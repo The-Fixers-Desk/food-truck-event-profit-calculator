@@ -1,0 +1,15 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local database
+data/*.db
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/settings.json
