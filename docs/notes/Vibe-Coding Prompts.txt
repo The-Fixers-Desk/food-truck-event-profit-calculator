@@ -15,3 +15,7 @@ Give me a prompt to give to Codex.
 What should we do while we wait for Codex?
 
 -----------------------------------------------------------
+
+Give me the commit message I will use when this is done.
+
+-----------------------------------------------------------

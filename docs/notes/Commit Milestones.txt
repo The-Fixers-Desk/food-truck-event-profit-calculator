@@ -15,7 +15,7 @@ DEFAULTS
 ☑ Create business defaults database schema
 ☑ Build business defaults form
 ☑ Add defaults form validation
-□ Add model-level validation
+☑ Add model-level validation
 ☑ Save business defaults to the local database
 ☑ Load saved defaults into the Defaults screen
 ☑ Add confirmation and error states for saving defaults

@@ -1,0 +1,14 @@
+Next GitHub Commit Message
+
+----------------------------------------------------------------------------------------------------------
+
+Verify first business defaults setup
+
+- Add a helper that detects whether business defaults setup is complete
+- Verify fresh databases begin without saved customer defaults
+- Verify first-time form values begin blank
+- Confirm optional fields may remain empty
+- Confirm required fields block invalid first saves
+- Ensure invalid first submissions leave the database unchanged
+- Verify completed setup remains detected after restart
+- Add focused first-time setup tests

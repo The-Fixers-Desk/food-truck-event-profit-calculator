@@ -118,6 +118,14 @@ def load_business_defaults() -> BusinessDefaults | None:
     )
 
 
+def business_defaults_setup_is_complete() -> bool:
+    """Return whether a valid business-defaults record has been saved."""
+    row = get_database().execute(
+        "SELECT 1 FROM business_defaults WHERE id = 1"
+    ).fetchone()
+    return row is not None
+
+
 def save_business_defaults(defaults: BusinessDefaults) -> None:
     """Atomically save the defaults record and replace its labor entries."""
     database = get_database()
