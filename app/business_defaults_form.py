@@ -8,7 +8,9 @@ from app.models import BusinessDefaults, LaborDefault
 SCALAR_FIELDS = (
     "business_name",
     "average_order_sale_amount",
+    "average_food_cost_per_order",
     "food_cost_percentage",
+    "typical_food_cost_total",
     "card_sales_percentage",
     "card_processing_percentage",
     "default_travel_cost",
@@ -21,6 +23,8 @@ def defaults_to_form(defaults: BusinessDefaults | None) -> dict:
     if defaults is None:
         return {
             **{name: "" for name in SCALAR_FIELDS},
+            "food_cost_method_choice": "average_per_order",
+            "food_cost_method": "",
             "profit_target_type": "",
             "minimum_profit_amount": "",
             "minimum_profit_margin": "",
@@ -31,8 +35,16 @@ def defaults_to_form(defaults: BusinessDefaults | None) -> dict:
         "average_order_sale_amount": _format_decimal(
             defaults.average_order_sale_amount
         ),
-        "food_cost_percentage": _format_percentage(
+        "food_cost_method_choice": defaults.food_cost_method,
+        "food_cost_method": defaults.food_cost_method,
+        "average_food_cost_per_order": _format_optional_decimal(
+            defaults.average_food_cost_per_order
+        ),
+        "food_cost_percentage": _format_optional_percentage(
             defaults.food_cost_percentage
+        ),
+        "typical_food_cost_total": _format_optional_decimal(
+            defaults.typical_food_cost_total
         ),
         "card_sales_percentage": _format_percentage(
             defaults.card_sales_percentage
@@ -76,6 +88,12 @@ def validate_defaults_form(
     values["profit_target_type"] = submitted.get(
         "profit_target_type", ""
     ).strip()
+    values["food_cost_method_choice"] = submitted.get(
+        "food_cost_method_choice", "average_per_order"
+    ).strip()
+    values["food_cost_method"] = submitted.get(
+        "food_cost_method", ""
+    ).strip()
     values["minimum_profit_amount"] = submitted.get(
         "minimum_profit_amount", ""
     ).strip()
@@ -100,9 +118,37 @@ def validate_defaults_form(
         "Average order sale amount", minimum=Decimal("0"),
         exclusive_minimum=True, scale=2
     )
-    food_cost = _percentage_field(
-        values, errors, "food_cost_percentage", "Food and packaging cost"
-    )
+    food_cost_method = values["food_cost_method"]
+    average_food_cost = None
+    food_cost_percentage = None
+    typical_food_cost_total = None
+    if food_cost_method == "average_per_order":
+        values["food_cost_percentage"] = ""
+        values["typical_food_cost_total"] = ""
+        average_food_cost = _decimal_field(
+            values, errors, "average_food_cost_per_order",
+            "Average food and packaging cost per order",
+            minimum=Decimal("0"), scale=2
+        )
+    elif food_cost_method == "sales_percentage":
+        values["average_food_cost_per_order"] = ""
+        values["typical_food_cost_total"] = ""
+        food_cost_percentage = _percentage_field(
+            values, errors, "food_cost_percentage",
+            "Food and packaging cost percentage"
+        )
+    elif food_cost_method == "typical_event_total":
+        values["average_food_cost_per_order"] = ""
+        values["food_cost_percentage"] = ""
+        typical_food_cost_total = _decimal_field(
+            values, errors, "typical_food_cost_total",
+            "Typical food and packaging total per event",
+            minimum=Decimal("0"), scale=2
+        )
+    else:
+        errors["food_cost_method"] = (
+            "Choose and confirm a food and packaging cost method."
+        )
     card_sales = _percentage_field(
         values, errors, "card_sales_percentage", "Sales paid by card"
     )
@@ -176,7 +222,10 @@ def validate_defaults_form(
         BusinessDefaults(
             business_name=values["business_name"],
             average_order_sale_amount=average_sale,
-            food_cost_percentage=food_cost,
+            food_cost_method=food_cost_method,
+            average_food_cost_per_order=average_food_cost,
+            food_cost_percentage=food_cost_percentage,
+            typical_food_cost_total=typical_food_cost_total,
             card_sales_percentage=card_sales,
             card_processing_percentage=card_processing,
             labor_entries=tuple(labor_defaults),

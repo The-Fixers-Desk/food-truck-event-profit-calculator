@@ -48,3 +48,46 @@ targetChoices.forEach((choice) => {
   choice.addEventListener("change", updateProfitTarget);
 });
 updateProfitTarget();
+
+const foodMethodChoice = document.querySelector("#food_cost_method_choice");
+const confirmedFoodMethod = document.querySelector("#food_cost_method");
+const confirmFoodMethod = document.querySelector(
+  "#confirm-food-cost-method",
+);
+const foodCostFields = {
+  average_per_order: {
+    container: document.querySelector("#average-food-cost-field"),
+    input: document.querySelector("#average_food_cost_per_order"),
+  },
+  sales_percentage: {
+    container: document.querySelector("#food-cost-percentage-field"),
+    input: document.querySelector("#food_cost_percentage"),
+  },
+  typical_event_total: {
+    container: document.querySelector("#typical-food-cost-field"),
+    input: document.querySelector("#typical_food_cost_total"),
+  },
+};
+
+function showConfirmedFoodMethod() {
+  Object.entries(foodCostFields).forEach(([method, field]) => {
+    const selected = confirmedFoodMethod.value === method;
+    field.container.hidden = !selected;
+    field.input.required = selected;
+  });
+}
+
+confirmFoodMethod.addEventListener("click", () => {
+  const nextMethod = foodMethodChoice.value;
+  if (confirmedFoodMethod.value !== nextMethod) {
+    Object.entries(foodCostFields).forEach(([method, field]) => {
+      if (method !== nextMethod) {
+        field.input.value = "";
+      }
+    });
+  }
+  confirmedFoodMethod.value = nextMethod;
+  showConfirmedFoodMethod();
+});
+
+showConfirmedFoodMethod();

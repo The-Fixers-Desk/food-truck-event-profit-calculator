@@ -11,6 +11,7 @@ def business_defaults() -> BusinessDefaults:
     return BusinessDefaults(
         business_name="Example Food Truck",
         average_order_sale_amount=Decimal("15.00"),
+        food_cost_method="sales_percentage",
         food_cost_percentage=Decimal("0.30"),
         card_sales_percentage=Decimal("0.80"),
         card_processing_percentage=Decimal("0.03"),
@@ -37,6 +38,7 @@ def test_optional_values_can_be_omitted():
     defaults = BusinessDefaults(
         business_name="Example Food Truck",
         average_order_sale_amount=Decimal("15.00"),
+        food_cost_method="sales_percentage",
         food_cost_percentage=Decimal("0.30"),
         card_sales_percentage=Decimal("0.80"),
         card_processing_percentage=Decimal("0.03"),
@@ -78,6 +80,7 @@ def valid_defaults_values() -> dict:
     return {
         "business_name": "Example Food Truck",
         "average_order_sale_amount": Decimal("15"),
+        "food_cost_method": "sales_percentage",
         "food_cost_percentage": Decimal("0.30"),
         "card_sales_percentage": Decimal("0.80"),
         "card_processing_percentage": Decimal("0.03"),
@@ -181,3 +184,44 @@ def test_business_defaults_reject_invalid_profit_margin(margin):
 
     with pytest.raises(ValueError):
         BusinessDefaults(**values)
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        {"food_cost_method": "unknown"},
+        {
+            "food_cost_method": "average_per_order",
+            "food_cost_percentage": None,
+        },
+        {
+            "food_cost_method": "average_per_order",
+            "food_cost_percentage": None,
+            "average_food_cost_per_order": Decimal("5"),
+        },
+        {
+            "food_cost_method": "typical_event_total",
+            "food_cost_percentage": None,
+            "typical_food_cost_total": Decimal("750"),
+        },
+    ],
+)
+def test_business_defaults_validate_food_cost_method(values):
+    defaults_values = valid_defaults_values()
+    defaults_values.update(values)
+
+    if values["food_cost_method"] == "unknown":
+        with pytest.raises(ValueError):
+            BusinessDefaults(**defaults_values)
+    elif values["food_cost_method"] == "average_per_order":
+        if values.get("average_food_cost_per_order") is None:
+            with pytest.raises(ValueError):
+                BusinessDefaults(**defaults_values)
+        else:
+            assert BusinessDefaults(**defaults_values).food_cost_method == (
+                "average_per_order"
+            )
+    else:
+        assert BusinessDefaults(**defaults_values).food_cost_method == (
+            "typical_event_total"
+        )

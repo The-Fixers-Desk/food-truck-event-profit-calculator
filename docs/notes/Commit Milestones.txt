@@ -24,7 +24,7 @@ DEFAULTS
 
 EVENT CALCULATOR — INPUTS
 
-□ Define event analysis data model
+☑ Define event analysis data model
 □ Update business defaults food and packaging cost method
 □ Create saved event database schema
 □ Build event identification form

@@ -2,13 +2,11 @@ Next GitHub Commit Message
 
 ----------------------------------------------------------------------------------------------------------
 
-Verify first business defaults setup
+Update business defaults food cost method
 
-- Add a helper that detects whether business defaults setup is complete
-- Verify fresh databases begin without saved customer defaults
-- Verify first-time form values begin blank
-- Confirm optional fields may remain empty
-- Confirm required fields block invalid first saves
-- Ensure invalid first submissions leave the database unchanged
-- Verify completed setup remains detected after restart
-- Add focused first-time setup tests
+- Replace the fixed food-cost percentage with a selectable estimation method
+- Add average cost per order, percentage of sales, and typical total per event
+- Add the two-step dropdown and Use this method interaction
+- Show and save only the confirmed method’s matching value
+- Preserve existing saved percentage defaults
+- Update validation, persistence, schema compatibility, documentation, and tests

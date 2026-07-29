@@ -12,7 +12,11 @@ def first_setup_data() -> dict[str, str | list[str]]:
     return {
         "business_name": "",
         "average_order_sale_amount": "15.00",
-        "food_cost_percentage": "30",
+        "food_cost_method_choice": "average_per_order",
+        "food_cost_method": "average_per_order",
+        "average_food_cost_per_order": "5.00",
+        "food_cost_percentage": "",
+        "typical_food_cost_total": "",
         "card_sales_percentage": "80",
         "card_processing_percentage": "3",
         "default_travel_cost": "",
@@ -46,7 +50,9 @@ def test_fresh_defaults_page_has_blank_customer_values(client):
     blank_fields = (
         "business_name",
         "average_order_sale_amount",
+        "average_food_cost_per_order",
         "food_cost_percentage",
+        "typical_food_cost_total",
         "card_sales_percentage",
         "card_processing_percentage",
         "default_travel_cost",
@@ -94,7 +100,6 @@ def test_first_setup_saves_with_every_optional_field_blank(
     "required_field",
     (
         "average_order_sale_amount",
-        "food_cost_percentage",
         "card_sales_percentage",
         "card_processing_percentage",
     ),

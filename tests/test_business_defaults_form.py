@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from app import create_app
 
 
@@ -20,7 +22,11 @@ def valid_form_data() -> dict[str, str | list[str]]:
     return {
         "business_name": "Example Food Truck",
         "average_order_sale_amount": "15.00",
+        "food_cost_method_choice": "sales_percentage",
+        "food_cost_method": "sales_percentage",
+        "average_food_cost_per_order": "",
         "food_cost_percentage": "30",
+        "typical_food_cost_total": "",
         "card_sales_percentage": "80",
         "card_processing_percentage": "3",
         "default_travel_cost": "75",
@@ -38,6 +44,13 @@ def test_defaults_page_shows_correct_fields(client):
 
     assert response.status_code == 200
     assert b"Average order sale amount" in response.data
+    assert b"How do you usually estimate food and packaging costs?" in (
+        response.data
+    )
+    assert b"Average cost per order" in response.data
+    assert b"Percentage of sales" in response.data
+    assert b"Typical total per event" in response.data
+    assert b"Use this method" in response.data
     assert b"Default travel cost" in response.data
     assert b"Hourly labor rate" in response.data
     assert b"Total hours paid at that rate" in response.data
@@ -53,6 +66,204 @@ def test_defaults_page_shows_correct_fields(client):
     assert b"Minimum profit margin" in response.data
     assert b"Paid staff" not in response.data
     assert b"Vehicle cost per mile" not in response.data
+
+
+def test_fresh_food_cost_defaults_to_average_without_showing_value(client):
+    response = client.get("/defaults")
+
+    assert (
+        b'<option value="average_per_order"\n            \n'
+        in response.data
+        or b'value="average_per_order"' in response.data
+    )
+    assert b'id="food_cost_method" name="food_cost_method" type="hidden"\n        value=""' in response.data
+    assert b'id="average-food-cost-field"\n        class="form-field target-field food-cost-field"\n        hidden' in response.data
+
+
+def test_saved_percentage_method_shows_only_percentage_field(client):
+    client.post("/defaults", data=valid_form_data())
+
+    response = client.get("/defaults")
+
+    assert b'value="sales_percentage"' in response.data
+    assert b'id="food-cost-percentage-field"\n        class="form-field target-field food-cost-field"\n        >' in response.data
+    assert b'value="30"' in response.data
+
+
+def test_all_food_cost_methods_save_only_matching_value(
+    client, database_path
+):
+    cases = (
+        ("average_per_order", "5.25", "", "", (525, None, None)),
+        ("sales_percentage", "", "30", "", (None, 3000, None)),
+        ("typical_event_total", "", "", "750", (None, None, 75000)),
+    )
+    for method, average, percentage, total, expected in cases:
+        form_data = valid_form_data()
+        form_data.update(
+            {
+                "food_cost_method_choice": method,
+                "food_cost_method": method,
+                "average_food_cost_per_order": average,
+                "food_cost_percentage": percentage,
+                "typical_food_cost_total": total,
+            }
+        )
+        response = client.post("/defaults", data=form_data)
+        assert response.status_code == 302
+        with sqlite3.connect(database_path) as database:
+            row = database.execute(
+                """
+                SELECT average_food_cost_per_order_cents,
+                       food_cost_percentage_basis_points,
+                       typical_food_cost_total_cents
+                FROM business_defaults
+                """
+            ).fetchone()
+        assert row == expected
+
+
+def test_unconfirmed_food_cost_method_is_rejected_without_saving(
+    client, database_path
+):
+    form_data = valid_form_data()
+    form_data["food_cost_method"] = ""
+
+    response = client.post("/defaults", data=form_data)
+
+    assert b"Choose and confirm a food and packaging cost method." in (
+        response.data
+    )
+    with sqlite3.connect(database_path) as database:
+        count = database.execute(
+            "SELECT COUNT(*) FROM business_defaults"
+        ).fetchone()[0]
+    assert count == 0
+
+
+def test_invalid_food_cost_value_is_preserved_without_changing_saved_data(
+    client, database_path
+):
+    client.post("/defaults", data=valid_form_data())
+    invalid = valid_form_data()
+    invalid["food_cost_percentage"] = "101"
+
+    response = client.post("/defaults", data=invalid)
+
+    assert b"Food and packaging cost percentage must be between 0 and 100." in (
+        response.data
+    )
+    assert b'value="101"' in response.data
+    with sqlite3.connect(database_path) as database:
+        value = database.execute(
+            "SELECT food_cost_percentage_basis_points FROM business_defaults"
+        ).fetchone()[0]
+    assert value == 3000
+
+
+@pytest.mark.parametrize(
+    ("method", "field_name", "invalid_value", "message"),
+    [
+        (
+            "average_per_order",
+            "average_food_cost_per_order",
+            "-1",
+            "must be 0 or more",
+        ),
+        (
+            "average_per_order",
+            "average_food_cost_per_order",
+            "1.234",
+            "at most 2 decimal places",
+        ),
+        (
+            "typical_event_total",
+            "typical_food_cost_total",
+            "-1",
+            "must be 0 or more",
+        ),
+    ],
+)
+def test_food_cost_money_validation(
+    client, method, field_name, invalid_value, message
+):
+    form_data = valid_form_data()
+    form_data.update(
+        {
+            "food_cost_method_choice": method,
+            "food_cost_method": method,
+            "average_food_cost_per_order": "",
+            "food_cost_percentage": "",
+            "typical_food_cost_total": "",
+            field_name: invalid_value,
+        }
+    )
+
+    response = client.post("/defaults", data=form_data)
+
+    assert message.encode() in response.data
+
+
+def test_existing_percentage_default_is_migrated_and_loaded(tmp_path):
+    database_path = tmp_path / "legacy.db"
+    with sqlite3.connect(database_path) as database:
+        database.executescript(
+            """
+            CREATE TABLE business_defaults (
+                id INTEGER PRIMARY KEY,
+                business_name TEXT NOT NULL,
+                average_order_sale_amount_cents INTEGER NOT NULL,
+                food_cost_basis_points INTEGER NOT NULL,
+                card_sales_basis_points INTEGER NOT NULL,
+                card_processing_basis_points INTEGER NOT NULL,
+                default_travel_cost_cents INTEGER,
+                default_owner_labor_pay_cents INTEGER,
+                profit_target_type TEXT,
+                minimum_profit_amount_cents INTEGER,
+                minimum_profit_margin_basis_points INTEGER,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE business_default_labor_entries (
+                id INTEGER PRIMARY KEY,
+                business_defaults_id INTEGER NOT NULL,
+                position INTEGER NOT NULL,
+                hourly_rate_cents INTEGER NOT NULL,
+                total_paid_minutes INTEGER NOT NULL
+            );
+            INSERT INTO business_defaults (
+                id, business_name, average_order_sale_amount_cents,
+                food_cost_basis_points, card_sales_basis_points,
+                card_processing_basis_points, profit_target_type,
+                minimum_profit_amount_cents
+            )
+            VALUES (
+                1, 'Legacy Truck', 1500, 3000, 8000, 300,
+                'profit_amount', 30000
+            );
+            INSERT INTO business_default_labor_entries (
+                id, business_defaults_id, position, hourly_rate_cents,
+                total_paid_minutes
+            )
+            VALUES (1, 1, 0, 1800, 720);
+            """
+        )
+    migrated_app = create_app(
+        {"DATABASE": database_path, "SECRET_KEY": "test", "TESTING": True}
+    )
+
+    response = migrated_app.test_client().get("/defaults")
+
+    assert b'value="sales_percentage"' in response.data
+    assert b'value="30"' in response.data
+    with sqlite3.connect(database_path) as database:
+        row = database.execute(
+            """
+            SELECT food_cost_method, food_cost_percentage_basis_points
+            FROM business_defaults
+            """
+        ).fetchone()
+    assert row == ("sales_percentage", 3000)
 
 
 def test_initial_profit_target_inputs_are_hidden(client):

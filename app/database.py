@@ -44,10 +44,8 @@ def initialize_database() -> None:
             "PRAGMA table_info(business_defaults)"
         ).fetchall()
     }
-    if columns and "average_order_value_cents" in columns:
-        _upgrade_legacy_business_defaults(database)
-    elif columns and "profit_target_type" not in columns:
-        _upgrade_profit_target_schema(database)
+    if columns and "food_cost_method" not in columns:
+        _upgrade_food_cost_schema(database, columns)
     elif columns and "default_owner_labor_pay_cents" not in columns:
         database.execute(
             """
@@ -84,8 +82,15 @@ def load_business_defaults() -> BusinessDefaults | None:
         average_order_sale_amount=_cents_to_decimal(
             row["average_order_sale_amount_cents"]
         ),
-        food_cost_percentage=_basis_points_to_decimal(
-            row["food_cost_basis_points"]
+        food_cost_method=row["food_cost_method"],
+        average_food_cost_per_order=_optional_cents_to_decimal(
+            row["average_food_cost_per_order_cents"]
+        ),
+        food_cost_percentage=_optional_basis_points_to_decimal(
+            row["food_cost_percentage_basis_points"]
+        ),
+        typical_food_cost_total=_optional_cents_to_decimal(
+            row["typical_food_cost_total_cents"]
         ),
         card_sales_percentage=_basis_points_to_decimal(
             row["card_sales_basis_points"]
@@ -134,18 +139,26 @@ def save_business_defaults(defaults: BusinessDefaults) -> None:
             """
             INSERT INTO business_defaults (
                 id, business_name, average_order_sale_amount_cents,
-                food_cost_basis_points, card_sales_basis_points,
+                food_cost_method, average_food_cost_per_order_cents,
+                food_cost_percentage_basis_points,
+                typical_food_cost_total_cents, card_sales_basis_points,
                 card_processing_basis_points, default_travel_cost_cents,
                 default_owner_labor_pay_cents,
                 profit_target_type, minimum_profit_amount_cents,
                 minimum_profit_margin_basis_points
             )
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 business_name = excluded.business_name,
                 average_order_sale_amount_cents =
                     excluded.average_order_sale_amount_cents,
-                food_cost_basis_points = excluded.food_cost_basis_points,
+                food_cost_method = excluded.food_cost_method,
+                average_food_cost_per_order_cents =
+                    excluded.average_food_cost_per_order_cents,
+                food_cost_percentage_basis_points =
+                    excluded.food_cost_percentage_basis_points,
+                typical_food_cost_total_cents =
+                    excluded.typical_food_cost_total_cents,
                 card_sales_basis_points = excluded.card_sales_basis_points,
                 card_processing_basis_points =
                     excluded.card_processing_basis_points,
@@ -163,7 +176,14 @@ def save_business_defaults(defaults: BusinessDefaults) -> None:
             (
                 defaults.business_name,
                 _decimal_to_cents(defaults.average_order_sale_amount),
-                _decimal_to_basis_points(defaults.food_cost_percentage),
+                defaults.food_cost_method,
+                _optional_decimal_to_cents(
+                    defaults.average_food_cost_per_order
+                ),
+                _optional_decimal_to_basis_points(
+                    defaults.food_cost_percentage
+                ),
+                _optional_decimal_to_cents(defaults.typical_food_cost_total),
                 _decimal_to_basis_points(defaults.card_sales_percentage),
                 _decimal_to_basis_points(
                     defaults.card_processing_percentage
@@ -204,6 +224,123 @@ def save_business_defaults(defaults: BusinessDefaults) -> None:
                 for position, entry in enumerate(defaults.labor_entries)
             ],
         )
+
+
+def _upgrade_food_cost_schema(
+    database: sqlite3.Connection,
+    columns: set[str],
+) -> None:
+    """Preserve legacy percentage defaults in the new method-based shape."""
+    defaults_row = database.execute(
+        "SELECT * FROM business_defaults WHERE id = 1"
+    ).fetchone()
+    labor_table_exists = database.execute(
+        """
+        SELECT 1 FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'business_default_labor_entries'
+        """
+    ).fetchone()
+    labor_rows = []
+    if labor_table_exists:
+        labor_rows = database.execute(
+            """
+            SELECT position, hourly_rate_cents, total_paid_minutes
+            FROM business_default_labor_entries ORDER BY position
+            """
+        ).fetchall()
+        database.execute("DROP TABLE business_default_labor_entries")
+
+    database.execute(
+    """
+    ALTER TABLE business_defaults
+    RENAME TO prior_defaults_food_cost
+    """
+    )
+    apply_business_defaults_schema(database)
+    if defaults_row is not None:
+        target_type = (
+            defaults_row["profit_target_type"]
+            if "profit_target_type" in columns
+            else _legacy_target_type(defaults_row)
+        )
+        database.execute(
+            """
+            INSERT INTO business_defaults (
+                id, business_name, average_order_sale_amount_cents,
+                food_cost_method, food_cost_percentage_basis_points,
+                card_sales_basis_points, card_processing_basis_points,
+                default_travel_cost_cents,
+                default_owner_labor_pay_cents,
+                profit_target_type, minimum_profit_amount_cents,
+                minimum_profit_margin_basis_points, created_at, updated_at
+            )
+            VALUES (
+                1, ?, ?, 'sales_percentage', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
+            """,
+            (
+                defaults_row["business_name"],
+                _legacy_column(
+                    defaults_row,
+                    "average_order_sale_amount_cents",
+                    "average_order_value_cents",
+                ),
+                defaults_row["food_cost_basis_points"],
+                defaults_row["card_sales_basis_points"],
+                defaults_row["card_processing_basis_points"],
+                _legacy_column(
+                    defaults_row, "default_travel_cost_cents"
+                ),
+                _legacy_column(
+                    defaults_row, "default_owner_labor_pay_cents"
+                ),
+                target_type,
+                (
+                    _legacy_column(
+                        defaults_row,
+                        "minimum_profit_amount_cents",
+                        "minimum_acceptable_profit_cents",
+                    )
+                    if target_type == "profit_amount"
+                    else None
+                ),
+                (
+                    _legacy_column(
+                        defaults_row,
+                        "minimum_profit_margin_basis_points",
+                        "minimum_acceptable_margin_basis_points",
+                    )
+                    if target_type == "profit_margin"
+                    else None
+                ),
+                _legacy_column(defaults_row, "created_at"),
+                _legacy_column(defaults_row, "updated_at"),
+            ),
+        )
+        if labor_rows:
+            database.executemany(
+                """
+                INSERT INTO business_default_labor_entries (
+                    business_defaults_id, position, hourly_rate_cents,
+                    total_paid_minutes
+                )
+                VALUES (1, ?, ?, ?)
+                """,
+                [tuple(row) for row in labor_rows],
+            )
+    database.execute("DROP TABLE prior_defaults_food_cost")
+    database.commit()
+
+
+def _legacy_column(
+    row: sqlite3.Row,
+    *names: str,
+) -> object | None:
+    for name in names:
+        if name in row.keys():
+            return row[name]
+    return None
 
 
 def _upgrade_legacy_business_defaults(

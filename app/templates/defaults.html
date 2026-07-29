@@ -42,12 +42,93 @@
       {{ field("business_name", "Business name", false, "Optional") }}
       {{ field("average_order_sale_amount",
                "Average order sale amount ($)") }}
-      {{ field("food_cost_percentage", "Food and packaging cost (%)") }}
       {{ field("card_sales_percentage", "Sales paid by card (%)") }}
       {{ field("card_processing_percentage", "Card processing fee (%)") }}
       {{ field("default_travel_cost", "Default travel cost ($)", false,
                "Optional flat cost for a typical event") }}
     </div>
+
+    <fieldset class="choice-section">
+      <legend>How do you usually estimate food and packaging costs?</legend>
+      <div class="method-confirmation">
+        <label class="form-label" for="food_cost_method_choice">
+          Cost method
+        </label>
+        <select class="form-input" id="food_cost_method_choice"
+          name="food_cost_method_choice">
+          <option value="average_per_order"
+            {% if form_values.food_cost_method_choice == "average_per_order" %}
+              selected
+            {% endif %}>Average cost per order</option>
+          <option value="sales_percentage"
+            {% if form_values.food_cost_method_choice == "sales_percentage" %}
+              selected
+            {% endif %}>Percentage of sales</option>
+          <option value="typical_event_total"
+            {% if form_values.food_cost_method_choice == "typical_event_total" %}
+              selected
+            {% endif %}>Typical total per event</option>
+        </select>
+        <button class="button-secondary" id="confirm-food-cost-method"
+          type="button">Use this method</button>
+      </div>
+      <input id="food_cost_method" name="food_cost_method" type="hidden"
+        value="{{ form_values.food_cost_method }}" />
+      {% if errors.get("food_cost_method") %}
+        <p class="field-error">{{ errors.food_cost_method }}</p>
+      {% endif %}
+
+      <div id="average-food-cost-field"
+        class="form-field target-field food-cost-field"
+        {% if form_values.food_cost_method != "average_per_order" %}hidden{% endif %}>
+        <label class="form-label" for="average_food_cost_per_order">
+          Average food and packaging cost per order ($)
+        </label>
+        <input class="form-input" id="average_food_cost_per_order"
+          name="average_food_cost_per_order" type="number" step="0.01"
+          value="{{ form_values.average_food_cost_per_order }}"
+          {% if errors.get("average_food_cost_per_order") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("average_food_cost_per_order") %}
+          <p class="field-error">{{ errors.average_food_cost_per_order }}</p>
+        {% endif %}
+      </div>
+
+      <div id="food-cost-percentage-field"
+        class="form-field target-field food-cost-field"
+        {% if form_values.food_cost_method != "sales_percentage" %}hidden{% endif %}>
+        <label class="form-label" for="food_cost_percentage">
+          Food and packaging cost percentage (%)
+        </label>
+        <input class="form-input" id="food_cost_percentage"
+          name="food_cost_percentage" type="number" step="0.01"
+          value="{{ form_values.food_cost_percentage }}"
+          {% if errors.get("food_cost_percentage") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("food_cost_percentage") %}
+          <p class="field-error">{{ errors.food_cost_percentage }}</p>
+        {% endif %}
+      </div>
+
+      <div id="typical-food-cost-field"
+        class="form-field target-field food-cost-field"
+        {% if form_values.food_cost_method != "typical_event_total" %}hidden{% endif %}>
+        <label class="form-label" for="typical_food_cost_total">
+          Typical food and packaging total per event ($)
+        </label>
+        <input class="form-input" id="typical_food_cost_total"
+          name="typical_food_cost_total" type="number" step="0.01"
+          value="{{ form_values.typical_food_cost_total }}"
+          {% if errors.get("typical_food_cost_total") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("typical_food_cost_total") %}
+          <p class="field-error">{{ errors.typical_food_cost_total }}</p>
+        {% endif %}
+      </div>
+    </fieldset>
 
     <fieldset class="choice-section">
       <legend>How do you decide whether an event is worth accepting?</legend>

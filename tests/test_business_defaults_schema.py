@@ -18,10 +18,14 @@ def insert_defaults(connection, travel_cost=7500):
         """
         INSERT INTO business_defaults (
             id, business_name, average_order_sale_amount_cents,
-            food_cost_basis_points, card_sales_basis_points,
+            food_cost_method, food_cost_percentage_basis_points,
+            card_sales_basis_points,
             card_processing_basis_points, default_travel_cost_cents
         )
-        VALUES (1, 'Example Food Truck', 1500, 3000, 8000, 300, ?)
+        VALUES (
+            1, 'Example Food Truck', 1500, 'sales_percentage',
+            3000, 8000, 300, ?
+        )
         """,
         (travel_cost,),
     )
@@ -115,10 +119,11 @@ def test_percentage_above_one_hundred_is_rejected(connection):
             """
             INSERT INTO business_defaults (
                 id, average_order_sale_amount_cents,
-                food_cost_basis_points, card_sales_basis_points,
+                food_cost_method, food_cost_percentage_basis_points,
+                card_sales_basis_points,
                 card_processing_basis_points
             )
-            VALUES (1, 1500, 10001, 8000, 300)
+            VALUES (1, 1500, 'sales_percentage', 10001, 8000, 300)
             """
         )
 
@@ -128,11 +133,15 @@ def test_profit_target_stores_only_its_matching_value(connection):
         """
         INSERT INTO business_defaults (
             id, average_order_sale_amount_cents,
-            food_cost_basis_points, card_sales_basis_points,
+            food_cost_method, food_cost_percentage_basis_points,
+            card_sales_basis_points,
             card_processing_basis_points, profit_target_type,
             minimum_profit_amount_cents
         )
-        VALUES (1, 1500, 3000, 8000, 300, 'profit_amount', 30000)
+        VALUES (
+            1, 1500, 'sales_percentage', 3000, 8000, 300,
+            'profit_amount', 30000
+        )
         """
     )
     with pytest.raises(sqlite3.IntegrityError):

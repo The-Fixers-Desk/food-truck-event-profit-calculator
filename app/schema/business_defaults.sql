@@ -3,8 +3,29 @@ CREATE TABLE IF NOT EXISTS business_defaults (
     business_name TEXT NOT NULL DEFAULT '',
     average_order_sale_amount_cents INTEGER NOT NULL
         CHECK (average_order_sale_amount_cents > 0),
-    food_cost_basis_points INTEGER NOT NULL
-        CHECK (food_cost_basis_points BETWEEN 0 AND 10000),
+    food_cost_method TEXT NOT NULL
+        CHECK (
+            food_cost_method IN (
+                'average_per_order',
+                'sales_percentage',
+                'typical_event_total'
+            )
+        ),
+    average_food_cost_per_order_cents INTEGER
+        CHECK (
+            average_food_cost_per_order_cents IS NULL
+            OR average_food_cost_per_order_cents >= 0
+        ),
+    food_cost_percentage_basis_points INTEGER
+        CHECK (
+            food_cost_percentage_basis_points IS NULL
+            OR food_cost_percentage_basis_points BETWEEN 0 AND 10000
+        ),
+    typical_food_cost_total_cents INTEGER
+        CHECK (
+            typical_food_cost_total_cents IS NULL
+            OR typical_food_cost_total_cents >= 0
+        ),
     card_sales_basis_points INTEGER NOT NULL
         CHECK (card_sales_basis_points BETWEEN 0 AND 10000),
     card_processing_basis_points INTEGER NOT NULL
@@ -36,6 +57,26 @@ CREATE TABLE IF NOT EXISTS business_defaults (
         ),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (
+        (
+            food_cost_method = 'average_per_order'
+            AND average_food_cost_per_order_cents IS NOT NULL
+            AND food_cost_percentage_basis_points IS NULL
+            AND typical_food_cost_total_cents IS NULL
+        )
+        OR (
+            food_cost_method = 'sales_percentage'
+            AND average_food_cost_per_order_cents IS NULL
+            AND food_cost_percentage_basis_points IS NOT NULL
+            AND typical_food_cost_total_cents IS NULL
+        )
+        OR (
+            food_cost_method = 'typical_event_total'
+            AND average_food_cost_per_order_cents IS NULL
+            AND food_cost_percentage_basis_points IS NULL
+            AND typical_food_cost_total_cents IS NOT NULL
+        )
+    ),
     CHECK (
         (
             profit_target_type IS NULL
