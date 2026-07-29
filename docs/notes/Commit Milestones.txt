@@ -19,12 +19,13 @@ DEFAULTS
 ☑ Save business defaults to the local database
 ☑ Load saved defaults into the Defaults screen
 ☑ Add confirmation and error states for saving defaults
-□ Verify first business defaults setup
+☑ Verify first business defaults setup
 
 
 EVENT CALCULATOR — INPUTS
 
 □ Define event analysis data model
+□ Update business defaults food and packaging cost method
 □ Create saved event database schema
 □ Build event identification form
 □ Build revenue assumptions section

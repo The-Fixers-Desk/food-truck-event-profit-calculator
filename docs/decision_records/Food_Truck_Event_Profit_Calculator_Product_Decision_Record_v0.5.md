@@ -1,14 +1,14 @@
 # Food Truck Event Profit Calculator
 
-## Product Decision Record (PDR) v0.4
+## Product Decision Record (PDR) v0.5
 
 ### Status
 
-Approved for V1 implementation. Supersedes PDR v0.3.
+Approved for V1 implementation. Supersedes PDR v0.4.
 
 ### Revision focus
 
-Version 0.4 records the approved first-use flow, Dashboard, business-defaults, labor, travel-cost, profit-target, and V1 UI/UX decisions made during implementation.
+Version 0.5 records the approved event-analysis structure, revenue and food-cost methods, weather behavior, scenario workflow, and separation of Event Inputs from Event Results.
 
 ### Investigation Question
 
@@ -76,19 +76,19 @@ Changes made to reusable defaults must never silently overwrite event-specific o
 
 ## FTC-PDR-011
 
-Customers can save the results of individual event analyses for later review and comparison.
+Customers can save one or more scenarios for the same event for later review and comparison. Each scenario preserves its own assumptions and results.
 
 ---
 
 ## FTC-PDR-012
 
-Every saved event records the event title, date, time, and location solely to help the customer recognize and compare saved scenarios. This information does not participate in financial calculations.
+Every Event records its event title, date, start time, and location solely to help the customer recognize it. Each saved Event Scenario records one complete set of assumptions and results for that Event. Event identity does not participate directly in financial calculations.
 
 ---
 
 ## FTC-PDR-013
 
-The Comparison area exists to allow customers to review and compare previously saved event analyses.
+The Comparison area exists to allow customers to review and compare saved Event Scenarios, including multiple versions of the same Event or scenarios from different Events.
 
 ---
 
@@ -190,7 +190,7 @@ The Dashboard is the normal starting menu after setup. It provides direct access
 
 ## FTC-PDR-030
 
-The Defaults screen uses the customer-facing term 'Average order sale amount.' It also stores the usual food and packaging cost percentage, percentage of sales paid by card, and card-processing fee percentage.
+The Defaults screen uses the customer-facing term 'Average order sale amount.' It stores the usual percentage of sales paid by card and card-processing fee percentage. Food and packaging cost defaults use a selectable method whose default is Average cost per order, with Percentage of sales and Manual event total available as alternatives.
 
 ---
 
@@ -233,5 +233,95 @@ Only the selected profitability target is displayed, saved, and used for future 
 ## FTC-PDR-037
 
 The V1 product includes a dedicated user-interface and user-experience polish phase after the core workflows are functional, so all screens receive a consistent commercial presentation.
+
+---
+
+## FTC-PDR-038
+
+An Event and an Event Scenario are distinct product concepts. The Event contains shared identifying information. Each Event Scenario contains one complete set of assumptions and results. Customers may save multiple scenarios for the same Event without silently overwriting earlier versions.
+
+---
+
+## FTC-PDR-039
+
+Event identity consists of event name, event date, start time, and location. V1 does not require an end time for identification.
+
+---
+
+## FTC-PDR-040
+
+The event model records the number of competing food vendors, estimated attendance, and the expected percentage of attendees who buy from the customer's truck. Customer-facing wording must not use the term 'capture rate.'
+
+---
+
+## FTC-PDR-041
+
+The customer chooses how expected revenue is entered. The default method estimates revenue from attendance, expected percentage of attendees who buy, and average order sale amount. The alternative method allows the customer to enter expected sales manually. Only the selected method controls the revenue calculation.
+
+---
+
+## FTC-PDR-042
+
+For the default attendance-based revenue method, one expected buyer is treated as one expected order in V1.
+
+---
+
+## FTC-PDR-043
+
+Food and packaging cost uses one selected method: Average cost per order, Percentage of sales, or Manual event total. Average cost per order is the default. Only the selected method and its matching value are displayed, saved, and used. The selection is available on both Defaults and Event Inputs.
+
+---
+
+## FTC-PDR-044
+
+Weather outlook is selected manually in V1. The available standard reductions are Favorable or normal at 0%, Minor concern at 5%, Moderate adverse weather at 15%, Significant adverse weather at 30%, Severe disruption risk at 50%, and a customer-entered Custom reduction.
+
+---
+
+## FTC-PDR-045
+
+Weather reduces expected customers rather than average order sale amount. Event protection moderates the selected weather reduction: Fully indoors applies 15%, Covered with reliable seating applies 50%, Partially covered applies 75%, and Fully outdoors applies 100%.
+
+---
+
+## FTC-PDR-046
+
+V1 does not retrieve weather automatically. The application reminds the customer to check the latest forecast and select the appropriate weather outlook.
+
+---
+
+## FTC-PDR-047
+
+Additional event costs use an addable named list. Each entry contains a cost name and amount. Parking, permits, generator fuel, utilities, and other event-specific costs may be represented through this list.
+
+---
+
+## FTC-PDR-048
+
+Event Inputs and Event Results are separate screens. The Inputs screen gathers the complete event and scenario information. The Results screen emphasizes the variable assumptions the customer is most likely to test, together with updated results and warnings.
+
+---
+
+## FTC-PDR-049
+
+The customer may adjust useful assumptions from the Results screen and save the result as another scenario for the same Event. Saving a new version must not silently overwrite an existing scenario.
+
+---
+
+## FTC-PDR-050
+
+Information explaining estimated inputs and estimated results is available through a clear control near the top of the Event Inputs screen. It is not displayed as a permanently open Estimate Status section.
+
+---
+
+## FTC-PDR-051
+
+New Event Scenarios begin with copied Business Defaults. Event-specific overrides do not change saved Defaults, and later changes to Defaults do not silently change existing scenarios.
+
+---
+
+## FTC-PDR-052
+
+The approved event-analysis structure is recorded in Event Analysis Structure v0.1 and is the implementation basis for the event domain model, event-input workflow, results workflow, saved scenarios, and comparison behavior.
 
 ---

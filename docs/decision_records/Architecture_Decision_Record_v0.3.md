@@ -1,16 +1,16 @@
 # Food Truck Event Profit Calculator
 
-## Architecture Decision Record (ADR) v0.2
+## Architecture Decision Record (ADR) v0.3
 
 ### Status
 
-Approved for V1 implementation. Supersedes ADR v0.1.
+Approved for V1 implementation. Supersedes ADR v0.2.
 
 ### Revision focus
 
-Version 0.2 incorporates the implemented business-defaults architecture and the
-approved Welcome-to-Dashboard application flow while preserving the existing V1
-technical direction.
+Version 0.3 incorporates the approved event-analysis domain structure, selectable
+revenue and food-cost methods, weather behavior, Event-to-Scenario relationship,
+and separate Event Inputs and Event Results workflows.
 
 ### Purpose
 
@@ -246,6 +246,10 @@ This avoids fixed columns for a predetermined number of labor rates.
 Optional values, including default travel cost and owner labor pay, are stored
 as nullable values rather than invented zero-value assumptions.
 
+Food and packaging defaults use a method discriminator plus one matching value.
+The allowed methods are average cost per order, percentage of sales, and manual
+event total. The selected value is stored and unselected values remain null.
+
 ---
 
 ## FTC-ADR-018 - Layered validation
@@ -313,3 +317,130 @@ commit before dependent work begins.
 
 Unrelated refactoring and speculative infrastructure are excluded from a
 milestone unless they are required to complete it safely.
+
+---
+
+## FTC-ADR-024 - Event and scenario domain separation
+
+The event domain distinguishes an `Event` from an `EventScenario`.
+
+An Event contains shared identifying information: event name, event date, start
+time, and location. An EventScenario contains one complete set of assumptions for
+that Event and later receives one corresponding set of calculated results.
+
+One Event may own multiple EventScenario records. Saving a new scenario must not
+silently overwrite an existing scenario.
+
+---
+
+## FTC-ADR-025 - Event-analysis domain composition
+
+The event-analysis domain will use small immutable models rather than one
+unstructured mapping.
+
+The structure will separate event identity, demand assumptions, weather
+assumptions, revenue assumptions, food-cost assumptions, payment and organizer
+fees, repeatable employee labor, repeatable additional event costs, owner labor
+pay, and the selected profit target.
+
+Exact class names may follow project conventions, but boundaries must preserve
+clear validation and readable calculation inputs.
+
+---
+
+## FTC-ADR-026 - Method discriminator and matching value pattern
+
+Revenue method and food-cost method will use the same explicit representation
+pattern already approved for profit targets:
+
+1. store one allowed method type
+2. store only the value or values required by that method
+3. leave values for unselected methods null
+4. reject contradictory combinations in domain validation and database constraints
+
+Revenue methods are attendance-based estimation and manual expected sales.
+Food-cost methods are average cost per order, percentage of sales, and manual
+event total.
+
+---
+
+## FTC-ADR-027 - Repeatable scenario child records
+
+Employee labor entries and additional event costs are repeatable ordered child
+records of an EventScenario.
+
+Each labor record stores an hourly rate in cents and combined paid time in minutes.
+Each additional-cost record stores a customer-facing name and an amount in cents.
+
+These records will not be represented by a fixed number of columns.
+
+---
+
+## FTC-ADR-028 - Weather assumptions and calculation constants
+
+Event protection and weather outlook are explicit domain values.
+
+Standard weather reductions and protection multipliers are calculation rules,
+not template constants. They will be implemented in the calculation or business-
+rule layer and covered by unit tests.
+
+The approved protection multipliers are:
+
+- fully indoors: 15%
+- covered with reliable seating: 50%
+- partially covered: 75%
+- fully outdoors: 100%
+
+V1 stores the customer's selected weather outlook or custom reduction and does not
+require an external weather service.
+
+---
+
+## FTC-ADR-029 - Defaults copied into independent scenarios
+
+Creating a new EventScenario copies applicable Business Defaults into the new
+domain object.
+
+After creation, scenario values are independent. Changing a scenario does not
+change Defaults, and changing Defaults does not mutate an existing scenario.
+
+Persistence must preserve the exact assumptions used by each saved scenario.
+
+---
+
+## FTC-ADR-030 - Separate input and results workflows
+
+Event Inputs and Event Results will use separate routes and templates or equivalent
+separate application views.
+
+The Inputs workflow gathers and validates the complete scenario. The Results
+workflow presents calculated outputs and exposes only the variable assumptions
+approved for convenient what-if changes.
+
+Results-page changes update the working scenario and may be saved as a new scenario
+without overwriting the source scenario unless the customer explicitly chooses an
+edit-and-resave action.
+
+---
+
+## FTC-ADR-031 - Estimate information disclosure
+
+Estimate guidance will be available through a clear disclosure control near the
+top of the Event Inputs view.
+
+The guidance is not modeled as a permanently visible Estimate Status section and
+does not require customers to classify every field manually. The interface may
+mark known assumption fields automatically.
+
+---
+
+## FTC-ADR-032 - Event-analysis specification authority
+
+Event Analysis Structure v0.1 is the approved detailed design basis for the event
+domain-model milestone.
+
+The Product Decision Record remains authoritative for product behavior. The Event
+Analysis Structure document provides the approved field grouping and model shape,
+and this ADR defines the technical constraints used to implement it.
+
+---
