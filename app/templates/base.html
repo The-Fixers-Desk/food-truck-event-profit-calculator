@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>
+      {% block title %}Food Truck Event Profit Calculator{% endblock %}
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="app-header__content">
+          <a class="wordmark" href="{{ url_for('main.calculator') }}">
+            Food Truck Event Profit Calculator
+          </a>
+        </div>
+      </header>
+
+      <nav class="app-navigation" aria-label="Primary navigation">
+        <div class="app-navigation__content">
+          <a
+            class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
+            href="{{ url_for('main.defaults') }}"
+          >
+            Defaults
+          </a>
+
+          <a
+            class="nav-link {% if active_page == 'calculator' %}nav-link--active{% endif %}"
+            href="{{ url_for('main.calculator') }}"
+          >
+            Event Calculator
+          </a>
+
+          <a
+            class="nav-link {% if active_page == 'comparison' %}nav-link--active{% endif %}"
+            href="{{ url_for('main.comparison') }}"
+          >
+            Comparison
+          </a>
+        </div>
+      </nav>
+
+      <main class="app-main">{% block content %}{% endblock %}</main>
+    </div>
+  </body>
+</html>
