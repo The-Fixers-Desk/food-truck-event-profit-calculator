@@ -1,4 +1,5 @@
 from flask import Flask
+from pathlib import Path
 
 from app.logging_config import configure_logging
 
@@ -8,6 +9,10 @@ def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(
         __name__,
         instance_relative_config=True,
+    )
+    app.config.from_mapping(
+        DATABASE=Path(app.root_path).parent / "data" / "app.db",
+        SECRET_KEY="development-only",
     )
 
     if test_config is not None:
@@ -20,6 +25,12 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     app.register_blueprint(main)
     register_error_handlers(app)
+
+    from app.database import close_database, initialize_database
+
+    app.teardown_appcontext(close_database)
+    with app.app_context():
+        initialize_database()
 
     if app.config.get("TESTING"):
 

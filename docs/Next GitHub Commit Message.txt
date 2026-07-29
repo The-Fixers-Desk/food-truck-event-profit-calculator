@@ -1,0 +1,15 @@
+Next GitHub Commit Message
+
+----------------------------------------------------------------------------------------------------------
+
+Complete business defaults form workflow
+
+- Replace the placeholder Defaults screen with a working saved form
+- Add editable labor-rate entries and optional owner labor pay
+- Add optional default travel cost
+- Add the minimum profit amount or profit margin target choice
+- Show only the selected profit target field
+- Validate entries and preserve input when errors occur
+- Save and reload business defaults from SQLite
+- Add confirmation messages and automated tests
+- Update the data model, schema, persistence, styling, and documentation

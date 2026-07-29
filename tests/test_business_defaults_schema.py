@@ -7,175 +7,139 @@ from app.database import apply_business_defaults_schema
 
 @pytest.fixture()
 def connection():
-    """Create an isolated in-memory SQLite database."""
     database = sqlite3.connect(":memory:")
-
     apply_business_defaults_schema(database)
-
     yield database
-
     database.close()
 
 
-def valid_business_defaults() -> tuple:
-    """Return a valid database row for business defaults."""
-    return (
-        1,
-        "Example Food Truck",
-        1500,
-        3000,
-        8000,
-        300,
-        2,
-        1800,
-        90,
-        60,
-        75,
-        30000,
-        2000,
-    )
-
-
-def insert_business_defaults(
-    connection: sqlite3.Connection,
-    values: tuple,
-) -> None:
-    """Insert one business-defaults record."""
+def insert_defaults(connection, travel_cost=7500):
     connection.execute(
         """
         INSERT INTO business_defaults (
-            id,
-            business_name,
-            average_order_value_cents,
-            food_cost_basis_points,
-            card_sales_basis_points,
-            card_processing_basis_points,
-            default_staff_count,
-            hourly_labor_cost_cents,
-            setup_minutes,
-            cleanup_minutes,
-            vehicle_cost_per_mile_cents,
-            minimum_acceptable_profit_cents,
-            minimum_acceptable_margin_basis_points
+            id, business_name, average_order_sale_amount_cents,
+            food_cost_basis_points, card_sales_basis_points,
+            card_processing_basis_points, default_travel_cost_cents
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (1, 'Example Food Truck', 1500, 3000, 8000, 300, ?)
         """,
-        values,
-    )
-    connection.commit()
-
-
-def test_business_defaults_table_is_created(
-    connection: sqlite3.Connection,
-):
-    """Applying the schema should create the expected table."""
-    result = connection.execute(
-        """
-        SELECT name
-        FROM sqlite_master
-        WHERE type = 'table'
-          AND name = 'business_defaults'
-        """
-    ).fetchone()
-
-    assert result == ("business_defaults",)
-
-
-def test_valid_business_defaults_can_be_inserted(
-    connection: sqlite3.Connection,
-):
-    """The table should accept a complete valid defaults record."""
-    insert_business_defaults(
-        connection,
-        valid_business_defaults(),
+        (travel_cost,),
     )
 
-    result = connection.execute(
+
+def test_business_defaults_and_labor_tables_are_created(connection):
+    tables = {
+        row[0]
+        for row in connection.execute(
+            """
+            SELECT name FROM sqlite_master
+            WHERE type = 'table'
+            """
+        )
+    }
+    assert "business_defaults" in tables
+    assert "business_default_labor_entries" in tables
+
+
+def test_multiple_labor_entries_can_be_saved(connection):
+    insert_defaults(connection)
+    connection.executemany(
         """
-        SELECT
-            business_name,
-            average_order_value_cents,
-            food_cost_basis_points
-        FROM business_defaults
+        INSERT INTO business_default_labor_entries (
+            business_defaults_id, position, hourly_rate_cents,
+            total_paid_minutes
+        )
+        VALUES (1, ?, ?, ?)
+        """,
+        ((0, 1800, 720), (1, 2500, 240)),
+    )
+
+    rows = connection.execute(
+        """
+        SELECT hourly_rate_cents, total_paid_minutes
+        FROM business_default_labor_entries ORDER BY position
+        """
+    ).fetchall()
+    assert rows == [(1800, 720), (2500, 240)]
+
+
+def test_optional_travel_cost_can_be_null(connection):
+    insert_defaults(connection, travel_cost=None)
+    value = connection.execute(
+        "SELECT default_travel_cost_cents FROM business_defaults"
+    ).fetchone()[0]
+    assert value is None
+
+
+def test_optional_owner_labor_pay_uses_nullable_cents(connection):
+    insert_defaults(connection)
+    connection.execute(
+        """
+        UPDATE business_defaults
+        SET default_owner_labor_pay_cents = 12500
         WHERE id = 1
         """
-    ).fetchone()
-
-    assert result == (
-        "Example Food Truck",
-        1500,
-        3000,
     )
-
-
-def test_optional_thresholds_can_be_null(
-    connection: sqlite3.Connection,
-):
-    """Optional decision thresholds should allow null values."""
-    values = list(valid_business_defaults())
-    values[11] = None
-    values[12] = None
-
-    insert_business_defaults(
-        connection,
-        tuple(values),
-    )
-
-    result = connection.execute(
-        """
-        SELECT
-            minimum_acceptable_profit_cents,
-            minimum_acceptable_margin_basis_points
-        FROM business_defaults
-        WHERE id = 1
-        """
-    ).fetchone()
-
-    assert result == (None, None)
-
-
-def test_only_one_defaults_record_can_exist(
-    connection: sqlite3.Connection,
-):
-    """The schema should reject additional defaults records."""
-    insert_business_defaults(
-        connection,
-        valid_business_defaults(),
-    )
-
-    second_record = list(valid_business_defaults())
-    second_record[0] = 2
+    value = connection.execute(
+        "SELECT default_owner_labor_pay_cents FROM business_defaults"
+    ).fetchone()[0]
+    assert value == 12500
 
     with pytest.raises(sqlite3.IntegrityError):
-        insert_business_defaults(
-            connection,
-            tuple(second_record),
+        connection.execute(
+            """
+            UPDATE business_defaults
+            SET default_owner_labor_pay_cents = -1
+            WHERE id = 1
+            """
         )
 
 
-def test_percentage_above_one_hundred_is_rejected(
-    connection: sqlite3.Connection,
-):
-    """Percentage columns should reject values above 100 percent."""
-    values = list(valid_business_defaults())
-    values[3] = 10001
-
+def test_negative_labor_values_are_rejected(connection):
+    insert_defaults(connection)
     with pytest.raises(sqlite3.IntegrityError):
-        insert_business_defaults(
-            connection,
-            tuple(values),
+        connection.execute(
+            """
+            INSERT INTO business_default_labor_entries (
+                business_defaults_id, position, hourly_rate_cents,
+                total_paid_minutes
+            )
+            VALUES (1, 0, -1, 60)
+            """
         )
 
 
-def test_negative_currency_is_rejected(
-    connection: sqlite3.Connection,
-):
-    """Currency columns should reject negative values."""
-    values = list(valid_business_defaults())
-    values[7] = -1
-
+def test_percentage_above_one_hundred_is_rejected(connection):
     with pytest.raises(sqlite3.IntegrityError):
-        insert_business_defaults(
-            connection,
-            tuple(values),
+        connection.execute(
+            """
+            INSERT INTO business_defaults (
+                id, average_order_sale_amount_cents,
+                food_cost_basis_points, card_sales_basis_points,
+                card_processing_basis_points
+            )
+            VALUES (1, 1500, 10001, 8000, 300)
+            """
+        )
+
+
+def test_profit_target_stores_only_its_matching_value(connection):
+    connection.execute(
+        """
+        INSERT INTO business_defaults (
+            id, average_order_sale_amount_cents,
+            food_cost_basis_points, card_sales_basis_points,
+            card_processing_basis_points, profit_target_type,
+            minimum_profit_amount_cents
+        )
+        VALUES (1, 1500, 3000, 8000, 300, 'profit_amount', 30000)
+        """
+    )
+    with pytest.raises(sqlite3.IntegrityError):
+        connection.execute(
+            """
+            UPDATE business_defaults
+            SET minimum_profit_margin_basis_points = 2000
+            WHERE id = 1
+            """
         )

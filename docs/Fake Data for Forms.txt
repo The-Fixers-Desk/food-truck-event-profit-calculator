@@ -1,0 +1,10 @@
+Fake Data for Forms
+
+| Field                     |              Enter |
+| ------------------------- | -----------------: |
+| Business name             | Copper Spoon Tacos |
+| Average order sale amount |              18.50 |
+| Food and packaging cost   |                 32 |
+| Sales paid by card        |                 85 |
+| Card processing fee       |               2.90 |
+| Default travel cost       |              45.00 |

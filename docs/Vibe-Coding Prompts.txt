@@ -1,0 +1,17 @@
+Vibe-Coding Prompts
+
+-----------------------------------------------------------
+
+Awesome. Next milestone is: Define business defaults data model
+
+What is it, what does it entail, and how do we do it?
+
+-----------------------------------------------------------
+
+Give me a prompt to give to Codex.
+
+-----------------------------------------------------------
+
+What should we do while we wait for Codex?
+
+-----------------------------------------------------------

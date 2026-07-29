@@ -1,60 +1,67 @@
 CREATE TABLE IF NOT EXISTS business_defaults (
-    id INTEGER PRIMARY KEY
-        CHECK (id = 1),
-
+    id INTEGER PRIMARY KEY CHECK (id = 1),
     business_name TEXT NOT NULL DEFAULT '',
-
-    average_order_value_cents INTEGER NOT NULL
-        CHECK (average_order_value_cents > 0),
-
+    average_order_sale_amount_cents INTEGER NOT NULL
+        CHECK (average_order_sale_amount_cents > 0),
     food_cost_basis_points INTEGER NOT NULL
-        CHECK (
-            food_cost_basis_points >= 0
-            AND food_cost_basis_points <= 10000
-        ),
-
+        CHECK (food_cost_basis_points BETWEEN 0 AND 10000),
     card_sales_basis_points INTEGER NOT NULL
-        CHECK (
-            card_sales_basis_points >= 0
-            AND card_sales_basis_points <= 10000
-        ),
-
+        CHECK (card_sales_basis_points BETWEEN 0 AND 10000),
     card_processing_basis_points INTEGER NOT NULL
+        CHECK (card_processing_basis_points BETWEEN 0 AND 10000),
+    default_travel_cost_cents INTEGER
         CHECK (
-            card_processing_basis_points >= 0
-            AND card_processing_basis_points <= 10000
+            default_travel_cost_cents IS NULL
+            OR default_travel_cost_cents >= 0
         ),
-
-    default_staff_count INTEGER NOT NULL
-        CHECK (default_staff_count >= 0),
-
-    hourly_labor_cost_cents INTEGER NOT NULL
-        CHECK (hourly_labor_cost_cents >= 0),
-
-    setup_minutes INTEGER NOT NULL
-        CHECK (setup_minutes >= 0),
-
-    cleanup_minutes INTEGER NOT NULL
-        CHECK (cleanup_minutes >= 0),
-
-    vehicle_cost_per_mile_cents INTEGER NOT NULL
-        CHECK (vehicle_cost_per_mile_cents >= 0),
-
-    minimum_acceptable_profit_cents INTEGER
+    default_owner_labor_pay_cents INTEGER
         CHECK (
-            minimum_acceptable_profit_cents IS NULL
-            OR minimum_acceptable_profit_cents >= 0
+            default_owner_labor_pay_cents IS NULL
+            OR default_owner_labor_pay_cents >= 0
         ),
-
-    minimum_acceptable_margin_basis_points INTEGER
+    profit_target_type TEXT
         CHECK (
-            minimum_acceptable_margin_basis_points IS NULL
-            OR (
-                minimum_acceptable_margin_basis_points >= 0
-                AND minimum_acceptable_margin_basis_points <= 10000
-            )
+            profit_target_type IS NULL
+            OR profit_target_type IN ('profit_amount', 'profit_margin')
         ),
-
+    minimum_profit_amount_cents INTEGER
+        CHECK (
+            minimum_profit_amount_cents IS NULL
+            OR minimum_profit_amount_cents >= 0
+        ),
+    minimum_profit_margin_basis_points INTEGER
+        CHECK (
+            minimum_profit_margin_basis_points IS NULL
+            OR minimum_profit_margin_basis_points BETWEEN 0 AND 10000
+        ),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (
+        (
+            profit_target_type IS NULL
+            AND minimum_profit_amount_cents IS NULL
+            AND minimum_profit_margin_basis_points IS NULL
+        )
+        OR (
+            profit_target_type = 'profit_amount'
+            AND minimum_profit_amount_cents IS NOT NULL
+            AND minimum_profit_margin_basis_points IS NULL
+        )
+        OR (
+            profit_target_type = 'profit_margin'
+            AND minimum_profit_amount_cents IS NULL
+            AND minimum_profit_margin_basis_points IS NOT NULL
+        )
+    )
+);
+
+CREATE TABLE IF NOT EXISTS business_default_labor_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_defaults_id INTEGER NOT NULL DEFAULT 1
+        REFERENCES business_defaults(id) ON DELETE CASCADE
+        CHECK (business_defaults_id = 1),
+    position INTEGER NOT NULL CHECK (position >= 0),
+    hourly_rate_cents INTEGER NOT NULL CHECK (hourly_rate_cents >= 0),
+    total_paid_minutes INTEGER NOT NULL CHECK (total_paid_minutes >= 0),
+    UNIQUE (business_defaults_id, position)
 );

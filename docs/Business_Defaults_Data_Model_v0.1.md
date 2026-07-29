@@ -33,9 +33,9 @@ existing analyses that have not established an event-specific override.
 - Meaning: The name used to identify the customer's food truck within the
   application.
 
-### average_order_value
+### average_order_sale_amount
 
-- Display name: Average order value
+- Display name: Average order sale amount
 - Data type: Currency
 - Required: Yes
 - Minimum value: Greater than $0.00
@@ -79,81 +79,62 @@ existing analyses that have not established an event-specific override.
 - Event override: Yes
 - Meaning: The percentage fee charged on revenue paid by card.
 
-### default_staff_count
+### labor_entries
 
-- Display name: Paid staff
-- Data type: Whole number
+- Display name: Default labor
+- Data type: One or more labor entries
 - Required: Yes
-- Minimum value: 0
 - Calculation role: Labor-cost estimation
 - Event override: Yes
-- Meaning: The typical number of paid workers assigned to an event.
+- Meaning: The typical labor paid at each hourly rate for an event.
 
-### hourly_labor_cost
+Each labor entry contains:
 
-- Display name: Hourly labor cost
+- **Hourly labor rate:** Currency, minimum $0.00.
+- **Total hours paid at that rate:** Decimal hours, minimum 0. This represents
+  combined worker-hours. Two employees working six hours each equals 12 total
+  hours paid.
+
+Default labor cost will be the sum of hourly labor rate multiplied by total
+hours paid at that rate across all entries.
+
+### default_owner_labor_pay
+
+- Display name: Default owner labor pay
 - Data type: Currency
-- Required: Yes
+- Required: No
 - Minimum value: $0.00
 - Calculation role: Labor-cost estimation
 - Event override: Yes
-- Meaning: The expected hourly cost for each paid worker. This should represent
-  the business's actual labor cost rather than only the employee's take-home
-  wage when the customer knows the full amount.
+- Meaning: An optional flat amount the owner normally pays themselves for
+  working a typical event. It is labor cost and is separate from business
+  profit. A blank value means no default owner labor pay has been set.
 
-### setup_hours
+### default_travel_cost
 
-- Display name: Setup time
-- Data type: Decimal hours
-- Required: Yes
-- Minimum value: 0
-- Calculation role: Labor-cost estimation
-- Event override: Yes
-- Meaning: The typical paid labor time required before event service begins.
-
-### cleanup_hours
-
-- Display name: Cleanup time
-- Data type: Decimal hours
-- Required: Yes
-- Minimum value: 0
-- Calculation role: Labor-cost estimation
-- Event override: Yes
-- Meaning: The typical paid labor time required after event service ends.
-
-### vehicle_cost_per_mile
-
-- Display name: Vehicle cost per mile
+- Display name: Default travel cost
 - Data type: Currency
-- Required: Yes
+- Required: No
 - Minimum value: $0.00
 - Calculation role: Travel-cost estimation
 - Event override: Yes
-- Meaning: The estimated fuel and vehicle cost associated with one business
-  mile.
+- Meaning: The typical flat travel cost for an event. It is not based on
+  mileage.
 
-### minimum_acceptable_profit
+### profit_target
 
-- Display name: Minimum acceptable profit
-- Data type: Currency
-- Required: No
-- Minimum value: $0.00
+- Prompt: How do you decide whether an event is worth accepting?
+- Required: Yes
+- Choices: Minimum profit amount or Minimum profit margin
 - Calculation role: Result interpretation
 - Event override: Yes
-- Meaning: The minimum estimated event profit the customer considers worth
-  pursuing.
+- Meaning: The single target the customer uses to judge whether an event is
+  worthwhile. This choice will later control profitability analysis and
+  warnings.
 
-### minimum_acceptable_margin
-
-- Display name: Minimum acceptable profit margin
-- Data type: Percentage
-- Required: No
-- Minimum value: 0%
-- Maximum value: 100%
-- Calculation role: Result interpretation
-- Event override: Yes
-- Meaning: The minimum estimated profit margin the customer considers
-  acceptable.
+When **Minimum profit amount** is selected, a required currency value of $0.00
+or more is stored. When **Minimum profit margin** is selected, a required
+percentage from 0% through 100% is stored. Only the selected value is retained.
 
 ---
 
@@ -198,16 +179,15 @@ The SQLite database stores exact numeric values as scaled integers.
 - Currency values are stored as whole cents.
 - Percentage values are stored as basis points, where one basis point equals
   0.01 percentage point.
-- Time values are stored as whole minutes.
-- Staff counts are stored as whole numbers.
+- Labor-entry time values are stored as whole minutes.
 
 Examples:
 
 - $15.00 is stored as 1500 cents.
-- $0.75 is stored as 75 cents.
+- $75.00 is stored as 7500 cents.
 - 30% is stored as 3000 basis points.
 - 3.5% is stored as 350 basis points.
-- 1.5 hours is stored as 90 minutes.
+- 12 hours is stored as 720 minutes.
 
 Conversion between database values and application `Decimal` values occurs in
 the database-access layer. Scaled database values are never presented directly

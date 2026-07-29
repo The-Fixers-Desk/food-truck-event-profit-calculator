@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 
 import pytest
 from flask import Flask
@@ -8,14 +9,22 @@ from app import create_app
 
 
 @pytest.fixture()
-def app() -> Generator[Flask, None, None]:
+def database_path(tmp_path: Path) -> Path:
+    """Return an isolated persistent database path."""
+    return tmp_path / "test.db"
+
+
+@pytest.fixture()
+def app(database_path: Path) -> Generator[Flask, None, None]:
     """Create a fresh Flask application for each test."""
     application = create_app(
-    {
-        "TESTING": True,
-        "PROPAGATE_EXCEPTIONS": False,
-    }
-)
+        {
+            "DATABASE": database_path,
+            "SECRET_KEY": "test",
+            "TESTING": True,
+            "PROPAGATE_EXCEPTIONS": False,
+        }
+    )
 
     yield application
 

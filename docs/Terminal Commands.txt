@@ -1,0 +1,33 @@
+Terminal Commands
+
+-----------------------------------------------------------
+
+ACTIVATE VIRTUAL ENVIRONMENT
+
+.venv\Scripts\Activate.ps1
+
+-----------------------------------------------------------
+
+INITIATE FLASK
+
+py -m flask --app app.py --debug run
+
+-----------------------------------------------------------
+
+RESTART FLASK
+
+.\.venv\Scripts\flask.exe --app app.py --debug run
+
+-----------------------------------------------------------
+
+INSTALL POWERSHELL
+
+py -m pip install -r requirements.txt
+
+-----------------------------------------------------------
+
+RUN AUTOMATED TEST
+
+py -m pytest
+
+-----------------------------------------------------------

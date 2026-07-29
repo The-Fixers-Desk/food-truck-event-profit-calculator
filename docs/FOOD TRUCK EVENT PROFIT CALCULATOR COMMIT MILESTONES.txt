@@ -1,0 +1,212 @@
+FOOD TRUCK EVENT PROFIT CALCULATOR
+V1 COMMIT MILESTONES
+
+FOUNDATION
+
+☑ Initialize local application foundation
+☑ Create shared application shell and navigation
+☑ Document application architecture decisions
+☑ Establish automated test structure
+☑ Add application-wide error handling and logging
+
+
+DEFAULTS
+
+☑ Define business defaults data model
+☑ Create business defaults database schema
+☑ Build business defaults form
+☑ Add defaults form validation
+□ Add model-level validation
+☑ Save business defaults to the local database
+☑ Load saved defaults into the Defaults screen
+☑ Add confirmation and error states for saving defaults
+□ Verify first-time setup workflow
+
+
+EVENT CALCULATOR — INPUTS
+
+□ Define event analysis data model
+□ Create saved event database schema
+□ Build event identification form
+□ Build revenue assumptions section
+□ Build food and supply cost section
+□ Build labor cost section
+□ Build travel and operating cost section
+□ Build event fee and miscellaneous cost section
+□ Apply saved business defaults to new event analyses
+□ Allow event-specific overrides without changing saved defaults
+□ Add calculator input validation
+□ Add clear estimated-input indicators
+
+
+CALCULATION ENGINE
+
+□ Define calculation rules and terminology
+□ Implement estimated revenue calculation
+□ Implement variable cost calculations
+□ Implement fixed cost calculations
+□ Implement total event cost calculation
+□ Implement estimated profit calculation
+□ Implement profit margin calculation
+□ Implement break-even sales calculation
+□ Implement break-even customer calculation
+□ Identify primary profitability constraints
+□ Add factual warnings for risky assumptions
+□ Add calculation engine unit tests
+□ Verify calculations against manual examples
+
+
+EVENT CALCULATOR — RESULTS
+
+□ Build event results summary
+□ Display revenue, costs, profit, and margin
+□ Display break-even requirements
+□ Display profitability constraints and warnings
+□ Distinguish estimated results from known values
+□ Update results when event inputs change
+□ Add reset and start-new-analysis actions
+□ Verify complete event analysis workflow
+
+
+SAVED EVENTS
+
+□ Save completed event analyses
+□ Preserve the assumptions used for each saved event
+□ Load a saved event for review
+□ Edit and resave an existing event analysis
+□ Duplicate a saved event as a new scenario
+□ Delete a saved event with confirmation
+□ Add saved-event success and error states
+□ Verify saved event persistence after application restart
+
+
+COMPARISON
+
+□ Build saved event list
+□ Add event selection for comparison
+□ Build event comparison view
+□ Compare revenue, cost, profit, margin, and break-even results
+□ Highlight meaningful differences between selected events
+□ Display empty and insufficient-data states
+□ Open a compared event for detailed review
+□ Verify complete comparison workflow
+
+
+FIRST-USE AND APPLICATION STATE
+
+□ Detect whether initial setup is complete
+□ Open Defaults on first use
+□ Open Event Calculator after setup is complete
+□ Add navigation safeguards for incomplete setup
+□ Preserve expected application state between sessions
+
+UI AND UX POLISH
+□ Define the V1 visual direction
+□ Create reusable colors, typography, spacing, buttons, inputs, and cards
+□ Polish the Defaults screen
+□ Polish the Event Calculator input experience
+□ Polish the Event Results screen
+□ Polish Saved Events and Comparison screens
+□ Design empty, loading, success, warning, and error states
+□ Improve field wording, help text, and screen organization
+□ Add helpful visual emphasis and hierarchy
+□ Verify consistent styling across the application
+□ Complete a full user-experience walkthrough
+
+
+DATABASE RELIABILITY
+
+□ Add database initialization
+□ Add database version tracking
+□ Add safe database migrations
+□ Protect database writes with transactions
+□ Add database backup capability
+□ Add database restore capability
+□ Verify recovery from interrupted saves
+□ Verify customer data remains separate from application files
+
+
+DESKTOP APPLICATION EXPERIENCE
+
+□ Create dedicated desktop application window
+□ Start the local server automatically on launch
+□ Hide browser tabs, address bars, and local addresses
+□ Display the product name and application icon
+□ Prevent multiple conflicting application instances
+□ Shut down local services safely when the application closes
+□ Add a friendly startup loading state
+□ Add a friendly application error screen
+□ Verify offline operation
+
+
+WINDOWS PACKAGING
+
+□ Create Windows application package
+□ Bundle Python and all required dependencies
+□ Add Windows application icon and metadata
+□ Create Windows installer
+□ Create Start menu and desktop launch options
+□ Store Windows customer data in the proper system location
+□ Verify install, launch, update, and uninstall behavior on Windows
+
+
+MACOS PACKAGING
+
+□ Create macOS application package
+□ Bundle Python and all required dependencies
+□ Add macOS application icon and metadata
+□ Create macOS installer or disk image
+□ Store macOS customer data in the proper system location
+□ Verify install, launch, update, and uninstall behavior on macOS
+
+
+ACCESSIBILITY AND RESPONSIVENESS
+
+□ Add complete keyboard navigation
+□ Add visible focus states
+□ Add accessible labels and validation messages
+□ Verify readable contrast and text sizing
+□ Verify layouts at supported window sizes
+□ Verify screen reader structure
+□ Complete application accessibility review
+
+
+QUALITY ASSURANCE
+
+□ Add route and integration tests
+□ Add database persistence tests
+□ Add end-to-end workflow tests
+□ Test first-time setup
+□ Test defaults and override behavior
+□ Test event creation, saving, editing, and deletion
+□ Test comparison behavior
+□ Test backup and restore
+□ Test application closure during normal operations
+□ Complete Windows acceptance testing
+□ Complete macOS acceptance testing
+□ Fix V1 acceptance testing defects
+
+
+DOCUMENTATION
+
+□ Finalize Product Decision Record for V1
+□ Create Architecture Decision Record
+□ Create calculation methodology documentation
+□ Create customer installation guide
+□ Create customer usage guide
+□ Create backup and restore instructions
+□ Create troubleshooting guide
+□ Update repository README
+□ Add release notes and version history
+
+
+RELEASE
+
+□ Complete V1 product review
+□ Complete V1 UI and UX review
+□ Freeze V1 calculation rules
+□ Prepare V1 release candidates
+□ Verify clean installation on Windows
+□ Verify clean installation on macOS
+□ Tag version 1.0.0
+□ Publish Food Truck Event Profit Calculator V1

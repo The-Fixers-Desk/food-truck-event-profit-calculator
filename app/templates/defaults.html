@@ -1,18 +1,203 @@
-{% extends "base.html" %} {% block title %} Defaults | Food Truck Event Profit
-Calculator {% endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Defaults | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
 <section class="page">
   <header class="page-header">
     <p class="page-eyebrow">Business Setup</p>
     <h1>Defaults</h1>
-
     <p class="page-description">
       Save reusable business information that can be applied automatically when
       evaluating events.
     </p>
   </header>
 
-  <div class="placeholder-panel">
-    <p>Your reusable business defaults will be configured here.</p>
-  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="status-message" role="status">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form class="form-panel" method="post" novalidate>
+    <div class="form-grid">
+      {% macro field(name, label, required=true, hint="") %}
+        <div class="form-field">
+          <label class="form-label" for="{{ name }}">{{ label }}</label>
+          <input class="form-input" id="{{ name }}" name="{{ name }}"
+            type="{{ 'text' if name == 'business_name' else 'number' }}"
+            {% if name != "business_name" %}step="0.01"{% endif %}
+            value="{{ form_values[name] }}"
+            {% if required %}required{% endif %}
+            {% if errors.get(name) %}
+              aria-invalid="true" aria-describedby="{{ name }}-error"
+            {% endif %} />
+          {% if hint %}<p class="form-hint">{{ hint }}</p>{% endif %}
+          {% if errors.get(name) %}
+            <p class="field-error" id="{{ name }}-error">
+              {{ errors[name] }}
+            </p>
+          {% endif %}
+        </div>
+      {% endmacro %}
+
+      {{ field("business_name", "Business name", false, "Optional") }}
+      {{ field("average_order_sale_amount",
+               "Average order sale amount ($)") }}
+      {{ field("food_cost_percentage", "Food and packaging cost (%)") }}
+      {{ field("card_sales_percentage", "Sales paid by card (%)") }}
+      {{ field("card_processing_percentage", "Card processing fee (%)") }}
+      {{ field("default_travel_cost", "Default travel cost ($)", false,
+               "Optional flat cost for a typical event") }}
+    </div>
+
+    <fieldset class="choice-section">
+      <legend>How do you decide whether an event is worth accepting?</legend>
+      <div class="choice-options">
+        <label class="choice-option">
+          <input type="radio" name="profit_target_type"
+            value="profit_amount"
+            {% if form_values.profit_target_type == "profit_amount" %}
+              checked
+            {% endif %} />
+          Minimum profit amount
+        </label>
+        <label class="choice-option">
+          <input type="radio" name="profit_target_type"
+            value="profit_margin"
+            {% if form_values.profit_target_type == "profit_margin" %}
+              checked
+            {% endif %} />
+          Minimum profit margin
+        </label>
+      </div>
+      {% if errors.get("profit_target_type") %}
+        <p class="field-error">{{ errors.profit_target_type }}</p>
+      {% endif %}
+
+      <div id="profit-amount-field" class="form-field target-field"
+        {% if form_values.profit_target_type != "profit_amount" %}hidden{% endif %}>
+        <label class="form-label" for="minimum_profit_amount">
+          Minimum profit amount ($)
+        </label>
+        <input class="form-input" id="minimum_profit_amount"
+          name="minimum_profit_amount" type="number" step="0.01"
+          value="{{ form_values.minimum_profit_amount }}"
+          {% if errors.get("minimum_profit_amount") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("minimum_profit_amount") %}
+          <p class="field-error">{{ errors.minimum_profit_amount }}</p>
+        {% endif %}
+      </div>
+
+      <div id="profit-margin-field" class="form-field target-field"
+        {% if form_values.profit_target_type != "profit_margin" %}hidden{% endif %}>
+        <label class="form-label" for="minimum_profit_margin">
+          Minimum profit margin (%)
+        </label>
+        <input class="form-input" id="minimum_profit_margin"
+          name="minimum_profit_margin" type="number" step="0.01"
+          value="{{ form_values.minimum_profit_margin }}"
+          {% if errors.get("minimum_profit_margin") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("minimum_profit_margin") %}
+          <p class="field-error">{{ errors.minimum_profit_margin }}</p>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="labor-section">
+      <legend>Default labor</legend>
+      <p class="form-hint">
+        Add each hourly rate and the combined worker-hours typically paid at
+        that rate. Two employees working six hours each equals 12 total hours.
+      </p>
+      {% if errors.get("labor") %}
+        <p class="field-error">{{ errors["labor"] }}</p>
+      {% endif %}
+      <div class="form-field owner-labor-pay">
+        <label class="form-label" for="default_owner_labor_pay">
+          Default owner labor pay ($)
+        </label>
+        <input class="form-input" id="default_owner_labor_pay"
+          name="default_owner_labor_pay" type="number" step="0.01"
+          value="{{ form_values.default_owner_labor_pay }}"
+          {% if errors.get("default_owner_labor_pay") %}
+            aria-invalid="true"
+          {% endif %} />
+        <p class="form-hint">
+          Optional flat amount you normally pay yourself for working an event.
+        </p>
+        {% if errors.get("default_owner_labor_pay") %}
+          <p class="field-error">
+            {{ errors.default_owner_labor_pay }}
+          </p>
+        {% endif %}
+      </div>
+      <div id="labor-entries">
+        {% for entry in form_values.labor_entries %}
+          {% set entry_errors = errors.labor_entries[loop.index0]
+             if errors.labor_entries|length > loop.index0 else {} %}
+          <div class="labor-entry">
+            <div class="form-field">
+              <label class="form-label">Hourly labor rate ($)</label>
+              <input class="form-input" name="labor_rate" type="number"
+                step="0.01" value="{{ entry.hourly_rate }}" required
+                {% if entry_errors.get("hourly_rate") %}
+                  aria-invalid="true"
+                {% endif %} />
+              {% if entry_errors.get("hourly_rate") %}
+                <p class="field-error">
+                  {{ entry_errors.hourly_rate }}
+                </p>
+              {% endif %}
+            </div>
+            <div class="form-field">
+              <label class="form-label">
+                Total hours paid at that rate
+              </label>
+              <input class="form-input" name="labor_hours" type="number"
+                step="any" value="{{ entry.total_hours_paid }}" required
+                {% if entry_errors.get("total_hours_paid") %}
+                  aria-invalid="true"
+                {% endif %} />
+              {% if entry_errors.get("total_hours_paid") %}
+                <p class="field-error">
+                  {{ entry_errors.total_hours_paid }}
+                </p>
+              {% endif %}
+            </div>
+            <button class="remove-labor button-secondary" type="button">
+              Remove
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="button-secondary" id="add-labor" type="button">
+        Add labor entry
+      </button>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="button" type="submit">Save defaults</button>
+    </div>
+  </form>
 </section>
+
+<template id="labor-entry-template">
+  <div class="labor-entry">
+    <div class="form-field">
+      <label class="form-label">Hourly labor rate ($)</label>
+      <input class="form-input" name="labor_rate" type="number"
+        step="0.01" required />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Total hours paid at that rate</label>
+      <input class="form-input" name="labor_hours" type="number"
+        step="any" required />
+    </div>
+    <button class="remove-labor button-secondary" type="button">Remove</button>
+  </div>
+</template>
+<script src="{{ url_for('static', filename='js/business_defaults.js') }}"></script>
 {% endblock %}

@@ -3,60 +3,58 @@ from decimal import Decimal
 
 import pytest
 
-from app.models import BusinessDefaults
+from app.models import BusinessDefaults, LaborDefault
 
 
 @pytest.fixture()
 def business_defaults() -> BusinessDefaults:
-    """Create a representative set of reusable business defaults."""
     return BusinessDefaults(
         business_name="Example Food Truck",
-        average_order_value=Decimal("15.00"),
+        average_order_sale_amount=Decimal("15.00"),
         food_cost_percentage=Decimal("0.30"),
         card_sales_percentage=Decimal("0.80"),
         card_processing_percentage=Decimal("0.03"),
-        default_staff_count=2,
-        hourly_labor_cost=Decimal("18.00"),
-        setup_hours=Decimal("1.50"),
-        cleanup_hours=Decimal("1.00"),
-        vehicle_cost_per_mile=Decimal("0.75"),
-        minimum_acceptable_profit=Decimal("300.00"),
-        minimum_acceptable_margin=Decimal("0.20"),
+        labor_entries=(
+            LaborDefault(Decimal("18.00"), Decimal("12.00")),
+            LaborDefault(Decimal("25.00"), Decimal("4.00")),
+        ),
+        default_owner_labor_pay=Decimal("125.00"),
+        profit_target_type="profit_amount",
+        minimum_profit_amount=Decimal("300.00"),
+        default_travel_cost=Decimal("75.00"),
     )
 
 
-def test_business_defaults_store_expected_values(
-    business_defaults: BusinessDefaults,
-):
-    """The model should preserve the supplied business assumptions."""
-    assert business_defaults.business_name == "Example Food Truck"
-    assert business_defaults.average_order_value == Decimal("15.00")
-    assert business_defaults.default_staff_count == 2
-    assert business_defaults.minimum_acceptable_margin == Decimal("0.20")
+def test_business_defaults_store_expected_values(business_defaults):
+    assert business_defaults.average_order_sale_amount == Decimal("15.00")
+    assert len(business_defaults.labor_entries) == 2
+    assert business_defaults.labor_entries[0].total_hours_paid == Decimal("12")
+    assert business_defaults.default_travel_cost == Decimal("75.00")
+    assert business_defaults.default_owner_labor_pay == Decimal("125.00")
 
 
-def test_optional_decision_thresholds_can_be_omitted():
-    """Profit targets should be optional."""
+def test_optional_values_can_be_omitted():
     defaults = BusinessDefaults(
         business_name="Example Food Truck",
-        average_order_value=Decimal("15.00"),
+        average_order_sale_amount=Decimal("15.00"),
         food_cost_percentage=Decimal("0.30"),
         card_sales_percentage=Decimal("0.80"),
         card_processing_percentage=Decimal("0.03"),
-        default_staff_count=2,
-        hourly_labor_cost=Decimal("18.00"),
-        setup_hours=Decimal("1.50"),
-        cleanup_hours=Decimal("1.00"),
-        vehicle_cost_per_mile=Decimal("0.75"),
+        labor_entries=(LaborDefault(Decimal("18"), Decimal("12")),),
     )
 
-    assert defaults.minimum_acceptable_profit is None
-    assert defaults.minimum_acceptable_margin is None
+    assert defaults.default_travel_cost is None
+    assert defaults.default_owner_labor_pay is None
+    assert defaults.profit_target_type is None
+    assert defaults.minimum_profit_amount is None
+    assert defaults.minimum_profit_margin is None
 
 
-def test_business_defaults_are_immutable(
-    business_defaults: BusinessDefaults,
-):
-    """Saved model instances should not be changed silently."""
+def test_business_defaults_are_immutable(business_defaults):
     with pytest.raises(FrozenInstanceError):
-        business_defaults.average_order_value = Decimal("20.00")
+        business_defaults.average_order_sale_amount = Decimal("20.00")
+
+
+def test_labor_defaults_are_immutable(business_defaults):
+    with pytest.raises(FrozenInstanceError):
+        business_defaults.labor_entries[0].hourly_rate = Decimal("20.00")
