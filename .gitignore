@@ -13,3 +13,6 @@ data/*.db
 
 # VS Code
 .vscode/settings.json
+
+# Local runtime logs
+instance/

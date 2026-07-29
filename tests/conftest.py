@@ -11,10 +11,11 @@ from app import create_app
 def app() -> Generator[Flask, None, None]:
     """Create a fresh Flask application for each test."""
     application = create_app(
-        {
-            "TESTING": True,
-        }
-    )
+    {
+        "TESTING": True,
+        "PROPAGATE_EXCEPTIONS": False,
+    }
+)
 
     yield application
 
