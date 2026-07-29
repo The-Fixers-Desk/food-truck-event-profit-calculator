@@ -1,5 +1,4 @@
-FOOD TRUCK EVENT PROFIT CALCULATOR
-V1 COMMIT MILESTONES
+Commit Milestones
 
 FOUNDATION
 
@@ -20,7 +19,7 @@ DEFAULTS
 ☑ Save business defaults to the local database
 ☑ Load saved defaults into the Defaults screen
 ☑ Add confirmation and error states for saving defaults
-□ Verify first-time setup workflow
+□ Verify first business defaults setup
 
 
 EVENT CALCULATOR — INPUTS
@@ -91,12 +90,26 @@ COMPARISON
 □ Open a compared event for detailed review
 □ Verify complete comparison workflow
 
+DASHBOARD
+
+□ Define dashboard actions and information
+□ Build dashboard screen
+□ Add new event shortcut
+□ Add saved events shortcut
+□ Add event comparison shortcut
+□ Add business defaults shortcut
+□ Display useful empty states for unavailable actions
+□ Open Dashboard after first-time setup is complete
 
 FIRST-USE AND APPLICATION STATE
 
 □ Detect whether initial setup is complete
-□ Open Defaults on first use
-□ Open Event Calculator after setup is complete
+□ Build first-launch welcome screen
+□ Introduce the four-step application workflow
+□ Guide the user from Welcome to Defaults
+□ Guide the user from completed Defaults to Dashboard
+□ Open Dashboard on future launches
+□ Skip onboarding after initial setup is complete
 □ Add navigation safeguards for incomplete setup
 □ Preserve expected application state between sessions
 
@@ -116,10 +129,10 @@ UI AND UX POLISH
 
 DATABASE RELIABILITY
 
-□ Add database initialization
+☑ Add database initialization
 □ Add database version tracking
 □ Add safe database migrations
-□ Protect database writes with transactions
+☑ Protect database writes with transactions
 □ Add database backup capability
 □ Add database restore capability
 □ Verify recovery from interrupted saves
@@ -173,8 +186,8 @@ ACCESSIBILITY AND RESPONSIVENESS
 
 QUALITY ASSURANCE
 
-□ Add route and integration tests
-□ Add database persistence tests
+☑ Add route and integration tests
+☑ Add database persistence tests
 □ Add end-to-end workflow tests
 □ Test first-time setup
 □ Test defaults and override behavior
