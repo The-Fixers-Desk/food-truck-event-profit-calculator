@@ -4,7 +4,7 @@
 
 ### Status
 
-Proposed for V1 implementation.
+Approved for V1 implementation.
 
 ### Purpose
 
@@ -188,3 +188,27 @@ analysis is created.
 
 Changing a saved business default must not silently alter a saved
 event-specific value or previously saved analysis.
+
+---
+
+## Database storage representation
+
+The SQLite database stores exact numeric values as scaled integers.
+
+- Currency values are stored as whole cents.
+- Percentage values are stored as basis points, where one basis point equals
+  0.01 percentage point.
+- Time values are stored as whole minutes.
+- Staff counts are stored as whole numbers.
+
+Examples:
+
+- $15.00 is stored as 1500 cents.
+- $0.75 is stored as 75 cents.
+- 30% is stored as 3000 basis points.
+- 3.5% is stored as 350 basis points.
+- 1.5 hours is stored as 90 minutes.
+
+Conversion between database values and application `Decimal` values occurs in
+the database-access layer. Scaled database values are never presented directly
+to the customer.
