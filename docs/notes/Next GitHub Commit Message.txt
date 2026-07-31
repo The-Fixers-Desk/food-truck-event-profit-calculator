@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build Dashboard and first-use application flow
-
-- Add the first-launch Welcome screen and four-step workflow
-- Detect setup completion from saved Business Defaults
-- Guide first-time users from Welcome to Defaults to Dashboard
-- Open Dashboard directly on later launches
-- Add Dashboard shortcuts for new analyses, saved events, comparison, and defaults
-- Add useful event and comparison empty states
-- Protect setup-required routes from direct access
-- Preserve dirty-workspace navigation warnings
-- Keep onboarding state consistent across application restarts
-- Add onboarding, Dashboard, navigation, and route tests
-
----------------------------------------------------------------------------------
-
 Add database versioning and safe migrations
 
 - Establish the current application schema as Version 1
@@ -76,6 +61,53 @@ Complete accessibility and responsive behavior
 - Support responsive layouts down to narrow application widths
 - Verify zoom, long-content, dialog, table, and workspace behavior
 - Add accessibility assertions, developer guidance, and a manual review checklist
+
+---------------------------------------------------------------------------------
+
+Build desktop application shell
+
+- Add a dedicated pywebview desktop window
+- Start the localhost Flask server automatically on an available port
+- Add local readiness checks and a friendly startup loading screen
+- Add cross-platform single-instance protection
+- Restrict the application server and window to the local app origin
+- Shut down the server, threads, temporary files, and instance lock safely
+- Add friendly startup and database-recovery error behavior
+- Keep mutable files under the configured application-data directory
+- Verify representative workflows operate without internet access
+- Preserve browser-based development and headless automated testing
+- Add desktop lifecycle, startup, shutdown, security, and offline tests
+
+---------------------------------------------------------------------------------
+
+Package Windows application
+
+- Build a 64-bit Windows application bundle with PyInstaller
+- Add consistent product metadata, versioning, and application icons
+- Create a per-user Inno Setup installer
+- Add Start Menu and optional Desktop shortcuts
+- Store customer data separately under LocalAppData
+- Bundle and verify the offline WebView2 prerequisite
+- Preserve customer data during upgrades, reinstalls, and uninstall
+- Add signing-ready build hooks without requiring a certificate
+- Add reproducible Windows build automation and artifact checksums
+- Add packaging, frozen-runtime, installer, and data-preservation tests
+
+---------------------------------------------------------------------------------
+
+Package macOS application
+
+- Build a Universal 2 macOS application bundle with py2app
+- Support Apple Silicon and Intel Macs running macOS 13 or later
+- Add consistent bundle metadata, versioning, and application icons
+- Create a drag-and-drop DMG with an Applications shortcut
+- Store customer data separately under Application Support
+- Preserve customer data during replacement, uninstall, and reinstall
+- Add development and release packaging modes
+- Add Developer ID signing, Hardened Runtime, and notarization hooks
+- Verify architecture slices, signatures, Gatekeeper status, and bundle contents
+- Add reproducible macOS build automation and artifact checksums
+- Add macOS packaging, frozen-runtime, metadata, and data-preservation tests
 
 ---------------------------------------------------------------------------------
 

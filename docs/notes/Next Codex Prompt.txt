@@ -4,300 +4,6 @@ Next Codex Prompt
 
 ---------------------------------------------------------------------------------
 
-Implement the milestone:
-
-Add database versioning and safe migrations.
-
-The application currently has a working SQLite schema containing Business
-Defaults, Events, Event Scenarios, employee labor rows, miscellaneous-cost
-rows, and other established application data.
-
-Add a formal migration system that supports safe future schema upgrades while
-preserving all existing customer data.
-
-Version 1 baseline
-
-Treat the complete schema that exists at the beginning of this milestone as
-the official Version 1 schema.
-
-Inspect the current database initialization, repositories, tables, columns,
-indexes, foreign keys, constraints, and scaled-integer persistence conventions
-before changing the initialization process.
-
-Do not change the meaning or structure of existing application data merely to
-introduce versioning.
-
-Migration ledger
-
-Add a migration ledger table named:
-
-schema_migrations
-
-Store at least:
-
-- version
-- name
-- applied_at
-
-Rules:
-
-- Version must be a unique sequential integer.
-- Migration records are immutable after successful application.
-- Record a migration only after its complete schema operation and verification
-  succeed.
-- The highest successfully recorded version represents the current database
-  schema version.
-- Define the application’s latest supported schema version explicitly.
-
-Do not use session state or application memory as the source of schema version
-truth.
-
-Fresh database behavior
-
-A completely new empty database must:
-
-- Create the migration ledger.
-- Apply the Version 1 migration.
-- Create the complete current application schema.
-- Record Version 1 only after schema creation succeeds.
-- Be immediately usable by all existing application workflows.
-
-Fresh setup and existing-database upgrades must produce the same final schema.
-
-Existing unversioned database adoption
-
-Existing customer databases currently have application tables but no migration
-ledger.
-
-Support adopting a compatible unversioned database as Version 1 without
-rebuilding or rewriting it.
-
-Before adoption:
-
-- Inspect all expected Version 1 tables.
-- Verify required columns and compatible types.
-- Verify important indexes, foreign keys, and relationships.
-- Verify the expected Defaults, Event, Scenario, labor, and miscellaneous-cost
-  structures.
-- Run an appropriate SQLite integrity or quick check.
-- Run a foreign-key check where applicable.
-
-When the unversioned database is compatible:
-
-- Create the migration ledger safely.
-- Record Version 1.
-- Preserve every existing row and identifier.
-- Do not rename, recreate, copy, or reorder existing business data merely to
-  stamp the version.
-
-When the database is incomplete, conflicting, or not recognizably compatible:
-
-- Do not stamp it as Version 1.
-- Do not attempt destructive repairs.
-- Stop startup safely.
-- Log the technical reason.
-- Show the customer the application’s normal friendly database-startup error.
-
-Do not silently reinterpret an unknown schema.
-
-Already-versioned database behavior
-
-When the database is already at the latest supported version:
-
-- Perform no migration writes.
-- Do not update migration timestamps.
-- Do not rerun migration functions.
-- Continue normal application startup.
-
-When the database is behind the latest supported version:
-
-- Apply every missing migration in numerical order.
-- Do not skip versions.
-- Stop immediately if any migration fails.
-
-When the database version is newer than the application supports:
-
-- Refuse to open it for normal operation.
-- Do not downgrade it.
-- Do not modify its schema or version records.
-- Provide a clear error indicating that a newer application version is
-  required.
-
-Migration execution
-
-Create a clear migration registry or equivalent ordered structure containing:
-
-- Version number
-- Migration name
-- Migration function
-
-Migration execution must occur:
-
-- After the database path and connection behavior are established
-- Before repositories, routes, or normal application workflows use the schema
-
-Each migration must:
-
-- Use the project’s existing transaction behavior.
-- Be atomic.
-- Validate its expected starting state.
-- Apply only its intended changes.
-- Validate its resulting state.
-- Record its version last.
-
-If any schema operation, data-copy operation, verification step, or ledger
-write fails:
-
-- Roll back the complete migration.
-- Leave the database at its previous successfully recorded version.
-- Do not continue to later migrations.
-- Do not allow normal application startup.
-
-Do not broadly catch and ignore SQLite schema errors.
-
-Temporary-table safety
-
-For migrations that eventually need table reconstruction:
-
-- Use a unique migration-specific temporary table name.
-- Do not use generic names such as prior_defaults.
-- Verify that the intended temporary name does not unexpectedly exist.
-- Treat an unexpected leftover table as a migration conflict rather than
-  silently reusing or deleting it.
-- Copy data explicitly.
-- Verify copied row counts and required relationships before replacing the
-  original table.
-- Drop old or temporary structures only after successful verification.
-
-Document this required pattern even if Version 1 itself does not need table
-reconstruction.
-
-Schema initialization
-
-Replace or adapt the existing parallel schema-initialization behavior so schema
-creation and upgrading are governed by the migration system.
-
-Do not leave a separate initialization path that can silently create missing
-columns or tables and make a damaged database appear valid.
-
-Existing initialization helpers may be reused by the Version 1 migration when
-that remains clear and safe.
-
-All current tests and normal application behavior must continue to work.
-
-Logging and errors
-
-Log:
-
-- The database version detected at startup
-- Every migration beginning
-- Every migration successfully completed
-- Adoption of a compatible unversioned database
-- Migration or compatibility failures
-
-Do not log sensitive customer data.
-
-Use the existing customer-facing error-handling system rather than exposing raw
-SQLite tracebacks in the interface.
-
-Data preservation
-
-Explicitly preserve:
-
-- Business Defaults
-- Labor defaults
-- Events
-- Event identity
-- Event Scenarios
-- Scenario assumptions
-- Scenario names
-- Ordered employee labor entries
-- Ordered miscellaneous-cost entries
-- All identifiers and relationships
-- Created and modified timestamps
-
-Do not delete, reset, or manually replace data/app.db.
-
-Tests must never use or modify the real customer database.
-
-Testing
-
-Add focused automated tests covering:
-
-- A completely fresh database reaching Version 1
-- The complete current schema being created through migrations
-- Migration Version 1 being recorded exactly once
-- Restarting an already-current database performing no migration writes
-- A compatible unversioned database being adopted as Version 1
-- Existing Defaults surviving adoption unchanged
-- Existing Events and Scenarios surviving adoption unchanged
-- Ordered child rows surviving adoption unchanged
-- Existing identifiers and timestamps remaining unchanged
-- An incomplete unversioned database being rejected
-- A conflicting schema being rejected
-- Integrity-check or foreign-key-check failure being rejected
-- Missing migrations running in numerical order
-- A failed migration rolling back all schema and data changes
-- A failed migration not being recorded
-- Later migrations not running after an earlier failure
-- An unexpected migration temporary table causing a safe failure
-- A database newer than the application being rejected without modification
-- Repository and route behavior working after migration
-- Application restart preserving the recorded version and all customer data
-- Migration logging where practical to verify
-
-Create test fixtures or temporary database copies representing:
-
-- Empty database
-- Current unversioned Version 1-compatible database
-- Already-versioned database
-- Partially damaged database
-- Future-version database
-- Migration-failure database
-
-Add at least one test-only future migration to prove ordered execution and
-transactional rollback without changing the production schema version.
-
-Documentation
-
-Add concise developer documentation explaining:
-
-- The Version 1 baseline
-- How schema versions are recorded
-- How to add the next migration
-- Required transaction and verification behavior
-- Safe table-reconstruction procedure
-- Prohibition against editing an already-released migration
-- Behavior for unversioned, damaged, and future-version databases
-
-Scope
-
-Do not implement:
-
-- Customer-facing database backup controls
-- Customer-facing restore controls
-- Scheduled backups
-- Backup-file management
-- Desktop-specific customer-data locations
-- Application update delivery
-- Any unrelated schema changes
-
-Do not add dependencies.
-Do not make unrelated changes.
-Do not commit.
-
-Afterward:
-
-1. Run focused migration, database, repository, and startup tests.
-2. Run the full test suite.
-3. Run git diff --check.
-4. Summarize the fresh-database and upgrade behavior in plain language.
-5. Explain how the current unversioned data/app.db will be adopted safely.
-6. Explain how to add a future migration.
-7. Report the test results.
-
-Keep the response concise.
-
 ---------------------------------------------------------------------------------
 
 Implement the milestone:
@@ -2836,6 +2542,642 @@ Afterward:
 8. List every manual Windows acceptance check completed.
 9. Clearly report any packaging tool, prerequisite, signing certificate, or
    clean test environment that was unavailable.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Package the macOS application.
+
+The desktop application shell, centralized application-data directory,
+database migrations, backup and recovery safeguards, offline interface, and
+complete customer workflows already exist.
+
+Create a reproducible standalone macOS application bundle and drag-and-drop
+disk image.
+
+Supported platform
+
+Target:
+
+- macOS 13 Ventura or later
+- Apple Silicon arm64
+- Intel x86_64
+- One Universal 2 application bundle and DMG
+
+Use a Universal 2 Python installation and Universal 2-compatible native
+dependencies.
+
+Do not silently fall back to a single architecture.
+
+If the available Python interpreter, PyObjC components, pywebview components,
+or other required native dependency cannot produce a valid Universal 2 build:
+
+- Stop the production build.
+- Identify the incompatible component clearly.
+- Do not label the artifact Universal 2.
+
+Do not build:
+
+- Mac App Store packages
+- A PKG installer
+- Separate Intel and Apple Silicon release packages
+- Windows packages
+- iOS applications
+
+Application identity
+
+Use:
+
+Product name:
+Food Truck Event Profit Calculator
+
+Publisher:
+The Fixer’s Desk
+
+Application bundle:
+Food Truck Event Profit Calculator.app
+
+Executable name:
+Food Truck Event Profit Calculator
+
+Bundle identifier:
+com.thefixersdesk.foodtruckeventprofitcalculator
+
+DMG filename pattern:
+FoodTruckEventProfitCalculator-{version}-universal.dmg
+
+Define the application version in one centralized source of truth.
+
+Reuse the version source already established for Windows packaging when
+available.
+
+Use that same version for:
+
+- Application display
+- CFBundleShortVersionString
+- CFBundleVersion
+- Build output names
+- DMG name
+- Documentation
+- Release metadata
+
+Do not introduce a second conflicting version value.
+
+py2app application bundle
+
+Use py2app to create the standalone macOS .app bundle from the existing
+production desktop entrypoint.
+
+Add py2app as the narrowly required macOS packaging dependency.
+
+Create and check in a clear macOS packaging configuration.
+
+Production builds must not use py2app alias or semi-standalone mode.
+
+Bundle:
+
+- The complete Python runtime needed by the application
+- Flask and all runtime Python dependencies
+- Required PyObjC components
+- pywebview’s Cocoa and WebKit requirements
+- Templates
+- Static CSS and JavaScript
+- Local startup-loading assets
+- Local startup-error assets
+- Required runtime documentation
+- Application icon
+- All other established local application resources
+
+Do not bundle:
+
+- Tests
+- pytest caches
+- Git metadata
+- Development virtual environments
+- Source-control configuration
+- Local development databases
+- data/app.db
+- .ftbackup files
+- Logs
+- Recovery snapshots
+- Restore staging files
+- Customer records
+- Secrets
+- Signing credentials
+- Developer-specific absolute paths
+
+Ensure that bundled resource discovery works correctly during:
+
+- Normal source execution
+- Automated tests
+- py2app frozen execution
+
+Do not rely on the current working directory.
+
+Use the existing resource-path abstraction or add a clear frozen-resource
+abstraction shared by the desktop shell and packaging system.
+
+Info.plist
+
+Provide appropriate macOS application metadata, including:
+
+- CFBundleIdentifier
+- CFBundleName
+- CFBundleDisplayName
+- CFBundleExecutable
+- CFBundleShortVersionString
+- CFBundleVersion
+- CFBundlePackageType
+- CFBundleIconFile
+- NSHumanReadableCopyright
+- LSMinimumSystemVersion
+- NSHighResolutionCapable
+
+Configure the app as a normal foreground GUI application.
+
+Do not register unsupported:
+
+- Document types
+- URL handlers
+- Background services
+- Login items
+- System extensions
+- Privileged helpers
+
+Do not claim Mac App Store distribution or Apple certification.
+
+Application icon
+
+Use one checked-in .icns asset consistently for:
+
+- Finder
+- Dock
+- Application bundle
+- Get Info
+- DMG presentation where appropriate
+
+Prefer an approved final product icon if one exists.
+
+If no approved icon exists:
+
+- Add a clearly documented temporary local product icon.
+- Do not download third-party artwork.
+- Do not use copyrighted imagery.
+- Make replacement straightforward before release.
+
+Include the required icon sizes inside the .icns file and verify that macOS
+recognizes the generated icon.
+
+macOS application-data directory
+
+Configure frozen macOS execution to use:
+
+~/Library/Application Support/com.thefixersdesk.foodtruckeventprofitcalculator
+
+Resolve all mutable data through the existing centralized application-data
+system.
+
+Store beneath it:
+
+- Live SQLite database
+- Logs
+- Automatic recovery snapshots
+- Backup and restore staging
+- Webview browser-profile data
+- Single-instance lock
+- Shell temporary files
+- Other mutable runtime state
+
+Requirements:
+
+- Create the directory safely on first launch.
+- Do not write customer data inside the .app bundle.
+- Do not write beside the application in /Applications.
+- Do not write into bundled Resources.
+- Do not depend on the application being writable.
+- Preserve configurable development and testing data roots.
+- Preserve isolated temporary roots in tests.
+- Do not move or delete the current development data/app.db.
+
+Installation and update model
+
+Distribute the app through a drag-and-drop DMG.
+
+The intended installation flow is:
+
+1. Open the DMG.
+2. Drag Food Truck Event Profit Calculator.app to Applications.
+3. Eject the DMG.
+4. Launch the application from Applications.
+
+Support installation to either:
+
+- /Applications
+- The customer’s ~/Applications directory
+
+Do not require administrator privileges from the application itself.
+
+Updating the application consists of replacing the existing .app bundle with a
+newer version.
+
+Application replacement must not modify or remove customer data under
+Application Support.
+
+If the application is running during replacement:
+
+- Document that it should be closed first.
+- Do not implement a background updater.
+- Do not modify active customer files from the DMG.
+
+Reinstallation must reconnect to preserved customer data and open the
+appropriate Welcome or Dashboard state.
+
+Uninstallation consists of moving the .app to Trash.
+
+Uninstallation must leave customer data intact, including:
+
+- Business Defaults
+- Events
+- Scenarios
+- Backups
+- Recovery snapshots
+- Logs
+
+Do not add an automatic data-removal utility in this milestone.
+
+DMG creation
+
+Create a polished but restrained drag-and-drop DMG using macOS system tools.
+
+The mounted DMG must contain:
+
+- Food Truck Event Profit Calculator.app
+- An Applications-folder alias or symbolic link
+
+Use a clear volume name:
+
+Food Truck Event Profit Calculator
+
+Requirements:
+
+- Preserve application-bundle symlinks and permissions.
+- Use a compressed read-only distribution image.
+- Do not include source code, build output, test data, or customer data.
+- Do not rely on third-party DMG-building software unless already approved.
+- Do not add decorative licensed backgrounds.
+- Keep the DMG usable without internet access.
+
+Create the DMG through reproducible scripted commands using tools available on
+macOS, such as hdiutil and ditto.
+
+Development and release build modes
+
+Provide two explicit build modes.
+
+Development mode:
+
+- Build the complete standalone .app.
+- Apply an appropriate ad-hoc signature where required.
+- Create a development DMG when requested.
+- Do not claim the output is Developer ID signed.
+- Do not claim the output is notarized.
+- Clearly label development artifacts and documentation accordingly.
+
+Release mode:
+
+- Require a valid Developer ID Application signing identity.
+- Require the signing identity to be supplied through the build environment or
+  keychain configuration.
+- Sign all nested executable code correctly.
+- Sign the outer application bundle last.
+- Enable Hardened Runtime.
+- Include a secure timestamp.
+- Use only the minimum entitlements demonstrated to be required.
+- Verify the application signature before producing the final DMG.
+- Sign the DMG where appropriate.
+- Submit the distribution artifact to Apple’s notary service using:
+  xcrun notarytool
+- Wait for the notarization result.
+- Retrieve and preserve useful failure logs when notarization fails.
+- Staple the successful notarization ticket.
+- Verify the stapled ticket.
+- Verify Gatekeeper acceptance.
+
+Do not use altool.
+
+Signing configuration
+
+Read release signing configuration from secure build inputs.
+
+Support an appropriate secure notarization-authentication method, such as an
+existing notarytool keychain profile or approved App Store Connect API
+credentials.
+
+Do not:
+
+- Commit certificates
+- Commit private keys
+- Commit Apple account passwords
+- Commit app-specific passwords
+- Commit notary credentials
+- Print secrets in build logs
+- Generate a fake Developer ID identity
+- Use a self-signed identity while claiming a release build
+- Proceed with release notarization when credentials are missing
+
+When release signing is explicitly requested but configuration is unavailable:
+
+- Fail clearly.
+- Explain which category of configuration is missing.
+- Preserve any valid unsigned development bundle separately.
+- Do not rename the unsigned output as a release artifact.
+
+Hardened Runtime and entitlements
+
+Enable Hardened Runtime for Developer ID release builds.
+
+Start with no optional runtime exceptions.
+
+Add an entitlement only when the packaged application demonstrably requires
+it to operate.
+
+Document every included entitlement and why it is required.
+
+Do not broadly add:
+
+- Disable library validation
+- Allow unsigned executable memory
+- Allow JIT
+- Debugging entitlement
+- Network server entitlement intended for sandboxed applications
+- File-access entitlements intended for sandboxed applications
+
+unless testing proves the exact entitlement is necessary.
+
+Do not enable App Sandbox in this direct-download V1 package.
+
+Preserve localhost Flask operation and the existing offline design.
+
+Code-signing verification
+
+Verify the finished .app and DMG using appropriate macOS tools.
+
+At minimum verify:
+
+- The outer application signature
+- Nested code signatures
+- Hardened Runtime on release builds
+- Bundle identifier
+- Version metadata
+- Architecture slices
+- Gatekeeper assessment
+- Notarization ticket
+- DMG integrity
+
+Fail the release build if any verification fails.
+
+Build automation
+
+Add a reproducible macOS build script using shell or Python orchestration.
+
+The build should:
+
+1. Verify it is running on macOS.
+2. Verify the supported macOS build environment.
+3. Verify Xcode Command Line Tools.
+4. Verify the expected Python version.
+5. Verify the Python interpreter supports the required Universal 2 build.
+6. Verify all required native dependencies support arm64 and x86_64.
+7. Verify py2app and required packaging-tool versions.
+8. Verify the application icon.
+9. Run focused macOS packaging tests.
+10. Run the full automated test suite unless explicitly skipped for a
+    documented developer-only reason.
+11. Clean stale macOS packaging output.
+12. Build the standalone .app.
+13. Audit bundle contents.
+14. Verify architectures and metadata.
+15. Smoke-test the application bundle.
+16. Apply development or release signing.
+17. Create the DMG.
+18. Sign, notarize, and staple in release mode.
+19. Verify the final artifact.
+20. Produce a SHA-256 checksum.
+21. Place final outputs in a clear release-artifacts directory.
+
+Do not automatically install or update:
+
+- Python
+- Xcode
+- Xcode Command Line Tools
+- py2app
+- Apple certificates
+- Signing credentials
+
+Fail with clear instructions when a required build tool or input is missing.
+
+Pin or record packaging-tool versions for reproducibility.
+
+Build cleanliness
+
+Clean only packaging-owned build and distribution directories.
+
+Do not delete:
+
+- Development databases
+- Customer databases
+- Backups
+- Recovery snapshots
+- Source files
+- Documentation
+
+Audit the .app and DMG for:
+
+- Customer SQLite files
+- .ftbackup files
+- Logs
+- Test fixtures
+- pytest caches
+- Git files
+- Environment files
+- Secrets
+- Developer usernames
+- Absolute development paths
+- Unnecessary GUI frameworks
+- Unrelated platform packaging files
+
+Packaged application verification
+
+Smoke-test the actual frozen .app rather than only source execution.
+
+Verify:
+
+- It launches by double-clicking without Terminal.
+- It opens one native pywebview window.
+- It starts the Flask loopback server automatically.
+- It binds only to 127.0.0.1.
+- It uses the expected product title and icon.
+- It creates mutable data only under Application Support.
+- It does not write into its own bundle.
+- It performs fresh onboarding with an empty data root.
+- It opens existing customer data.
+- Live Event Analysis recalculation works.
+- Scenario persistence works.
+- Saved Events and comparison work.
+- Backup download works.
+- Restore validation works.
+- Single-instance protection works.
+- Closing the window stops the local server.
+- It operates with external network access blocked.
+- It remains functional after being copied into Applications.
+- It remains functional after application replacement.
+
+macOS installation acceptance
+
+Verify in clean macOS environments where practical.
+
+Clean installation:
+
+- DMG mounts successfully.
+- The application can be copied to Applications.
+- Application identity and icon display correctly.
+- First launch creates the correct Application Support directory.
+- Onboarding works.
+- No customer data is created inside the app bundle.
+
+Apple Silicon:
+
+- The app launches natively as arm64.
+- It does not require Rosetta.
+- All packaged native dependencies contain a compatible arm64 slice.
+
+Intel:
+
+- The app launches natively as x86_64.
+- All packaged native dependencies contain a compatible x86_64 slice.
+
+Existing data:
+
+- Defaults, Events, Scenarios, and backups remain available after replacing
+  the app.
+
+Upgrade:
+
+- Replacing an older app bundle updates installed application resources.
+- Customer data remains unchanged.
+- Required schema migrations run through the existing safe migration system.
+- The application does not create a second customer-data directory.
+
+Uninstall and reinstall:
+
+- Moving the app to Trash removes the application.
+- Application Support data remains.
+- Reinstalling the app finds and uses preserved data.
+
+Offline:
+
+- Installation from the DMG requires no internet access.
+- Normal application workflows require no internet.
+- A notarization ticket stapled to a release DMG remains verifiable offline
+  where macOS permits.
+
+Failure states:
+
+- A damaged database opens the established recovery state.
+- Missing signing credentials block only release signing and notarization.
+- A failed notarization never produces an artifact labeled as release-ready.
+- Invalid architecture slices fail production verification.
+- Build failure does not alter development or customer data.
+
+Testing
+
+Add focused automated tests where behavior does not require a physical macOS
+desktop, including:
+
+- macOS frozen-resource resolution
+- macOS Application Support data-root selection
+- Bundle identifier and version metadata
+- Info.plist generation
+- DMG artifact naming
+- Universal 2 build configuration
+- Icon configuration
+- Exclusion of customer-data files
+- Development versus release modes
+- Missing-signing configuration
+- Notarization-command construction without exposing credentials
+- Bundle-content auditing
+- Build-script validation
+- Importing packaging modules without side effects
+- Existing non-macOS tests remaining runnable
+
+Use scripted and manual macOS acceptance checks for behaviors that require
+Finder, Gatekeeper, native windowing, code signing, notarization, or different
+Mac architectures.
+
+Documentation
+
+Add concise developer documentation explaining:
+
+- Supported macOS versions and architectures
+- Required macOS build machine
+- Required Python and py2app setup
+- Bundle identifier
+- Application Support data location
+- How to create a development build
+- How to create a release build
+- Developer ID requirements
+- Hardened Runtime and entitlements
+- notarytool authentication
+- Notarization and stapling
+- DMG creation
+- Generated artifact locations
+- Installation and replacement behavior
+- Uninstall data preservation
+- Apple Silicon acceptance testing
+- Intel acceptance testing
+- Expected Gatekeeper behavior for unsigned development builds
+- Release-readiness requirements
+
+Scope
+
+Do not implement:
+
+- Mac App Store distribution
+- PKG installer distribution
+- Automatic updates
+- Sparkle or another update framework
+- Apple receipt validation
+- License keys
+- Cloud services
+- Telemetry
+- Crash-report uploading
+- Destructive uninstall
+- Final V1 publication
+
+Do not change calculations, business behavior, persistence rules, or customer
+workflows.
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused macOS packaging, frozen-runtime, metadata, and data-path tests.
+2. Run the full automated test suite.
+3. Run git diff --check.
+4. Build the Universal 2 application when a suitable macOS environment is
+   available.
+5. Build the DMG when macOS packaging tools are available.
+6. Sign and notarize only when valid release credentials are available.
+7. Report exact generated artifact paths and SHA-256 checksums.
+8. Summarize installation, replacement, uninstall, and data-preservation
+   behavior.
+9. List each Apple Silicon and Intel acceptance check completed.
+10. Clearly report any unavailable Mac hardware, build tools, Developer ID
+    identity, notarization credentials, or clean test environment.
 
 Keep the response concise.
 

@@ -113,30 +113,10 @@ def close_database(exception: BaseException | None = None) -> None:
 
 
 def initialize_database() -> None:
-    """Create the schema, upgrading the uncommitted legacy shape if present."""
-    database = get_database()
-    columns = {
-        row["name"]
-        for row in database.execute(
-            "PRAGMA table_info(business_defaults)"
-        ).fetchall()
-    }
-    if columns and "food_cost_method" not in columns:
-        _upgrade_food_cost_schema(database, columns)
-    elif columns and "default_owner_labor_pay_cents" not in columns:
-        database.execute(
-            """
-            ALTER TABLE business_defaults
-            ADD COLUMN default_owner_labor_pay_cents INTEGER
-                CHECK (
-                    default_owner_labor_pay_cents IS NULL
-                    OR default_owner_labor_pay_cents >= 0
-                )
-            """
-        )
-        database.commit()
-    apply_business_defaults_schema(database)
-    apply_event_analysis_schema(database)
+    """Create, adopt, or upgrade the database through formal migrations."""
+    from app.migrations import migrate_database
+
+    migrate_database(get_database(), logger=current_app.logger)
 
 
 def load_business_defaults() -> BusinessDefaults | None:

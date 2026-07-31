@@ -88,7 +88,7 @@ SAVED WORK AND COMPARISON
 
 DASHBOARD AND ONBOARDING
 
-□ >Build the Dashboard and first-use application flow
+☑ Build the Dashboard and first-use application flow
   Add the Welcome screen, four-step introduction, setup detection,
   Welcome → Defaults → Dashboard flow, normal Dashboard launches,
   shortcuts, empty states, navigation safeguards, and session state.
@@ -96,7 +96,7 @@ DASHBOARD AND ONBOARDING
 
 DATABASE RELIABILITY
 
-□ *Add database versioning and safe migrations
+□ >Add database versioning and safe migrations
   Track schema versions, run migrations once, support upgrades safely,
   and protect existing customer data.
 
@@ -127,11 +127,11 @@ DESKTOP APPLICATION AND PACKAGING
   single-instance protection, product identity, loading and error screens,
   and verified offline use.
 
-□ -Package the Windows application
+□ *Package the Windows application
   Bundle dependencies, add metadata and icons, create the installer and
   shortcuts, use the correct data location, and verify installation behavior.
 
-□ -Package the macOS application
+□ *Package the macOS application
   Bundle dependencies, add metadata and icons, create the installer or disk
   image, use the correct data location, and verify installation behavior.
 
@@ -142,18 +142,18 @@ QUALITY ASSURANCE
   Cover onboarding, defaults and overrides, event analysis, saved scenarios,
   comparison, backup and restore, and application closure.
 
-□ Complete platform acceptance testing and fix V1 defects
+□ -Complete platform acceptance testing and fix V1 defects
   Perform Windows and macOS acceptance testing and resolve all confirmed
   release-blocking defects.
 
 
 DOCUMENTATION AND RELEASE
 
-□ Finalize the complete V1 documentation set
+□ -Finalize the complete V1 documentation set
   Finalize the PDR, ADR, calculation methodology, installation guide,
   usage guide, backup instructions, troubleshooting guide, README,
   release notes, and version history.
 
-□ Prepare and publish Food Truck Event Profit Calculator V1
+□ -Prepare and publish Food Truck Event Profit Calculator V1
   Complete product and UI reviews, freeze calculation rules, prepare release
   candidates, verify clean installations, tag version 1.0.0, and publish.
