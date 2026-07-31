@@ -30,7 +30,7 @@ Total Milestones- 13
 ☑ Update business defaults food and packaging cost method
 ☑ Create saved event database schema
 ☑ Build event identification form
-□ Build revenue assumptions section
+☑ Build revenue assumptions section
 □ Build food and supply cost section
 □ Build labor cost section
 □ Build travel and operating cost section

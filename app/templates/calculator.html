@@ -187,6 +187,91 @@
       </section>
     </fieldset>
 
+    <fieldset class="input-section">
+      <legend>Food and packaging costs</legend>
+      <p class="section-question">
+        How do you want to estimate food and packaging costs for this event?
+      </p>
+      <div class="method-confirmation">
+        <label class="form-label" for="event_food_cost_method_choice">
+          Cost method
+        </label>
+        <select class="form-input" id="event_food_cost_method_choice"
+          name="food_cost_method_choice">
+          {% for value, label in (
+            ("average_per_order", "Average cost per order"),
+            ("sales_percentage", "Percentage of sales"),
+            ("manual_event_total", "Total for this event")
+          ) %}
+            <option value="{{ value }}"
+              {% if form_values.food_cost_method_choice == value %}
+                selected
+              {% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="button-secondary" id="confirm-event-food-cost-method"
+          type="button">Use this method</button>
+      </div>
+      <input id="event_food_cost_method" name="food_cost_method" type="hidden"
+        value="{{ form_values.food_cost_method }}" />
+      {% if errors.get("food_cost_method") %}
+        <p class="field-error">{{ errors.food_cost_method }}</p>
+      {% endif %}
+
+      <div id="event-average-food-cost-field"
+        class="form-field target-field event-food-cost-field"
+        {% if form_values.food_cost_method != "average_per_order" %}hidden{% endif %}>
+        <label class="form-label" for="event_average_food_cost_per_order">
+          Average food and packaging cost per order ($)
+        </label>
+        <input class="form-input" id="event_average_food_cost_per_order"
+          name="average_food_cost_per_order" type="number" step="0.01"
+          value="{{ form_values.average_food_cost_per_order }}"
+          {% if errors.get("average_food_cost_per_order") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("average_food_cost_per_order") %}
+          <p class="field-error">
+            {{ errors.average_food_cost_per_order }}
+          </p>
+        {% endif %}
+      </div>
+
+      <div id="event-food-cost-percentage-field"
+        class="form-field target-field event-food-cost-field"
+        {% if form_values.food_cost_method != "sales_percentage" %}hidden{% endif %}>
+        <label class="form-label" for="event_food_cost_percentage">
+          Food and packaging cost percentage (%)
+        </label>
+        <input class="form-input" id="event_food_cost_percentage"
+          name="food_cost_percentage" type="number" step="0.01"
+          value="{{ form_values.food_cost_percentage }}"
+          {% if errors.get("food_cost_percentage") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("food_cost_percentage") %}
+          <p class="field-error">{{ errors.food_cost_percentage }}</p>
+        {% endif %}
+      </div>
+
+      <div id="event-manual-food-cost-field"
+        class="form-field target-field event-food-cost-field"
+        {% if form_values.food_cost_method != "manual_event_total" %}hidden{% endif %}>
+        <label class="form-label" for="event_manual_food_cost_total">
+          Total food and packaging cost for this event ($)
+        </label>
+        <input class="form-input" id="event_manual_food_cost_total"
+          name="manual_food_cost_total" type="number" step="0.01"
+          value="{{ form_values.manual_food_cost_total }}"
+          {% if errors.get("manual_food_cost_total") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("manual_food_cost_total") %}
+          <p class="field-error">{{ errors.manual_food_cost_total }}</p>
+        {% endif %}
+      </div>
+    </fieldset>
+
     <div class="form-actions">
       <button class="button" type="submit">Continue</button>
     </div>

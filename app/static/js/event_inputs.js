@@ -98,3 +98,50 @@ useCalculatedSales.addEventListener("click", () => {
 });
 
 updateSalesControls();
+
+const eventFoodMethodChoice = document.querySelector(
+  "#event_food_cost_method_choice",
+);
+const confirmedEventFoodMethod = document.querySelector(
+  "#event_food_cost_method",
+);
+const confirmEventFoodMethod = document.querySelector(
+  "#confirm-event-food-cost-method",
+);
+const eventFoodCostFields = {
+  average_per_order: {
+    container: document.querySelector("#event-average-food-cost-field"),
+    input: document.querySelector("#event_average_food_cost_per_order"),
+  },
+  sales_percentage: {
+    container: document.querySelector("#event-food-cost-percentage-field"),
+    input: document.querySelector("#event_food_cost_percentage"),
+  },
+  manual_event_total: {
+    container: document.querySelector("#event-manual-food-cost-field"),
+    input: document.querySelector("#event_manual_food_cost_total"),
+  },
+};
+
+function showConfirmedEventFoodMethod() {
+  Object.entries(eventFoodCostFields).forEach(([method, field]) => {
+    const selected = confirmedEventFoodMethod.value === method;
+    field.container.hidden = !selected;
+    field.input.required = selected;
+  });
+}
+
+confirmEventFoodMethod.addEventListener("click", () => {
+  const nextMethod = eventFoodMethodChoice.value;
+  if (confirmedEventFoodMethod.value !== nextMethod) {
+    Object.entries(eventFoodCostFields).forEach(([method, field]) => {
+      if (method !== nextMethod) {
+        field.input.value = "";
+      }
+    });
+  }
+  confirmedEventFoodMethod.value = nextMethod;
+  showConfirmedEventFoodMethod();
+});
+
+showConfirmedEventFoodMethod();

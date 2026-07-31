@@ -18,6 +18,13 @@ REVENUE_FIELDS = (
     "revenue_method",
     "expected_sales_amount",
 )
+FOOD_COST_FIELDS = (
+    "food_cost_method_choice",
+    "food_cost_method",
+    "average_food_cost_per_order",
+    "food_cost_percentage",
+    "manual_food_cost_total",
+)
 WEATHER_REDUCTIONS = {
     "favorable": Decimal("0"),
     "minor_concern": Decimal("5"),
@@ -36,9 +43,10 @@ PROTECTION_FACTORS = {
 def blank_event_inputs_form() -> dict[str, str]:
     values = {
         name: ""
-        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS)
+        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS, *FOOD_COST_FIELDS)
     }
     values["revenue_method"] = "attendance"
+    values["food_cost_method_choice"] = "average_per_order"
     return values
 
 
@@ -48,7 +56,7 @@ def validate_event_inputs(
     """Validate the currently implemented portions of Event Inputs."""
     values = {
         name: submitted.get(name, "").strip()
-        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS)
+        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS, *FOOD_COST_FIELDS)
     }
     errors: dict[str, str] = {}
 
@@ -107,6 +115,8 @@ def validate_event_inputs(
         values["revenue_method"] = "attendance"
         values["expected_sales_amount"] = ""
 
+    _validate_food_cost(values, errors)
+
     if errors:
         return None, values, errors
 
@@ -117,6 +127,48 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def _validate_food_cost(
+    values: dict[str, str],
+    errors: dict[str, str],
+) -> None:
+    method = values["food_cost_method"]
+    if method == "average_per_order":
+        values["food_cost_percentage"] = ""
+        values["manual_food_cost_total"] = ""
+        _money(
+            values,
+            errors,
+            "average_food_cost_per_order",
+            "Average food and packaging cost per order",
+        )
+    elif method == "sales_percentage":
+        values["average_food_cost_per_order"] = ""
+        values["manual_food_cost_total"] = ""
+        _percentage(
+            values,
+            errors,
+            "food_cost_percentage",
+            "Food and packaging cost percentage",
+        )
+    elif method == "manual_event_total":
+        values["average_food_cost_per_order"] = ""
+        values["food_cost_percentage"] = ""
+        _money(
+            values,
+            errors,
+            "manual_food_cost_total",
+            "Total food and packaging cost for this event",
+        )
+    else:
+        values["food_cost_method"] = ""
+        values["average_food_cost_per_order"] = ""
+        values["food_cost_percentage"] = ""
+        values["manual_food_cost_total"] = ""
+        errors["food_cost_method"] = (
+            "Choose and confirm a food and packaging cost method."
+        )
 
 
 def protection_reductions(values: dict[str, str]) -> dict[str, str]:

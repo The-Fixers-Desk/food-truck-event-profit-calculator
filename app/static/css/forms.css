@@ -175,6 +175,15 @@
   display: none;
 }
 
+.event-food-cost-field[hidden] {
+  display: none;
+}
+
+.section-question {
+  margin-bottom: 0;
+  color: var(--color-text-muted);
+}
+
 .method-confirmation {
   display: grid;
   grid-template-columns: minmax(180px, 360px) auto;
