@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Data Safety | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page">
+<section class="page data-safety-page workspace-page--form">
   <header class="page-header">
     <p class="page-eyebrow">Data Safety</p>
     <h1>Back up or restore your data</h1>
@@ -26,23 +26,24 @@
     {% endfor %}
   {% endwith %}
 
+  <div class="safety-action-grid">
   {% if not recovery_mode %}
-    <section class="placeholder-panel data-safety-panel">
-      <h2>Create a backup</h2>
-      <p>The download does not change your saved data.</p>
+    <section class="safety-action-panel safety-action-panel--primary">
+      <h2>Download backup</h2>
+      <p>Save a local copy of your Defaults, Events, Scenarios, labor, and additional costs.</p>
       <form method="post" action="{{ url_for('main.download_backup') }}">
         <button class="button" type="submit">Download backup</button>
       </form>
+      <details class="supporting-disclosure">
+        <summary>About local backups</summary>
+        <p>Downloading does not change your saved work. The backup remains wherever you choose to store it.</p>
+      </details>
     </section>
   {% endif %}
 
-  <section class="placeholder-panel data-safety-panel">
+  <section class="safety-action-panel safety-action-panel--restore">
     <h2>Restore backup</h2>
-    <p>
-      Restoring completely replaces the current Business Defaults, Events,
-      Scenarios, labor entries, miscellaneous costs, and other saved data.
-      It does not merge records.
-    </p>
+    <p>Restore replaces all current application data. It does not merge records.</p>
     {% if restore_error %}
       <p class="field-error" role="alert">{{ restore_error }}</p>
     {% endif %}
@@ -58,9 +59,14 @@
         I understand that this replaces all current saved data.
       </label>
       <div class="form-actions">
-        <button class="button" type="submit">Restore backup</button>
+        <button class="button-destructive" type="submit">Restore backup</button>
       </div>
     </form>
+    <details class="supporting-disclosure">
+      <summary>What happens before restore?</summary>
+      <p>The app validates the backup and creates a recovery snapshot before replacing current data.</p>
+    </details>
   </section>
+  </div>
 </section>
 {% endblock %}

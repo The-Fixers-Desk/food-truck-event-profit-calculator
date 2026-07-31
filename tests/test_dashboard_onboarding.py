@@ -113,7 +113,7 @@ def test_existing_setup_skips_welcome_and_dashboard_has_empty_states(
     assert "Business defaults are available" in dashboard
     assert "<strong>0</strong> saved Events" in dashboard
     assert "<strong>0</strong> saved Scenarios" in dashboard
-    assert "Analyze your first event" in dashboard
+    assert "No recent work yet" in dashboard
     assert "At least two saved Scenarios are required." in dashboard
     assert "/events/new" in dashboard
     assert "/saved-events" in dashboard

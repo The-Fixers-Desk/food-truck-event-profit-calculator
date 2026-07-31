@@ -272,4 +272,4 @@ def test_workspace_client_behavior_is_debounced_accessible_and_responsive(
     assert "workspaceBaseline = new FormData(workspaceForm)" in script
     assert "position: sticky" in styles
     assert "@media (max-width: 800px)" in styles
-    assert "order: -1" in styles
+    assert "grid-row: auto" in styles

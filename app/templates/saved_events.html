@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Saved Events | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page">
+<section class="page saved-events-page workspace-page--list">
   <header class="page-header">
     <p class="page-eyebrow">Saved Analyses</p>
     <h1>Saved Events</h1>
@@ -10,7 +10,30 @@
     </p>
   </header>
 
-  <form id="comparison-selection-form" method="post"
+  {% if events %}
+  <div class="management-toolbar" role="search">
+    <div class="form-field management-search">
+      <label class="form-label" for="saved-work-search">Search saved work</label>
+      <input class="form-input" id="saved-work-search" type="search"
+        placeholder="Event or Scenario name" autocomplete="off" />
+    </div>
+    <div class="form-field management-sort">
+      <label class="form-label" for="saved-work-sort">Sort Events</label>
+      <select class="form-input" id="saved-work-sort">
+        <option value="modified">Recently modified</option>
+        <option value="event-date">Event date</option>
+        <option value="name">Event name</option>
+      </select>
+    </div>
+    <button class="button-tertiary" id="clear-saved-work-search"
+      type="button" hidden>Clear search</button>
+    <p id="saved-work-filter-status" class="visually-hidden"
+      aria-live="polite"></p>
+  </div>
+  {% endif %}
+
+  {% if events or comparison_error %}
+  <form class="selected-count-bar" id="comparison-selection-form" method="post"
     action="{{ url_for('main.comparison') }}">
     <button class="button" id="compare-selected" type="submit" disabled>
       Compare selected
@@ -22,6 +45,7 @@
       <p class="field-error" role="alert">{{ comparison_error }}</p>
     {% endif %}
   </form>
+  {% endif %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -32,20 +56,27 @@
   {% endwith %}
 
   {% if not events %}
-    <div class="placeholder-panel saved-events-empty">
-      <h2>No saved events yet</h2>
-      <p>
-        Complete a new Event Inputs form to create your first saved analysis.
-      </p>
+    <div class="empty-state saved-events-empty">
+      <h2 class="empty-state__title">No saved Events</h2>
+      <p>Analyze an event to create your first saved Scenario.</p>
       <a class="button" href="{{ url_for('main.calculator') }}">
-        Start an event analysis
+        Analyze new event
       </a>
     </div>
   {% endif %}
 
-  <div class="saved-event-list">
+  <div class="empty-state no-results-state" id="saved-work-no-results" hidden>
+    <h2 class="empty-state__title">No matching saved work</h2>
+    <p>Try another Event or Scenario name.</p>
+    <button class="button" id="clear-saved-work-no-results" type="button">Clear search</button>
+  </div>
+
+  <div class="saved-event-list management-list" id="saved-event-list">
     {% for event in events %}
-      <article class="saved-event" data-event-id="{{ event.id }}">
+      <article class="saved-event event-library-row" data-event-id="{{ event.id }}"
+        data-event-name="{{ event.event_name }}"
+        data-event-date="{{ event.event_date }}"
+        data-modified="{{ event.last_modified }}">
         <header class="saved-event__header">
           <div>
             <h2>{{ event.event_name }}</h2>
@@ -56,9 +87,11 @@
             <p>
               {{ event.scenario_count }} saved
               Scenario{% if event.scenario_count != 1 %}s{% endif %}
-              · Last modified {{ event.last_modified }}
+              · Last modified
+              <time datetime="{{ event.last_modified }}">{{ event.last_modified[:10] }}</time>
             </p>
           </div>
+          <a class="button" href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=event.scenarios[0].id) }}">Open analysis</a>
         </header>
 
         <details class="management-action"
@@ -104,8 +137,9 @@
 
         <div class="saved-scenario-list">
           {% for scenario in event.scenarios %}
-            <section class="saved-scenario"
-              data-scenario-id="{{ scenario.id }}">
+            <section class="saved-scenario scenario-row selection-row"
+              data-scenario-id="{{ scenario.id }}"
+              data-scenario-name="{{ scenario.scenario_name }}">
               <label class="comparison-selection">
                 <input type="checkbox" name="scenario_id"
                   value="{{ scenario.id }}"
@@ -118,7 +152,10 @@
               </label>
               <div>
                 <h3>{{ scenario.scenario_name }}</h3>
-                <p>Last modified {{ scenario.updated_at }}</p>
+                <p class="management-metadata">
+                  {{ event.event_name }} · Modified
+                  <time datetime="{{ scenario.updated_at }}">{{ scenario.updated_at[:10] }}</time>
+                </p>
               </div>
               <a class="button-secondary"
                 href="{{ url_for('main.open_saved_scenario',

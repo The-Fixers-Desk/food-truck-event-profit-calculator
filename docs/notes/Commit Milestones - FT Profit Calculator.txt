@@ -167,14 +167,14 @@ cognitive load. Convert long forms into compact guided workflows that minimize
 scrolling while preserving rapid data entry. Improve grouping, progressive
 disclosure, inline guidance, validation, warnings, and review experiences.
 
-□ >Redesign the Event Analysis workspace
+☑ Redesign the Event Analysis workspace
 
 Redesign the interactive workspace to prioritize decision-making. Improve the
 layout of assumptions, results, warnings, calculations, scenario controls, and
 actions. Establish clear visual hierarchy so the most important business
 information is immediately obvious while maintaining live recalculation.
 
-□ *Redesign dashboards and saved-work views
+□ >Redesign dashboards and saved-work views
 
 Redesign the Dashboard, Saved Events, Scenario Comparison, Backup, Welcome, and
 related management screens. Improve discoverability, summaries, empty states,

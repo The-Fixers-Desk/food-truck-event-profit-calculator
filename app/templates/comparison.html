@@ -11,6 +11,7 @@
     </p>
   </header>
 
+  <div class="comparison-controls sticky-management-controls">
   <fieldset class="baseline-selector">
     <legend>Comparison baseline</legend>
     {% for column in comparison.columns %}
@@ -35,10 +36,11 @@
     <input id="show-differences-only" type="checkbox" />
     Show differences only
   </label>
+  </div>
 
   <div class="comparison-identities">
     {% for column in comparison.columns %}
-      <article class="comparison-identity"
+      <article class="comparison-identity comparison-header"
         data-scenario-id="{{ column.scenario_id }}">
         <p class="baseline-label"
           {% if column.scenario_id != comparison.baseline_id %}hidden{% endif %}>

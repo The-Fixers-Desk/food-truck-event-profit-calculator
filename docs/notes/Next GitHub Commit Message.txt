@@ -2,20 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Redesign the Event Analysis workspace
-
-- Transform Event Analysis into a decision-focused workspace
-- Separate assumptions from financial results with a two-region desktop layout
-- Prioritize business profit, target status, break-even, and warnings
-- Add a dedicated Scenario management area with persistent actions
-- Introduce reusable decision summary, metric, warning, and calculation components
-- Improve information hierarchy through progressive disclosure and grouped breakdowns
-- Optimize the workspace for widescreen desktop use while preserving responsive behavior
-- Maintain live recalculation and all existing business logic
-- Add accessibility, responsive, and regression test coverage
-
----------------------------------------------------------------------------------
-
 Redesign Dashboard and saved-work views
 
 - Redesign Dashboard and Welcome as compact, task-focused launch experiences

@@ -585,11 +585,19 @@
 }
 
 .saved-event {
-  padding: var(--space-5);
+  padding: var(--space-4) 0;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  box-shadow: var(--shadow-panel);
+  border: 0;
+  border-bottom: var(--divider-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.saved-event__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: start;
 }
 
 .saved-event__header h2,
@@ -616,6 +624,8 @@
   background: var(--color-background);
   border-radius: var(--radius-small);
 }
+
+.selection-row.is-selected { outline-offset: 0; }
 
 .management-action {
   margin-top: var(--space-3);
@@ -818,10 +828,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .analysis-results {
-    position: static;
-    order: -1;
-  }
+  .analysis-results { position: static; }
 }
 
 .sales-preview h2 {

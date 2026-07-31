@@ -115,11 +115,13 @@ def dashboard():
     if not business_defaults_setup_is_complete():
         return redirect(url_for("main.welcome"))
     event_count, scenario_count = saved_event_counts()
+    recent_events = list_saved_events()[:3]
     return render_template(
         "dashboard.html",
         active_page="dashboard",
         event_count=event_count,
         scenario_count=scenario_count,
+        recent_events=recent_events,
     )
 
 

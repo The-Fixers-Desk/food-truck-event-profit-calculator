@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Welcome | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page">
+<section class="page onboarding-page workspace-page--empty">
   <header class="page-header">
     <p class="page-eyebrow">Welcome</p>
     <h1>Plan food truck events with clearer numbers</h1>
@@ -11,11 +11,11 @@
     </p>
   </header>
 
-  <ol class="workflow-steps">
-    <li><h2>Set business defaults</h2><p>Save the values you commonly use.</p></li>
-    <li><h2>Describe an event</h2><p>Enter its demand, costs, and conditions.</p></li>
-    <li><h2>Review the analysis</h2><p>See the expected sales, costs, and profit.</p></li>
-    <li><h2>Compare options</h2><p>Save scenarios and compare different assumptions.</p></li>
+  <ol class="workflow-steps onboarding-steps" aria-label="Getting started steps">
+    <li class="concise-onboarding-step"><span>1</span><div><h2>Set business defaults</h2><p>Save the values you commonly use.</p></div></li>
+    <li class="concise-onboarding-step"><span>2</span><div><h2>Describe an event</h2><p>Enter its demand, costs, and conditions.</p></div></li>
+    <li class="concise-onboarding-step"><span>3</span><div><h2>Review the analysis</h2><p>See the expected sales, costs, and profit.</p></div></li>
+    <li class="concise-onboarding-step"><span>4</span><div><h2>Compare options</h2><p>Save scenarios and compare different assumptions.</p></div></li>
   </ol>
 
   <a class="button" href="{{ url_for('main.defaults', setup=1) }}">
