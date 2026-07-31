@@ -3,7 +3,10 @@ from decimal import Decimal
 
 import pytest
 
-from app.calculations import calculate_event_scenario
+from app.calculations import (
+    CalculationWarning,
+    calculate_event_scenario,
+)
 from app.models import (
     AdditionalEventCost,
     DemandAssumptions,
@@ -306,6 +309,9 @@ def test_manual_example_one_attendance_based():
     assert result.total_event_cost == Decimal("894")
     assert result.business_profit == Decimal("106")
     assert result.profit_margin == Decimal("0.106")
+    assert result.break_even_sales == Decimal("894")
+    assert result.exact_break_even_customers == Decimal("89.4")
+    assert result.minimum_whole_break_even_customers == 90
 
 
 def test_manual_example_two_custom_sales_owner_only():
@@ -343,6 +349,9 @@ def test_manual_example_two_custom_sales_owner_only():
     assert result.total_event_cost == Decimal("625")
     assert result.business_profit == Decimal("1375")
     assert result.profit_margin == Decimal("0.6875")
+    assert result.break_even_sales == Decimal("625")
+    assert result.exact_break_even_customers is None
+    assert result.minimum_whole_break_even_customers is None
 
 
 def test_manual_example_three_negative_profit():
@@ -379,3 +388,325 @@ def test_manual_example_three_negative_profit():
     assert result.total_event_cost == Decimal("1220")
     assert result.business_profit == Decimal("-720")
     assert result.profit_margin == Decimal("-1.44")
+
+
+def test_break_even_sales_equals_current_total_event_cost():
+    result = calculate_event_scenario(scenario())
+
+    assert result.break_even_sales == result.total_event_cost
+
+
+def test_owner_labor_pay_is_included_in_break_even_sales():
+    with_owner_pay = calculate_event_scenario(scenario())
+    without_owner_pay = calculate_event_scenario(
+        replace(scenario(), owner_labor_pay=None)
+    )
+
+    assert (
+        with_owner_pay.break_even_sales
+        - without_owner_pay.break_even_sales
+        == Decimal("100")
+    )
+
+
+def test_break_even_customers_are_exact_and_rounded_up():
+    result = calculate_event_scenario(scenario())
+
+    assert result.exact_break_even_customers == Decimal("89.4")
+    assert result.minimum_whole_break_even_customers == 90
+
+
+def test_exact_whole_break_even_customers_are_not_rounded_further():
+    example = replace(
+        scenario(),
+        fees=replace(
+            scenario().fees,
+            vendor_or_booking_fee=Decimal("106"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.break_even_sales == Decimal("900")
+    assert result.exact_break_even_customers == Decimal("90")
+    assert result.minimum_whole_break_even_customers == 90
+
+
+def test_zero_total_cost_has_zero_break_even():
+    example = replace(
+        scenario(),
+        demand=DemandAssumptions(0, 0, Decimal("0")),
+        food_cost=FoodCostAssumptions(
+            "sales_percentage", sales_percentage=Decimal("0")
+        ),
+        fees=PaymentAndOrganizerFees(
+            card_sales_percentage=Decimal("0"),
+            card_processing_percentage=Decimal("0"),
+            fixed_card_processing_fee=None,
+            vendor_or_booking_fee=Decimal("0"),
+            organizer_commission_percentage=None,
+        ),
+        employee_labor=(),
+        owner_labor_pay=None,
+        travel_cost=None,
+        additional_costs=(),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.total_event_cost == Decimal("0")
+    assert result.break_even_sales == Decimal("0")
+    assert result.exact_break_even_customers == Decimal("0")
+    assert result.minimum_whole_break_even_customers == 0
+
+
+def test_zero_average_order_amount_has_no_break_even_customer_count():
+    example = replace(
+        scenario(),
+        revenue=RevenueAssumptions(
+            "attendance", average_order_sale_amount=Decimal("0")
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.break_even_sales > Decimal("0")
+    assert result.exact_break_even_customers is None
+    assert result.minimum_whole_break_even_customers is None
+
+
+def test_positive_profit_status():
+    result = calculate_event_scenario(scenario())
+
+    assert result.profitability_status == "profitable"
+    assert "estimated_loss" not in warning_codes(result)
+    assert "exactly_at_break_even" not in warning_codes(result)
+
+
+def test_estimated_loss_status_and_warning():
+    example = replace(
+        scenario(),
+        fees=replace(
+            scenario().fees,
+            vendor_or_booking_fee=Decimal("207"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.business_profit == Decimal("-1")
+    assert result.profitability_status == "estimated_loss"
+    assert result.warnings[0] == CalculationWarning(
+        code="estimated_loss",
+        severity="critical",
+        message="This scenario has an estimated business loss.",
+    )
+
+
+def test_exact_break_even_status_and_warning():
+    example = replace(
+        scenario(),
+        fees=replace(
+            scenario().fees,
+            vendor_or_booking_fee=Decimal("206"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.business_profit == Decimal("0")
+    assert result.profitability_status == "break_even"
+    assert result.warnings[0] == CalculationWarning(
+        code="exactly_at_break_even",
+        severity="info",
+        message="This scenario is exactly at break-even.",
+    )
+
+
+@pytest.mark.parametrize(
+    ("target", "expected_met"),
+    [
+        (Decimal("100"), True),
+        (Decimal("106"), True),
+        (Decimal("107"), False),
+    ],
+)
+def test_profit_amount_target_evaluation(target, expected_met):
+    example = replace(
+        scenario(),
+        profit_target=ProfitTarget(
+            "profit_amount", minimum_profit_amount=target
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.profit_target_evaluation.target_value == target
+    assert result.profit_target_evaluation.actual_value == Decimal("106")
+    assert result.profit_target_evaluation.is_met is expected_met
+    assert (
+        "below_profit_target" in warning_codes(result)
+    ) is (not expected_met)
+
+
+@pytest.mark.parametrize(
+    ("target", "expected_met"),
+    [
+        (Decimal("0.10"), True),
+        (Decimal("0.106"), True),
+        (Decimal("0.11"), False),
+    ],
+)
+def test_profit_margin_target_evaluation(target, expected_met):
+    example = replace(
+        scenario(),
+        profit_target=ProfitTarget(
+            "profit_margin", minimum_profit_margin=target
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.profit_target_evaluation.target_value == target
+    assert result.profit_target_evaluation.actual_value == Decimal("0.106")
+    assert result.profit_target_evaluation.is_met is expected_met
+    assert (
+        "below_profit_target" in warning_codes(result)
+    ) is (not expected_met)
+
+
+def test_margin_target_is_unavailable_when_sales_are_zero():
+    example = replace(
+        scenario(),
+        demand=DemandAssumptions(0, 0, Decimal("0")),
+        revenue=RevenueAssumptions(
+            "attendance", average_order_sale_amount=Decimal("10")
+        ),
+        profit_target=ProfitTarget(
+            "profit_margin", minimum_profit_margin=Decimal("0.10")
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.profit_target_evaluation.actual_value is None
+    assert result.profit_target_evaluation.is_met is None
+    assert "below_profit_target" not in warning_codes(result)
+    assert "profit_margin_unavailable" in warning_codes(result)
+
+
+def test_no_profit_target_has_no_evaluation_or_target_warning():
+    example = replace(scenario(), profit_target=None)
+
+    result = calculate_event_scenario(example)
+
+    assert result.profit_target_evaluation is None
+    assert "below_profit_target" not in warning_codes(result)
+
+
+def test_expected_orders_below_break_even_customers_warning():
+    example = replace(
+        scenario(),
+        fees=replace(
+            scenario().fees,
+            vendor_or_booking_fee=Decimal("300"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.expected_orders == Decimal("100")
+    assert result.exact_break_even_customers == Decimal("109.4")
+    assert "expected_customers_below_break_even" in warning_codes(result)
+
+
+def test_break_even_customers_exceed_weather_adjusted_attendance_warning():
+    example = replace(
+        scenario(),
+        additional_costs=(
+            AdditionalEventCost("Large fixed cost", Decimal("10000")),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.minimum_whole_break_even_customers == 1085
+    assert result.weather_adjusted_attendance == Decimal("1000")
+    assert (
+        "break_even_exceeds_available_attendance"
+        in warning_codes(result)
+    )
+
+
+def test_custom_expected_sales_warning_documents_order_assumption():
+    example = replace(
+        scenario(),
+        revenue=RevenueAssumptions(
+            "manual_sales", expected_sales_amount=Decimal("2000")
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    warning = next(
+        warning
+        for warning in result.warnings
+        if warning.code == "custom_sales_assumption"
+    )
+    assert warning.severity == "info"
+    assert "attendance-based expected order estimate" in warning.message
+
+
+def test_warning_codes_messages_severity_and_order_are_stable():
+    example = replace(
+        scenario(),
+        additional_costs=(
+            AdditionalEventCost("Large fixed cost", Decimal("10000")),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.warnings == (
+        CalculationWarning(
+            "estimated_loss",
+            "critical",
+            "This scenario has an estimated business loss.",
+        ),
+        CalculationWarning(
+            "below_profit_target",
+            "warning",
+            "This scenario is below the selected profit target.",
+        ),
+        CalculationWarning(
+            "expected_customers_below_break_even",
+            "warning",
+            "Expected customers are below the break-even customer count.",
+        ),
+        CalculationWarning(
+            "break_even_exceeds_available_attendance",
+            "critical",
+            "Break-even customers exceed weather-adjusted attendance.",
+        ),
+    )
+
+
+def test_break_even_keeps_exact_decimal_precision():
+    example = replace(
+        scenario(),
+        revenue=RevenueAssumptions(
+            "attendance",
+            average_order_sale_amount=Decimal("12.345"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert (
+        result.exact_break_even_customers
+        == result.total_event_cost / Decimal("12.345")
+    )
+
+
+def warning_codes(result):
+    return tuple(warning.code for warning in result.warnings)

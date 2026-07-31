@@ -44,7 +44,7 @@ EVENT CALCULATOR — INPUTS
 
 CALCULATION AND RESULTS
 
-□ Implement the core calculation engine
+☑ Implement the core calculation engine
   Define terminology and calculate revenue, variable costs, fixed costs,
   total costs, owner pay, business profit, and profit margin. Include unit
   tests and manual examples.

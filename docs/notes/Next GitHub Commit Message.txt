@@ -2,14 +2,13 @@ Next GitHub Commit Message
 
 -----------------------------------------------------------
 
-Implement core calculation engine
+Extend calculation engine with break-even analysis
 
-- Calculate weather-adjusted customers, expected orders, and expected sales
-- Support attendance-based estimates and custom expected-sales overrides
-- Calculate all three food and packaging cost methods
-- Calculate card-processing fees and organizer commission
-- Calculate employee labor, owner pay, and fixed event costs
-- Calculate total event cost, business profit, and profit margin
-- Represent zero-sales profit margin as not calculable
-- Use exact Decimal calculations without intermediate rounding
-- Add calculation result models, unit tests, and manual examples
+- Calculate break-even sales from the scenario’s current total event cost
+- Calculate exact and minimum whole break-even customers
+- Include owner labor pay in break-even costs
+- Evaluate profit amount and profit margin targets
+- Add structured factual profitability and assumption warnings
+- Handle zero sales and unavailable break-even values safely
+- Preserve exact Decimal calculations
+- Add focused unit tests and manual examples

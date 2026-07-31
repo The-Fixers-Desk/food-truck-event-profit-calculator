@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 
 from app.models import EventScenario
 
@@ -21,6 +21,21 @@ PROTECTION_FACTORS = {
     "partially_covered": Decimal("0.75"),
     "fully_outdoors": Decimal("1"),
 }
+
+
+@dataclass(frozen=True)
+class ProfitTargetEvaluation:
+    target_type: str
+    target_value: Decimal
+    actual_value: Decimal | None
+    is_met: bool | None
+
+
+@dataclass(frozen=True)
+class CalculationWarning:
+    code: str
+    severity: str
+    message: str
 
 
 @dataclass(frozen=True)
@@ -52,6 +67,14 @@ class EventCalculationResult:
     total_event_cost: Decimal
     business_profit: Decimal
     profit_margin: Decimal | None
+
+    break_even_sales: Decimal
+    exact_break_even_customers: Decimal | None
+    minimum_whole_break_even_customers: int | None
+    weather_adjusted_attendance: Decimal
+    profitability_status: str
+    profit_target_evaluation: ProfitTargetEvaluation | None
+    warnings: tuple[CalculationWarning, ...]
 
 
 def calculate_event_scenario(
@@ -145,6 +168,52 @@ def calculate_event_scenario(
         if expected_sales == ZERO
         else business_profit / expected_sales
     )
+    break_even_sales = total_event_cost
+    average_order_sale_amount = (
+        scenario.revenue.average_order_sale_amount
+    )
+    if (
+        average_order_sale_amount is None
+        or average_order_sale_amount == ZERO
+    ):
+        exact_break_even_customers = None
+        minimum_whole_break_even_customers = None
+    else:
+        exact_break_even_customers = (
+            break_even_sales / average_order_sale_amount
+        )
+        minimum_whole_break_even_customers = int(
+            exact_break_even_customers.to_integral_value(
+                rounding=ROUND_CEILING
+            )
+        )
+
+    weather_adjusted_attendance = (
+        Decimal(scenario.demand.estimated_attendance)
+        * (ONE - final_weather_reduction)
+    )
+    profitability_status = (
+        "estimated_loss"
+        if business_profit < ZERO
+        else "break_even"
+        if business_profit == ZERO
+        else "profitable"
+    )
+    profit_target_evaluation = _evaluate_profit_target(
+        scenario, business_profit, profit_margin
+    )
+    warnings = _build_warnings(
+        scenario=scenario,
+        business_profit=business_profit,
+        profit_margin=profit_margin,
+        expected_orders=expected_orders,
+        exact_break_even_customers=exact_break_even_customers,
+        minimum_whole_break_even_customers=(
+            minimum_whole_break_even_customers
+        ),
+        weather_adjusted_attendance=weather_adjusted_attendance,
+        profit_target_evaluation=profit_target_evaluation,
+    )
 
     return EventCalculationResult(
         expected_customers_before_weather=expected_customers_before_weather,
@@ -171,6 +240,15 @@ def calculate_event_scenario(
         total_event_cost=total_event_cost,
         business_profit=business_profit,
         profit_margin=profit_margin,
+        break_even_sales=break_even_sales,
+        exact_break_even_customers=exact_break_even_customers,
+        minimum_whole_break_even_customers=(
+            minimum_whole_break_even_customers
+        ),
+        weather_adjusted_attendance=weather_adjusted_attendance,
+        profitability_status=profitability_status,
+        profit_target_evaluation=profit_target_evaluation,
+        warnings=warnings,
     )
 
 
@@ -199,3 +277,118 @@ def _food_cost(
 
 def _or_zero(value: Decimal | None) -> Decimal:
     return ZERO if value is None else value
+
+
+def _evaluate_profit_target(
+    scenario: EventScenario,
+    business_profit: Decimal,
+    profit_margin: Decimal | None,
+) -> ProfitTargetEvaluation | None:
+    target = scenario.profit_target
+    if target is None:
+        return None
+    if target.target_type == "profit_amount":
+        return ProfitTargetEvaluation(
+            target_type=target.target_type,
+            target_value=target.minimum_profit_amount,
+            actual_value=business_profit,
+            is_met=business_profit >= target.minimum_profit_amount,
+        )
+    if profit_margin is None:
+        return ProfitTargetEvaluation(
+            target_type=target.target_type,
+            target_value=target.minimum_profit_margin,
+            actual_value=None,
+            is_met=None,
+        )
+    return ProfitTargetEvaluation(
+        target_type=target.target_type,
+        target_value=target.minimum_profit_margin,
+        actual_value=profit_margin,
+        is_met=profit_margin >= target.minimum_profit_margin,
+    )
+
+
+def _build_warnings(
+    *,
+    scenario: EventScenario,
+    business_profit: Decimal,
+    profit_margin: Decimal | None,
+    expected_orders: Decimal,
+    exact_break_even_customers: Decimal | None,
+    minimum_whole_break_even_customers: int | None,
+    weather_adjusted_attendance: Decimal,
+    profit_target_evaluation: ProfitTargetEvaluation | None,
+) -> tuple[CalculationWarning, ...]:
+    warnings = []
+    if business_profit < ZERO:
+        warnings.append(
+            CalculationWarning(
+                "estimated_loss",
+                "critical",
+                "This scenario has an estimated business loss.",
+            )
+        )
+    elif business_profit == ZERO:
+        warnings.append(
+            CalculationWarning(
+                "exactly_at_break_even",
+                "info",
+                "This scenario is exactly at break-even.",
+            )
+        )
+    if (
+        profit_target_evaluation is not None
+        and profit_target_evaluation.is_met is False
+    ):
+        warnings.append(
+            CalculationWarning(
+                "below_profit_target",
+                "warning",
+                "This scenario is below the selected profit target.",
+            )
+        )
+    if (
+        exact_break_even_customers is not None
+        and expected_orders < exact_break_even_customers
+    ):
+        warnings.append(
+            CalculationWarning(
+                "expected_customers_below_break_even",
+                "warning",
+                "Expected customers are below the break-even customer count.",
+            )
+        )
+    if (
+        minimum_whole_break_even_customers is not None
+        and Decimal(minimum_whole_break_even_customers)
+        > weather_adjusted_attendance
+    ):
+        warnings.append(
+            CalculationWarning(
+                "break_even_exceeds_available_attendance",
+                "critical",
+                "Break-even customers exceed weather-adjusted attendance.",
+            )
+        )
+    if profit_margin is None:
+        warnings.append(
+            CalculationWarning(
+                "profit_margin_unavailable",
+                "info",
+                "Profit margin is unavailable because expected sales are zero.",
+            )
+        )
+    if scenario.revenue.method == "manual_sales":
+        warnings.append(
+            CalculationWarning(
+                "custom_sales_assumption",
+                "info",
+                (
+                    "Custom expected sales are active; order-based costs and "
+                    "card transactions still use the attendance-based "
+                    "expected order estimate."
+                ),
+            )
+        )
+    return tuple(warnings)
