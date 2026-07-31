@@ -74,7 +74,7 @@ def test_save_dialog_has_name_description_and_focus_restoration(client):
     assert 'aria-labelledby="save-analysis-title"' in page
     assert 'aria-describedby="save-analysis-description"' in page
     assert 'id="save-analysis-description"' in page
-    assert 'addEventListener("close", () => openSave.focus())' in script
+    assert 'addEventListener("close", () => saveDialogTrigger.focus())' in script
     assert ".showModal()" in script
 
 

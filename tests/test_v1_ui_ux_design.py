@@ -88,8 +88,8 @@ def test_workspace_has_assumption_navigation_sticky_actions_and_results(client):
 
     assert 'aria-label="Assumption sections"' in page
     assert page.count("data-section-target=") == 5
-    assert "Analysis results" in page
-    assert 'aria-label="Key results"' in page
+    assert "Business results" in page
+    assert 'aria-labelledby="decision-summary-title"' in page
     assert "sticky-actions" in page
     assert "Calculate" not in page
 

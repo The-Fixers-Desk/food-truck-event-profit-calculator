@@ -2,20 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Redesign Business Defaults and Event Inputs workflows
-
-- Convert Business Defaults and Event Inputs into guided multi-stage workflows
-- Add reusable stepper, review, and workflow navigation components
-- Reduce scrolling through compact layouts and progressive disclosure
-- Improve field grouping, inline guidance, validation, and contextual warnings
-- Preserve rapid keyboard-friendly data entry and repeatable row editing
-- Add concise review stages before saving or analyzing
-- Improve error recovery, stage indicators, and accessibility
-- Reuse the shared V1 design system throughout both workflows
-- Add regression, responsive, accessibility, and workflow test coverage
-
----------------------------------------------------------------------------------
-
 Redesign the Event Analysis workspace
 
 - Transform Event Analysis into a decision-focused workspace
@@ -41,6 +27,20 @@ Redesign Dashboard and saved-work views
 - Standardize management rows, toolbars, selection states, dialogs, and task panels
 - Preserve all existing persistence, comparison, backup, restore, and recovery behavior
 - Add responsive, accessibility, management-workflow, and regression test coverage
+
+---------------------------------------------------------------------------------
+
+Complete V1 visual polish and interaction refinement
+
+- Perform a complete visual and interaction audit across the application
+- Refine typography, spacing, alignment, and visual hierarchy for consistency
+- Standardize loading, saving, success, warning, error, hover, focus, and disabled states
+- Improve motion, transitions, microinteractions, and feedback while preserving responsiveness
+- Polish wording, icons, dialogs, empty states, tables, cards, and management views
+- Remove remaining visual inconsistencies and design-system duplication
+- Improve accessibility, long-content handling, and responsive behavior
+- Preserve all existing functionality, workflows, calculations, and persistence
+- Add visual, interaction, accessibility, and regression test coverage
 
 ---------------------------------------------------------------------------------
 

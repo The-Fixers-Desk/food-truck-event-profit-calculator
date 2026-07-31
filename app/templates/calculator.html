@@ -7,6 +7,71 @@
     New analysis
   {% endif %}
 {% endblock %}
+{% macro decision_region(analysis) %}
+  <aside class="decision-region" aria-labelledby="decision-summary-title">
+    <p id="analysis-update-status" class="analysis-update-status"
+      aria-live="polite">Current analysis</p>
+    <section class="decision-summary">
+      <div class="decision-summary__heading">
+        <span class="type-label">Decision summary</span>
+        <h2 id="decision-summary-title">Should this event work for you?</h2>
+      </div>
+      <div class="decision-summary__profit">
+        <span>Business profit</span>
+        <strong data-result-field="business_profit" data-format="money">
+          ${{ analysis.business_profit }}
+        </strong>
+      </div>
+      <div class="decision-summary__supporting">
+        <div class="financial-metric financial-metric--target">
+          <span>Profit target</span>
+          <strong id="profit-target-result">
+            {% if analysis.profit_target.is_met is none %}Unavailable
+            {% elif analysis.profit_target.is_met %}Target met
+            {% else %}Target not met{% endif %}
+          </strong>
+        </div>
+        <div class="financial-metric">
+          <span>Profit margin</span>
+          <strong data-result-field="profit_margin" data-format="percent">
+            {% if analysis.profit_margin is none %}Not calculable{% else %}{{ analysis.profit_margin }}%{% endif %}
+          </strong>
+        </div>
+        <div class="financial-metric">
+          <span>Break-even customers</span>
+          <strong data-result-field="minimum_whole_break_even_customers">
+            {% if analysis.minimum_whole_break_even_customers is none %}Not calculable{% else %}{{ analysis.minimum_whole_break_even_customers }}{% endif %}
+          </strong>
+        </div>
+      </div>
+      <p class="recommendation-summary" id="decision-recommendation"
+        data-profitability-status="{{ analysis.profitability_status }}">
+        {% if analysis.profit_target.is_met is none %}
+          Your profit target cannot be evaluated with these assumptions.
+        {% elif analysis.profit_target.is_met %}
+          These assumptions meet your selected profit target.
+        {% else %}
+          These assumptions are below your selected profit target.
+        {% endif %}
+      </p>
+    </section>
+    <section class="warning-panel" aria-labelledby="warnings-title">
+      <h3 id="warnings-title">What needs attention</h3>
+      <ul id="analysis-warnings" class="analysis-warnings" aria-live="polite">
+        {% for warning in analysis.warnings %}
+          <li data-warning-code="{{ warning.code }}"
+            data-severity="{{ warning.severity }}">
+            <span class="visually-hidden">{{ warning.severity|capitalize }}: </span>{{ warning.message }}
+          </li>
+        {% else %}
+          <li data-warning-code="none" data-severity="info">
+            No factual notices for the current assumptions.
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </aside>
+{% endmacro %}
 {% block content %}
 <section class="page{% if workspace %} analysis-workspace-page{% endif %}">
   <header class="page-header">
@@ -46,8 +111,33 @@
 
   {% if workspace %}
     <div class="analysis-workspace">
+      {{ decision_region(analysis) }}
       <div class="workspace-assumptions">
         <h2>Adjustable assumptions</h2>
+        <section class="scenario-action-bar" aria-labelledby="scenario-actions-title">
+          <div class="scenario-action-bar__identity">
+            <span id="scenario-actions-title">Scenario</span>
+            <strong data-scenario-action-name>{{ active_scenario_name }}</strong>
+          </div>
+          <div class="scenario-action-bar__actions">
+            <button class="button" id="open-save-analysis"
+              type="button" disabled>Save</button>
+            <button class="button-secondary" id="open-save-as-new"
+              type="button" disabled>Save as new</button>
+            <button class="button-secondary" id="reset-analysis"
+              type="button">Reset changes</button>
+            <a class="button-secondary" href="{{ url_for('main.saved_events') }}">
+              Rename
+            </a>
+            <a class="button-secondary"
+              href="{{ url_for('main.saved_events') }}#comparison-selection-form">
+              Compare
+            </a>
+            <a class="button-secondary" href="{{ url_for('main.calculator') }}">
+              Start new analysis
+            </a>
+          </div>
+        </section>
   {% endif %}
   <div class="{% if not workspace %}guided-workflow{% endif %}">
   <nav class="section-switcher {% if not workspace %}workflow-stepper event-stepper{% endif %}"
@@ -789,15 +879,7 @@
     </fieldset>
 
     <div class="form-actions sticky-actions">
-      {% if workspace %}
-        <button class="button" id="open-save-analysis"
-          type="button" disabled>Save</button>
-        <button class="button-secondary" id="reset-analysis"
-          type="button">Reset changes</button>
-        <a class="button" href="{{ url_for('main.calculator') }}">
-          Start new analysis
-        </a>
-      {% else %}
+      {% if not workspace %}
         <button class="button-secondary" id="section-back"
           type="button">Back</button>
         <span id="section-progress" aria-live="polite"></span>
@@ -813,66 +895,19 @@
   {% if workspace %}
       </div>
       <aside class="analysis-results" aria-labelledby="analysis-results-title">
-        <h2 id="analysis-results-title">Analysis results</h2>
-        <p id="analysis-update-status" class="analysis-update-status"
-          aria-live="polite">Current analysis</p>
-
-        <section class="result-summary" aria-label="Key results">
-          {% for key, label, format in (
-            ("expected_sales", "Expected sales", "money"),
-            ("total_event_cost", "Total event cost", "money"),
-            ("business_profit", "Business profit", "money"),
-            ("profit_margin", "Profit margin", "percent")
-          ) %}
-            <div class="result-item result-item--key">
-              <span>{{ label }}</span>
-              <strong data-result-field="{{ key }}" data-format="{{ format }}">
-                {% if analysis[key] is none %}
-                  Not calculable
-                {% elif format == "money" %}
-                  ${{ analysis[key] }}
-                {% elif format == "percent" %}
-                  {{ analysis[key] }}%
-                {% else %}
-                  {{ analysis[key] }}
-                {% endif %}
-              </strong>
-            </div>
-          {% endfor %}
-        </section>
-
-        <section class="result-section">
-          <h3>Demand and revenue</h3>
+        <h2 id="analysis-results-title" class="visually-hidden">Business results</h2>
+        <section class="financial-metrics" aria-labelledby="primary-metrics-title">
+          <h3 id="primary-metrics-title">Primary financial metrics</h3>
           {% for key, label in (
-            ("weather_adjusted_attendance", "Weather-adjusted attendance"),
-            ("total_expected_food_buyers", "Total expected food buyers"),
-            ("total_food_vendors", "Total food vendors"),
-            ("estimated_business_buyers", "Even-split buyers for you"),
-            ("expected_orders", "Expected orders")
-          ) %}
-            <div class="result-item">
-              <span>{{ label }}</span>
-              <strong data-result-field="{{ key }}">{{ analysis[key] }}</strong>
-            </div>
-          {% endfor %}
-        </section>
-
-        <section class="result-section">
-          <h3>Cost breakdown</h3>
-          {% for key, label in (
-            ("food_and_packaging_cost", "Food and packaging"),
-            ("percentage_card_processing_fee", "Percentage card fees"),
-            ("fixed_card_processing_fees", "Fixed card fees"),
-            ("organizer_commission", "Organizer commission"),
-            ("variable_costs", "Variable costs"),
+            ("expected_sales", "Revenue"),
+            ("food_and_packaging_cost", "Food costs"),
             ("employee_labor_cost", "Employee labor"),
-            ("owner_labor_pay", "Owner labor pay"),
-            ("travel_cost", "Travel"),
-            ("vendor_or_booking_fee", "Vendor or booking fee"),
-            ("additional_event_costs", "Other event costs"),
-            ("fixed_costs", "Fixed costs")
+            ("owner_labor_pay", "Owner pay"),
+            ("fixed_costs", "Fixed costs"),
+            ("organizer_commission", "Organizer fees"),
+            ("total_event_cost", "Total costs")
           ) %}
-            <div class="result-item">
+            <div class="financial-metric">
               <span>{{ label }}</span>
               <strong data-result-field="{{ key }}" data-format="money">
                 ${{ analysis[key] }}
@@ -881,52 +916,32 @@
           {% endfor %}
         </section>
 
-        <section class="result-section">
-          <h3>Break-even and target</h3>
-          {% for key, label, format in (
-            ("break_even_sales", "Break-even sales", "money"),
-            ("minimum_whole_break_even_customers",
-             "Break-even customers", "")
+        <section class="grouped-financial-breakdown"
+          aria-labelledby="financial-breakdown-title">
+          <h3 id="financial-breakdown-title">Calculation details</h3>
+          {% set breakdowns = (
+            ("Revenue", (("weather_adjusted_attendance", "Weather-adjusted attendance", ""), ("total_expected_food_buyers", "Expected food buyers", ""), ("total_food_vendors", "Food vendors", ""), ("estimated_business_buyers", "Even-split buyers for you", ""), ("expected_orders", "Expected orders", ""), ("expected_sales", "Expected sales", "money"))),
+            ("Food", (("food_and_packaging_cost", "Food and packaging", "money"),)),
+            ("Labor", (("employee_labor_cost", "Employee labor", "money"), ("owner_labor_pay", "Owner labor pay", "money"))),
+            ("Fees", (("percentage_card_processing_fee", "Percentage card fees", "money"), ("fixed_card_processing_fees", "Fixed card fees", "money"), ("organizer_commission", "Organizer commission", "money"), ("vendor_or_booking_fee", "Vendor or booking fee", "money"))),
+            ("Additional costs", (("travel_cost", "Travel", "money"), ("additional_event_costs", "Other event costs", "money"), ("fixed_costs", "All fixed costs", "money"))),
+            ("Profit calculations", (("variable_costs", "Variable costs", "money"), ("total_event_cost", "Total event cost", "money"), ("break_even_sales", "Break-even sales", "money"), ("business_profit", "Business profit", "money"), ("profit_margin", "Profit margin", "percent")))
           ) %}
-            <div class="result-item">
-              <span>{{ label }}</span>
-              <strong data-result-field="{{ key }}" data-format="{{ format }}">
-                {% if analysis[key] is none %}
-                  Not calculable
-                {% elif format == "money" %}
-                  ${{ analysis[key] }}
-                {% else %}
-                  {{ analysis[key] }}
-                {% endif %}
-              </strong>
-            </div>
+          {% for heading, items in breakdowns %}
+            <details class="calculation-section">
+              <summary>{{ heading }}</summary>
+              <div class="calculation-section__content">
+                {% for key, label, format in items %}
+                  <div class="result-item">
+                    <span>{{ label }}</span>
+                    <strong data-result-field="{{ key }}" data-format="{{ format }}">
+                      {% if analysis[key] is none %}Not calculable{% elif format == "money" %}${{ analysis[key] }}{% elif format == "percent" %}{{ analysis[key] }}%{% else %}{{ analysis[key] }}{% endif %}
+                    </strong>
+                  </div>
+                {% endfor %}
+              </div>
+            </details>
           {% endfor %}
-          <p id="profit-target-result">
-            {% if analysis.profit_target.is_met is none %}
-              Profit-target evaluation is not available.
-            {% elif analysis.profit_target.is_met %}
-              The selected profit target is met.
-            {% else %}
-              The selected profit target is not met.
-            {% endif %}
-          </p>
-        </section>
-
-        <section class="result-section" aria-labelledby="warnings-title">
-          <h3 id="warnings-title">Factual notices</h3>
-          <ul id="analysis-warnings" class="analysis-warnings">
-            {% for warning in analysis.warnings %}
-              <li data-warning-code="{{ warning.code }}"
-                data-severity="{{ warning.severity }}">
-                <span class="visually-hidden">{{ warning.severity|capitalize }}: </span>
-                {{ warning.message }}
-              </li>
-            {% else %}
-              <li data-warning-code="none" data-severity="info">
-                No factual notices for the current assumptions.
-              </li>
-            {% endfor %}
-          </ul>
         </section>
       </aside>
     </div>

@@ -20,7 +20,7 @@ def test_valid_event_inputs_open_workspace_with_read_only_identity(client):
     assert "Town Square" in page
     assert 'data-workspace="true"' in page
     assert "Adjustable assumptions" in page
-    assert "Analysis results" in page
+    assert "Business results" in page
 
 
 def test_invalid_event_inputs_remain_on_input_form(client):

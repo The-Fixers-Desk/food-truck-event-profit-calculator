@@ -1,0 +1,899 @@
+Implement the milestone:
+
+Complete V1 visual polish and interaction refinement.
+
+The V1 design system, shared application shell, guided form workflows,
+redesigned Event Analysis workspace, and redesigned management screens now
+exist.
+
+Perform the final whole-application visual and interaction refinement pass.
+
+This milestone should make the product feel cohesive, deliberate, and
+production-quality across every current screen and state.
+
+Do not redesign major workflows or screen architecture from scratch.
+
+Do not change calculations, business rules, persistence, routes, database
+behavior, backup behavior, comparison behavior, or workflow meaning.
+
+Primary objective
+
+Polish the existing application until it feels like one complete professional
+desktop product.
+
+The quality bar is comparable in clarity, restraint, consistency, and finish to
+modern products such as:
+
+- Notion
+- ChatGPT
+- Linear
+- Stripe Dashboard
+- Zillow
+
+Do not imitate those products.
+
+Use them only as references for:
+
+- visual consistency
+- typography
+- spacing
+- interaction quality
+- restrained motion
+- feedback states
+- wording
+- attention to edge cases
+
+Definition of done
+
+A user should be able to move through the entire application without
+encountering a screen, control, message, spacing decision, or state that:
+
+- looks unfinished
+- feels visually inconsistent
+- appears to belong to a different product
+- uses unclear wording
+- behaves unexpectedly
+- looks like an engineering placeholder
+
+Do not add visual novelty merely to make the diff appear substantial.
+
+This is a consistency and friction audit.
+
+Whole-application audit
+
+Review every current customer-facing screen and state, including:
+
+- Welcome
+- Dashboard
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- Saved Events
+- Scenario Comparison selection
+- Scenario Comparison results
+- Data Safety
+- backup and restore flows
+- confirmation dialogs
+- rename and delete dialogs
+- loading states
+- saving states
+- success states
+- warning states
+- validation states
+- disabled states
+- empty states
+- no-results states
+- dirty-workspace states
+- recovery states
+- not-found states
+- application-error states
+- narrow-window layouts
+- long-content states
+
+Do not limit the work to shared CSS.
+
+Inspect each screen after applying shared refinements.
+
+Typography
+
+Audit and refine:
+
+- font sizes
+- font weights
+- line heights
+- heading hierarchy
+- label hierarchy
+- supporting text
+- numeric emphasis
+- table and row text
+- captions
+- metadata
+- dialog text
+
+Requirements:
+
+- page titles should be distinct but restrained
+- section headings should be easy to scan
+- body copy should be comfortable to read
+- labels should be concise
+- important figures should have clear emphasis
+- supporting text should not compete with primary content
+- no unexplained one-off text sizes or weights
+- avoid oversized marketing-style headings inside the application
+
+Use the established typography scale.
+
+Do not create screen-specific typography systems.
+
+Spacing and alignment
+
+Audit and refine:
+
+- page padding
+- section spacing
+- card and row padding
+- form spacing
+- control alignment
+- table alignment
+- button groups
+- icon and label alignment
+- sticky action placement
+- dialog spacing
+- empty-state spacing
+
+Remove:
+
+- accidental gaps
+- crowded groups
+- excessive whitespace
+- inconsistent vertical rhythm
+- misaligned baselines
+- uneven button heights
+- arbitrary margins
+- duplicated separators
+
+Professional does not mean spacious everywhere.
+
+Use:
+
+- compact density for records, controls, and financial data
+- comfortable density for explanations and review content
+- generous spacing only around major decisions and empty states
+
+Visual hierarchy
+
+Ensure every screen has:
+
+- one obvious focal point
+- one obvious primary action
+- clear secondary actions
+- restrained destructive actions
+- predictable scanning order
+- clear section boundaries
+- appropriate emphasis on warnings and results
+
+Do not allow several same-weight actions to compete.
+
+Do not emphasize every metric, card, or heading equally.
+
+Buttons and interactive controls
+
+Audit all:
+
+- primary buttons
+- secondary buttons
+- tertiary buttons
+- destructive buttons
+- icon buttons
+- text links
+- menu actions
+- tabs
+- stepper controls
+- expandable sections
+- row actions
+- switches
+- checkboxes
+- radio buttons
+- selects
+- text inputs
+- numeric inputs
+
+Ensure consistent:
+
+- size
+- padding
+- radius
+- icon placement
+- hover state
+- active state
+- focus state
+- disabled state
+- loading state
+
+Requirements:
+
+- hover clarifies interactivity
+- focus is stronger and more visible than hover
+- disabled controls remain legible
+- icon-only controls have tooltips and accessible names
+- destructive actions are not visually dominant until deliberately opened
+- duplicate submission is prevented while an action is in progress
+- buttons should use specific verbs rather than vague wording
+
+Examples of preferred action labels:
+
+- Analyze event
+- Continue
+- Save changes
+- Save as new scenario
+- Overwrite current scenario
+- Open analysis
+- Compare selected
+- Download backup
+- Restore backup
+- Rename
+- Delete
+
+Avoid vague labels such as:
+
+- Submit
+- Confirm
+- Go
+- Process
+
+unless the surrounding context makes the action unambiguous.
+
+Motion and transitions
+
+Use motion only to explain change.
+
+Appropriate uses include:
+
+- panel expansion and collapse
+- dialog entry and exit
+- step transitions
+- selected-state changes
+- saving acknowledgement
+- recalculation acknowledgement
+- loading completion
+- success-message appearance
+
+Use short, subtle transitions, generally around 120–200 milliseconds.
+
+Motion should:
+
+- feel calm
+- never delay interaction
+- never block input
+- never distract from data
+- respect reduced-motion preferences
+
+Avoid:
+
+- decorative entrance animation
+- bouncing controls
+- constant pulsing
+- motion on every hover
+- long fades
+- large movement across the screen
+- animation that obscures state changes
+
+Loading, saving, and asynchronous behavior
+
+Standardize asynchronous feedback.
+
+Every asynchronous action should clearly communicate:
+
+1. The action started.
+2. The action is still working, if it takes noticeable time.
+3. The action succeeded or failed.
+4. Whether the customer may act again.
+
+Cover:
+
+- Event Analysis recalculation
+- Scenario save
+- Save as new Scenario
+- overwrite
+- reset
+- Event rename
+- Scenario rename
+- delete actions
+- backup creation
+- restore validation
+- restore execution
+- application startup
+- database recovery actions
+
+Requirements:
+
+- prevent accidental duplicate submissions
+- preserve the current view during short operations
+- do not show a spinner for work that completes instantly
+- use button loading states where appropriate
+- retain entered values on failure
+- use concise success confirmation
+- keep technical errors out of customer-facing messages
+- do not allow stale asynchronous responses to overwrite newer state
+
+Recalculation should feel immediate.
+
+Use subtle status text or a brief visual update acknowledgement only when it
+improves confidence.
+
+Feedback system
+
+Use one consistent feedback model.
+
+Inline validation:
+
+- field-level input problems
+- attached directly to the relevant control
+- may block progress or submission
+
+Contextual warnings:
+
+- business-risk information
+- placed beside the causal assumption group
+- nonblocking
+- factual
+- updated live
+
+Success feedback:
+
+- compact
+- specific
+- non-disruptive
+- should not require dismissal for routine actions
+
+Error feedback:
+
+- clear
+- recoverable where possible
+- explains the next step
+- never exposes raw technical details
+
+Dialogs:
+
+- only for required decisions, confirmations, or destructive actions
+- not for routine success messages
+- not when inline feedback is sufficient
+
+Standardize feedback for:
+
+- saved
+- renamed
+- deleted
+- restored
+- validation failed
+- backup failed
+- restore failed
+- record missing
+- unsaved changes
+- recovery required
+
+Wording audit
+
+Review every visible customer-facing string.
+
+Use:
+
+- plain language
+- sentence case
+- consistent terminology
+- specific action verbs
+- concise explanations
+- consistent capitalization
+- consistent punctuation
+
+Standardize terminology including:
+
+- Business Defaults
+- Event
+- Scenario
+- Event Analysis
+- Expected food buyers
+- Other competing food vendors
+- Expected buyers for your business
+- Expected sales
+- Total event cost
+- Owner labor pay
+- Business profit
+- Profit margin
+- Break-even sales
+- Break-even customers
+- Save as new scenario
+- Overwrite current scenario
+- Download backup
+- Restore backup
+- Open analysis
+
+Remove:
+
+- technical implementation language
+- database terminology
+- route terminology
+- generic filler
+- redundant explanations
+- repeated headings
+- vague button labels
+- inconsistent capitalization
+
+Do not change business meaning while improving wording.
+
+Icons
+
+Use one consistent icon family.
+
+Audit all icons for:
+
+- meaning
+- size
+- alignment
+- stroke weight
+- spacing
+- consistency
+- accessibility
+
+Rules:
+
+- the same icon should always represent the same action
+- icons should not replace essential labels unless space truly requires it
+- icon-only actions require tooltips and accessible names
+- decorative icons should be hidden from assistive technology
+- avoid icons that add no information
+- avoid mixing outline, filled, and unrelated icon styles without semantic
+  reason
+
+Hover and focus behavior
+
+Standardize interaction states across the application.
+
+Hover should:
+
+- indicate clickability
+- remain subtle
+- not shift layout
+- not reduce contrast
+
+Focus should:
+
+- remain highly visible
+- be consistent across controls
+- never be removed
+- remain visible against every surface
+- not be obscured by sticky regions
+
+Selected and active states should:
+
+- be visible without relying only on color
+- remain consistent across navigation, tabs, steppers, filters, and rows
+
+Cards, panels, and boundaries
+
+Audit card and panel usage.
+
+Use cards only for meaningful:
+
+- summaries
+- selectable records
+- independent panels
+- task areas
+- elevated decisions
+
+Remove or simplify:
+
+- page-wrapper cards
+- redundant nested cards
+- excessive border boxes
+- shadows used only for decoration
+- unnecessary background panels
+
+Prefer:
+
+- spacing
+- alignment
+- typography
+- dividers
+- subtle surface contrast
+
+Ensure cards and panels share:
+
+- padding
+- radius
+- border treatment
+- elevation
+- heading structure
+
+Tables, lists, and records
+
+Refine:
+
+- row density
+- numeric alignment
+- metadata spacing
+- headers
+- separators
+- hover behavior
+- selected state
+- overflow actions
+- responsive stacking
+
+Ensure:
+
+- event and Scenario identity remain clear
+- row actions are easy to locate
+- primary row action is obvious
+- destructive actions remain secondary
+- long names wrap safely
+- dates are formatted consistently
+- raw timestamps never appear
+- financial figures align for scanning
+
+Dialogs and overlays
+
+Audit all dialogs.
+
+Ensure:
+
+- clear title
+- concise explanation
+- focused task
+- visible primary and cancel actions
+- correct destructive emphasis
+- logical focus entry
+- focus restoration on close
+- Escape behavior where appropriate
+- background interaction prevented when modal
+- no long forms inside small dialogs
+- no excessive vertical content
+
+Use consistent widths and spacing.
+
+Empty and no-results states
+
+Refine all empty states to include:
+
+- concise title
+- one-sentence explanation
+- one primary next action
+
+Cover:
+
+- no saved Events
+- no recent work
+- no comparison selection
+- no search results
+- no Scenarios where applicable
+- first-use states
+
+Avoid:
+
+- filler illustration
+- multiple competing actions
+- long explanations
+- giant cards
+
+No-results states should differ clearly from no-data states.
+
+Status states
+
+Audit presentation of:
+
+- success
+- warning
+- danger
+- information
+- disabled
+- selected
+- dirty
+- loading
+- recovery
+- unavailable
+
+Ensure status is never communicated through color alone.
+
+Use consistent:
+
+- icons
+- labels
+- wording
+- placement
+- semantic colors
+
+Long-content and stress states
+
+Review the application with:
+
+- long Event names
+- long Scenario names
+- long locations
+- long additional-cost names
+- multiple labor rows
+- multiple additional-cost rows
+- long validation messages
+- multiple warnings
+- many saved Events
+- four-Scenario comparisons
+
+Ensure:
+
+- text wraps cleanly
+- actions remain reachable
+- layouts do not overlap
+- sticky regions do not cover content
+- truncation uses accessible full-text access where needed
+- no page-wide accidental overflow
+- no visual collapse
+
+Responsive and window-size refinement
+
+Review supported desktop and narrow widths.
+
+Ensure:
+
+- navigation remains usable
+- context bars remain coherent
+- primary actions remain visible
+- forms remain readable
+- Event Analysis preserves decision hierarchy
+- Saved Events remain scannable
+- comparison remains understandable
+- dialogs fit safely
+- sticky regions adapt
+- no fixed-height traps
+- no accidental horizontal scrolling
+- content does not become excessively padded on medium widths
+
+Do not create a separate unrelated mobile design.
+
+Accessibility refinement
+
+Maintain or improve:
+
+- semantic headings
+- landmarks
+- skip link
+- keyboard navigation
+- visible focus
+- error associations
+- warning announcements
+- dialog focus management
+- selected-state communication
+- reduced-motion support
+- accessible contrast
+- logical source order
+- touch target size where relevant
+
+Do not knowingly introduce inaccessible custom controls.
+
+Use native controls where possible.
+
+Design-system cleanup
+
+Audit the design-system implementation after all screen redesigns.
+
+Remove or consolidate:
+
+- duplicated tokens
+- obsolete component classes
+- abandoned screen-specific styles
+- inconsistent one-off values
+- unused layout utilities
+- redundant button variants
+- duplicate alert patterns
+- duplicate empty-state implementations
+
+Keep:
+
+- clear reusable tokens
+- reusable components
+- predictable naming
+- maintainable CSS organization
+
+Do not perform broad unrelated refactors.
+
+Consistency audit
+
+Create a repeatable whole-application audit checklist covering:
+
+- typography
+- spacing
+- action hierarchy
+- icon usage
+- wording
+- validation
+- warnings
+- feedback
+- loading
+- focus
+- hover
+- empty states
+- error states
+- responsive behavior
+- long content
+- dialogs
+- destructive actions
+
+Apply it to every screen.
+
+Testing
+
+Add or update focused automated tests covering:
+
+Interaction states:
+
+- button loading states
+- duplicate-submit prevention
+- saving state
+- disabled state
+- success feedback
+- recoverable failure feedback
+
+Motion:
+
+- reduced-motion behavior
+- expandable sections remain functional
+- transitions do not block interaction
+
+Wording:
+
+- key action labels
+- consistent terminology
+- no generic Submit labels where specific actions exist
+- no raw technical wording in customer-facing failures
+
+Dialogs:
+
+- focus entry
+- focus restoration
+- cancel behavior
+- destructive confirmation
+- keyboard behavior
+
+Feedback:
+
+- inline validation
+- contextual warnings
+- success confirmation
+- failure alerts
+- no duplicate feedback patterns where practical to assert
+
+Icons and actions:
+
+- accessible names for icon-only controls
+- consistent action labeling
+- decorative icon treatment
+
+Long content:
+
+- long Event names
+- long Scenario names
+- long locations
+- repeated rows
+- multiple warnings
+- four-Scenario comparisons
+
+Responsive:
+
+- shared shell
+- guided forms
+- Event Analysis
+- Saved Events
+- comparison
+- Data Safety
+- dialogs
+- sticky actions
+
+Regression:
+
+- onboarding works
+- Defaults save
+- Event Inputs submit
+- Event Analysis recalculates
+- Scenario actions work
+- Saved Events work
+- comparison works
+- backup and restore work
+- recovery works
+- dirty-navigation protection works
+- calculations and persistence remain unchanged
+
+Manual visual review
+
+Add a concise final visual-review checklist for:
+
+- Welcome
+- Dashboard
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- Saved Events
+- comparison selection
+- comparison results
+- Data Safety
+- confirmation dialogs
+- backup and restore
+- recovery
+- empty states
+- invalid states
+- loading and saving
+- desktop widths
+- narrow widths
+- keyboard-only use
+- reduced motion
+- long names
+- dense data
+- warning-heavy scenarios
+
+Record any remaining visual limitation instead of hiding it.
+
+Regression boundaries
+
+Do not change:
+
+- calculations
+- demand formulas
+- weather formulas
+- break-even rules
+- target rules
+- warning conditions
+- persistence
+- database schema
+- migrations
+- backup format
+- restore semantics
+- Scenario behavior
+- comparison behavior
+- route URLs
+- setup behavior
+- navigation safeguards
+
+Small production changes are allowed only when required to:
+
+- correct inconsistent wording
+- expose existing state clearly
+- standardize loading feedback
+- prevent duplicate action submission
+- improve accessibility
+- remove confirmed visual or interaction friction
+
+Do not add new product features.
+
+Scope
+
+Do not implement:
+
+- new calculations
+- new warnings
+- charts
+- AI recommendations
+- dark mode
+- themes
+- customer customization
+- new navigation destinations
+- cloud services
+- sharing
+- automatic updates
+- major screen restructuring
+- frontend framework migration
+- new dependencies unless already approved and strictly necessary
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused visual-state, interaction, wording, accessibility, responsive,
+   and regression tests.
+2. Run all existing UI and workflow tests.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Complete the whole-application visual-review checklist.
+6. Summarize the major refinements made.
+7. Explain how consistency and interaction quality were improved.
+8. List obsolete or duplicated design-system code removed.
+9. List any remaining visual limitations.
+10. Report every command and its exact result.
+
+Keep the response concise.

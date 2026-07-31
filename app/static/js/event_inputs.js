@@ -648,13 +648,21 @@ function updateWorkspaceResults(result) {
     displayResultValue(element, result[element.dataset.resultField]);
   });
   const targetResult = document.querySelector("#profit-target-result");
-  if (result.profit_target?.is_met === null) {
-    targetResult.textContent = "Profit-target evaluation is not available.";
+  const recommendation = document.querySelector("#decision-recommendation");
+  if (result.profit_target?.is_met == null) {
+    targetResult.textContent = "Unavailable";
+    recommendation.textContent =
+      "Your profit target cannot be evaluated with these assumptions.";
   } else if (result.profit_target?.is_met) {
-    targetResult.textContent = "The selected profit target is met.";
+    targetResult.textContent = "Target met";
+    recommendation.textContent =
+      "These assumptions meet your selected profit target.";
   } else {
-    targetResult.textContent = "The selected profit target is not met.";
+    targetResult.textContent = "Target not met";
+    recommendation.textContent =
+      "These assumptions are below your selected profit target.";
   }
+  recommendation.dataset.profitabilityStatus = result.profitability_status;
   const warningList = document.querySelector("#analysis-warnings");
   warningList.replaceChildren();
   const warnings = result.warnings.length
@@ -736,6 +744,7 @@ function updateWorkspaceDirtyState() {
     !== workspaceSignature(workspaceBaseline);
   workspaceForm.dataset.dirty = String(dirty);
   document.querySelector("#open-save-analysis").disabled = !dirty;
+  document.querySelector("#open-save-as-new").disabled = !dirty;
 }
 
 function restoreWorkspaceBaseline() {
@@ -837,6 +846,8 @@ const saveAnalysisDialog = document.querySelector("#save-analysis-dialog");
 
 if (workspaceForm && saveAnalysisDialog) {
   const openSave = document.querySelector("#open-save-analysis");
+  const openSaveAsNew = document.querySelector("#open-save-as-new");
+  let saveDialogTrigger = openSave;
   const saveModes = saveAnalysisDialog.querySelectorAll(
     'input[name="save_mode"]',
   );
@@ -851,7 +862,7 @@ if (workspaceForm && saveAnalysisDialog) {
   const scenarioNameError = document.querySelector("#scenario-name-error");
   const overwriteError = document.querySelector("#overwrite-error");
   const saveError = document.querySelector("#save-analysis-error");
-  saveAnalysisDialog.addEventListener("close", () => openSave.focus());
+  saveAnalysisDialog.addEventListener("close", () => saveDialogTrigger.focus());
 
   function clearSaveErrors() {
     [scenarioNameError, overwriteError, saveError].forEach((error) => {
@@ -877,15 +888,24 @@ if (workspaceForm && saveAnalysisDialog) {
     clearSaveErrors();
   }
 
-  openSave.addEventListener("click", () => {
+  function openSaveDialog(mode, trigger) {
+    saveDialogTrigger = trigger;
     saveAnalysisDialog.querySelector(
-      'input[name="save_mode"][value="new"]',
+      `input[name="save_mode"][value="${mode}"]`,
     ).checked = true;
     newNameInput.value = "";
     overwriteConfirmation.checked = false;
     updateSaveMode();
     saveAnalysisDialog.showModal();
-    newNameInput.focus();
+    if (mode === "new") newNameInput.focus();
+    else overwriteConfirmation.focus();
+  }
+
+  openSave.addEventListener("click", () => {
+    openSaveDialog("overwrite", openSave);
+  });
+  openSaveAsNew.addEventListener("click", () => {
+    openSaveDialog("new", openSaveAsNew);
   });
 
   saveModes.forEach((mode) => {
@@ -936,6 +956,8 @@ if (workspaceForm && saveAnalysisDialog) {
         document.querySelector("#active_scenario_id").value =
           payload.active_scenario_id;
         document.querySelector("#active-scenario-name").textContent =
+          payload.active_scenario_name;
+        document.querySelector("[data-scenario-action-name]").textContent =
           payload.active_scenario_name;
         document.querySelector("#overwrite-scenario-name").textContent =
           payload.active_scenario_name;
