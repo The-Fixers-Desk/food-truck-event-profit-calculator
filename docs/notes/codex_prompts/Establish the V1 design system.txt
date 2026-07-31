@@ -1,0 +1,435 @@
+Implement the milestone:
+
+Establish the V1 design system.
+
+The application is now functionally complete enough to begin the dedicated UI
+and UX phase.
+
+This milestone establishes the reusable visual language that every remaining
+screen redesign will use.
+
+Do not redesign individual application screens beyond what is necessary to
+demonstrate or validate reusable components.
+
+Do not change business logic, calculations, workflows, persistence, routes, or
+database behavior.
+
+The goal is to create a cohesive desktop application design system that future
+milestones will apply across the product.
+
+Design objectives
+
+The application should ultimately feel comparable in overall quality—not visual
+imitation—to products such as:
+
+- Notion
+- ChatGPT
+- Linear
+- Stripe Dashboard
+- Zillow
+
+The goal is not to copy these products.
+
+The goal is to reach the same level of clarity, consistency, restraint,
+professionalism, and usability.
+
+Design principles
+
+Every design decision should follow these principles.
+
+1. Looks like a professional desktop application, not a website.
+
+2. Function before beauty.
+
+Visual improvements must never reduce usability, readability, information
+density, or workflow speed.
+
+3. Decisions over decoration.
+
+Every visual element should help users make faster or better business
+decisions.
+
+Avoid decoration that does not improve understanding, confidence, or
+efficiency.
+
+4. Strong visual hierarchy.
+
+Every screen should have:
+
+- one obvious primary action
+- one obvious focal point
+- predictable scanning order
+
+5. Consistency over creativity.
+
+Identical controls should always look and behave identically.
+
+6. Low cognitive load.
+
+Reduce unnecessary visual noise.
+
+Reduce repeated wording.
+
+Reduce unnecessary decisions.
+
+7. Progressive disclosure.
+
+Do not overwhelm users with secondary information.
+
+Reveal complexity only when needed.
+
+8. Fast scanning.
+
+Important numbers, warnings, actions, and statuses should be identifiable
+within seconds.
+
+9. Desktop first.
+
+Optimize for mouse, keyboard, and wide desktop layouts.
+
+10. Reusable components.
+
+Future screens should be assembled from shared design primitives rather than
+screen-specific styling.
+
+Required design system
+
+Create a complete reusable design system including:
+
+Typography
+
+Define a complete typography scale including:
+
+- application title
+- page title
+- section title
+- subsection title
+- card title
+- body text
+- supporting text
+- captions
+- table text
+- numeric emphasis
+- labels
+
+Specify consistent:
+
+- font sizes
+- font weights
+- line heights
+- spacing
+
+Spacing system
+
+Create a spacing scale suitable for desktop applications.
+
+Replace inconsistent margins and padding with reusable spacing tokens.
+
+Layout system
+
+Create reusable layout primitives including:
+
+- page container
+- content width
+- section spacing
+- grid system
+- card spacing
+- action bars
+- side-by-side desktop layouts
+- responsive breakpoints
+
+Color system
+
+Define semantic colors rather than screen-specific colors.
+
+Include:
+
+- background
+- surface
+- elevated surface
+- border
+- divider
+- primary
+- secondary
+- success
+- warning
+- danger
+- information
+- disabled
+- focus
+- selected
+
+Avoid excessive saturation.
+
+Prefer restrained professional colors.
+
+Elevation
+
+Create reusable elevation levels using subtle shadows.
+
+Avoid heavy shadows.
+
+Border radius
+
+Define one consistent radius system for:
+
+- buttons
+- cards
+- dialogs
+- inputs
+- badges
+
+Borders
+
+Define consistent:
+
+- border widths
+- divider styles
+- selected states
+- disabled states
+
+Buttons
+
+Create reusable button variants including:
+
+- primary
+- secondary
+- tertiary
+- destructive
+- icon button
+- small
+- standard
+- large
+
+Include consistent:
+
+- hover
+- active
+- disabled
+- focus
+- loading
+
+states.
+
+Inputs
+
+Create consistent styling for:
+
+- text inputs
+- numeric inputs
+- selects
+- textareas
+- checkboxes
+- radio buttons
+- switches
+
+Include:
+
+- hover
+- focus
+- disabled
+- invalid
+- warning
+
+states.
+
+Tabs
+
+Design reusable desktop tabs suitable for workflows such as Event Analysis.
+
+Cards
+
+Design reusable cards for:
+
+- dashboards
+- saved events
+- summaries
+- comparison
+- statistics
+- warnings
+
+Alerts
+
+Design reusable:
+
+- success
+- warning
+- information
+- error
+
+alert components.
+
+Badges
+
+Create reusable badges including:
+
+- From defaults
+- Changed for this event
+- Estimate
+- Status indicators
+
+Tables
+
+Design reusable data tables emphasizing:
+
+- readability
+- alignment
+- numeric comparison
+- dense information
+- desktop usability
+
+Empty states
+
+Design reusable empty-state components including:
+
+- icon
+- title
+- explanation
+- primary action
+
+Icons
+
+Choose one consistent icon system already compatible with the project.
+
+Do not mix icon families.
+
+Define:
+
+- icon sizes
+- icon spacing
+- icon alignment
+
+Loading
+
+Design reusable:
+
+- loading indicators
+- progress indicators
+- skeleton states
+
+Dialogs
+
+Create reusable dialog styling for:
+
+- confirmation
+- destructive actions
+- informational dialogs
+
+Messages
+
+Create reusable patterns for:
+
+- inline validation
+- helper text
+- contextual warnings
+- informational guidance
+- success confirmation
+
+CSS architecture
+
+Refactor styling into reusable design primitives.
+
+Avoid screen-specific duplicated CSS.
+
+Create reusable:
+
+- variables
+- tokens
+- utility classes
+- component classes
+
+Use clear naming.
+
+Do not over-engineer.
+
+Interaction principles
+
+Design interactions should feel:
+
+- responsive
+- predictable
+- calm
+- efficient
+
+Avoid flashy animations.
+
+Use subtle transitions only where they improve usability.
+
+Accessibility
+
+The design system must support:
+
+- keyboard navigation
+- visible focus
+- accessible contrast
+- scalable typography
+- semantic color usage
+
+Future compatibility
+
+The design system must support every planned application screen including:
+
+- Welcome
+- Dashboard
+- Defaults
+- Event Inputs
+- Event Analysis
+- Saved Events
+- Scenario Comparison
+- Backup
+- Dialogs
+- Empty states
+
+without introducing incompatible styling.
+
+Documentation
+
+Create concise documentation describing:
+
+- design philosophy
+- typography scale
+- spacing scale
+- color system
+- elevation
+- component catalog
+- usage guidelines
+
+Future milestones should be able to reference this documentation instead of
+redefining component styling.
+
+Regression requirements
+
+Do not change:
+
+- calculations
+- warnings
+- routes
+- persistence
+- migrations
+- tests
+- workflows
+
+Only adjust production code where required to establish reusable styling.
+
+Do not redesign complete screens yet.
+
+Do not:
+
+- introduce a new frontend framework
+- rewrite templates
+- replace existing UI architecture
+- change navigation behavior
+- redesign workflows
+- commit
+
+After implementation:
+
+1. Verify the application renders correctly.
+2. Verify no existing functionality changes.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Summarize the design system created.
+6. List every reusable component introduced.
+7. Explain how future redesign milestones can build upon it.
+
+Keep the response concise.

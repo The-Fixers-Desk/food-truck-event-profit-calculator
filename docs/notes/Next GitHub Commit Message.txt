@@ -2,19 +2,15 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build desktop application shell
+Establish the V1 design system foundation
 
-- Add a dedicated pywebview desktop window
-- Start the localhost Flask server automatically on an available port
-- Add local readiness checks and a friendly startup loading screen
-- Add cross-platform single-instance protection
-- Restrict the application server and window to the local app origin
-- Shut down the server, threads, temporary files, and instance lock safely
-- Add friendly startup and database-recovery error behavior
-- Keep mutable files under the configured application-data directory
-- Verify representative workflows operate without internet access
-- Preserve browser-based development and headless automated testing
-- Add desktop lifecycle, startup, shutdown, security, and offline tests
+- Create the reusable V1 design system for the application
+- Standardize typography, spacing, colors, elevation, borders, and radii
+- Add reusable buttons, inputs, cards, tables, alerts, badges, dialogs, and layout components
+- Refactor styling into shared design primitives and reusable CSS architecture
+- Improve accessibility, interaction states, and desktop-first responsiveness
+- Document the design system for future UI redesign milestones
+- Preserve all existing functionality, workflows, and business logic
 
 ---------------------------------------------------------------------------------
 

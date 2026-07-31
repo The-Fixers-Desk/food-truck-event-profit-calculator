@@ -1,0 +1,22 @@
+/* Small composable layout utilities for template redesign milestones. */
+.page-container { width: min(calc(100% - 2rem), var(--content-width)); margin-inline: auto; }
+.stack { display: grid; gap: var(--space-4); }
+.stack--small { gap: var(--space-2); }
+.stack--large { gap: var(--space-6); }
+.cluster { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.grid { display: grid; gap: var(--space-4); }
+.grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.split-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(20rem, .8fr); gap: var(--space-5); align-items: start; }
+.divider { border-top: var(--divider-default); }
+.text-muted { color: var(--color-text-muted); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+.text-right { text-align: right; }
+.numeric { font-variant-numeric: tabular-nums; }
+.w-full { width: 100%; }
+
+@media (max-width: 800px) {
+  .grid--2, .grid--3, .split-layout { grid-template-columns: minmax(0, 1fr); }
+}

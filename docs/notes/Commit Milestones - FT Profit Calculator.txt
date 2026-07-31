@@ -144,10 +144,54 @@ DESIGN AND ACCESSIBILITY
   Add keyboard navigation, focus states, accessible labels and errors,
   contrast, responsive layouts, and screen-reader structure.
 
+□ Establish the V1 design system
+
+Create the complete visual language for the application, including typography,
+spacing scale, color system, elevation, borders, radii, icons, buttons, form
+controls, cards, tables, badges, alerts, empty states, and reusable layout
+components. Build reusable design primitives before redesigning individual
+screens.
+
+□ Redesign application layout and navigation
+
+Transform the application from a collection of pages into a cohesive desktop
+application. Improve navigation, page structure, screen hierarchy, spacing,
+content widths, persistent actions, visual rhythm, and overall information
+architecture. Reduce unnecessary scrolling and create a layout consistent with
+modern desktop applications such as Notion, ChatGPT, Linear, Stripe, and Zillow.
+
+□ Redesign forms and input workflows
+
+Redesign Business Defaults and Event Inputs for speed, clarity, and low
+cognitive load. Convert long forms into compact guided workflows that minimize
+scrolling while preserving rapid data entry. Improve grouping, progressive
+disclosure, inline guidance, validation, warnings, and review experiences.
+
+□ Redesign the Event Analysis workspace
+
+Redesign the interactive workspace to prioritize decision-making. Improve the
+layout of assumptions, results, warnings, calculations, scenario controls, and
+actions. Establish clear visual hierarchy so the most important business
+information is immediately obvious while maintaining live recalculation.
+
+□ Redesign dashboards and saved-work views
+
+Redesign the Dashboard, Saved Events, Scenario Comparison, Backup, Welcome, and
+related management screens. Improve discoverability, summaries, empty states,
+tables, cards, comparison readability, filtering, and workflow efficiency.
+
+□ Complete V1 visual polish and interaction refinement
+
+Polish the entire application into a cohesive professional desktop product.
+Refine typography, spacing, alignment, animations, transitions, loading states,
+hover behavior, focus states, visual hierarchy, microinteractions, wording, and
+consistency. Remove remaining visual friction and achieve a polished,
+production-quality experience.
+
 
 DESKTOP APPLICATION AND PACKAGING
 
-□ >Build the desktop application shell
+□ *Build the desktop application shell
   Add the dedicated window, automatic local-server startup, safe shutdown,
   single-instance protection, product identity, loading and error screens,
   and verified offline use.

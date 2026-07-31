@@ -152,8 +152,7 @@ class LocalServer:
         if self._shutdown:
             return
         self._shutdown = True
-        if self._started:
-            self._server.shutdown()
+        self._server.shutdown()
         self._server.server_close()
         if self._started and self._thread.is_alive():
             self._thread.join(timeout)
