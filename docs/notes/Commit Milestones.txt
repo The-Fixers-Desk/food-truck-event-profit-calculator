@@ -80,7 +80,7 @@ SAVED WORK AND COMPARISON
   the interactive Event Analysis workspace, rename, delete, and verify
   persistence after restart.
 
-□ >Build the complete event comparison workflow
+☑ Build the complete event comparison workflow
   Select scenarios, compare their financial results and assumptions,
   highlight meaningful differences, and open either scenario in the
   interactive workspace.
@@ -88,7 +88,7 @@ SAVED WORK AND COMPARISON
 
 DASHBOARD AND ONBOARDING
 
-□ *Build the Dashboard and first-use application flow
+□ >Build the Dashboard and first-use application flow
   Add the Welcome screen, four-step introduction, setup detection,
   Welcome → Defaults → Dashboard flow, normal Dashboard launches,
   shortcuts, empty states, navigation safeguards, and session state.
@@ -122,23 +122,23 @@ DESIGN AND ACCESSIBILITY
 
 DESKTOP APPLICATION AND PACKAGING
 
-□ Build the desktop application shell
+□ *Build the desktop application shell
   Add the dedicated window, automatic local-server startup, safe shutdown,
   single-instance protection, product identity, loading and error screens,
   and verified offline use.
 
-□ Package the Windows application
+□ -Package the Windows application
   Bundle dependencies, add metadata and icons, create the installer and
   shortcuts, use the correct data location, and verify installation behavior.
 
-□ Package the macOS application
+□ -Package the macOS application
   Bundle dependencies, add metadata and icons, create the installer or disk
   image, use the correct data location, and verify installation behavior.
 
 
 QUALITY ASSURANCE
 
-□ Add complete automated end-to-end workflow tests
+□ -Add complete automated end-to-end workflow tests
   Cover onboarding, defaults and overrides, event analysis, saved scenarios,
   comparison, backup and restore, and application closure.
 

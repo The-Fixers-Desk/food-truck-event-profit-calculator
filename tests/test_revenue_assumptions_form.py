@@ -32,7 +32,7 @@ def opening_tag(response_data: bytes, element_id: str) -> bytes:
 
 
 def test_revenue_assumptions_fields_and_preview_are_present(client):
-    response = client.get("/")
+    response = client.get("/events/new")
     page = response.data.decode()
 
     assert "Revenue Assumptions" in page
@@ -51,7 +51,7 @@ def test_revenue_assumptions_fields_and_preview_are_present(client):
 
 
 def test_about_estimates_is_collapsed_and_can_be_toggled(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert b"About estimates" in response.data
     assert b"<details" in response.data
@@ -59,7 +59,7 @@ def test_about_estimates_is_collapsed_and_can_be_toggled(client):
 
 
 def test_weather_choices_show_selected_reductions(client):
-    page = client.get("/").data.decode()
+    page = client.get("/events/new").data.decode()
 
     assert "Favorable / normal — 0%" in page
     assert "Minor concern — 5%" in page
@@ -71,14 +71,14 @@ def test_weather_choices_show_selected_reductions(client):
 
 
 def test_event_protection_is_hidden_until_weather_is_valid(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert b"hidden" in opening_tag(response.data, "custom-weather-field")
     assert b"hidden" in opening_tag(response.data, "event-protection-field")
 
     form_data = valid_event_inputs()
     form_data["weather_outlook"] = ""
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     assert b"Choose the weather outlook." in response.data
     assert b"hidden" in opening_tag(
         response.data, "event-protection-field"
@@ -89,7 +89,7 @@ def test_effective_reductions_are_displayed_for_selected_weather(client):
     form_data = valid_event_inputs()
     form_data["location"] = ""
 
-    page = client.post("/", data=form_data).data.decode()
+    page = client.post("/events/new", data=form_data).data.decode()
 
     assert "Fully indoors — <span" in page
     assert 'data-protection="fully_indoors">2.25</span>%' in page
@@ -107,7 +107,7 @@ def test_custom_weather_requires_valid_reduction_before_protection(client):
     form_data["weather_outlook"] = "custom"
     form_data["custom_weather_reduction"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Custom weather reduction is required." in response.data
     assert b"hidden" not in opening_tag(
@@ -127,7 +127,7 @@ def test_custom_weather_displays_effective_reductions_and_preserves_value(
     form_data["custom_weather_reduction"] = "20"
     form_data["event_protection"] = "fully_indoors"
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     page = response.data.decode()
 
     assert 'value="20"' in page
@@ -142,7 +142,7 @@ def test_event_protection_is_required_after_weather_selection(client):
     form_data = valid_event_inputs()
     form_data["event_protection"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Choose the event protection." in response.data
 
@@ -151,12 +151,12 @@ def test_custom_expected_sales_is_required_and_preserved_when_active(client):
     form_data = valid_event_inputs()
     form_data["revenue_method"] = "manual_sales"
     form_data["expected_sales_amount"] = ""
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     assert b"Expected sales amount is required." in response.data
 
     form_data["location"] = ""
     form_data["expected_sales_amount"] = "5000"
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     assert b'value="manual_sales"' in response.data
     assert b'value="5000"' in response.data
     assert b"hidden" not in opening_tag(response.data, "custom-sales-field")
@@ -168,7 +168,7 @@ def test_calculated_estimate_state_clears_hidden_custom_sales(client):
     form_data["revenue_method"] = "attendance"
     form_data["expected_sales_amount"] = "9999"
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b'value="attendance"' in response.data
     assert b'value="9999"' not in response.data
@@ -222,7 +222,7 @@ def test_revenue_validation_preserves_input(
     form_data = valid_event_inputs()
     form_data[field_name] = invalid_value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{invalid_value}"'.encode() in response.data

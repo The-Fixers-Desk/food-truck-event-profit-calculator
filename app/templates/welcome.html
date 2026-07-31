@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Welcome | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <p class="page-eyebrow">Welcome</p>
+    <h1>Plan food truck events with clearer numbers</h1>
+    <p class="page-description">
+      Set up your usual business assumptions once, then use them as a starting
+      point for each event.
+    </p>
+  </header>
+
+  <ol class="workflow-steps">
+    <li><h2>Set business defaults</h2><p>Save the values you commonly use.</p></li>
+    <li><h2>Describe an event</h2><p>Enter its demand, costs, and conditions.</p></li>
+    <li><h2>Review the analysis</h2><p>See the expected sales, costs, and profit.</p></li>
+    <li><h2>Compare options</h2><p>Save scenarios and compare different assumptions.</p></li>
+  </ol>
+
+  <a class="button" href="{{ url_for('main.defaults', setup=1) }}">
+    Get started
+  </a>
+</section>
+{% endblock %}

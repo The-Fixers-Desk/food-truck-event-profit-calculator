@@ -203,10 +203,10 @@ def load_business_defaults() -> BusinessDefaults | None:
 
 def business_defaults_setup_is_complete() -> bool:
     """Return whether a valid business-defaults record has been saved."""
-    row = get_database().execute(
-        "SELECT 1 FROM business_defaults WHERE id = 1"
-    ).fetchone()
-    return row is not None
+    try:
+        return load_business_defaults() is not None
+    except (sqlite3.Error, ValueError):
+        return False
 
 
 def save_business_defaults(defaults: BusinessDefaults) -> None:
@@ -355,6 +355,18 @@ def list_saved_events() -> list[dict]:
             }
         )
     return events
+
+
+def saved_event_counts() -> tuple[int, int]:
+    """Return the persisted Event and Scenario counts."""
+    row = get_database().execute(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM events) AS event_count,
+            (SELECT COUNT(*) FROM event_scenarios) AS scenario_count
+        """
+    ).fetchone()
+    return row["event_count"], row["scenario_count"]
 
 
 def rename_event(event_id: int, name: str) -> bool:

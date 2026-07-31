@@ -18,7 +18,7 @@ def scenario_ids(database_path):
 
 
 def create_scenarios(client, database_path, count=4):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     for index in range(2, count + 1):
         save_sibling(
             client,
@@ -47,11 +47,11 @@ def test_selecting_two_three_or_four_scenarios(
 def test_comparing_scenarios_from_different_events(client, database_path):
     first = complete_event_inputs()
     first["event_name"] = "First Event"
-    client.post("/", data=first)
+    client.post("/events/new", data=first)
     first_id = latest_ids(database_path)[1]
     second = complete_event_inputs()
     second["event_name"] = "Second Event"
-    client.post("/", data=second)
+    client.post("/events/new", data=second)
     second_id = latest_ids(database_path)[1]
 
     page = client.post(
@@ -111,7 +111,7 @@ def test_first_selected_is_baseline_and_baseline_can_change(
 def test_exact_money_count_percentage_and_category_differences(
     client, app, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     _, second_id = save_sibling(
         client,
         database_path,
@@ -151,7 +151,7 @@ def test_exact_money_count_percentage_and_category_differences(
 def test_unavailable_results_are_not_given_numeric_differences(
     client, app, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     _, second_id = save_sibling(
         client,
         database_path,
@@ -175,7 +175,7 @@ def test_unavailable_results_are_not_given_numeric_differences(
 def test_factual_highlights_include_ties_targets_and_warning_differences(
     client, app, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     _, tied_id = save_sibling(client, database_path, "Exact copy")
     _, loss_id = save_sibling(
         client,
@@ -198,7 +198,7 @@ def test_factual_highlights_include_ties_targets_and_warning_differences(
 def test_complete_assumptions_and_ordered_rows_are_compared(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     _, second_id = save_sibling(
         client,
         database_path,
@@ -254,7 +254,7 @@ def test_differences_only_keeps_results_and_hides_identical_assumptions(
 def test_comparison_recalculates_without_modifying_storage_or_defaults(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     save_sibling(client, database_path, "Second")
     ids = scenario_ids(database_path)
     with sqlite3.connect(database_path) as database:
@@ -274,7 +274,7 @@ def test_comparison_recalculates_without_modifying_storage_or_defaults(
 def test_missing_selected_scenario_has_customer_facing_error(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     existing = latest_ids(database_path)[1]
 
     response = client.post(
@@ -289,7 +289,7 @@ def test_missing_selected_scenario_has_customer_facing_error(
 def test_compared_scenario_opens_clean_existing_workspace(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, second_id = save_sibling(
         client, database_path, "Open me", travel_cost="123"
     )

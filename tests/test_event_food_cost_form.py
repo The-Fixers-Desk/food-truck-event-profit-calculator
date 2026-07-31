@@ -39,7 +39,7 @@ def opening_tag(response_data: bytes, element_id: str) -> bytes:
 
 
 def test_food_cost_section_and_all_method_choices_are_present(client):
-    page = client.get("/").data.decode()
+    page = client.get("/events/new").data.decode()
 
     assert "Food and packaging costs" in page
     assert (
@@ -53,7 +53,7 @@ def test_food_cost_section_and_all_method_choices_are_present(client):
 
 
 def test_food_cost_starts_with_average_selected_and_all_values_hidden(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     select_html = response.data.decode().split(
         'id="event_food_cost_method_choice"', 1
@@ -112,7 +112,7 @@ def test_confirmed_food_cost_method_shows_only_its_matching_field(
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"hidden" not in opening_tag(response.data, visible_field)
     assert f'value="{value}"'.encode() in response.data
@@ -137,7 +137,7 @@ def test_switching_method_clears_previous_food_cost_value(client):
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b'value="30"' in response.data
     assert b'value="99"' not in response.data
@@ -173,7 +173,7 @@ def test_unconfirmed_food_cost_method_is_required(client):
     form_data = valid_event_inputs()
     form_data["food_cost_method"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Choose and confirm a food and packaging cost method." in (
         response.data
@@ -224,7 +224,7 @@ def test_food_cost_validation_preserves_invalid_input(
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{invalid_value}"'.encode() in response.data
@@ -243,7 +243,7 @@ def test_confirmed_food_cost_survives_unrelated_validation_error(client):
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Location is required." in response.data
     assert b'value="sales_percentage"' in response.data
@@ -254,7 +254,7 @@ def test_confirmed_food_cost_survives_unrelated_validation_error(client):
 
 
 def test_food_cost_form_does_not_save_events(client, database_path):
-    client.post("/", data=valid_event_inputs())
+    client.post("/events/new", data=valid_event_inputs())
 
     with sqlite3.connect(database_path) as database:
         event_count = database.execute(

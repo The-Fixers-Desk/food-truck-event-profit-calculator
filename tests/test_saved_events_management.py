@@ -44,13 +44,13 @@ def test_saved_events_empty_state_and_navigation(client):
 
     assert "No saved events yet" in page
     assert "Start an event analysis" in page
-    assert "Saved Events" in client.get("/").data.decode()
+    assert "Saved events" in client.get("/events/new").data.decode()
 
 
 def test_events_are_grouped_with_identity_and_scenarios(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     save_sibling(client, database_path, "Rain plan")
 
     page = client.get("/saved-events").data.decode()
@@ -69,12 +69,12 @@ def test_event_and_scenario_ordering_is_modified_first_and_deterministic(
 ):
     first = complete_event_inputs()
     first["event_name"] = "Older Event"
-    client.post("/", data=first)
+    client.post("/events/new", data=first)
     first_event, _ = latest_ids(database_path)
     save_sibling(client, database_path, "Older sibling")
     second = complete_event_inputs()
     second["event_name"] = "Newer Event"
-    client.post("/", data=second)
+    client.post("/events/new", data=second)
     second_event, _ = latest_ids(database_path)
     with sqlite3.connect(database_path) as database:
         database.execute(
@@ -113,7 +113,7 @@ def test_event_and_scenario_ordering_is_modified_first_and_deterministic(
 def test_opening_each_saved_scenario_reuses_clean_workspace_without_duplicates(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, second_id = save_sibling(
         client,
         database_path,
@@ -169,7 +169,7 @@ def test_missing_saved_scenario_uses_not_found_page(client, path):
 
 
 def test_event_rename_validation_and_scope(client, database_path):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = latest_ids(database_path)
 
     invalid = client.post(
@@ -208,7 +208,7 @@ def test_event_rename_validation_and_scope(client, database_path):
 def test_scenario_rename_validation_uniqueness_and_scope(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, second_id = save_sibling(
         client, database_path, "Rain plan"
     )
@@ -263,7 +263,7 @@ def test_scenario_rename_validation_uniqueness_and_scope(
 def test_deleting_nonfinal_scenario_preserves_event_and_sibling(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, second_id = save_sibling(
         client, database_path, "Delete me"
     )
@@ -295,7 +295,7 @@ def test_deleting_nonfinal_scenario_preserves_event_and_sibling(
 def test_final_scenario_cannot_be_deleted_individually(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = latest_ids(database_path)
 
     response = client.post(
@@ -310,7 +310,7 @@ def test_final_scenario_cannot_be_deleted_individually(
 def test_confirmed_event_delete_cascades_and_failure_rolls_back(
     client, database_path, monkeypatch
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, _ = save_sibling(client, database_path, "Sibling")
 
     def fail_after_delete(database, target_event_id):
@@ -358,7 +358,7 @@ def test_confirmed_event_delete_cascades_and_failure_rolls_back(
 def test_names_deletions_and_rows_persist_after_restart(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, deleted_id = save_sibling(
         client, database_path, "Delete before restart"
     )
@@ -381,6 +381,7 @@ def test_names_deletions_and_rows_persist_after_restart(
     restarted = create_app(
         {
             "DATABASE": database_path,
+            "ENFORCE_SETUP": False,
             "SECRET_KEY": "restart-test",
             "TESTING": True,
         }
@@ -405,7 +406,7 @@ def test_management_preserves_business_defaults(client, database_path):
         before = database.execute(
             "SELECT * FROM business_defaults"
         ).fetchone()
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = latest_ids(database_path)
     client.post(
         f"/events/{event_id}/scenarios/{scenario_id}/rename",
@@ -424,7 +425,7 @@ def test_management_preserves_business_defaults(client, database_path):
 
 
 def test_dirty_workspace_navigation_uses_discard_confirmation(client):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     script = client.get("/static/js/event_inputs.js").data.decode()
 
     assert "Discard unsaved changes and leave this analysis?" in script

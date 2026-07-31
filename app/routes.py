@@ -3,6 +3,7 @@ import sqlite3
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     jsonify,
     redirect,
@@ -17,6 +18,7 @@ from app.comparison import build_comparison
 from app.database import (
     FinalScenarioDeletionError,
     ScenarioNameConflict,
+    business_defaults_setup_is_complete,
     create_event_scenario,
     create_event_with_initial_scenario,
     delete_event,
@@ -28,6 +30,7 @@ from app.database import (
     rename_event,
     rename_event_scenario,
     save_business_defaults,
+    saved_event_counts,
 )
 from app.event_inputs_form import (
     blank_event_inputs_form,
@@ -43,7 +46,57 @@ from app.event_inputs_form import (
 main = Blueprint("main", __name__)
 
 
-@main.route("/", methods=("GET", "POST"))
+@main.before_request
+def require_business_defaults_setup():
+    """Keep setup-dependent screens behind persisted valid Defaults."""
+    if not current_app.config.get("ENFORCE_SETUP", True):
+        return None
+    if request.endpoint in {
+        "main.home",
+        "main.welcome",
+        "main.defaults",
+    }:
+        return None
+    if not business_defaults_setup_is_complete():
+        flash(
+            "Set up your business defaults before analyzing an event.",
+            "info",
+        )
+        return redirect(url_for("main.welcome"))
+    return None
+
+
+@main.get("/")
+def home():
+    """Open Welcome on first use and Dashboard after setup."""
+    if business_defaults_setup_is_complete():
+        return redirect(url_for("main.dashboard"))
+    return render_template("welcome.html", active_page="welcome")
+
+
+@main.get("/welcome")
+def welcome():
+    """Display onboarding only while setup remains incomplete."""
+    if business_defaults_setup_is_complete():
+        return redirect(url_for("main.dashboard"))
+    return render_template("welcome.html", active_page="welcome")
+
+
+@main.get("/dashboard")
+def dashboard():
+    """Display persisted setup and saved-analysis context."""
+    if not business_defaults_setup_is_complete():
+        return redirect(url_for("main.welcome"))
+    event_count, scenario_count = saved_event_counts()
+    return render_template(
+        "dashboard.html",
+        active_page="dashboard",
+        event_count=event_count,
+        scenario_count=scenario_count,
+    )
+
+
+@main.route("/events/new", methods=("GET", "POST"))
 def calculator():
     """Display the Event Inputs screen."""
     errors = {}
@@ -231,6 +284,7 @@ def save_event_analysis():
 def defaults():
     """Display the Defaults screen."""
     errors = {}
+    initial_setup = not business_defaults_setup_is_complete()
     if request.method == "POST":
         defaults_record, form_values, errors = validate_defaults_form(
             request.form
@@ -238,6 +292,11 @@ def defaults():
         if defaults_record is not None:
             save_business_defaults(defaults_record)
             flash("Business defaults saved successfully.", "success")
+            if (
+                initial_setup
+                and current_app.config.get("ENFORCE_SETUP", True)
+            ):
+                return redirect(url_for("main.dashboard"))
             return redirect(url_for("main.defaults"))
     else:
         form_values = defaults_to_form(load_business_defaults())
@@ -452,3 +511,4 @@ def _render_saved_events(
     list_saved_events,
     rename_event,
     rename_event_scenario,
+    business_defaults_setup_is_complete,

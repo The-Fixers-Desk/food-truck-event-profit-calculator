@@ -31,7 +31,7 @@ def valid_event_inputs() -> dict[str, str | list[str]]:
 
 
 def test_labor_section_starts_without_employee_rows(client):
-    response = client.get("/")
+    response = client.get("/events/new")
     entries_html = response.data.split(
         b'id="event-employee-labor-entries"', 1
     )[1].split(b'id="add-event-labor"', 1)[0]
@@ -43,7 +43,7 @@ def test_labor_section_starts_without_employee_rows(client):
 
 
 def test_labor_help_explains_combined_hours(client):
-    response = client.get("/")
+    response = client.get("/events/new")
     page_text = " ".join(response.data.decode().split())
 
     assert "Combined hours include all employees paid at the same rate" in (
@@ -80,7 +80,7 @@ def test_multiple_employee_labor_entries_preserve_order_and_values(client):
     form_data["employee_labor_rate"] = ["18.00", "25.00"]
     form_data["employee_labor_hours"] = ["12", "4"]
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     page = response.data.decode()
     assert page.index('value="18.00"') < page.index('value="25.00"')
@@ -94,7 +94,7 @@ def test_removed_employee_labor_row_is_absent_on_submission(client):
     form_data["employee_labor_rate"] = ["25.00"]
     form_data["employee_labor_hours"] = ["4"]
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b'value="25.00"' in response.data
     assert b'value="4"' in response.data
@@ -106,7 +106,7 @@ def test_owner_only_event_allows_zero_employee_labor(client):
     form_data["location"] = ""
     form_data["owner_labor_pay"] = "125.00"
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b'value="125.00"' in response.data
     assert b"Hourly labor rate is required." not in response.data
@@ -116,7 +116,7 @@ def test_owner_labor_pay_is_optional(client):
     form_data = valid_event_inputs()
     form_data["location"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Owner labor pay for this event is required." not in response.data
     assert b'name="owner_labor_pay"' in response.data
@@ -145,7 +145,7 @@ def test_employee_labor_validation_preserves_rows(
     form_data["employee_labor_rate"] = rates
     form_data["employee_labor_hours"] = hours
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{rates[0]}"'.encode() in response.data
@@ -168,7 +168,7 @@ def test_owner_labor_validation_preserves_value(
     form_data = valid_event_inputs()
     form_data["owner_labor_pay"] = value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{value}"'.encode() in response.data
@@ -179,7 +179,7 @@ def test_invalid_labor_does_not_save_event_records(client, database_path):
     form_data["employee_labor_rate"] = ["0"]
     form_data["employee_labor_hours"] = ["4"]
 
-    client.post("/", data=form_data)
+    client.post("/events/new", data=form_data)
 
     with sqlite3.connect(database_path) as database:
         event_count = database.execute(

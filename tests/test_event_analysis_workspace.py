@@ -9,7 +9,7 @@ from tests.test_complete_event_inputs_workflow import (
 
 
 def test_valid_event_inputs_open_workspace_with_read_only_identity(client):
-    response = client.post("/", data=complete_event_inputs())
+    response = client.post("/events/new", data=complete_event_inputs())
     page = response.data.decode()
 
     assert response.status_code == 200
@@ -27,7 +27,7 @@ def test_invalid_event_inputs_remain_on_input_form(client):
     form_data = complete_event_inputs()
     form_data["estimated_attendance"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"<h1>Event Inputs</h1>" in response.data
     assert b"Estimated attendance is required." in response.data
@@ -35,7 +35,7 @@ def test_invalid_event_inputs_remain_on_input_form(client):
 
 
 def test_workspace_contains_all_adjustable_groups_and_actions(client):
-    page = client.post("/", data=complete_event_inputs()).data.decode()
+    page = client.post("/events/new", data=complete_event_inputs()).data.decode()
 
     for text in (
         "Revenue Assumptions",
@@ -66,7 +66,7 @@ def test_workspace_contains_all_adjustable_groups_and_actions(client):
 
 
 def test_initial_workspace_displays_complete_calculation(client):
-    page = client.post("/", data=complete_event_inputs()).data.decode()
+    page = client.post("/events/new", data=complete_event_inputs()).data.decode()
 
     assert "$5000" in page
     assert "$1275.0625" in page
@@ -229,7 +229,7 @@ def test_live_calculations_create_no_additional_records_or_default_changes(
             "SELECT * FROM business_defaults"
         ).fetchone()
 
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     client.post(
         "/event-analysis/calculate", data=complete_event_inputs()
     )
@@ -247,9 +247,9 @@ def test_live_calculations_create_no_additional_records_or_default_changes(
 
 
 def test_start_new_analysis_returns_clean_event_inputs(client):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
 
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert b"<h1>Event Inputs</h1>" in response.data
     assert b'value="Summer Festival"' not in response.data
@@ -258,7 +258,7 @@ def test_start_new_analysis_returns_clean_event_inputs(client):
 def test_workspace_client_behavior_is_debounced_accessible_and_responsive(
     client,
 ):
-    page = client.post("/", data=complete_event_inputs()).data.decode()
+    page = client.post("/events/new", data=complete_event_inputs()).data.decode()
     script = client.get("/static/js/event_inputs.js").data.decode()
     styles = client.get("/static/css/forms.css").data.decode()
 

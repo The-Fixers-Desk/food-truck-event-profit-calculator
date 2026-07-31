@@ -42,7 +42,7 @@ def valid_event_inputs() -> dict[str, str | list[str]]:
 
 
 def test_travel_and_operating_cost_fields_are_present(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert b"Travel and operating costs" in response.data
     for name, label in OPERATING_COST_FIELDS.items():
@@ -51,7 +51,7 @@ def test_travel_and_operating_cost_fields_are_present(client):
 
 
 def test_all_operating_cost_fields_are_optional(client):
-    response = client.post("/", data=valid_event_inputs())
+    response = client.post("/events/new", data=valid_event_inputs())
 
     for label in (
         "Travel cost",
@@ -74,7 +74,7 @@ def test_valid_operating_cost_values_are_accepted_and_preserved(client):
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     for value in ("75.00", "20.50", "100", "35.25"):
         assert f'value="{value}"'.encode() in response.data
@@ -103,7 +103,7 @@ def test_invalid_operating_cost_values_are_rejected_and_preserved(
     form_data = valid_event_inputs()
     form_data[field_name] = invalid_value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert f"{label} {error_suffix}".encode() in response.data
     assert f'value="{invalid_value}"'.encode() in response.data
@@ -121,7 +121,7 @@ def test_operating_cost_values_survive_unrelated_validation_error(client):
         }
     )
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Event name is required." in response.data
     for value in ("75", "20", "100", "35"):
@@ -134,7 +134,7 @@ def test_invalid_operating_cost_does_not_save_records(
     form_data = valid_event_inputs()
     form_data["travel_cost"] = "-1"
 
-    client.post("/", data=form_data)
+    client.post("/events/new", data=form_data)
 
     with sqlite3.connect(database_path) as database:
         event_count = database.execute(

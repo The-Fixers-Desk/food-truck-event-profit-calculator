@@ -10,3 +10,5 @@ Anything we need to do before we make a prompt for Codex?
 
 Give me the commit message I will use when this is done.
 
+---------------------------------------------------------------------------------
+

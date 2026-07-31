@@ -2,243 +2,6 @@ Next Codex Prompt
 
 ---------------------------------------------------------------------------------
 
-Implement the milestone:
-
-Build the Dashboard and first-use application flow.
-
-Business Defaults, Event Inputs, automatic Event and Scenario saving, the
-interactive analysis workspace, Saved Events management, and Scenario
-comparison already exist.
-
-Build the first-launch onboarding flow and the normal Dashboard entry point.
-Reuse the existing screens, routes, navigation, repositories, and dirty-state
-protection.
-
-Setup-completion rule
-
-Determine whether initial setup is complete from the existence of a valid saved
-Business Defaults record.
-
-- Do not add a separate onboarding-complete database flag.
-- Do not use a session-only value as the source of truth.
-- Existing installations with valid saved Business Defaults must be treated as
-  already set up.
-- Missing or invalid Business Defaults mean setup is incomplete.
-
-Welcome screen
-
-Add a first-launch Welcome screen that introduces this four-step workflow:
-
-1. Set business defaults
-2. Describe an event
-3. Review the analysis
-4. Compare options
-
-Include concise customer-facing explanations for each step.
-
-Add one clear primary action labeled:
-
-“Get started”
-
-When selected:
-
-- Open the existing Business Defaults screen.
-- Treat the visit as part of initial setup.
-- Do not create placeholder Defaults, Events, or Scenarios.
-
-Do not perform final visual polish yet. Use the project’s existing readable
-styling patterns.
-
-First-use flow
-
-When no valid Business Defaults exist:
-
-- Application launch opens Welcome.
-- Get started opens Business Defaults.
-- A successful first Business Defaults save opens Dashboard.
-- A failed Defaults save remains on the Defaults screen with existing errors
-  and preserved values.
-- Closing and reopening before setup is complete begins at Welcome again.
-
-When valid Business Defaults already exist:
-
-- Application launch opens Dashboard.
-- Welcome redirects safely to Dashboard.
-- Do not repeat onboarding.
-
-Dashboard
-
-Build the Dashboard as the normal application home screen after setup.
-
-Provide these primary actions:
-
-1. Analyze new event
-   - Open a clean Event Inputs workflow.
-   - Prefill applicable values from current Business Defaults.
-   - Do not reuse assumptions from the previous Event or workspace.
-
-2. View saved events
-   - Open the existing Saved Events screen.
-   - Keep this action available when no Events exist.
-
-3. Compare scenarios
-   - Open the existing Scenario comparison selection workflow when at least two
-     saved Scenarios exist.
-   - When fewer than two saved Scenarios exist, present a clear unavailable or
-     empty state explaining that at least two saved Scenarios are required.
-   - Do not silently send the user to an unusable comparison page.
-
-4. Update business defaults
-   - Open the existing Business Defaults screen in normal editing mode.
-   - Saving updated Defaults must not alter existing Events or Scenarios.
-   - After a successful normal update, preserve the existing confirmation
-     behavior and provide a clear way back to Dashboard.
-   - Do not treat a normal Defaults update as onboarding.
-
-Dashboard information and states
-
-Include concise useful context such as:
-
-- Whether Business Defaults are available
-- Number of saved Events
-- Number of saved Scenarios
-- A useful first-event prompt when no Events exist
-- A comparison-readiness message when fewer than two Scenarios exist
-
-Do not add financial summaries, charts, recommendations, recent-activity
-systems, or stored Dashboard analytics in this milestone.
-
-Navigation
-
-Update the shared application navigation so that after setup it provides clear
-access to:
-
-- Dashboard
-- Analyze new event
-- Saved events
-- Compare scenarios
-- Business defaults
-
-Before setup is complete:
-
-- Welcome and Business Defaults may be accessed.
-- Dashboard, Event Inputs, Event Analysis workspaces, Saved Events, and
-  Comparison must not bypass setup.
-- Direct requests to setup-protected routes must redirect safely to Welcome or
-  Business Defaults rather than crashing or rendering incomplete workflows.
-- Preserve an appropriate destination message when useful.
-
-After setup is complete:
-
-- Welcome redirects to Dashboard.
-- Dashboard acts as the normal home route.
-
-Unsaved workspace protection
-
-Preserve and reuse the existing dirty-workspace navigation protection.
-
-If the customer attempts to use Dashboard or navigation links while the active
-workspace contains unsaved changes:
-
-- Require confirmation before discarding those changes.
-- Canceling must preserve the workspace exactly.
-- Confirming must navigate without modifying the active saved Scenario.
-- Do not show the warning when the workspace is clean.
-
-Application and session behavior
-
-Use persisted Business Defaults as the setup source of truth across application
-restarts.
-
-Use session state only for temporary navigation or customer feedback where
-appropriate.
-
-Do not let stale session data:
-
-- Skip required setup
-- Repeat onboarding after setup
-- Reopen a deleted Event or Scenario
-- Override the current database state
-
-Empty and error states
-
-Support:
-
-- No Business Defaults
-- No saved Events
-- One saved Scenario
-- Fewer than two Scenarios available for comparison
-- Saved records disappearing before a shortcut opens
-- Repository or database failures while loading Dashboard counts
-
-Provide clear next actions and use existing application-wide error handling.
-
-Data integrity
-
-- Dashboard and onboarding views must not create Events or Scenarios.
-- Do not modify existing Event or Scenario assumptions.
-- Do not reset or replace data/app.db.
-- Preserve Business Defaults and all unrelated customer data.
-- Reuse current repositories and counting methods where practical.
-
-Scope
-
-Do not implement:
-
-- Final visual design
-- Charts or financial Dashboard summaries
-- Recent-event history
-- Search, filtering, or pagination
-- Backup and restore
-- Desktop packaging
-- New calculation behavior
-- Changes to Scenario comparison rules
-- Changes to saved-work management behavior
-
-Do not add dependencies.
-Do not make unrelated changes.
-Do not commit.
-
-Testing
-
-Add or update tests covering:
-
-- Fresh application launch opening Welcome
-- Four-step workflow content
-- Get started opening Business Defaults
-- First successful Defaults save opening Dashboard
-- Failed first save preserving form values and errors
-- Reopening before setup remains complete
-- Existing saved Defaults skipping Welcome
-- Normal launches opening Dashboard
-- Welcome redirecting after setup
-- Dashboard action destinations
-- New Event Inputs beginning clean and using current Defaults
-- Saved Events empty-state access
-- Comparison unavailable with zero or one Scenario
-- Comparison available with at least two Scenarios
-- Accurate Event and Scenario counts
-- Updating Defaults not modifying saved Events or Scenarios
-- Setup-protected direct routes redirecting safely
-- Dirty-workspace navigation confirmation
-- Clean-workspace navigation without confirmation
-- Database state overriding stale session state
-- Persistence of setup completion after application restart
-- Dashboard repository-error handling
-- No onboarding or Dashboard action creating unintended records
-
-Afterward:
-
-1. Run focused onboarding, Dashboard, route, and navigation tests.
-2. Run the full test suite.
-3. Run git diff --check.
-4. Summarize the first-use and normal-launch workflows in plain language.
-5. Explain how to manually test fresh setup, later launches, Dashboard empty
-   states, shortcuts, route safeguards, and dirty-workspace protection.
-6. Report the test results.
-
-Keep the response concise.
-
 ---------------------------------------------------------------------------------
 
 Implement the milestone:
@@ -2050,4 +1813,1031 @@ Keep the response concise.
 
 ---------------------------------------------------------------------------------
 
+Implement the milestone:
+
+Build the desktop application shell.
+
+The complete Flask application, centralized application-data directory,
+database migrations, backup and recovery safeguards, responsive UI, and
+accessibility behavior already exist.
+
+Build a cross-platform desktop shell that starts the local application
+automatically in a dedicated native window and shuts it down safely.
+
+Desktop technology
+
+Use pywebview for the dedicated desktop window.
+
+Add pywebview as the narrowly required desktop-shell dependency.
+
+Do not:
+
+- Replace Flask
+- Rebuild templates in another UI framework
+- Introduce Electron, Tauri, React, or another application architecture
+- Package Windows or macOS installers yet
+
+Keep the existing browser-based development and automated-test workflows
+available without requiring pywebview to open a window.
+
+Desktop entrypoint
+
+Create a clear production desktop entrypoint separate from the normal Flask
+development entrypoint.
+
+The desktop entrypoint must coordinate:
+
+1. Single-instance protection
+2. Application-data directory initialization
+3. Database validation and migration
+4. Local-server startup
+5. Readiness checking
+6. Native-window creation
+7. Safe shutdown
+8. Instance-lock release
+
+Keep orchestration separate from Flask routes and business logic.
+
+Local server
+
+Start the existing Flask application through a controllable Werkzeug server,
+such as an appropriate make_server-based implementation.
+
+Requirements:
+
+- Bind only to 127.0.0.1.
+- Do not bind to 0.0.0.0 or expose the application to the local network.
+- Allow the operating system to assign an available port.
+- Do not assume a fixed port is free.
+- Run the server in a managed background thread.
+- Disable the Flask debug server and reloader.
+- Make server startup failure observable to the shell.
+- Provide or reuse a lightweight local readiness check.
+- Do not expose sensitive application or database information through the
+  readiness response.
+
+The desktop window must not display the main application until the server is
+ready.
+
+Single-instance protection
+
+Implement a cross-platform single-instance guard using an operating-system
+file lock or equivalent standard-library behavior.
+
+Support:
+
+- Windows locking behavior
+- macOS locking behavior
+- Development environments used by the test suite
+
+The lock file must live beneath the centralized application-data directory.
+
+When another application instance already holds the lock:
+
+- Do not start another server.
+- Do not open another application window.
+- Show a brief customer-facing message stating that the application is already
+  open.
+- Exit normally.
+- Do not delete or override the active instance’s lock.
+
+A stale file without an active operating-system lock must not permanently
+prevent startup.
+
+Release the lock after normal shutdown and after handled startup failure.
+
+Do not implement foreground activation of the existing window in this
+milestone.
+
+Startup sequence
+
+Use this order:
+
+1. Resolve and prepare the configured application-data directory.
+2. Acquire the single-instance lock.
+3. Initialize logging without exposing customer content.
+4. Validate the live database and apply required migrations and recovery
+   safeguards through the existing systems.
+5. Start the loopback server.
+6. Confirm server readiness.
+7. Open or update the native application window with the application URL.
+
+Do not allow routes or repositories to operate before database startup has
+completed successfully.
+
+Loading experience
+
+Display a friendly native-window loading state while startup work completes.
+
+Use simple local HTML and CSS bundled with the application.
+
+Display:
+
+- Product name
+- A concise message such as “Starting your event calculator…”
+- A nonessential loading indicator that respects reduced-motion preferences
+
+Do not use:
+
+- Remote assets
+- External fonts
+- Marketing content
+- Raw startup logs
+- Database paths
+- Technical stack information
+
+Once the server is ready, navigate the same window to the application’s local
+URL rather than opening a second window.
+
+Application window
+
+Use the product name:
+
+Food Truck Event Profit Calculator
+
+Requirements:
+
+- Display the product name in the native window title.
+- Open one primary application window.
+- Use a sensible initial desktop size.
+- Define a minimum usable size consistent with the responsive interface.
+- Allow resizing.
+- Do not display browser tabs, an address bar, browser bookmarks, or the local
+  URL.
+- Do not open the customer’s ordinary browser during normal startup.
+- Preserve normal keyboard navigation and accessibility inside the webview.
+- Do not intercept ordinary application shortcuts unnecessarily.
+
+Final Windows and macOS icons and package metadata belong to later packaging
+milestones. Use a bundled placeholder only if pywebview requires one.
+
+Navigation safety
+
+The primary webview is intended only for the local application.
+
+- Allow navigation within the application’s generated 127.0.0.1 origin.
+- Reject or safely handle attempts to navigate the primary window to unrelated
+  remote origins.
+- Do not allow a remote page to replace the application in the primary window.
+- Do not weaken Flask request validation or existing route safeguards.
+- Do not expose local filesystem navigation.
+
+If the application later contains a deliberate external help link, it may open
+in the operating system’s normal browser rather than replacing the app window.
+Do not add new external links in this milestone.
+
+Safe shutdown
+
+Closing the primary native window must trigger an orderly shutdown.
+
+Perform:
+
+1. Mark the shell as shutting down.
+2. Stop accepting new application requests where practical.
+3. Shut down the Werkzeug server through its supported shutdown method.
+4. Join the server thread with a reasonable timeout.
+5. Clean shell-owned temporary files.
+6. Release the single-instance lock.
+7. Exit normally.
+
+Requirements:
+
+- Do not use os._exit for ordinary shutdown.
+- Do not leave the local server running after the window closes.
+- Do not leave the instance lock actively held.
+- Do not interrupt an active database transaction deliberately.
+- Make repeated shutdown calls harmless.
+- Handle window-close and startup-failure cleanup through the same reliable
+  lifecycle abstraction where practical.
+
+If shutdown exceeds the reasonable timeout:
+
+- Log the technical issue.
+- Continue a controlled exit without exposing a traceback to the customer.
+
+Startup failure behavior
+
+Handle failures occurring during:
+
+- Application-data initialization
+- Instance-lock acquisition
+- Database validation
+- Migration
+- Recovery-snapshot creation
+- Server creation
+- Server-thread startup
+- Readiness checking
+- Native-window creation
+
+When startup cannot continue:
+
+- Do not open a broken normal application screen.
+- Shut down any partially started server.
+- Release the instance lock.
+- Preserve the customer database.
+- Preserve existing recovery behavior.
+- Show a friendly local error screen or native message.
+
+The customer-facing message should:
+
+- State that the application could not start.
+- Explain that saved data was not intentionally deleted.
+- Suggest closing and reopening the application.
+- Direct the customer to the established troubleshooting information when it
+  exists.
+
+Do not display:
+
+- Raw tracebacks
+- SQL statements
+- Absolute filesystem paths
+- Port numbers
+- Internal exception text
+
+Log technical details using the existing logging system.
+
+Damaged-database recovery
+
+Preserve the established damaged-database startup behavior.
+
+When the database cannot be opened safely:
+
+- Do not silently overwrite or recreate it.
+- Make the existing recovery or Restore backup workflow available where
+  practical inside the desktop shell.
+- Do not start unrestricted normal application routes.
+- Keep the damaged database and automatic recovery snapshots intact.
+
+Application-data separation
+
+Use the existing centralized application-data directory abstraction.
+
+The desktop shell must resolve through it:
+
+- Live database
+- Logs
+- Single-instance lock
+- Recovery snapshots
+- Backup and restore staging
+- Shell-owned temporary files
+
+Do not place mutable customer data beside:
+
+- Python source files
+- Templates
+- Static assets
+- The future executable
+- Future installed application resources
+
+Preserve compatibility with the current development data location.
+
+The Windows and macOS packaging milestones will configure the final
+platform-specific application-data roots.
+
+Offline operation
+
+The desktop application must remain usable with no internet connection.
+
+Audit the shell and customer interface for runtime dependencies on:
+
+- Remote scripts
+- Remote stylesheets
+- External fonts
+- Remote images
+- Online APIs
+- Telemetry
+- Authentication services
+- CDN-hosted assets
+
+Move any required customer-facing assets into local static resources.
+
+Do not add telemetry or remote update checking.
+
+Add an automated or controlled integration test that prevents or rejects
+external network access while exercising representative application routes.
+
+Do not mistake the internal 127.0.0.1 server connection for external network
+access.
+
+Development workflow
+
+Preserve these capabilities:
+
+- Running Flask normally during development
+- Running route and domain tests without opening a native window
+- Providing isolated application-data roots in tests
+- Starting the desktop shell explicitly for manual testing
+- Importing shell modules without automatically starting the application
+
+Do not create side effects at module import time.
+
+Organize code into testable units for:
+
+- Instance locking
+- Server lifecycle
+- Readiness checking
+- Window configuration
+- Navigation restrictions
+- Startup coordination
+- Shutdown coordination
+
+Testing
+
+Add focused automated tests covering:
+
+Server lifecycle:
+- Binding only to 127.0.0.1
+- Selecting an available port
+- Starting the server before application navigation
+- Readiness success
+- Readiness timeout
+- Server startup failure
+- Safe server shutdown
+- Repeated shutdown calls
+- Server thread cleanup
+
+Single instance:
+- First instance acquiring the lock
+- Second instance being rejected
+- A stale unlocked file not blocking startup
+- Lock release after normal shutdown
+- Lock release after startup failure
+- Isolated locks under separate test data roots
+
+Startup:
+- Correct startup-order coordination
+- Database initialization before server availability
+- Migration failure preventing normal startup
+- Recovery-state startup behavior
+- Partial-startup cleanup
+- Friendly customer-facing failure behavior
+- Technical failure logging without customer data
+
+Window behavior:
+- Correct product title
+- Loading content being local
+- Navigation to the application only after readiness
+- One primary window being created
+- Sensible initial and minimum dimensions
+- Remote primary-window navigation being rejected
+- Closing the window triggering shutdown
+
+Data separation:
+- Shell files resolving beneath the configured data root
+- No mutable writes to application-code directories
+- Development-data compatibility
+- Safe temporary-file cleanup
+
+Offline operation:
+- No required remote assets
+- Representative workflows functioning with external network access blocked
+- Internal loopback requests remaining functional
+
+Regression:
+- Existing browser development entrypoint still working
+- Existing route, calculation, persistence, backup, and recovery tests remaining
+  functional
+- Importing desktop-shell modules creating no server or window side effects
+
+Use mocks or dependency injection for native-window behavior in automated tests.
+Do not require a graphical display for the full test suite.
+
+Manual testing
+
+Add concise developer instructions for manually verifying:
+
+- First desktop launch
+- Existing-data launch
+- Loading state
+- Dashboard navigation
+- Event Analysis live recalculation
+- Backup download and restore flow
+- Attempting a second launch
+- Closing the window during ordinary use
+- Startup database failure
+- Offline startup and normal operation
+- Window resizing at supported sizes
+
+Documentation
+
+Add concise developer documentation explaining:
+
+- Desktop entrypoint
+- Startup sequence
+- Server lifecycle
+- Single-instance guard
+- Safe shutdown
+- Loading and startup-error behavior
+- Localhost-only security
+- Offline requirements
+- Application-data directory configuration
+- How packaging milestones should invoke the shell
+
+Scope
+
+Do not implement:
+
+- Windows packaging
+- Windows installer behavior
+- macOS packaging
+- macOS disk-image behavior
+- Final icons or signing
+- Automatic application updates
+- Foreground activation of an existing instance
+- System tray behavior
+- Background operation after the window closes
+- New business features
+- New calculations
+- New persistence behavior
+- Final platform-specific data directories
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused shell, lifecycle, startup, data-path, and offline tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the desktop launch and shutdown behavior in plain language.
+5. Explain how single-instance protection works.
+6. Explain how to launch the desktop shell manually.
+7. List the manual checks completed.
+8. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Package the Windows application.
+
+The desktop application shell, centralized data-directory system, database
+migrations, backup and restore safeguards, offline interface, and complete
+customer workflows already exist.
+
+Create a reproducible 64-bit Windows application bundle and installer.
+
+Packaging target
+
+Support:
+
+- Windows 10 x64
+- Windows 11 x64
+
+Do not build:
+
+- 32-bit Windows packages
+- ARM64 packages
+- Microsoft Store or MSIX packages
+- macOS packages
+
+Use a 64-bit Windows Python environment for the production build.
+
+Application identity
+
+Use:
+
+Product name:
+Food Truck Event Profit Calculator
+
+Publisher:
+The Fixer’s Desk
+
+Executable name:
+FoodTruckEventProfitCalculator.exe
+
+Installer filename pattern:
+FoodTruckEventProfitCalculator-Setup-{version}-x64.exe
+
+Define the application version in one centralized source of truth.
+
+The desktop shell, executable metadata, installer metadata, application
+display, and generated filenames must use that same version.
+
+If the project already has an established version source, reuse it rather than
+creating a conflicting system.
+
+Use a permanent, checked-in Inno Setup AppId that remains unchanged across
+future releases and upgrades.
+
+Do not generate a different AppId for every build.
+
+Application icon
+
+Use one checked-in Windows .ico asset consistently for:
+
+- Packaged executable
+- Desktop window where supported
+- Installer
+- Start Menu shortcut
+- Desktop shortcut
+- Add/Remove Programs entry
+
+Prefer an existing approved product icon when one exists.
+
+If no final icon exists, add and use a clearly documented temporary local icon
+suitable for development packaging. Do not download an icon or use copyrighted
+third-party artwork.
+
+Keep replacement of the temporary icon straightforward before V1 release.
+
+PyInstaller bundle
+
+Use PyInstaller to create a windowed one-folder bundle.
+
+Create and check in a clear PyInstaller spec file.
+
+Requirements:
+
+- Use onedir rather than onefile.
+- Suppress the console window in the customer build.
+- Use the existing production desktop entrypoint.
+- Bundle all required Python packages.
+- Bundle Flask templates.
+- Bundle static CSS and JavaScript.
+- Bundle local loading and startup-error assets.
+- Bundle documentation required at runtime.
+- Bundle the Windows application icon.
+- Include pywebview’s required Windows components.
+- Exclude unrelated GUI frameworks and development packages.
+- Do not bundle tests, development databases, source-control files, caches,
+  local virtual environments, or customer data.
+- Do not include the repository’s data/app.db.
+- Do not include backups, recovery snapshots, logs, or local test artifacts.
+- Ensure no absolute development-machine paths remain in the package.
+
+Resolve bundled read-only resources correctly in both:
+
+- Normal source execution
+- PyInstaller frozen execution
+
+Use PyInstaller’s supported frozen-runtime behavior rather than relying on the
+current working directory.
+
+The packaged application must launch by double-clicking the executable without
+requiring:
+
+- Python
+- pip
+- A virtual environment
+- VS Code
+- A terminal
+- Internet access
+
+Windows customer-data location
+
+Configure packaged Windows execution to use:
+
+%LOCALAPPDATA%\The Fixer's Desk\Food Truck Event Profit Calculator
+
+Resolve all mutable files beneath that directory through the existing
+centralized application-data path system.
+
+Include:
+
+- Live SQLite database
+- Logs
+- Automatic recovery snapshots
+- Backup and restore staging
+- Pywebview storage or browser-profile data
+- Single-instance lock
+- Shell temporary files
+
+Requirements:
+
+- Create required directories on first launch.
+- Do not place mutable files in the installer directory.
+- Do not write beside the executable.
+- Do not write beneath templates, static files, or bundled resources.
+- Preserve the existing configurable development-data path outside packaged
+  Windows execution.
+- Preserve the ability of automated tests to use isolated temporary roots.
+
+Do not move or delete the development data/app.db during packaging or testing.
+
+WebView2 Runtime
+
+Use pywebview’s Windows Edge Chromium renderer.
+
+The Windows installer must operate without internet access.
+
+Bundle the official x64 Microsoft Edge WebView2 Evergreen Standalone Installer
+as an installer prerequisite.
+
+During installation:
+
+- Detect whether a valid WebView2 Runtime is already installed.
+- Check supported per-machine and per-user installation locations or use an
+  appropriate supported detection method.
+- Do not reinstall the Runtime when a valid installation exists.
+- When missing, run the bundled x64 Evergreen Standalone Installer silently.
+- Verify the prerequisite installation succeeded before completing the
+  application installation.
+- Show a clear installer error if the Runtime cannot be installed.
+- Do not launch the application when the prerequisite failed.
+
+Do not:
+
+- Download WebView2 during installation
+- Depend on an internet bootstrapper
+- Bundle a Fixed Version WebView2 directory into the application
+- Fall back to the deprecated MSHTML renderer
+
+Keep the Microsoft prerequisite installer outside the installed application
+directory after setup completes unless it is genuinely needed there.
+
+Do not commit a downloaded Microsoft installer binary if repository policy
+excludes third-party binaries. In that case:
+
+- Provide a documented expected local build path.
+- Add an acquisition/checksum-verification build step.
+- Fail the installer build clearly when the prerequisite file is absent.
+- Never silently download an unverified executable.
+
+Inno Setup installer
+
+Use Inno Setup to create a per-user x64 installer.
+
+Configure:
+
+- Stable AppId
+- AppName
+- AppVersion
+- AppPublisher
+- Version metadata
+- x64-compatible architecture
+- PrivilegesRequired=lowest
+- Per-user installation
+- Normal Windows uninstall registration
+- Modern compression
+- Installer icon
+- Uninstaller icon where supported
+
+Default installation directory:
+
+%LOCALAPPDATA%\Programs\The Fixer's Desk\Food Truck Event Profit Calculator
+
+Use the appropriate Inno Setup constants rather than hardcoding the current
+Windows username or profile path.
+
+Install the complete PyInstaller one-folder output beneath the application
+installation directory.
+
+Shortcuts
+
+Create:
+
+1. Start Menu shortcut
+   - Always created
+   - Name:
+     Food Truck Event Profit Calculator
+
+2. Desktop shortcut
+   - Presented as an installer task
+   - Selected by default
+   - Customer may deselect it
+
+Both shortcuts must:
+
+- Launch the packaged executable directly
+- Use the product icon
+- Use the installation directory as the working directory where needed
+- Contain no Python, terminal, or development-machine paths
+
+Do not create:
+
+- Startup-folder shortcuts
+- Browser shortcuts
+- URL shortcuts
+- Multiple duplicate Start Menu entries
+
+Installation behavior
+
+Support:
+
+- Clean first installation
+- Installation over an existing older package
+- Repair-style reinstall of the same version where practical
+- Launch after successful interactive installation
+- Silent installation without forced application launch
+
+When installing over an existing version:
+
+- Reuse the stable application identity and installation location.
+- Replace installed application files safely.
+- Preserve customer data.
+- Preserve backups and recovery snapshots.
+- Preserve existing database schema and allow application startup to perform
+  established migrations.
+- Do not create duplicate Add/Remove Programs entries.
+- Do not create duplicate shortcuts.
+
+Do not implement automatic update discovery or downloading.
+
+Running-application handling
+
+Use the desktop shell’s established single-instance identity and an appropriate
+installer application mutex or running-process safeguard.
+
+When installation or uninstallation is attempted while the application is
+running:
+
+- Ask the customer to close it or close it safely through supported installer
+  behavior.
+- Do not terminate it during an active database write without coordination.
+- Do not replace files while the running process still uses them.
+- Do not corrupt or delete customer data.
+
+Uninstallation behavior
+
+Uninstallation should remove:
+
+- Installed application files
+- Start Menu shortcut
+- Desktop shortcut created by the installer
+- Installer-owned registry information
+- Uninstaller files
+
+Uninstallation must preserve:
+
+- Customer database
+- Business Defaults
+- Events
+- Scenarios
+- Customer-created backups
+- Automatic recovery snapshots
+- Logs
+- Other data beneath the customer-data directory
+
+Do not offer a destructive “remove all data” checkbox in this milestone.
+
+Where practical, show or document that customer data remains available for
+reinstallation.
+
+Reinstalling after uninstall must reconnect to the preserved data and open the
+appropriate Welcome or Dashboard state.
+
+Executable and installer metadata
+
+Add appropriate Windows version metadata, including:
+
+- Product name
+- File description
+- Publisher or company name
+- Product version
+- File version
+- Copyright
+- Original executable filename
+
+Do not claim:
+
+- Microsoft certification
+- Digital signature
+- Trademark ownership not held by the project
+- A final V1 release when the current version is still prerelease
+
+Signing readiness
+
+Create clearly documented optional signing hooks for:
+
+- The packaged executable
+- The installer
+
+Accept signing configuration from the build environment.
+
+Do not:
+
+- Generate a fake certificate
+- Commit private keys
+- Commit certificate passwords
+- Require signing for ordinary developer builds
+- Mark unsigned artifacts as signed
+
+A signed build should fail clearly when signing is explicitly requested but
+the required certificate configuration is unavailable.
+
+Build automation
+
+Add a reproducible PowerShell build script or equivalent Windows build
+orchestration.
+
+The build should:
+
+1. Verify it is running on supported Windows x64.
+2. Verify the correct Python environment.
+3. Verify required build tools and versions.
+4. Run the focused packaging tests.
+5. Run the complete automated test suite unless explicitly skipped for a
+   documented developer-only reason.
+6. Clean prior build output.
+7. Build the PyInstaller one-folder application.
+8. Validate the bundle contents.
+9. Smoke-test the packaged executable.
+10. Apply optional executable signing.
+11. Compile the Inno Setup installer.
+12. Apply optional installer signing.
+13. Validate generated artifact names and metadata.
+14. Produce checksums for distributable artifacts.
+15. Place final outputs in a clear release-artifacts directory.
+
+Do not automatically install missing build tools or modify the developer’s
+system configuration.
+
+Fail with clear instructions when:
+
+- PyInstaller is missing
+- Inno Setup Compiler is missing
+- The icon is missing
+- The WebView2 offline prerequisite is missing
+- Required runtime files are absent
+- Tests fail
+- Packaging fails
+- Explicitly requested signing fails
+
+Pin or record the packaging-tool versions used for reproducibility.
+
+Build cleanliness
+
+Before packaging:
+
+- Remove stale PyInstaller build and dist output.
+- Remove stale installer output.
+- Do not delete customer or development databases.
+- Do not remove repository documentation or source files.
+
+After packaging, inspect the bundle and installer inputs to ensure they contain
+no:
+
+- SQLite customer database
+- .ftbackup files
+- Recovery snapshots
+- Logs
+- Test data
+- pytest caches
+- Git metadata
+- Environment files
+- Secrets
+- Developer usernames or absolute paths
+- Unneeded GUI frameworks
+
+Packaged executable verification
+
+Test the frozen executable directly before creating the installer.
+
+Verify:
+
+- It launches without a console window.
+- It opens one native application window.
+- It starts the local server automatically.
+- It uses only 127.0.0.1.
+- It creates customer data in LocalAppData.
+- It does not write to the bundle directory.
+- It creates or opens the database correctly.
+- It completes onboarding on a clean data root.
+- It opens existing customer data correctly.
+- Live calculations work.
+- Scenario saving works.
+- Backup creation works.
+- Restore validation works.
+- The second application launch is rejected safely.
+- Closing the window stops the local server.
+- It operates with external network access blocked.
+
+Installer verification
+
+Verify using clean, isolated Windows test environments where practical:
+
+Clean installation:
+
+- Installer runs without administrator elevation.
+- WebView2 is detected or installed from the bundled offline prerequisite.
+- Application files are installed in the correct per-user location.
+- Start Menu shortcut is created.
+- Desktop shortcut follows the chosen installer option.
+- Add/Remove Programs entry is correct.
+- Application launches successfully.
+- First-use behavior works.
+
+Existing-data installation:
+
+- Existing LocalAppData customer records remain intact.
+- Dashboard, Events, Scenarios, and Defaults load correctly.
+
+Upgrade:
+
+- Installing a newer package over an older package produces one installed
+  product entry.
+- Application files update.
+- Customer data remains unchanged.
+- Required database migrations run safely on launch.
+- Shortcuts remain valid.
+
+Same-version reinstall:
+
+- Application remains launchable.
+- Customer data remains intact.
+- Duplicate shortcuts or uninstall entries are not created.
+
+Uninstall:
+
+- Application files and installer-owned shortcuts are removed.
+- Customer data remains intact.
+- Uninstall succeeds without internet access.
+- Reinstallation finds and uses the preserved customer data.
+
+Failure states:
+
+- Missing WebView2 prerequisite file prevents the installer build.
+- Failed WebView2 installation prevents application launch.
+- A running application is handled safely.
+- A damaged customer database enters the established recovery state.
+- Installer failure does not remove existing customer data.
+
+Testing
+
+Add focused automated tests where packaging behavior can be tested without a
+full Windows installer environment, including:
+
+- Frozen-resource resolution
+- Packaged Windows data-root selection
+- Product and version metadata values
+- Exclusion of customer-data files
+- Stable application and installer identifiers
+- Build-script validation
+- Artifact naming
+- Shortcut definitions
+- Per-user installation configuration
+- Data-preserving uninstall configuration
+- WebView2 detection logic
+- Missing-prerequisite failure
+- Optional-signing configuration
+- Bundle-content auditing
+- Build imports creating no desktop side effects
+
+Use manual or scripted Windows acceptance checks for behavior that cannot be
+reliably tested inside pytest.
+
+Do not weaken tests merely because code is frozen.
+
+Documentation
+
+Add concise developer documentation explaining:
+
+- Supported Windows versions and architecture
+- Required packaging tools
+- How to obtain and verify the WebView2 offline installer
+- How to provide the Windows icon
+- How to create a clean development package
+- How to create a signing-enabled package
+- Artifact locations
+- Installer behavior
+- Install and customer-data paths
+- Upgrade behavior
+- Uninstall data-preservation behavior
+- Clean Windows acceptance-testing procedure
+- Known unsigned-development-build behavior
+
+Scope
+
+Do not implement:
+
+- macOS packaging
+- ARM64 Windows packaging
+- 32-bit Windows packaging
+- Microsoft Store distribution
+- MSIX
+- Automatic updates
+- License-key systems
+- Cloud services
+- Telemetry
+- Crash-report uploading
+- Destructive data removal during uninstall
+- Final V1 publication
+
+Do not change business functionality, calculations, persistence rules, or
+customer workflows.
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused packaging, frozen-runtime, data-path, and metadata tests.
+2. Run the full automated test suite.
+3. Run git diff --check.
+4. Build the PyInstaller Windows bundle when the required Windows tools are
+   available.
+5. Build the Inno Setup installer when the required prerequisite files and
+   compiler are available.
+6. Report the exact generated artifact paths and SHA-256 checksums.
+7. Summarize clean install, upgrade, uninstall, and data-preservation behavior.
+8. List every manual Windows acceptance check completed.
+9. Clearly report any packaging tool, prerequisite, signing certificate, or
+   clean test environment that was unavailable.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
 

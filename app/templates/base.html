@@ -19,7 +19,7 @@
     <div class="app-shell">
       <header class="app-header">
         <div class="app-header__content">
-          <a class="wordmark" href="{{ url_for('main.calculator') }}">
+          <a class="wordmark" href="{{ url_for('main.home') }}">
             Food Truck Event Profit Calculator
           </a>
         </div>
@@ -27,26 +27,29 @@
 
       <nav class="app-navigation" aria-label="Primary navigation">
         <div class="app-navigation__content">
-          <a
-            class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
-            href="{{ url_for('main.defaults') }}"
-          >
-            Defaults
-          </a>
-
-          <a
-            class="nav-link {% if active_page == 'calculator' %}nav-link--active{% endif %}"
-            href="{{ url_for('main.calculator') }}"
-          >
-            Event Inputs
-          </a>
-
-          <a data-discard-navigation
-            class="nav-link {% if active_page == 'saved_events' %}nav-link--active{% endif %}"
-            href="{{ url_for('main.saved_events') }}"
-          >
-            Saved Events
-          </a>
+          {% if business_defaults_setup_complete %}
+            <a data-discard-navigation
+              class="nav-link {% if active_page == 'dashboard' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a data-discard-navigation
+              class="nav-link {% if active_page == 'calculator' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.calculator') }}">Analyze new event</a>
+            <a data-discard-navigation
+              class="nav-link {% if active_page == 'saved_events' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.saved_events') }}">Saved events</a>
+            <a data-discard-navigation class="nav-link"
+              href="{{ url_for('main.saved_events') }}#comparison-selection-form">
+              Compare scenarios
+            </a>
+            <a data-discard-navigation
+              class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.defaults') }}">Business defaults</a>
+          {% else %}
+            <a class="nav-link {% if active_page == 'welcome' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.welcome') }}">Welcome</a>
+            <a class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.defaults') }}">Business defaults</a>
+          {% endif %}
         </div>
       </nav>
 

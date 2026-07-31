@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <p class="page-eyebrow">Dashboard</p>
+    <h1>Plan your next event</h1>
+    <p class="page-description">
+      Business defaults are available. Start a new analysis or manage saved work.
+    </p>
+  </header>
+
+  <div class="dashboard-stats">
+    <p><strong>{{ event_count }}</strong> saved Event{% if event_count != 1 %}s{% endif %}</p>
+    <p><strong>{{ scenario_count }}</strong> saved Scenario{% if scenario_count != 1 %}s{% endif %}</p>
+  </div>
+
+  {% if event_count == 0 %}
+    <div class="placeholder-panel dashboard-prompt">
+      <h2>Analyze your first event</h2>
+      <p>Use your saved defaults as a starting point.</p>
+    </div>
+  {% endif %}
+
+  <div class="dashboard-actions">
+    <a class="button" href="{{ url_for('main.calculator') }}">Analyze new event</a>
+    <a class="button-secondary" href="{{ url_for('main.saved_events') }}">View saved events</a>
+    {% if scenario_count >= 2 %}
+      <a class="button-secondary"
+        href="{{ url_for('main.saved_events') }}#comparison-selection-form">
+        Compare scenarios
+      </a>
+    {% else %}
+      <div class="dashboard-unavailable">
+        <strong>Compare scenarios</strong>
+        <p>At least two saved Scenarios are required.</p>
+      </div>
+    {% endif %}
+    <a class="button-secondary" href="{{ url_for('main.defaults') }}">
+      Update business defaults
+    </a>
+  </div>
+</section>
+{% endblock %}

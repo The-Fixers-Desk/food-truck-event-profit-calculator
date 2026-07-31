@@ -24,7 +24,7 @@ def saved_event_counts(database_path) -> tuple[int, int]:
 
 
 def test_event_inputs_page_opens(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert response.status_code == 200
     assert b"<h1>Event Inputs</h1>" in response.data
@@ -43,7 +43,7 @@ def test_event_inputs_page_opens(client):
 def test_event_identification_fields_are_present_and_required(
     client, field_name, input_type
 ):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert f'name="{field_name}"'.encode() in response.data
     assert f'type="{input_type}"'.encode() in response.data
@@ -65,7 +65,7 @@ def test_required_event_identification_fields_are_validated(
     form_data = valid_event_identification()
     form_data[field_name] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert response.status_code == 200
     assert expected_error in response.data
@@ -85,7 +85,7 @@ def test_invalid_values_are_preserved(
     form_data = valid_event_identification()
     form_data[field_name] = invalid_value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{invalid_value}"'.encode() in response.data
@@ -101,7 +101,7 @@ def test_event_identification_does_not_create_records(
     if not valid_submission:
         form_data["event_name"] = ""
 
-    client.post("/", data=form_data)
+    client.post("/events/new", data=form_data)
 
     assert saved_event_counts(database_path) == (0, 0)
 
@@ -110,4 +110,5 @@ def test_navigation_reaches_event_inputs(client):
     response = client.get("/defaults")
 
     assert b'href="/"' in response.data
-    assert b"Event Inputs" in response.data
+    assert b'href="/events/new"' in response.data
+    assert b"Analyze new event" in response.data

@@ -12,6 +12,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     )
     app.config.from_mapping(
         DATABASE=Path(app.root_path).parent / "data" / "app.db",
+        ENFORCE_SETUP=True,
         SECRET_KEY="development-only",
     )
 
@@ -31,6 +32,17 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.teardown_appcontext(close_database)
     with app.app_context():
         initialize_database()
+
+    @app.context_processor
+    def application_state():
+        from app.database import business_defaults_setup_is_complete
+
+        return {
+            "business_defaults_setup_complete": (
+                not app.config.get("ENFORCE_SETUP", True)
+                or business_defaults_setup_is_complete()
+            )
+        }
 
     if app.config.get("TESTING"):
 

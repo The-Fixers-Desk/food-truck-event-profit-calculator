@@ -67,3 +67,36 @@
   margin: 0;
   color: var(--color-text-muted);
 }
+
+.workflow-steps,
+.dashboard-actions {
+  display: grid;
+  gap: var(--space-4);
+  margin-block: var(--space-6);
+}
+
+.workflow-steps li,
+.dashboard-stats,
+.dashboard-unavailable {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.workflow-steps h2,
+.workflow-steps p,
+.dashboard-stats p,
+.dashboard-unavailable p {
+  margin-block: 0;
+}
+
+.dashboard-stats {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.dashboard-prompt {
+  min-height: auto;
+  margin-block: var(--space-5);
+}

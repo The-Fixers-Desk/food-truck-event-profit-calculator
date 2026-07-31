@@ -23,7 +23,7 @@ def saved_ids(database_path):
 def test_valid_submission_persists_complete_original_estimate(
     client, database_path
 ):
-    response = client.post("/", data=complete_event_inputs())
+    response = client.post("/events/new", data=complete_event_inputs())
 
     assert b"Event Analysis" in response.data
     with sqlite3.connect(database_path) as database:
@@ -74,7 +74,7 @@ def test_initial_save_rolls_back_if_a_child_write_fails(
         database_module, "_insert_scenario_children", fail_children
     )
 
-    response = client.post("/", data=complete_event_inputs())
+    response = client.post("/events/new", data=complete_event_inputs())
 
     assert b"Event Inputs" in response.data
     assert b"The event could not be saved." in response.data
@@ -90,8 +90,8 @@ def test_initial_save_rolls_back_if_a_child_write_fails(
 def test_separate_valid_submissions_create_separate_events(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
 
     with sqlite3.connect(database_path) as database:
         assert database.execute(
@@ -106,7 +106,7 @@ def test_separate_valid_submissions_create_separate_events(
 
 
 def test_calculated_results_are_not_persisted(client, database_path):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
 
     with sqlite3.connect(database_path) as database:
         columns = {
@@ -124,7 +124,7 @@ def test_calculated_results_are_not_persisted(client, database_path):
 def test_persisted_assumptions_reproduce_workspace_calculation(
     client, app, database_path
 ):
-    response = client.post("/", data=complete_event_inputs())
+    response = client.post("/events/new", data=complete_event_inputs())
     _, scenario_id = saved_ids(database_path)
 
     with app.app_context():
@@ -137,7 +137,7 @@ def test_persisted_assumptions_reproduce_workspace_calculation(
 
 
 def test_save_as_new_requires_unique_trimmed_name(client, database_path):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = saved_ids(database_path)
     form_data = complete_event_inputs()
     form_data.update(
@@ -168,7 +168,7 @@ def test_save_as_new_requires_unique_trimmed_name(client, database_path):
 def test_save_as_new_creates_sibling_and_makes_it_active(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, original_id = saved_ids(database_path)
     form_data = complete_event_inputs()
     form_data.update(
@@ -204,9 +204,9 @@ def test_save_as_new_creates_sibling_and_makes_it_active(
 def test_same_scenario_name_is_allowed_for_different_events(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     first_event, first_scenario = saved_ids(database_path)
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     second_event, second_scenario = saved_ids(database_path)
     form_data = complete_event_inputs()
     form_data.update(
@@ -235,7 +235,7 @@ def test_same_scenario_name_is_allowed_for_different_events(
 def test_overwrite_requires_confirmation_and_preserves_identity(
     client, database_path
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = saved_ids(database_path)
     with sqlite3.connect(database_path) as database:
         database.execute(
@@ -290,7 +290,7 @@ def test_overwrite_requires_confirmation_and_preserves_identity(
 def test_overwrite_replaces_ordered_children_transactionally(
     client, database_path, monkeypatch
 ):
-    client.post("/", data=complete_event_inputs())
+    client.post("/events/new", data=complete_event_inputs())
     event_id, scenario_id = saved_ids(database_path)
     form_data = complete_event_inputs()
     form_data.update(

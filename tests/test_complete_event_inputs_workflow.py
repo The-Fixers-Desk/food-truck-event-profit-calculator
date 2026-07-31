@@ -92,7 +92,7 @@ def test_saved_business_defaults_prefill_new_event_without_business_name(
 ):
     client.post("/defaults", data=saved_defaults_data())
 
-    response = client.get("/")
+    response = client.get("/events/new")
     page = response.data.decode()
 
     assert 'name="event_name"' in page
@@ -107,7 +107,7 @@ def test_saved_business_defaults_prefill_new_event_without_business_name(
 def test_event_specific_fields_remain_blank_when_defaults_are_applied(client):
     client.post("/defaults", data=saved_defaults_data())
 
-    page = client.get("/").data.decode()
+    page = client.get("/events/new").data.decode()
 
     for field_name in (
         "event_name",
@@ -129,7 +129,7 @@ def test_event_specific_fields_remain_blank_when_defaults_are_applied(client):
 
 
 def test_event_inputs_page_does_not_crash_without_defaults(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert response.status_code == 200
     assert b"From defaults" not in response.data
@@ -152,7 +152,7 @@ def test_complete_valid_form_covers_every_section_and_saves_initial_scenario(
     assert len(values["employee_labor"]) == 2
     assert len(values["additional_costs"]) == 2
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     assert response.status_code == 200
     with sqlite3.connect(database_path) as database:
         assert database.execute(
@@ -172,7 +172,7 @@ def test_event_overrides_survive_errors_and_do_not_modify_defaults(
     add_default_baselines(form_data)
     form_data["event_name"] = ""
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Event name is required." in response.data
     for value in ("16.50", "900", "75", "3.25", "20", "150", "80"):
@@ -189,7 +189,7 @@ def test_required_card_and_profit_target_validation(client):
     form_data["minimum_profit_amount"] = ""
     form_data["minimum_profit_margin"] = "99"
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Sales paid by card is required." in response.data
     assert b"Card-processing percentage must be between 0 and 100." in (
@@ -200,7 +200,7 @@ def test_required_card_and_profit_target_validation(client):
 
 
 def test_estimate_and_event_only_indicators_are_visible(client):
-    page = client.get("/").data.decode()
+    page = client.get("/events/new").data.decode()
 
     assert "Changes on this screen apply only to this event." in page
     assert page.count("Estimate") >= 5

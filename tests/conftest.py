@@ -20,6 +20,7 @@ def app(database_path: Path) -> Generator[Flask, None, None]:
     application = create_app(
         {
             "DATABASE": database_path,
+            "ENFORCE_SETUP": False,
             "SECRET_KEY": "test",
             "TESTING": True,
             "PROPAGATE_EXCEPTIONS": False,

@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build complete event comparison workflow
-
-- Add selection for comparing two to four saved Scenarios
-- Support comparisons within one Event or across different Events
-- Recalculate every Scenario from its saved assumptions
-- Add baseline selection and factual value differences
-- Compare financial results, assumptions, targets, and warnings
-- Highlight highest profit, lowest cost, and lowest break-even requirement
-- Add Show differences only behavior
-- Open any compared Scenario in the interactive workspace
-- Add responsive, accessible comparison and error states
-- Add comparison, route, persistence, and workspace tests
-
----------------------------------------------------------------------------------
-
 Build Dashboard and first-use application flow
 
 - Add the first-launch Welcome screen and four-step workflow

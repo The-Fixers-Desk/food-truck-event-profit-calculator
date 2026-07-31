@@ -261,6 +261,11 @@
 
     <div class="form-actions">
       <button class="button" type="submit">Save defaults</button>
+      {% if business_defaults_setup_complete %}
+        <a class="button-secondary" href="{{ url_for('main.dashboard') }}">
+          Back to Dashboard
+        </a>
+      {% endif %}
     </div>
   </form>
 </section>

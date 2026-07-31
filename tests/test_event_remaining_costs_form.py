@@ -51,7 +51,7 @@ def valid_event_inputs() -> dict[str, str | list[str]]:
 
 
 def test_all_dedicated_cost_and_fee_fields_are_present(client):
-    response = client.get("/")
+    response = client.get("/events/new")
 
     assert b"Travel and operating costs" in response.data
     assert b"Event and payment fees" in response.data
@@ -60,7 +60,7 @@ def test_all_dedicated_cost_and_fee_fields_are_present(client):
 
 
 def test_all_dedicated_cost_and_fee_fields_are_optional(client):
-    response = client.post("/", data=valid_event_inputs())
+    response = client.post("/events/new", data=valid_event_inputs())
 
     for label in (
         "Travel cost",
@@ -97,14 +97,14 @@ def test_organizer_commission_validation_preserves_value(
     form_data = valid_event_inputs()
     form_data["organizer_commission_percentage"] = value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{value}"'.encode() in response.data
 
 
 def test_fixed_processing_fee_wording_is_transaction_based(client):
-    response = client.get("/")
+    response = client.get("/events/new")
     page = " ".join(response.data.decode().split())
 
     assert "Fixed card-processing fee per card transaction ($)" in page
@@ -130,14 +130,14 @@ def test_fixed_processing_fee_validation_preserves_value(
     form_data = valid_event_inputs()
     form_data["fixed_card_processing_fee"] = value
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{value}"'.encode() in response.data
 
 
 def test_additional_costs_start_empty_and_have_add_remove_controls(client):
-    response = client.get("/")
+    response = client.get("/events/new")
     entries_html = response.data.split(
         b'id="event-additional-cost-entries"', 1
     )[1].split(b'id="add-additional-cost"', 1)[0]
@@ -163,7 +163,7 @@ def test_multiple_additional_costs_preserve_order_and_values(client):
     ]
     form_data["additional_cost_amount"] = ["21.50", "42.75"]
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
     page = response.data.decode()
 
     assert page.index('value="Parking overflow"') < page.index(
@@ -178,7 +178,7 @@ def test_removed_additional_cost_is_absent_on_submission(client):
     form_data["additional_cost_name"] = ["Ice delivery"]
     form_data["additional_cost_amount"] = ["42.75"]
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b'value="Ice delivery"' in response.data
     assert b'value="42.75"' in response.data
@@ -214,7 +214,7 @@ def test_additional_cost_validation_preserves_rows(
     form_data["additional_cost_name"] = names
     form_data["additional_cost_amount"] = amounts
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert expected_error in response.data
     assert f'value="{names[0]}"'.encode() in response.data
@@ -230,7 +230,7 @@ def test_costs_and_rows_survive_unrelated_validation_error(client):
     form_data["additional_cost_name"] = ["Ice"]
     form_data["additional_cost_amount"] = ["40"]
 
-    response = client.post("/", data=form_data)
+    response = client.post("/events/new", data=form_data)
 
     assert b"Event name is required." in response.data
     for value in ("100", "5", "0.30", "Ice", "40"):
@@ -244,7 +244,7 @@ def test_invalid_remaining_costs_do_not_save_records(
     form_data["additional_cost_name"] = [""]
     form_data["additional_cost_amount"] = ["10"]
 
-    client.post("/", data=form_data)
+    client.post("/events/new", data=form_data)
 
     with sqlite3.connect(database_path) as database:
         event_count = database.execute(

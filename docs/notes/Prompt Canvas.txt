@@ -2,22 +2,9 @@ Prompt Canvas
 
 ---------------------------------------------------------------------------------
 
-Awesome. Next milestone is: Build the desktop application shell
-  Add the dedicated window, automatic local-server startup, safe shutdown,
-  single-instance protection, product identity, loading and error screens,
-  and verified offline use.
-
-Anything we need to do before we make a prompt for Codex?
-
----------------------------------------------------------------------------------
-
-Give me the commit message I will use when this is done.
-
----------------------------------------------------------------------------------
-
-Awesome. Next milestone is: Package the Windows application
-  Bundle dependencies, add metadata and icons, create the installer and
-  shortcuts, use the correct data location, and verify installation behavior.
+Awesome. Next milestone is: Add complete automated end-to-end workflow tests
+  Cover onboarding, defaults and overrides, event analysis, saved scenarios,
+  comparison, backup and restore, and application closure.
 
 Anything we need to do before we make a prompt for Codex?
 
@@ -34,4 +21,6 @@ Anything we need to do before we make a prompt for Codex?
 ---------------------------------------------------------------------------------
 
 Give me the commit message I will use when this is done.
+
+---------------------------------------------------------------------------------
 
