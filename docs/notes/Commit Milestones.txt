@@ -33,11 +33,11 @@ EVENT CALCULATOR — INPUTS
 ☑ Build labor cost section
   Current task; leave unchanged.
 
-□ Complete remaining event cost inputs
+☑ Complete remaining event cost inputs
   Includes travel, parking, permits, utilities, vendor or booking fees,
   organizer commission, fixed processing fees, and named miscellaneous costs.
 
-□ Finish the complete Event Inputs workflow
+☑ Finish the complete Event Inputs workflow
   Apply saved defaults, allow independent event overrides, finish all input
   validation, add estimated-input indicators, and verify the complete form.
 
@@ -49,25 +49,40 @@ CALCULATION AND RESULTS
   total costs, owner pay, business profit, and profit margin. Include unit
   tests and manual examples.
 
-□ Implement break-even analysis, constraints, and warnings
-  Calculate break-even sales and customers, identify profitability limits,
-  and add factual assumption and risk warnings with tests.
+□ Extend the calculation engine with break-even analysis and factual warnings
+  Use the existing calculation results to calculate break-even sales and
+  customers, evaluate the selected profit target, and produce factual
+  profitability and assumption warnings with focused tests.
 
-□ Build the complete Event Results workflow
-  Display all results, distinguish estimates, allow useful live assumption
-  changes, add reset and new-analysis actions, and verify the full
-  input-to-results flow.
+□ Build the Event Analysis workspace
+  Create the primary post-input experience with financial results and
+  adjustable scenario factors sharing the screen. Allow the user to adjust
+  attendance, weather, competition, sales assumptions, food costs, labor,
+  fees, and other relevant variables without returning to the initial setup
+  form.
+
+□ Add live scenario recalculation
+  Automatically update every dependent result and warning whenever an
+  adjustable assumption changes. Do not require a separate Calculate button.
+  Provide clear reset, start-new-event, and return-to-input actions.
+
+□ Add scenario save and version actions
+  Allow the current workspace state to be saved as the first scenario,
+  saved over an existing scenario, or saved as a new scenario without
+  overwriting the original.
 
 
 SAVED WORK AND COMPARISON
 
-□ Build saved event and scenario management
-  Save complete analyses, preserve assumptions, load, edit, duplicate,
-  delete, show success and error states, and verify restart persistence.
+□ Complete saved event and scenario management
+  List saved events and their scenarios, load any scenario directly into
+  the interactive Event Analysis workspace, rename, delete, and verify
+  persistence after restart.
 
 □ Build the complete event comparison workflow
-  List and select scenarios, compare financial results, highlight meaningful
-  differences, handle empty states, and open scenarios for review.
+  Select scenarios, compare their financial results and assumptions,
+  highlight meaningful differences, and open either scenario in the
+  interactive workspace.
 
 
 DASHBOARD AND ONBOARDING

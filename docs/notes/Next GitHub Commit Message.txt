@@ -2,12 +2,14 @@ Next GitHub Commit Message
 
 -----------------------------------------------------------
 
-Finish complete Event Inputs workflow
+Implement core calculation engine
 
-- Prefill new events with saved business defaults
-- Keep event-specific changes separate from saved defaults
-- Add From defaults, Changed for this event, and Estimate indicators
-- Complete validation across the full Event Inputs form
-- Preserve all entered values and repeatable rows after errors
-- Handle missing business defaults safely
-- Add complete-form and override-protection tests
+- Calculate weather-adjusted customers, expected orders, and expected sales
+- Support attendance-based estimates and custom expected-sales overrides
+- Calculate all three food and packaging cost methods
+- Calculate card-processing fees and organizer commission
+- Calculate employee labor, owner pay, and fixed event costs
+- Calculate total event cost, business profit, and profit margin
+- Represent zero-sales profit margin as not calculable
+- Use exact Decimal calculations without intermediate rounding
+- Add calculation result models, unit tests, and manual examples
