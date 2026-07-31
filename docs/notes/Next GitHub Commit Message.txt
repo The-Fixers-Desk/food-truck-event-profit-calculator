@@ -2,20 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Redesign Dashboard and saved-work views
-
-- Redesign Dashboard and Welcome as compact, task-focused launch experiences
-- Transform Saved Events into a searchable and sortable work library
-- Improve Event and Scenario identity, metadata, row actions, and empty states
-- Redesign Scenario selection and comparison for faster, clearer scanning
-- Improve baseline controls, differences-only behavior, and comparison readability
-- Redesign Data Safety around clear backup and restore task areas
-- Standardize management rows, toolbars, selection states, dialogs, and task panels
-- Preserve all existing persistence, comparison, backup, restore, and recovery behavior
-- Add responsive, accessibility, management-workflow, and regression test coverage
-
----------------------------------------------------------------------------------
-
 Complete V1 visual polish and interaction refinement
 
 - Perform a complete visual and interaction audit across the application

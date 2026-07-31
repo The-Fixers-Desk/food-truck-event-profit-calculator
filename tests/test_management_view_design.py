@@ -114,7 +114,8 @@ def test_data_safety_has_clear_normal_and_high_impact_tasks(client):
     assert "Download backup" in page
     assert "Restore replaces all current application data" in page
     assert "It does not merge records" in page
-    assert 'class="button-destructive" type="submit">Restore backup' in page
+    assert 'class="button-destructive" id="restore-backup"' in page
+    assert ">Restore backup</button>" in page
     assert "creates a recovery snapshot" in page
     assert "SQLite" not in page
 

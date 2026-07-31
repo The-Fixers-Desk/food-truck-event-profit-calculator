@@ -34,7 +34,25 @@ if (comparisonForm) {
     });
   });
   updateComparisonSelection();
+  comparisonForm.addEventListener("submit", () => {
+    compareButton.disabled = true;
+    compareButton.classList.add("is-loading");
+    compareButton.setAttribute("aria-busy", "true");
+    compareButton.textContent = "Comparing…";
+  });
 }
+
+document.querySelectorAll(".management-action form").forEach((form) => {
+  form.addEventListener("submit", () => {
+    const button = form.querySelector('button[type="submit"]');
+    if (!button) return;
+    button.disabled = true;
+    button.classList.add("is-loading");
+    button.setAttribute("aria-busy", "true");
+    button.textContent = button.textContent.trim().startsWith("Delete")
+      ? "Deleting…" : "Renaming…";
+  });
+});
 
 const savedWorkSearch = document.querySelector("#saved-work-search");
 const savedWorkSort = document.querySelector("#saved-work-sort");

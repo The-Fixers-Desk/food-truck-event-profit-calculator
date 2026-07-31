@@ -14,8 +14,7 @@
 .form-panel,
 .saved-event,
 .comparison-identity,
-.comparison-warning-grid article,
-.placeholder-panel {
+.comparison-warning-grid article {
   border: var(--border-default);
   border-radius: var(--radius-medium);
   background: var(--color-surface);
@@ -141,6 +140,13 @@ input[type="checkbox"], input[type="radio"] { width: 1.125rem; height: 1.125rem;
 dialog, .dialog, .save-analysis-dialog { max-width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); padding: var(--space-5); overflow: auto; border: var(--border-default); border-radius: var(--radius-large); background: var(--color-surface-elevated); box-shadow: var(--shadow-3); color: var(--color-text); }
 dialog::backdrop { background: rgb(24 35 45 / 52%); }
 .dialog__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
+
+summary {
+  border-radius: var(--radius-xs);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+summary:hover { color: var(--color-primary-hover); }
+[aria-busy="true"] { cursor: progress; }
 
 @keyframes ds-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {

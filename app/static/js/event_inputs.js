@@ -862,6 +862,7 @@ if (workspaceForm && saveAnalysisDialog) {
   const scenarioNameError = document.querySelector("#scenario-name-error");
   const overwriteError = document.querySelector("#overwrite-error");
   const saveError = document.querySelector("#save-analysis-error");
+  const confirmSave = document.querySelector("#confirm-save-analysis");
   saveAnalysisDialog.addEventListener("close", () => saveDialogTrigger.focus());
 
   function clearSaveErrors() {
@@ -885,6 +886,8 @@ if (workspaceForm && saveAnalysisDialog) {
     if (saveAsNew) {
       overwriteConfirmation.checked = false;
     }
+    confirmSave.textContent = saveAsNew
+      ? "Save as new scenario" : "Overwrite current scenario";
     clearSaveErrors();
   }
 
@@ -917,12 +920,16 @@ if (workspaceForm && saveAnalysisDialog) {
     () => saveAnalysisDialog.close(),
   );
 
-  document.querySelector("#confirm-save-analysis").addEventListener(
+  confirmSave.addEventListener(
     "click",
     async () => {
       clearSaveErrors();
       const formData = new FormData(workspaceForm);
       const mode = selectedSaveMode();
+      confirmSave.disabled = true;
+      confirmSave.classList.add("is-loading");
+      confirmSave.setAttribute("aria-busy", "true");
+      confirmSave.textContent = mode === "new" ? "Saving…" : "Overwriting…";
       formData.set("save_mode", mode);
       formData.set("scenario_name", newNameInput.value);
       formData.set(
@@ -971,6 +978,12 @@ if (workspaceForm && saveAnalysisDialog) {
         saveError.textContent =
           "The scenario could not be saved. Your changes are preserved.";
         saveError.hidden = false;
+      } finally {
+        confirmSave.disabled = false;
+        confirmSave.classList.remove("is-loading");
+        confirmSave.removeAttribute("aria-busy");
+        confirmSave.textContent = mode === "new"
+          ? "Save as new scenario" : "Overwrite current scenario";
       }
     },
   );

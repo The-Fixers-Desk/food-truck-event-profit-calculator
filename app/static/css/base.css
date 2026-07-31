@@ -58,13 +58,26 @@ h1 {
   line-height: 1.1;
 }
 
+h1, h2, h3, p, dd, td, th {
+  overflow-wrap: anywhere;
+}
+
+input, select, textarea, button, summary, [tabindex] {
+  scroll-margin-block: 5rem;
+}
+
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 button,

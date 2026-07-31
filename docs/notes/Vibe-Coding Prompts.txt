@@ -18,3 +18,7 @@ Give me the commit message I will use when this is done. Summary and description
 
 Make a milestone list entry, and a Codex prompt for INSERT
 
+---------------------------------------------------------------------------------
+
+I agree with everything you just said. Make a milestone list entry, and a Codex prompt for all the corrections you just listed.
+

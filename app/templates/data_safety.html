@@ -31,8 +31,8 @@
     <section class="safety-action-panel safety-action-panel--primary">
       <h2>Download backup</h2>
       <p>Save a local copy of your Defaults, Events, Scenarios, labor, and additional costs.</p>
-      <form method="post" action="{{ url_for('main.download_backup') }}">
-        <button class="button" type="submit">Download backup</button>
+      <form id="download-backup-form" method="post" action="{{ url_for('main.download_backup') }}">
+        <button class="button" id="download-backup" type="submit">Download backup</button>
       </form>
       <details class="supporting-disclosure">
         <summary>About local backups</summary>
@@ -47,7 +47,7 @@
     {% if restore_error %}
       <p class="field-error" role="alert">{{ restore_error }}</p>
     {% endif %}
-    <form method="post" enctype="multipart/form-data"
+    <form id="restore-backup-form" method="post" enctype="multipart/form-data"
       action="{{ url_for('main.restore_backup') }}">
       <div class="form-field">
         <label class="form-label" for="backup-file">Backup file</label>
@@ -59,7 +59,7 @@
         I understand that this replaces all current saved data.
       </label>
       <div class="form-actions">
-        <button class="button-destructive" type="submit">Restore backup</button>
+        <button class="button-destructive" id="restore-backup" type="submit">Restore backup</button>
       </div>
     </form>
     <details class="supporting-disclosure">
@@ -68,5 +68,6 @@
     </details>
   </section>
   </div>
+  <script src="{{ url_for('static', filename='js/data_safety.js') }}"></script>
 </section>
 {% endblock %}

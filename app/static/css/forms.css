@@ -46,12 +46,12 @@
 }
 
 .form-input[aria-invalid="true"] {
-  border-color: #a12622;
+  border-color: var(--color-danger);
 }
 
 .field-error {
   margin: 0;
-  color: #a12622;
+  color: var(--color-danger);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -482,35 +482,10 @@
   padding: 0 0 var(--space-4) var(--space-3);
 }
 
-.result-summary,
-.result-section {
-  display: grid;
-  gap: var(--space-2);
-  padding-block: var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
-
-.result-summary {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.result-section h3 {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-heading);
-  font-size: 1rem;
-}
-
 .result-item {
   display: flex;
   gap: var(--space-3);
   justify-content: space-between;
-}
-
-.result-item--key {
-  display: grid;
-  padding: var(--space-2);
-  background: var(--color-background);
-  border-radius: var(--radius-small);
 }
 
 .analysis-warnings {
@@ -521,7 +496,7 @@
 }
 
 .analysis-warnings [data-severity="critical"] {
-  color: #8b1a1a;
+  color: var(--color-danger);
   font-weight: 700;
 }
 
@@ -644,7 +619,7 @@
 }
 
 .danger-action summary {
-  color: #8b1a1a;
+  color: var(--color-danger);
 }
 
 @media (max-width: 600px) {
@@ -694,7 +669,6 @@
 
 @media (max-width: 800px) {
   .form-grid,
-  .result-summary,
   .review-grid,
   .analysis-workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -818,7 +792,7 @@
 
 .live-field-error {
   margin: 0;
-  color: #a12622;
+  color: var(--color-danger);
   font-size: 0.875rem;
   font-weight: 600;
 }

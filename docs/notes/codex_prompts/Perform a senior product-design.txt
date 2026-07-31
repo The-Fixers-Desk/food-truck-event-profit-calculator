@@ -1,0 +1,814 @@
+Implement the milestone:
+
+Perform a senior product-design audit and simplify the full application.
+
+The application already has:
+
+- a V1 design system
+- a persistent application shell
+- guided Business Defaults and Event Inputs workflows
+- a redesigned Event Analysis workspace
+- redesigned Dashboard and saved-work views
+- a whole-application visual-polish pass
+- complete functional behavior and regression coverage
+
+The result is materially improved, but it remains too conservative.
+
+It still feels like carefully styled HTML rather than a truly composed,
+professional desktop application.
+
+This milestone is not another component-polish pass.
+
+Perform a senior product-design audit of the complete application and make
+substantial editorial and compositional corrections.
+
+You have explicit permission to:
+
+- remove redundant interface elements
+- combine duplicated actions
+- move actions to more appropriate locations
+- hide low-priority information behind progressive disclosure
+- reduce or remove unnecessary cards, borders, and containers
+- simplify navigation
+- substantially recompose page layouts
+- reduce visible metadata
+- make secondary information genuinely secondary
+- make whole rows or surfaces interactive when that is clearer than repeated
+  buttons
+- replace weak content summaries with more decision-relevant summaries using
+  existing data
+- change customer-facing wording where meaning is preserved
+- simplify screens even when that produces a substantial template diff
+
+Preserve every actual capability.
+
+Do not remove access to any current workflow or customer data.
+
+Primary objective
+
+The application should feel comparable in clarity, focus, restraint, and
+composition—not visual imitation—to products such as:
+
+- ChatGPT
+- Notion
+- Linear
+- Stripe Dashboard
+- Zillow
+
+Do not copy their interfaces.
+
+Use them as a quality bar for:
+
+- one dominant task per screen
+- editorial composition
+- confident use of whitespace
+- minimal visual noise
+- strong hierarchy
+- restrained chrome
+- clear action priority
+- progressive disclosure
+- professional interaction patterns
+- deliberate reduction of redundancy
+
+Core design principle
+
+Every screen must answer:
+
+“What is the primary job of this screen?”
+
+Then visually subordinate everything that does not directly support that job.
+
+Do not treat all useful information or actions as equally important.
+
+The application should be understandable quickly without presenting every
+available action at once.
+
+Whole-application audit
+
+Audit and recompose every customer-facing screen:
+
+- Welcome
+- Dashboard
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- Saved Events
+- Scenario selection
+- Scenario Comparison
+- Data Safety
+- dialogs
+- empty states
+- no-results states
+- warnings
+- error states
+- recovery states
+- not-found states
+- narrow layouts
+- long-content states
+
+For every screen, identify:
+
+1. The primary task
+2. The primary focal point
+3. The primary action
+4. Secondary actions
+5. Tertiary information
+6. Redundant content
+7. Unnecessary boundaries
+8. Repeated navigation
+9. Content that should be hidden initially
+10. Content that should be removed entirely
+
+Implement the corrections rather than only documenting them.
+
+Do not require the developer to enumerate obvious visual issues one by one.
+
+Dashboard
+
+The Dashboard currently contains too many similarly weighted destinations and
+duplicates global navigation.
+
+Redesign it around one dominant task:
+
+Analyze a new event
+
+Recommended composition:
+
+1. Restrained page context
+2. Strong primary invitation to analyze a new event
+3. One prominent “continue where you left off” item
+4. A small number of quiet recent-work rows
+5. One restrained link to view all saved work
+
+Remove redundant shortcut cards that duplicate the sidebar, including direct
+Dashboard cards for:
+
+- Saved Events
+- Business Defaults
+- Data Safety
+- Compare Scenarios
+
+Those capabilities remain available through global navigation.
+
+Do not remove global access.
+
+The Dashboard should not resemble an analytics dashboard.
+
+Do not add:
+
+- vanity metrics
+- invented trends
+- charts
+- fake activity
+- decorative statistics
+
+Counts such as saved Event and Scenario totals may remain only if they genuinely
+support context and are visually quiet.
+
+Prefer decision-relevant existing information where available, such as:
+
+- most recently used Scenario
+- whether its target is met
+- current expected business profit
+- one Event that needs attention
+
+Use only existing calculated and persisted data.
+
+Do not add new calculations or persistence.
+
+Dashboard recent work
+
+Replace repeated full-width “Continue analysis” buttons where a simpler row
+interaction is clearer.
+
+Preferred pattern:
+
+- Event name
+- Scenario name or status
+- concise date or location metadata
+- one decision-relevant result where already available
+- subtle directional affordance
+- the whole row opens analysis
+
+Ensure:
+
+- keyboard accessibility
+- clear hover and focus
+- accessible link purpose
+- row actions do not conflict with nested controls
+
+Do not make every recent item a large card.
+
+Limit the Dashboard to the most useful recent items.
+
+Saved Events remains the full library.
+
+Application chrome
+
+Audit the shell for chrome that consumes space without adding meaning.
+
+Specifically review:
+
+- the “Workspace” top strip
+- duplicate page titles
+- duplicate context labels
+- sidebar branding
+- navigation bullets
+- selected-state treatment
+- excess borders
+- application-wide dividers
+
+Remove or simplify elements that do not improve orientation.
+
+The top context region should exist only where it communicates useful current
+context or actions.
+
+Do not retain an empty or generic “Workspace” label merely because the shell
+supports one.
+
+Global navigation
+
+Refine the left navigation so it feels intentional and professional.
+
+Requirements:
+
+- replace weak circular bullets with the established consistent icon family
+- use clear labels
+- selected state should be confident but restrained
+- avoid heavy card-like selected navigation if a simpler treatment is clearer
+- reduce unnecessary outlines and shadows
+- maintain product identity without consuming excess space
+- preserve current routes and safeguards
+- retain keyboard and screen-reader semantics
+
+Do not use decorative icons.
+
+Do not create duplicate global navigation elsewhere.
+
+Brand hierarchy
+
+Keep:
+
+The Fixer’s Desk
+
+Food Truck Event Profit Calculator
+
+But refine their hierarchy.
+
+The company identity should be subtle.
+
+The product identity should remain understandable.
+
+Do not let two small text lines look like incidental metadata.
+
+Use the established typography system intentionally.
+
+Visual boundaries
+
+The current application still relies too heavily on visible borders and
+outlined containers.
+
+Perform a boundary-reduction pass.
+
+Remove cards, borders, or outlines where grouping can be communicated through:
+
+- spacing
+- alignment
+- typography
+- dividers
+- surface contrast
+- row structure
+
+Use cards only when they represent:
+
+- an independent task
+- a selectable object
+- a decision summary
+- an elevated status
+- a bounded management object
+
+Do not:
+
+- wrap ordinary text links in bordered rectangles
+- put every section in a card
+- use cards to duplicate navigation
+- nest cards without strong semantic reason
+- use shadows to compensate for weak hierarchy
+
+Buttons and links
+
+Audit whether repeated buttons should instead be:
+
+- whole-row links
+- compact text actions
+- overflow-menu actions
+- icon-and-label actions
+- one shared primary action
+
+Do not preserve a full rectangular button merely because one existed before.
+
+Primary buttons should remain rare.
+
+A normal screen should generally have only one visually dominant primary
+action.
+
+Secondary actions should be restrained.
+
+Tertiary actions should often be links or overflow actions.
+
+Destructive actions should remain discoverable but quiet until intentionally
+opened.
+
+Information hierarchy
+
+Increase the contrast between:
+
+- primary content
+- secondary content
+- tertiary metadata
+
+Do not let:
+
+- section links
+- scenario counts
+- metadata
+- buttons
+- headings
+- badges
+
+all compete at similar visual weight.
+
+Use:
+
+- font size
+- weight
+- contrast
+- placement
+- whitespace
+- density
+
+to establish priority.
+
+Secondary text should be genuinely quiet while maintaining accessible contrast.
+
+Metadata
+
+Reduce raw metadata strings and separator-heavy presentation.
+
+Standardize compact metadata patterns for:
+
+- Scenario name
+- Event date
+- location
+- modified date
+- Scenario count
+- target status
+- expected business profit
+
+Do not display all available metadata simply because it exists.
+
+Show what helps identify or evaluate the item.
+
+Use progressive disclosure or detailed screens for the rest.
+
+Welcome
+
+Recompose Welcome around:
+
+- what the product helps the user decide
+- the short established first-use sequence
+- one obvious Get started action
+
+Remove any remaining landing-page or documentation-style composition.
+
+The user should understand the product and next action within seconds.
+
+Business Defaults and Event Inputs
+
+Audit the guided workflows after their redesign.
+
+Do not rebuild the stage model.
+
+Simplify remaining visual friction:
+
+- unnecessary stage chrome
+- over-explained helper text
+- repeated badges
+- excessive bordered groups
+- redundant review content
+- too many same-weight labels
+- oversized action regions
+
+Maintain:
+
+- all stages
+- all fields
+- all validation
+- all warnings
+- all review behavior
+- all persistence semantics
+
+The active stage should remain the focal point.
+
+Event Analysis
+
+Audit the flagship workspace with the same editorial authority.
+
+Ensure:
+
+- Business Profit is unmistakably primary
+- target status is immediately visible
+- break-even is prominent
+- major warnings are readable
+- assumptions remain easy to manipulate
+- detailed calculations remain subordinate
+- Scenario actions are clear but not visually overwhelming
+- every visible number is formatted professionally
+- no raw Decimal strings are exposed
+- the workspace uses horizontal space intentionally
+- the screen does not feel like a form next to a report
+
+Reduce:
+
+- excessive panels
+- equal-weight metric cards
+- repeated section labels
+- unnecessary border boxes
+- always-visible low-priority calculations
+
+Preserve all live recalculation and Scenario behavior.
+
+Saved Events
+
+Ensure Saved Events feels like a compact library rather than a vertical stack of
+large cards.
+
+Use:
+
+- search
+- sort
+- compact Event grouping
+- concise Scenario rows
+- whole-row open behavior where appropriate
+- secondary overflow actions
+- clear hierarchy between Event and Scenario
+
+Avoid:
+
+- full buttons repeated on every row when unnecessary
+- repeated metadata
+- giant white cards
+- excessive indentation
+- heavy outlines
+- destructive actions presented too prominently
+
+Preserve rename, delete, final-Scenario protection, and all persistence behavior.
+
+Scenario selection
+
+Make selection fast and obvious.
+
+Prioritize:
+
+- Scenario identity
+- Event identity
+- selected state
+- selected count
+- Compare selected action
+
+Remove unnecessary record chrome.
+
+Make the whole selectable row operate predictably where accessible and safe.
+
+Preserve two-to-four selection limits.
+
+Scenario Comparison
+
+Audit the Comparison screen for data density and reading flow.
+
+Prioritize:
+
+1. baseline identity
+2. Scenario identity
+3. business profit
+4. target status
+5. break-even
+6. meaningful result differences
+7. assumption differences
+
+Reduce repeated Scenario names and heavy table borders.
+
+Use sticky or persistent comparison headers where helpful.
+
+Use localized horizontal scrolling only when necessary.
+
+Do not split aligned comparison data into unrelated cards.
+
+Preserve all calculations and comparison semantics.
+
+Data Safety
+
+Simplify normal Data Safety into two clear tasks:
+
+- Download backup
+- Restore backup
+
+Do not make the page resemble a warning screen during normal operation.
+
+Use concise explanations and progressive disclosure.
+
+Restore remains visually distinct and appropriately cautionary without
+competing with the normal backup action.
+
+Preserve every safeguard.
+
+Empty and no-results states
+
+Audit every empty and no-results state.
+
+Each should have:
+
+- one clear title
+- one sentence
+- one primary next action
+
+Remove decorative filler and duplicated navigation.
+
+No-data and no-search-results states must remain distinct.
+
+Composition and whitespace
+
+Use whitespace as hierarchy rather than simply increasing padding.
+
+Every screen should feel composed around its primary task.
+
+Avoid placing all content at the top-left merely because document flow does so
+by default.
+
+Where appropriate, use:
+
+- vertical centering for initial task entry
+- balanced content columns
+- deliberate negative space
+- narrower focus regions inside a wider workspace
+- quiet lower-priority content zones
+
+Do not create large empty space that pushes useful work below the fold.
+
+The goal is focused composition, not arbitrary spaciousness.
+
+Responsive behavior
+
+Preserve the same hierarchy at narrower widths.
+
+Do not merely stack every element at full visual weight.
+
+When space contracts:
+
+- keep the primary task first
+- collapse or hide tertiary information
+- preserve primary actions
+- keep identity visible
+- avoid duplicate mobile navigation
+- avoid accidental page-wide scrolling
+- keep whole-row actions understandable
+
+Accessibility
+
+All simplification must preserve or improve:
+
+- semantic landmarks
+- keyboard access
+- visible focus
+- accessible names
+- current-page state
+- whole-row link semantics
+- target size
+- status communication
+- warning announcements
+- dialog behavior
+- logical source order
+- reduced-motion behavior
+
+Do not create inaccessible clickable containers.
+
+When making a whole row interactive, use valid link or button semantics rather
+than generic JavaScript click handlers.
+
+No capability loss
+
+Create a capability inventory before making changes.
+
+Verify continued access to:
+
+- Dashboard
+- new analysis
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- save
+- save as new
+- overwrite
+- reset
+- rename
+- delete
+- Saved Events
+- search
+- sort
+- comparison selection
+- comparison results
+- baseline selection
+- Show differences only
+- Data Safety
+- download backup
+- restore backup
+- recovery
+- onboarding
+- error handling
+
+Removing a duplicate action is allowed only if the same capability remains
+clearly accessible elsewhere.
+
+Do not silently remove workflows.
+
+Testing
+
+Add or update focused tests covering:
+
+Dashboard:
+- Analyze new event remains the sole dominant primary action
+- duplicate shortcut cards are absent
+- one recent item is presented prominently
+- only the intended number of recent items appears
+- whole-row Continue behavior is accessible
+- Saved Events remains linked
+- no fake analytics are introduced
+
+Shell:
+- generic Workspace text is absent when it has no meaningful context
+- sidebar uses established icons and labels
+- global navigation remains complete
+- selected state remains accessible
+- product identity remains present
+- route safeguards remain intact
+
+Navigation redundancy:
+- no duplicate global destination blocks appear on Dashboard
+- no duplicate page title appears where shell context already supplies it
+- local workflow navigation remains local
+
+Boundary reduction:
+- removed redundant wrapper-card structures where expected
+- no deeply nested card patterns on audited screens
+- cards remain where semantically meaningful
+
+Saved Events:
+- compact Event and Scenario rows remain functional
+- primary open behavior remains accessible
+- rename and delete remain available
+- search and sort remain intact
+- final-Scenario protection remains intact
+
+Comparison:
+- selection remains fast and accessible
+- selected count remains visible
+- baseline and Scenario identities remain clear
+- aligned result comparison remains intact
+- Show differences only remains functional
+
+Event Analysis:
+- primary decision hierarchy remains present
+- assumptions remain editable
+- detailed calculations remain available through progressive disclosure
+- all Scenario actions remain accessible
+- live recalculation remains unchanged
+
+Data Safety:
+- backup remains primary
+- restore remains available
+- safeguards remain unchanged
+- normal state does not render as recovery or danger
+
+Accessibility:
+- whole-row actions use semantic links or buttons
+- keyboard navigation works
+- focus is visible
+- icon-only controls have names
+- selected states do not rely only on color
+- hidden tertiary information remains accessible when disclosed
+
+Responsive:
+- primary task remains first
+- duplicate navigation does not reappear
+- recent rows remain usable
+- management rows remain usable
+- Comparison remains understandable
+- no accidental page-wide overflow
+
+Regression:
+- every capability in the inventory remains reachable
+- all calculations are unchanged
+- persistence is unchanged
+- backup and restore are unchanged
+- route behavior is unchanged
+- dirty-state protection is unchanged
+- onboarding and recovery remain functional
+
+Manual senior-design review
+
+Add a concise review document or checklist requiring inspection of every screen
+for:
+
+- one dominant task
+- one dominant focal point
+- one primary action
+- redundant navigation
+- repeated actions
+- unnecessary cards
+- unnecessary borders
+- weak hierarchy
+- overexposed metadata
+- generic engineering composition
+- poor use of whitespace
+- unclear row interactivity
+- duplicate headings
+- low-priority content competing with decisions
+- narrow-window hierarchy
+- long-content behavior
+
+Document each substantive removal or relocation and where the preserved
+capability now lives.
+
+Regression boundaries
+
+Do not change:
+
+- calculations
+- formulas
+- warning rules
+- business logic
+- database schema
+- migrations
+- persistence semantics
+- Scenario semantics
+- comparison semantics
+- backup format
+- restore semantics
+- setup behavior
+- route URLs
+
+Small production-code changes are allowed only when needed to:
+
+- remove redundant presentation
+- support existing-data summaries
+- enable semantic whole-row links
+- improve progressive disclosure
+- simplify action placement
+- preserve accessibility after recomposition
+- expose already-existing result data in a more useful summary
+
+Do not add new stored preferences or business calculations.
+
+Scope
+
+Do not implement:
+
+- new product features
+- new calculations
+- new warnings
+- charts
+- AI recommendations
+- cloud sync
+- sharing
+- folders
+- tags
+- favorites
+- bulk actions
+- dark mode
+- themes
+- frontend framework migration
+- new dependencies
+- platform packaging changes
+
+Do not preserve weak interface elements solely to minimize the diff.
+
+Do not make unrelated backend changes.
+
+Do not commit.
+
+Afterward:
+
+1. Run focused Dashboard, shell, Saved Events, Event Analysis, comparison,
+   Data Safety, accessibility, responsive, and regression tests.
+2. Run all existing UI and workflow tests.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Summarize the major compositional changes.
+6. List every redundant element removed.
+7. List every action moved or consolidated.
+8. Explain where each preserved capability is now accessed.
+9. Explain how each screen’s dominant task was clarified.
+10. List any remaining screen that still falls below the intended quality bar.
+11. Report every command and its exact result.
+
+Keep the response concise.

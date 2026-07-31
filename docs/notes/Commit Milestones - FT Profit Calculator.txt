@@ -174,19 +174,27 @@ layout of assumptions, results, warnings, calculations, scenario controls, and
 actions. Establish clear visual hierarchy so the most important business
 information is immediately obvious while maintaining live recalculation.
 
-□ >Redesign dashboards and saved-work views
+☑ Redesign dashboards and saved-work views
 
 Redesign the Dashboard, Saved Events, Scenario Comparison, Backup, Welcome, and
 related management screens. Improve discoverability, summaries, empty states,
 tables, cards, comparison readability, filtering, and workflow efficiency.
 
-□ *Complete V1 visual polish and interaction refinement
+☑ Complete V1 visual polish and interaction refinement
 
 Polish the entire application into a cohesive professional desktop product.
 Refine typography, spacing, alignment, animations, transitions, loading states,
 hover behavior, focus states, visual hierarchy, microinteractions, wording, and
 consistency. Remove remaining visual friction and achieve a polished,
 production-quality experience.
+
+□ >Perform a senior product-design audit and simplify the full application
+  Recompose each screen around one dominant task, remove redundant navigation
+  and duplicated actions, reduce visible boundaries, strengthen information
+  hierarchy, and substantially simplify layouts while preserving every existing
+  capability. Replace conservative “styled HTML” composition with a focused,
+  restrained desktop experience comparable in clarity and finish to ChatGPT,
+  Notion, Linear, Stripe, and Zillow.
 
 
 DESKTOP APPLICATION AND PACKAGING
