@@ -1,5 +1,9 @@
 from flask import Flask, render_template
-from werkzeug.exceptions import InternalServerError, NotFound
+from werkzeug.exceptions import (
+    InternalServerError,
+    NotFound,
+    RequestEntityTooLarge,
+)
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -31,3 +35,12 @@ def register_error_handlers(app: Flask) -> None:
             "errors/500.html",
             active_page=None,
         ), 500
+    @app.errorhandler(RequestEntityTooLarge)
+    def handle_upload_too_large(error: RequestEntityTooLarge):
+        app.logger.warning("Rejected an oversized backup upload.")
+        return render_template(
+            "data_safety.html",
+            active_page="data_safety",
+            recovery_mode=app.config.get("RECOVERY_MODE", False),
+            restore_error="The selected backup file is too large.",
+        ), 413

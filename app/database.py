@@ -114,9 +114,22 @@ def close_database(exception: BaseException | None = None) -> None:
 
 def initialize_database() -> None:
     """Create, adopt, or upgrade the database through formal migrations."""
+    from app.data_safety import create_automatic_recovery_snapshot
     from app.migrations import migrate_database
 
-    migrate_database(get_database(), logger=current_app.logger)
+    paths = current_app.config["DATA_PATHS"]
+    migrate_database(
+        get_database(),
+        logger=current_app.logger,
+        before_migrations=lambda connection: (
+            create_automatic_recovery_snapshot(
+                connection,
+                paths,
+                "pre-migration",
+                logger=current_app.logger,
+            )
+        ),
+    )
 
 
 def load_business_defaults() -> BusinessDefaults | None:

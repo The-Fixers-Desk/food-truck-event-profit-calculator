@@ -6,432 +6,6 @@ Next Codex Prompt
 
 ---------------------------------------------------------------------------------
 
-Implement the milestone:
-
-Add backup, restore, and recovery safeguards.
-
-Database versioning and safe migrations, transactional repositories, and the
-complete customer-data schema already exist.
-
-Build customer-facing backup and restore behavior, automatic recovery
-snapshots, interrupted-operation safeguards, and a centralized customer-data
-location.
-
-Backup format
-
-Create a versioned portable backup format using the file extension:
-
-.ftbackup
-
-The backup should be a ZIP-compatible archive created with Python’s standard
-library and contain:
-
-- A consistent SQLite database snapshot
-- A JSON manifest
-
-The manifest must contain at least:
-
-- Backup-format version
-- Application version
-- Database schema version
-- Backup creation timestamp
-- Database filename
-- SHA-256 checksum of the database snapshot
-
-Use SQLite’s supported connection backup API to create the snapshot.
-
-Do not copy the active database file directly.
-
-Before producing a customer backup:
-
-- Complete or safely coordinate active database work.
-- Create the database snapshot in a temporary location beneath the configured
-  application-data directory.
-- Run an SQLite integrity check on the completed snapshot.
-- Run a foreign-key check.
-- Calculate and record its checksum.
-- Package the snapshot and manifest.
-- Remove temporary working files after success or failure.
-
-Do not include:
-
-- Logs
-- Caches
-- Temporary uploads
-- Previous backups
-- Application code or installed files
-
-Customer-facing backup workflow
-
-Add a functional Data Safety screen accessible from the established
-application navigation or Dashboard.
-
-Provide a clear action labeled:
-
-“Download backup”
-
-When selected:
-
-- Create a fresh backup.
-- Return it as a downloadable .ftbackup file.
-- Use a useful timestamped filename.
-- Do not expose server or local filesystem paths.
-- Do not modify customer data.
-
-If backup creation fails:
-
-- Do not return a partial archive.
-- Remove incomplete temporary files.
-- Preserve the live database.
-- Show the existing friendly customer-facing error behavior.
-- Log the technical cause without logging customer content.
-
-Restore workflow
-
-Provide a customer-facing action labeled:
-
-“Restore backup”
-
-Allow the customer to select a .ftbackup file through the existing local web
-interface.
-
-Restore is a complete replacement operation. It does not merge records.
-
-Clearly explain that restoring will replace the current:
-
-- Business Defaults
-- Events
-- Scenarios
-- Labor entries
-- Miscellaneous-cost entries
-- Other saved application data
-
-Require explicit confirmation before replacing the current database.
-
-Backup validation
-
-Before modifying the live database:
-
-- Save the uploaded archive to a controlled temporary location beneath the
-  application-data directory.
-- Reject unexpectedly large, malformed, unsafe, or path-traversing archives.
-- Read and validate the manifest.
-- Verify the supported backup-format version.
-- Verify required manifest values.
-- Extract only the expected database file.
-- Verify the SHA-256 checksum.
-- Verify that the extracted file is a recognizable SQLite database.
-- Run an SQLite integrity check.
-- Run a foreign-key check.
-- Inspect its migration ledger and schema version.
-- Verify that its schema is recognizable and supported.
-
-Do not trust filenames or paths contained in the archive.
-
-Schema compatibility
-
-When the restored database is at the current supported schema version:
-
-- Restore it without unnecessary schema writes.
-
-When it is from an older supported schema version:
-
-- Restore it to a staging location.
-- Run the existing migration system against the staged database.
-- Validate the fully migrated database before replacing the live database.
-
-When its schema version is newer than the application supports:
-
-- Reject the restore.
-- Explain that the backup requires a newer application version.
-- Do not modify current customer data.
-
-When the database is damaged, incomplete, foreign-key-invalid, or incompatible:
-
-- Reject the restore safely.
-- Preserve current customer data.
-- Show a useful customer-facing message.
-
-Pre-restore recovery snapshot
-
-Immediately before replacing the current database:
-
-- Create an automatic recovery snapshot of the current live database using the
-  same safe SQLite backup mechanism.
-- Store it in an automatic-recovery directory beneath the application-data
-  directory.
-- Include a manifest or metadata identifying it as a pre-restore snapshot.
-- If the recovery snapshot cannot be created and validated, abort the restore.
-
-Restore replacement
-
-Never overwrite the active database incrementally.
-
-Use this general sequence:
-
-1. Validate and, if necessary, migrate the uploaded database in staging.
-2. Validate the staged final database.
-3. Create and validate a pre-restore recovery snapshot.
-4. Close or coordinate all active live-database connections.
-5. Replace the live database using a safe atomic filesystem operation where
-   supported.
-6. Reopen the database.
-7. Verify schema version, integrity, and foreign keys.
-8. Confirm normal repository access before reporting success.
-
-If replacement or post-replacement verification fails:
-
-- Do not leave a partially written database.
-- Attempt to restore the validated pre-restore recovery snapshot.
-- Preserve failed files for technical diagnosis when safe.
-- Stop normal operation rather than continuing with uncertain data.
-- Log the recovery sequence without exposing customer content.
-
-After a successful restore:
-
-- Clear stale session references to Events, Scenarios, workspaces, and
-  temporary navigation state.
-- Re-evaluate setup completion from restored Business Defaults.
-- Open the appropriate Welcome or Dashboard route.
-- Display a clear success message.
-
-Automatic migration recovery snapshots
-
-Integrate with the existing migration startup process.
-
-Before applying one or more missing production migrations to a customer
-database:
-
-- Create and validate an automatic pre-migration recovery snapshot.
-- Abort migration if that snapshot cannot be safely created.
-- Do not create another snapshot when the database is already current and no
-  migration will run.
-
-A failed migration must continue using the migration system’s existing
-transaction and rollback rules.
-
-Do not silently restore a pre-migration snapshot unless needed to recover from
-a database state that cannot be returned to its prior version transactionally.
-
-Automatic recovery retention
-
-Keep the five most recent validated automatic recovery snapshots.
-
-After successfully creating a new automatic snapshot:
-
-- Remove only older snapshots beyond the retention limit.
-- Never delete the newly created snapshot.
-- Ignore unrelated files.
-- Do not let cleanup failure invalidate an otherwise valid snapshot or
-  operation; log the cleanup failure instead.
-
-Customer-created downloaded backups are not managed by this retention rule.
-
-Damaged-database startup behavior
-
-At startup, continue using the migration system’s compatibility checks.
-
-When the live database fails integrity, foreign-key, schema, or migration
-validation:
-
-- Do not modify or delete the damaged database automatically.
-- Do not silently replace it with a recovery snapshot.
-- Preserve the damaged database.
-- Prevent normal routes and repositories from using it.
-- Show a friendly recovery state explaining that customer data could not be
-  opened and that a valid backup may be restored.
-
-When practical, make the Restore backup workflow available from this recovery
-state without exposing unrelated application functions.
-
-Interrupted-write safeguards
-
-Review all customer-data write paths involved in:
-
-- Business Defaults
-- Initial Event and Scenario creation
-- Scenario overwrite
-- Save as new Scenario
-- Renaming
-- Deletion
-- Migration
-- Restore
-
-Verify that established transaction behavior prevents partial writes.
-
-Add failure-injection tests showing that interruption or exceptions during:
-
-- Parent-record writes
-- Child-row replacement
-- Migration
-- Backup creation
-- Restore staging
-- Atomic replacement
-
-do not leave partially committed customer records or an unusable live
-database.
-
-Do not create application-level autosaving in this milestone.
-
-Application-data directory
-
-Create one centralized application-data path service or equivalent abstraction.
-
-All mutable runtime files must be resolved through it, including:
-
-- Live customer database
-- Automatic recovery snapshots
-- Backup and restore staging files
-- Temporary customer-data files
-
-Requirements:
-
-- Allow tests to provide isolated temporary directories.
-- Allow the runtime or future desktop package to configure the customer-data
-  root.
-- Do not scatter direct references to data/app.db through the codebase.
-- Do not write customer data beside Python modules, templates, static assets,
-  or packaged application files when an external data root is configured.
-- Prevent customer-supplied filenames from escaping the data root.
-- Preserve compatibility with the current development database path.
-- Do not move or delete the real data/app.db unexpectedly.
-
-The later Windows and macOS packaging milestones will assign final
-platform-specific customer-data directories. Do not implement those
-platform-specific locations here.
-
-Security and privacy
-
-- Do not log Business Defaults, Event names, assumptions, or other customer
-  record contents.
-- Do not include secrets or absolute local paths in the manifest.
-- Use safe archive extraction.
-- Accept only the expected backup structure.
-- Place restore-upload limits appropriate for the application’s SQLite data.
-- Remove temporary uploaded and extracted files after success or failure.
-
-Testing
-
-Add focused automated tests covering:
-
-Backup:
-- Creating a valid .ftbackup archive
-- Manifest fields and backup-format version
-- Database checksum
-- Snapshot integrity and foreign-key checks
-- Complete customer data appearing in the snapshot
-- Live database remaining unchanged
-- Backup creation while the live database is open
-- Failed backup producing no partial downloadable archive
-- Temporary-file cleanup
-- Unsafe output filenames being prevented
-
-Restore validation:
-- Valid current-version backup
-- Valid older supported backup being migrated in staging
-- Newer unsupported backup being rejected
-- Invalid archive
-- Missing manifest
-- Invalid manifest
-- Checksum mismatch
-- Missing database file
-- Additional unexpected archive paths
-- Path traversal attempts
-- Corrupt SQLite database
-- Integrity-check failure
-- Foreign-key-check failure
-- Incompatible schema
-- Oversized upload handling
-
-Restore behavior:
-- Complete replacement of existing customer data
-- No merging of old and restored records
-- Pre-restore recovery snapshot creation
-- Restore aborting when the safety snapshot fails
-- Atomic replacement
-- Post-restore integrity verification
-- Session and stale-workspace state being cleared
-- Correct Welcome or Dashboard destination after restore
-- Current database remaining unchanged after validation failure
-- Recovery after replacement or post-verification failure
-
-Automatic recovery:
-- Snapshot before a real pending migration
-- No snapshot when no migration is needed
-- Snapshot validation
-- Retaining the five newest snapshots
-- Removing only older managed snapshots
-- Cleanup failure not corrupting the database operation
-
-Interrupted writes:
-- Business Defaults rollback
-- Initial Event and Scenario transaction rollback
-- Scenario child-row replacement rollback
-- Rename and delete rollback
-- Migration rollback
-- Restore interruption at each major stage
-- Live database remaining valid after simulated failures
-
-Data separation:
-- All mutable paths resolving beneath the configured application-data root
-- Isolated test data directories
-- No writes to application-code or package directories
-- Safe filename handling
-- Compatibility with the established development database location
-
-Restart and recovery:
-- Restored data remaining available after application restart
-- Automatic recovery snapshots remaining valid after restart
-- Damaged live database entering the friendly recovery state
-- Damaged database never being silently overwritten
-
-Documentation
-
-Add concise developer documentation covering:
-
-- Backup archive structure
-- Backup-format versioning
-- Restore validation sequence
-- Schema-version compatibility behavior
-- Automatic recovery snapshot policy
-- Five-snapshot retention rule
-- Interrupted-operation recovery
-- Application-data directory abstraction
-- How future desktop packaging should configure the data root
-
-Scope
-
-Do not implement:
-
-- Cloud backup
-- Scheduled customer backups
-- Backup synchronization
-- Password-protected or encrypted archives
-- Importing individual Events or Scenarios
-- Merging databases
-- Windows-specific customer-data locations
-- macOS-specific customer-data locations
-- Desktop file-picker integration
-- Application update delivery
-- Final visual design
-
-Do not add dependencies.
-Do not make unrelated changes.
-Do not commit.
-
-Afterward:
-
-1. Run focused backup, restore, migration, data-path, and recovery tests.
-2. Run the full test suite.
-3. Run git diff --check.
-4. Summarize the customer-facing backup and restore workflow.
-5. Explain how the live database is protected during restore and migration.
-6. Explain how automatic recovery snapshots are retained.
-7. Explain how to manually test backup, restore, rejection, and recovery.
-8. Report the test results.
-
-Keep the response concise.
-
 ---------------------------------------------------------------------------------
 
 Implement the milestone:
@@ -3180,6 +2754,1178 @@ Afterward:
     identity, notarization credentials, or clean test environment.
 
 Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Add complete automated end-to-end workflow tests.
+
+The full V1 application workflows, desktop shell, Windows packaging,
+macOS packaging, calculations, persistence, migrations, backup and restore,
+responsive design, and accessibility behavior already exist.
+
+Add automated browser-level and desktop-lifecycle tests proving that the
+customer’s critical workflows operate correctly when the complete application
+is assembled.
+
+Testing technology
+
+Use the official Playwright pytest plugin for browser end-to-end tests.
+
+Add only the narrowly required development and testing dependencies.
+
+Use:
+
+- Chromium for the complete end-to-end suite
+- Firefox and WebKit for a smaller critical-workflow smoke suite
+
+Document the Playwright browser-installation command required after installing
+Python dependencies.
+
+Do not require every developer test run to execute the full suite in all three
+browser engines.
+
+Do not introduce Selenium, Cypress, or a second browser-automation framework.
+
+Test architecture
+
+Create a clearly separated end-to-end test area, such as:
+
+tests/e2e/
+
+Keep end-to-end tests distinct from:
+
+- Unit tests
+- Domain tests
+- Repository tests
+- Route tests
+- Packaging tests
+- Manual platform-acceptance checks
+
+Provide reusable pytest fixtures for:
+
+- Isolated temporary application-data directories
+- Real temporary SQLite databases
+- Database migration and startup
+- Real Flask servers bound to 127.0.0.1
+- Operating-system-selected available ports
+- Browser base URLs
+- Clean browser contexts
+- Download directories
+- Restarting the application against the same temporary customer data
+- Starting with deliberately prepared saved data when a workflow genuinely
+  requires it
+- Cleaning all server threads, files, and processes after tests
+
+Every browser test must use an isolated application-data root unless a
+specific restart test deliberately reuses its own temporary root.
+
+Never read, modify, copy over, migrate, back up, or restore the real:
+
+data/app.db
+
+Do not use customer or developer backup files as fixtures.
+
+Real-system boundary
+
+Browser end-to-end tests must exercise:
+
+- Real Flask routes
+- Real templates
+- Real CSS and JavaScript
+- Real form validation
+- Real calculation logic
+- Real SQLite persistence
+- Real database migrations
+- Real backup generation
+- Real restore validation
+- Real session behavior
+- Real navigation safeguards
+
+Do not mock:
+
+- Calculation results
+- Database repositories
+- Save behavior
+- Scenario loading
+- Comparison calculations
+- Backup contents
+- Restore replacement
+- Setup-completion detection
+
+Mock only genuinely external or native boundaries where unavoidable, such as:
+
+- The pywebview native-window adapter in headless lifecycle tests
+- Operating-system file dialogs not used by the browser interface
+- Platform signing or installer behavior, which is outside this milestone
+
+Customer-oriented locators
+
+Prefer Playwright locators based on:
+
+- Accessible role
+- Visible label
+- Accessible name
+- Visible text where appropriate
+
+Use test IDs only when no stable customer-visible or semantic locator exists.
+
+Do not rely on:
+
+- XPath
+- Deep CSS selectors
+- Element position
+- Generated framework classes
+- Database identifiers exposed only for tests
+- Exact incidental whitespace
+- Exact timestamps unless time is explicitly controlled
+
+The tests should reinforce the accessibility work rather than bypass it.
+
+Waiting and reliability
+
+Do not use arbitrary sleep calls.
+
+Use:
+
+- Playwright’s normal actionability waiting
+- Auto-retrying assertions
+- Explicit waiting for meaningful customer-visible states
+- Expected downloads
+- Relevant route or calculation responses where necessary
+- Application-provided status regions
+
+For live Event Analysis:
+
+- Wait for the updating state when useful.
+- Wait for the completed analysis status or updated displayed value.
+- Ensure an older response does not replace a newer edit.
+- Do not depend on a hardcoded debounce duration.
+
+Configure sensible test-level timeouts without hiding genuine hangs behind
+excessively long global timeouts.
+
+Test-data strategy
+
+Create concise builders or helpers for entering predictable customer data.
+
+Use realistic but clearly fictional values.
+
+Maintain at least:
+
+1. One standard profitable Event
+2. One weaker alternate Scenario
+3. One loss-producing Scenario
+4. One Event suitable for comparison across Events
+5. Business Defaults containing employee labor and a profit target
+6. A Scenario containing multiple labor rows and miscellaneous costs
+
+Avoid scattering large duplicated field-entry blocks across every test.
+
+Do not build an elaborate page-object framework.
+
+Use small focused helpers for repeated customer actions, such as:
+
+- Complete first-time Defaults
+- Enter a standard Event
+- Wait for live analysis completion
+- Save as a new Scenario
+- Open Saved Events
+- Select Scenarios for comparison
+- Download a backup
+- Upload and confirm a restore
+
+Helpers must still operate through the visible UI.
+
+Complete customer-journey test
+
+Add one complete browser journey that begins with a fresh application-data
+directory and proves the following sequence:
+
+1. Launch the fresh application.
+2. Verify the Welcome screen appears.
+3. Review the four-step introduction.
+4. Select Get started.
+5. Enter and save complete Business Defaults.
+6. Verify navigation to Dashboard.
+7. Start a new Event analysis.
+8. Verify applicable Defaults are prefilled.
+9. Enter the complete Event-specific information.
+10. Submit Event Inputs.
+11. Verify:
+    - The Event is automatically saved
+    - The Original estimate Scenario is created
+    - The interactive workspace opens
+    - Initial results are displayed
+12. Change multiple workspace assumptions, including:
+    - Attendance
+    - Weather or event protection
+    - Percentage expected to buy food
+    - Competing food vendors
+    - One revenue or cost assumption
+    - Employee labor
+13. Verify dependent revenue, cost, profit, margin, break-even, target, and
+    warning output updates without a Calculate button.
+14. Save the adjusted state as a new named Scenario.
+15. Modify it again and overwrite the active Scenario with explicit
+    confirmation.
+16. Open Saved Events.
+17. Verify the Event and both Scenarios appear.
+18. Open each Scenario and verify its saved assumptions and recalculated
+    results differ as expected.
+19. Compare the two Scenarios.
+20. Change the comparison baseline.
+21. Enable Show differences only.
+22. Open one Scenario from comparison.
+23. Download a customer backup.
+24. Make a visible persisted change after the backup, such as renaming a
+    Scenario or creating another Scenario.
+25. Restore the downloaded backup through the customer interface.
+26. Confirm complete replacement.
+27. Verify the post-backup change is absent.
+28. Verify the backed-up Defaults, Event, Scenarios, and ordered child rows
+    remain.
+29. Restart the Flask application using the same temporary data root.
+30. Verify launch opens Dashboard and all restored data remains usable.
+
+This journey must not inspect or manipulate the database directly to prove
+customer-visible outcomes.
+
+Focused onboarding and Defaults workflow
+
+Add browser tests covering:
+
+- Fresh launch opening Welcome
+- Get started opening Defaults
+- Invalid Defaults remaining on the form
+- Error summary and field errors appearing
+- Entered values remaining intact
+- Successful setup opening Dashboard
+- Restart after setup opening Dashboard
+- Existing Defaults preventing repeat onboarding
+- Updating Defaults without altering saved Event assumptions
+- Analyze new event using the latest Defaults
+
+Focused Event Inputs and workspace workflow
+
+Add browser tests covering:
+
+- Complete Event Inputs submission
+- Automatic Event and Original estimate persistence
+- Invalid submission creating no visible saved Event
+- Defaults indicators and event-specific override indicators
+- Shared food-demand indicator
+- Live recalculation after meaningful changes
+- Adding and removing labor rows
+- Adding and removing miscellaneous-cost rows
+- Custom expected-sales behavior
+- Invalid live edits preserving the latest valid results
+- Correcting the invalid field updating results
+- Reset changes restoring the active saved baseline
+- Start new analysis opening a clean form
+- Dirty-workspace navigation confirmation
+- Canceling navigation preserving current edits
+- Confirming navigation leaving the saved Scenario unchanged
+
+Focused Scenario version workflow
+
+Add browser tests covering:
+
+- Original estimate being created automatically
+- Save being disabled when the workspace is clean
+- Save as new Scenario being selected by default
+- Blank Scenario-name validation
+- Duplicate-name validation
+- Case-insensitive duplicate detection
+- Save as new preserving the original Scenario
+- New Scenario becoming active
+- Overwrite requiring explicit confirmation
+- Overwrite changing only the active Scenario
+- Reset baseline updating after a successful save
+- Failed save preserving workspace values and results
+
+Focused Saved Events workflow
+
+Add browser tests covering:
+
+- Empty Saved Events state
+- Events grouped with their Scenarios
+- Opening a saved Scenario
+- Loaded workspace beginning clean
+- Renaming an Event
+- Renaming a Scenario
+- Duplicate Scenario-name rejection
+- Deleting a non-final Scenario
+- Blocking individual deletion of the final Scenario
+- Deleting an Event and all its Scenarios after confirmation
+- Restart persistence for renames and deletions
+- Missing saved records producing friendly behavior
+
+Focused comparison workflow
+
+Add browser tests covering:
+
+- Insufficient selection
+- Comparing two Scenarios from one Event
+- Comparing Scenarios from different Events
+- Selecting three and four Scenarios
+- Preventing selection beyond four
+- Initial baseline assignment
+- Changing the baseline
+- Financial-result differences
+- Percentage-point differences
+- Assumption differences
+- Target and warning differences
+- Tie labels where fixture data creates ties
+- Show differences only
+- Opening every compared Scenario in the existing workspace
+- Comparison creating no visible duplicate records
+
+Focused backup and restore workflow
+
+Add browser tests covering:
+
+- Downloading a valid .ftbackup file
+- The downloaded filename and extension
+- Restoring that backup after changing current data
+- Complete replacement rather than merging
+- Setup destination after restoring data with Defaults
+- Welcome destination after restoring a valid backup without Defaults, if such
+  a supported backup state exists
+- Invalid archive rejection
+- Checksum-mismatch rejection
+- Newer unsupported backup rejection
+- Canceling restore
+- Restore confirmation wording
+- Current data remaining after restore validation failure
+- Pre-restore recovery snapshot behavior where customer-visible or safely
+  verifiable through the isolated test data root
+- Restored data persisting after application restart
+
+It is acceptable for narrowly technical backup-archive preparation in invalid
+backup tests to use dedicated test helpers, but the actual upload, confirmation,
+error, and successful restore must occur through the customer interface.
+
+Application restart
+
+Provide a reusable application restart fixture or helper that:
+
+- Stops the current test Flask server cleanly
+- Waits for its thread to terminate
+- Preserves the test’s isolated application-data directory
+- Starts a new application instance against that same directory
+- Uses a new available loopback port if needed
+- Opens a fresh browser context
+- Does not retain stale cookies or temporary in-memory application state unless
+  the specific test deliberately covers session behavior
+
+Verify restart persistence for:
+
+- Setup completion
+- Defaults
+- Events
+- Scenarios
+- Scenario names
+- Ordered labor rows
+- Ordered miscellaneous-cost rows
+- Renames
+- Deletions
+- Restored backup data
+- Migration version
+
+Desktop-shell closure journey
+
+Add a separate automated shell-lifecycle test using the real desktop shell
+orchestrator with an injected headless test window adapter.
+
+Do not require a graphical display.
+
+The journey must:
+
+1. Use an isolated application-data root.
+2. Acquire the real single-instance lock.
+3. Initialize and migrate a real temporary database.
+4. Start the real loopback Werkzeug server.
+5. Complete the readiness check.
+6. Record that the headless window adapter received the application URL.
+7. Trigger the same application-close callback used by pywebview.
+8. Verify the server stops accepting connections.
+9. Verify the server thread terminates.
+10. Verify shell temporary files are cleaned where expected.
+11. Verify the instance lock is released.
+12. Start a second shell lifecycle successfully against the same data root.
+13. Close it successfully again.
+
+Also cover:
+
+- Closing during the loading phase
+- Repeated close signals
+- Startup failure after acquiring the lock
+- Startup failure after starting the server
+- Cleanup after failure
+- The database remaining valid after controlled shutdown
+
+Do not claim this proves native window behavior on Windows or macOS.
+
+Actual packaged-window closure remains a platform acceptance test.
+
+Offline browser journey
+
+Run at least one representative complete browser workflow while rejecting all
+non-loopback network requests.
+
+Allow:
+
+- The application’s own 127.0.0.1 origin
+
+Fail the test if the application attempts to require:
+
+- Remote scripts
+- Remote styles
+- Remote fonts
+- Remote images
+- Remote APIs
+- Telemetry
+- Authentication
+
+Do not block the browser’s internal implementation traffic in a way unrelated
+to the application.
+
+Cross-browser smoke suite
+
+Mark a small critical smoke suite for Chromium, Firefox, and WebKit.
+
+Include at least:
+
+- Fresh onboarding and Defaults save
+- Creating one Event
+- Opening the Event Analysis workspace
+- One live recalculation
+- Saving a new Scenario
+- Opening Saved Events
+- Comparing two Scenarios
+
+Run the complete browser suite in Chromium.
+
+Do not require the entire full suite to run in all three engines for every
+ordinary development run.
+
+Diagnostics
+
+Configure useful failure artifacts.
+
+On failed browser tests, retain:
+
+- A screenshot
+- A Playwright trace
+- Relevant browser console errors
+- Relevant failed application requests
+- Server log location for the isolated test run
+
+Do not include customer or real developer data.
+
+Do not retain screenshots or traces for every successful test unless
+explicitly requested.
+
+Store generated test artifacts under an ignored test-results directory.
+
+Assertions
+
+Assert customer-visible behavior and persisted behavior through the UI.
+
+Prefer assertions such as:
+
+- Current heading
+- Status text
+- Field values
+- Visible financial result
+- Visible Scenario name
+- Saved Events grouping
+- Comparison difference
+- Success or validation message
+- Correct route or workflow destination
+
+Do not over-specify:
+
+- Exact CSS classes
+- Exact pixel positions
+- Entire page HTML
+- Incidental whitespace
+- Current wall-clock timestamps
+- Generated internal IDs
+
+Use numeric assertions carefully.
+
+When the displayed value is rounded for customers:
+
+- Assert the documented displayed value.
+- Rely on existing unit tests for exact internal Decimal precision.
+
+Test-suite commands
+
+Add clear pytest markers, such as:
+
+- e2e
+- e2e_smoke
+- desktop_lifecycle
+
+Provide documented commands for:
+
+- Chromium full E2E suite
+- Cross-browser smoke suite
+- Desktop lifecycle suite
+- Complete existing test suite
+- Headed debugging
+- Retaining and opening failure traces
+
+Ensure ordinary unit tests do not automatically download browsers or open
+windows.
+
+Continuous-integration readiness
+
+Make the tests suitable for later CI use.
+
+- Keep browser installation explicit.
+- Support headless execution.
+- Use deterministic isolated directories.
+- Avoid developer-machine paths.
+- Avoid dependence on existing customer data.
+- Avoid requiring internet access after required Playwright browsers have been
+  installed.
+- Return nonzero status on failures.
+- Keep failure artifacts in predictable locations.
+
+Do not add a new hosted CI service or workflow unless the repository already
+has an established CI configuration that should naturally be extended.
+
+Regression safety
+
+Do not change production behavior merely to make tests pass.
+
+Small testability improvements are allowed when they:
+
+- Use dependency injection
+- Expose clean lifecycle boundaries
+- Permit isolated data roots
+- Permit deterministic clocks where genuinely needed
+- Preserve identical production behavior
+
+Do not add publicly accessible test-only routes.
+
+Do not weaken:
+
+- Validation
+- Route protection
+- Transactions
+- Restore verification
+- Dirty-workspace protection
+- Single-instance protection
+- Navigation safeguards
+- Calculation rules
+
+Scope
+
+Do not implement:
+
+- Windows installer acceptance automation
+- macOS DMG acceptance automation
+- Native UI automation against packaged applications
+- Code signing tests requiring real certificates
+- Notarization tests requiring Apple credentials
+- Automatic release publication
+- New customer functionality
+- New calculations
+- New workflow behavior
+- Visual screenshot-regression testing
+- Performance load testing
+
+Those platform-specific installation and packaged-application checks belong to
+the next V1 acceptance-testing milestone.
+
+Documentation
+
+Add concise developer documentation covering:
+
+- Required test dependencies
+- Installing Playwright browser binaries
+- E2E test architecture
+- Test-data isolation
+- Running Chromium tests
+- Running cross-browser smoke tests
+- Running headed tests
+- Inspecting traces and screenshots
+- Desktop-shell lifecycle testing
+- Restart testing
+- Offline testing
+- Why real customer data must never be used
+- What remains for Windows and macOS acceptance testing
+
+Afterward:
+
+1. Install only the required Playwright browser binaries when the environment
+   permits it.
+2. Run the focused Chromium E2E suite.
+3. Run the cross-browser smoke suite when the browsers are available.
+4. Run the desktop lifecycle suite.
+5. Run the complete automated test suite.
+6. Run git diff --check.
+7. Summarize the automated customer journeys added.
+8. Report every command and its exact result.
+9. List all retained failure artifacts if anything failed.
+10. Clearly report any unavailable browser binary, graphical capability, or
+    environment limitation.
+
+Do not make unrelated changes.
+Do not commit.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Complete platform acceptance testing and fix V1 defects.
+
+The Windows and macOS packages, desktop shell, complete automated end-to-end
+suite, calculations, persistence, backup and restore, accessibility, and all V1
+customer workflows already exist.
+
+Perform release-candidate acceptance testing against the actual packaged
+Windows and macOS applications. Resolve every confirmed release-blocking defect
+that can be reproduced, then rebuild and retest the affected artifacts.
+
+Do not treat source-mode Flask execution as platform acceptance testing.
+
+Acceptance-test records
+
+Create a structured V1 acceptance-test record in the repository.
+
+For every performed check, record:
+
+- Test identifier
+- Platform
+- Architecture
+- Operating-system version
+- Application version
+- Artifact filename
+- Artifact SHA-256 checksum
+- Clean, upgrade, reinstall, or recovery environment
+- Preconditions
+- Steps performed
+- Expected result
+- Actual result
+- Pass, fail, blocked, or not run
+- Evidence or concise notes
+- Related defect identifier when applicable
+- Retest result after a fix
+
+Clearly distinguish:
+
+- Passed
+- Failed
+- Blocked by an unavailable environment or credential
+- Not run
+
+Never mark an unavailable check as passed.
+
+Release-blocking definition
+
+Treat a confirmed defect as release-blocking when it causes or creates a
+material risk of:
+
+- Failure to install
+- Failure to launch
+- Failure to close cleanly
+- Local server or process remaining active after application closure
+- Data loss
+- Data corruption
+- Partial database writes
+- Unsafe schema migration
+- Customer data being written into installed application resources
+- Customer data being deleted during upgrade, reinstall, replacement, or
+  uninstall
+- Backup creation failure in an otherwise supported state
+- Valid backup restoration failure
+- Invalid backup being accepted
+- Recovery safeguards failing
+- Incorrect financial calculations
+- Incorrect profit, margin, break-even, demand, or warning results
+- Saved assumptions loading incorrectly
+- A core V1 workflow being unusable
+- Scenario version actions overwriting the wrong Scenario
+- Comparison displaying results from the wrong assumptions
+- Setup or route safeguards allowing an unusable application state
+- Single-instance protection allowing conflicting writes
+- Required offline workflows depending on external network access
+- A serious keyboard or screen-reader barrier that prevents completion of a
+  core workflow
+- Windows prerequisite handling preventing supported installation
+- macOS signing, notarization, Gatekeeper, architecture, or bundle defects that
+  prevent the intended supported distribution
+
+Do not classify as release-blocking solely because of:
+
+- Minor spacing inconsistencies
+- Small wording preferences
+- Nonessential animation or transition behavior
+- Cosmetic differences between platforms
+- Development-only unsigned-build warnings that are already documented and do
+  not affect the intended signed release process
+
+Document nonblocking defects separately without expanding this milestone into
+new product work.
+
+Release candidates
+
+Test actual newly built release-candidate artifacts.
+
+Windows:
+
+- PyInstaller one-folder application
+- Inno Setup installer
+
+macOS:
+
+- py2app application bundle
+- Drag-and-drop DMG
+
+Use the centralized application-version source.
+
+Generate and record SHA-256 checksums for every tested artifact.
+
+Do not silently test an older artifact after source changes.
+
+After any packaging-affecting fix:
+
+- Rebuild the affected artifact.
+- Generate a new checksum.
+- Repeat all acceptance checks materially affected by the change.
+
+Windows test matrix
+
+Where clean environments are available, test:
+
+- Windows 10 x64
+- Windows 11 x64
+
+For each tested Windows version, cover the following.
+
+Clean installation:
+
+- Installer launches without requiring administrator elevation.
+- WebView2 detection works when the Runtime is already installed.
+- Bundled offline WebView2 installation works when the Runtime is absent.
+- A WebView2 prerequisite failure stops installation safely.
+- Application files install under the configured per-user program location.
+- Customer data is created under the configured LocalAppData location.
+- No mutable customer data is written beside the executable.
+- Start Menu shortcut works.
+- Desktop shortcut behavior matches the installer choice.
+- Add/Remove Programs metadata is correct.
+- Application launches without a console window.
+- Product title, version, and icon are correct.
+- First-use onboarding works.
+
+Core customer workflow:
+
+- Save Business Defaults.
+- Create a complete Event.
+- Verify automatic Original estimate creation.
+- Use live Event Analysis recalculation.
+- Save as a new Scenario.
+- Overwrite the active Scenario deliberately.
+- Open saved work.
+- Rename and delete permitted records.
+- Compare Scenarios.
+- Download a backup.
+- Restore a valid backup.
+- Reject an invalid backup.
+- Verify restored data after restart.
+
+Desktop behavior:
+
+- Second launch is rejected safely.
+- Closing the window stops the local server.
+- Closing releases the instance lock.
+- Application can start again afterward.
+- Window resizing preserves usable layouts.
+- Keyboard navigation remains usable.
+- No ordinary workflow opens a browser window unexpectedly.
+
+Existing data and upgrade:
+
+- Install over an older supported package.
+- Preserve Defaults, Events, Scenarios, backups, and recovery snapshots.
+- Run pending database migrations safely.
+- Produce only one installed-program entry.
+- Preserve working shortcuts.
+- Open the correct Dashboard or Welcome state afterward.
+
+Same-version reinstall:
+
+- Reinstall successfully.
+- Preserve all customer data.
+- Avoid duplicate shortcuts and installed-program entries.
+
+Uninstall and reinstall:
+
+- Remove installer-owned application files and shortcuts.
+- Preserve LocalAppData customer records.
+- Reinstall successfully.
+- Reconnect to preserved customer data.
+
+Offline operation:
+
+- Install without internet access.
+- Launch without internet access.
+- Complete representative core workflows without internet access.
+- Use only the local loopback server.
+
+Failure and recovery:
+
+- Damaged database enters the established recovery state.
+- Damaged data is not silently deleted or replaced.
+- Restore remains available where designed.
+- Interrupted or failed startup preserves customer data.
+- Installer failure does not remove established customer data.
+- Running-application installation and uninstall handling is safe.
+
+macOS test matrix
+
+Where suitable environments are available, test:
+
+- Apple Silicon arm64
+- Intel x86_64
+- macOS 13 or later
+
+Verify the actual architecture slice used at runtime.
+
+Do not count Rosetta execution as native Apple Silicon acceptance.
+
+For each tested Mac environment, cover the following.
+
+DMG and installation:
+
+- DMG mounts successfully.
+- Volume identity is correct.
+- Application and Applications alias are present.
+- Application copies successfully to /Applications or ~/Applications.
+- Application launches without Terminal.
+- Bundle name, version, identifier, and icon are correct.
+- Customer data is created only under the configured Application Support
+  directory.
+- No mutable data is written into the .app bundle.
+- First-use onboarding works.
+
+Core customer workflow:
+
+- Save Business Defaults.
+- Create a complete Event.
+- Verify automatic Original estimate creation.
+- Use live Event Analysis recalculation.
+- Save as a new Scenario.
+- Overwrite the active Scenario.
+- Open saved work.
+- Rename and delete permitted records.
+- Compare Scenarios.
+- Download a backup.
+- Restore a valid backup.
+- Reject an invalid backup.
+- Verify restored data after restart.
+
+Desktop behavior:
+
+- Second launch is rejected safely.
+- Closing the window stops the local server.
+- Closing releases the instance lock.
+- Application launches again successfully.
+- Window resizing preserves usable layouts.
+- Keyboard navigation remains usable.
+- No ordinary workflow opens a browser unexpectedly.
+
+Application replacement:
+
+- Replace an older .app with the newer release candidate.
+- Preserve Defaults, Events, Scenarios, backups, and recovery snapshots.
+- Run pending schema migrations safely.
+- Continue using the same Application Support directory.
+- Open the correct application state.
+
+Uninstall and reinstall:
+
+- Move the .app to Trash.
+- Preserve Application Support customer data.
+- Reinstall from the DMG.
+- Reconnect to preserved data.
+
+Offline operation:
+
+- Install from the DMG without internet access.
+- Launch without internet access.
+- Complete representative workflows without internet access.
+
+Failure and recovery:
+
+- Damaged database enters the established recovery state.
+- Damaged data remains preserved.
+- Restore remains available where designed.
+- Failed startup does not replace or reset customer data.
+
+macOS release verification
+
+When valid Developer ID and notarization credentials are available:
+
+- Sign nested executable code correctly.
+- Sign the outer application bundle last.
+- Verify Hardened Runtime.
+- Verify bundle identifier and version.
+- Verify arm64 and x86_64 slices.
+- Create and sign the DMG.
+- Submit using notarytool.
+- Verify successful notarization.
+- Staple the ticket.
+- Verify the stapled ticket.
+- Verify Gatekeeper acceptance.
+
+When credentials or required hardware are unavailable:
+
+- Record the checks as blocked or not run.
+- Do not claim the artifact is release-ready for macOS distribution.
+- Do not claim signing or notarization success.
+- Preserve development-build results separately.
+
+Cross-platform data checks
+
+On both platforms, verify:
+
+- Fresh databases are created through the migration system.
+- Existing compatible databases retain every identifier and relationship.
+- Business Defaults persist.
+- Events and Scenarios persist.
+- Ordered employee labor rows persist.
+- Ordered miscellaneous-cost rows persist.
+- Calculated results are regenerated from saved assumptions.
+- Backup files contain the expected data.
+- Restore performs complete replacement rather than merging.
+- Automatic recovery snapshots remain valid.
+- Application upgrades do not relocate or duplicate customer data.
+- Uninstallation or application replacement does not delete customer data.
+
+Cross-platform calculation checks
+
+Using the same manually verifiable fixtures on both platforms, verify displayed:
+
+- Weather-adjusted attendance
+- Total expected food buyers
+- Even-split expected buyers
+- Expected sales
+- Food and packaging cost
+- Payment-processing costs
+- Labor
+- Owner labor pay
+- Total event cost
+- Business profit
+- Profit margin
+- Break-even sales
+- Break-even customers
+- Profit-target evaluation
+- Factual warnings
+
+Compare displayed values with the established manual examples and automated
+calculation tests.
+
+Any platform-specific arithmetic difference is release-blocking.
+
+Accessibility acceptance
+
+On each available platform, perform practical acceptance checks for:
+
+- Complete keyboard use of a core customer journey
+- Visible focus
+- Dialog focus entry and restoration
+- Validation summary and inline errors
+- Repeatable labor and miscellaneous-cost rows
+- Scenario save and overwrite dialogs
+- Saved Event rename and delete flows
+- Scenario comparison
+- Backup and restore
+- 200% zoom or equivalent scaling
+- Narrow supported window sizing
+- Long Event and Scenario names
+- No essential information conveyed only through color
+
+Where available, perform a basic screen-reader workflow using the platform’s
+standard assistive technology.
+
+Record the exact assistive technology and version used.
+
+A barrier that prevents completion of a core workflow is release-blocking.
+
+Defect workflow
+
+Create a concise acceptance-defect log.
+
+For every confirmed defect, record:
+
+- Defect identifier
+- Environment
+- Artifact checksum
+- Reproduction steps
+- Expected behavior
+- Actual behavior
+- Severity
+- Release-blocking decision and rationale
+- Root cause when identified
+- Files changed
+- Automated regression coverage added
+- Focused test result
+- Full-suite result
+- Rebuilt artifact checksum
+- Acceptance retest result
+
+Before fixing:
+
+- Reproduce the problem reliably.
+- Confirm it occurs in the tested release candidate.
+- Distinguish product defects from test-environment failures.
+
+For every release-blocking defect:
+
+1. Add or update an automated regression test where technically practical.
+2. Fix the smallest underlying cause.
+3. Do not work around data-integrity or calculation problems only in the UI.
+4. Run focused tests.
+5. Run the full automated suite.
+6. Run git diff --check.
+7. Rebuild the affected packaged artifact.
+8. Repeat the failed acceptance test.
+9. Repeat adjacent critical workflows that could have regressed.
+10. Update the acceptance record and defect log.
+
+If a blocker cannot be fixed safely within this milestone:
+
+- Leave it open and clearly documented.
+- Do not mark the platform release-ready.
+- Do not conceal it with wording changes or skipped tests.
+
+Change control
+
+Do not add:
+
+- New business features
+- New calculations
+- New Scenario behavior
+- New Dashboard features
+- New comparison behavior
+- New backup formats
+- Automatic updates
+- Cloud services
+- Telemetry
+- License systems
+- Unplanned redesign
+
+Small usability corrections are allowed only when required to resolve a
+confirmed acceptance defect.
+
+Do not broadly refactor stable systems without a defect-driven reason.
+
+Automated regression testing
+
+After acceptance fixes:
+
+- Run all focused tests related to changed behavior.
+- Run the complete unit, integration, route, migration, backup, shell,
+  packaging, accessibility, and end-to-end test suite.
+- Run the Chromium full E2E suite.
+- Run the Firefox and WebKit smoke suites where browser binaries are available.
+- Run desktop lifecycle tests.
+- Run offline tests.
+- Run packaging audits.
+- Run git diff --check.
+
+Do not weaken existing tests to make acceptance fixes pass.
+
+Release-readiness summary
+
+Create a final V1 acceptance summary containing:
+
+- Application version
+- Source revision
+- Tested artifact names and checksums
+- Platforms and architectures tested
+- Clean-install results
+- Upgrade and replacement results
+- Reinstall results
+- Uninstall and data-preservation results
+- Offline results
+- Core-workflow results
+- Backup, restore, and recovery results
+- Accessibility results
+- Signing, notarization, and Gatekeeper results
+- Automated-suite results
+- Fixed release blockers
+- Remaining release blockers
+- Remaining nonblocking defects
+- Blocked or unperformed checks
+- Overall readiness separately for:
+  - Windows
+  - macOS
+
+Use only these readiness outcomes:
+
+- Ready for release
+- Not ready for release
+- Acceptance incomplete
+
+Do not describe a platform as ready when required release-blocking checks are
+failed, blocked, or unperformed.
+
+Documentation
+
+Update packaging and release documentation with:
+
+- Final performed acceptance procedure
+- Test environments used
+- Required clean-environment checks
+- Defect-classification rules
+- Artifact-evidence requirements
+- Rebuild and retest procedure
+- Known environment limitations
+- Remaining manual checks before publication
+
+Scope
+
+Do not:
+
+- Publish V1
+- Tag version 1.0.0
+- Upload release artifacts
+- Announce release readiness without evidence
+- Add unsupported platforms
+- Generate fake acceptance evidence
+- Claim unavailable hardware or credentials were used
+- Commit signing secrets or credentials
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Report every environment actually used.
+2. Report every tested artifact path and checksum.
+3. Report all acceptance checks as passed, failed, blocked, or not run.
+4. List every confirmed defect.
+5. List every release-blocking defect fixed.
+6. List every open release blocker.
+7. Report all focused and full-suite test commands and exact results.
+8. Report all rebuilt artifact paths and checksums.
+9. State Windows readiness.
+10. State macOS readiness.
+11. Clearly identify hardware, credentials, packaging tools, or clean
+    environments that were unavailable.
+
+Keep the response concise but do not omit limitations.
 
 ---------------------------------------------------------------------------------
 

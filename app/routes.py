@@ -1,4 +1,7 @@
 import sqlite3
+import os
+from pathlib import Path
+import tempfile
 
 from flask import (
     Blueprint,
@@ -9,7 +12,16 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
+    session,
     url_for,
+)
+from app.data_safety import (
+    BackupValidationError,
+    create_automatic_recovery_snapshot,
+    create_customer_backup,
+    database_from_recovery_archive,
+    stage_restore_backup,
 )
 
 from app.business_defaults_form import defaults_to_form, validate_defaults_form
@@ -31,6 +43,8 @@ from app.database import (
     rename_event_scenario,
     save_business_defaults,
     saved_event_counts,
+    close_database,
+    get_database,
 )
 from app.event_inputs_form import (
     blank_event_inputs_form,
@@ -49,12 +63,22 @@ main = Blueprint("main", __name__)
 @main.before_request
 def require_business_defaults_setup():
     """Keep setup-dependent screens behind persisted valid Defaults."""
+    if current_app.config.get("RECOVERY_MODE"):
+        if request.endpoint not in {
+            "main.data_safety",
+            "main.restore_backup",
+        }:
+            return redirect(url_for("main.data_safety"))
+        return None
     if not current_app.config.get("ENFORCE_SETUP", True):
         return None
     if request.endpoint in {
         "main.home",
         "main.welcome",
         "main.defaults",
+        "main.data_safety",
+        "main.download_backup",
+        "main.restore_backup",
     }:
         return None
     if not business_defaults_setup_is_complete():
@@ -69,6 +93,8 @@ def require_business_defaults_setup():
 @main.get("/")
 def home():
     """Open Welcome on first use and Dashboard after setup."""
+    if current_app.config.get("RECOVERY_MODE"):
+        return redirect(url_for("main.data_safety"))
     if business_defaults_setup_is_complete():
         return redirect(url_for("main.dashboard"))
     return render_template("welcome.html", active_page="welcome")
@@ -94,6 +120,118 @@ def dashboard():
         event_count=event_count,
         scenario_count=scenario_count,
     )
+
+
+@main.get("/data-safety")
+def data_safety():
+    """Display customer backup, restore, and recovery controls."""
+    return render_template(
+        "data_safety.html",
+        active_page="data_safety",
+        recovery_mode=current_app.config.get("RECOVERY_MODE", False),
+        restore_error=None,
+    )
+
+
+@main.post("/data-safety/backup")
+def download_backup():
+    """Create and download a fresh consistent database snapshot."""
+    if current_app.config.get("RECOVERY_MODE"):
+        abort(503)
+    try:
+        payload, filename = create_customer_backup(
+            get_database(),
+            current_app.config["DATA_PATHS"],
+        )
+    except (OSError, sqlite3.Error, BackupValidationError):
+        current_app.logger.exception("Customer backup creation failed.")
+        abort(500)
+    return send_file(
+        payload,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/zip",
+    )
+
+
+@main.post("/data-safety/restore")
+def restore_backup():
+    """Validate and atomically replace all customer data from a backup."""
+    upload = request.files.get("backup_file")
+    if request.form.get("confirm_restore") != "yes":
+        return _render_restore_error(
+            "Confirm that restoring will replace all current saved data."
+        )
+    if upload is None or not upload.filename.lower().endswith(".ftbackup"):
+        return _render_restore_error("Choose a valid .ftbackup file.")
+    paths = current_app.config["DATA_PATHS"]
+    try:
+        payload = upload.stream.read(current_app.config["MAX_CONTENT_LENGTH"] + 1)
+        with tempfile.TemporaryDirectory(dir=paths.staging) as temporary:
+            working = Path(temporary)
+            staged = stage_restore_backup(payload, paths, working)
+            recovery_mode = current_app.config.get("RECOVERY_MODE", False)
+            recovery = None
+            if recovery_mode:
+                close_database()
+                damaged_name = (
+                    f"damaged-{Path(temporary).name}.sqlite"
+                )
+                damaged = paths.safe_child(
+                    paths.automatic_recovery, damaged_name
+                )
+                os.replace(paths.database, damaged)
+            else:
+                live = get_database()
+                recovery = create_automatic_recovery_snapshot(
+                    live,
+                    paths,
+                    "pre-restore",
+                    logger=current_app.logger,
+                )
+                close_database()
+            try:
+                os.replace(staged, paths.database)
+                restored = get_database()
+                from app.migrations import migrate_database
+
+                migrate_database(restored)
+                load_business_defaults()
+                saved_event_counts()
+            except Exception:
+                current_app.logger.exception(
+                    "Restore replacement failed; applying recovery snapshot."
+                )
+                close_database()
+                if recovery is not None:
+                    rollback = working / "rollback.sqlite"
+                    database_from_recovery_archive(recovery, rollback)
+                    os.replace(rollback, paths.database)
+                elif recovery_mode and damaged.exists():
+                    os.replace(damaged, paths.database)
+                get_database()
+                raise
+    except BackupValidationError as error:
+        current_app.logger.warning("Backup restore validation failed: %s", error)
+        return _render_restore_error(str(error))
+    except (OSError, sqlite3.Error):
+        current_app.logger.exception("Backup restore failed.")
+        abort(500)
+    current_app.config["RECOVERY_MODE"] = False
+    session.clear()
+    flash("Backup restored successfully.", "success")
+    if business_defaults_setup_is_complete():
+        return redirect(url_for("main.dashboard"))
+    return redirect(url_for("main.welcome"))
+
+
+def _render_restore_error(message: str):
+    return render_template(
+        "data_safety.html",
+        active_page="data_safety",
+        recovery_mode=current_app.config.get("RECOVERY_MODE", False),
+        restore_error=message,
+    ), 400
 
 
 @main.route("/events/new", methods=("GET", "POST"))

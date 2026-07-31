@@ -391,6 +391,7 @@ def migrate_database(
     migrations: Iterable[Migration] = MIGRATIONS,
     latest_version: int = LATEST_SUPPORTED_SCHEMA_VERSION,
     logger=None,
+    before_migrations: Callable[[sqlite3.Connection], None] | None = None,
 ) -> None:
     """Create, adopt, or upgrade a database to the supported schema."""
     registry = tuple(migrations)
@@ -405,6 +406,11 @@ def migrate_database(
             if logger:
                 logger.info("Detected unversioned database; verifying Version 1.")
             try:
+                if (
+                    before_migrations is not None
+                    and _is_known_pre_v1_defaults_schema(connection, tables)
+                ):
+                    before_migrations(connection)
                 connection.execute("BEGIN IMMEDIATE")
                 if _is_known_pre_v1_defaults_schema(connection, tables):
                     if logger:
@@ -481,6 +487,8 @@ def migrate_database(
         registry[current_version - 1].verify(connection)
         return
 
+    if before_migrations is not None:
+        before_migrations(connection)
     for migration in registry[current_version:]:
         if logger:
             logger.info(

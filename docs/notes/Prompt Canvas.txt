@@ -2,31 +2,7 @@ Prompt Canvas
 
 ---------------------------------------------------------------------------------
 
-Awesome. Next milestone is: Add complete automated end-to-end workflow tests
-  Cover onboarding, defaults and overrides, event analysis, saved scenarios,
-  comparison, backup and restore, and application closure.
-
-Anything we need to do before we make a prompt for Codex?
-
----------------------------------------------------------------------------------
-
-Give me the commit message I will use when this is done.
-
----------------------------------------------------------------------------------
-
-Awesome. Next milestone is: Complete platform acceptance testing and fix V1 defects
-  Perform Windows and macOS acceptance testing and resolve all confirmed
-  release-blocking defects.
-
-Anything we need to do before we make a prompt for Codex?
-
----------------------------------------------------------------------------------
-
-Give me the commit message I will use when this is done.
-
----------------------------------------------------------------------------------
-
-// DO NOT DO THESE LAST TWO PROMPTS UNTIL IT IS BUILT AND YOU LIKE IT //
+// DO NOT DO THESE LAST TWO PROMPTS UNTIL CALCULATOR IS BUILT AND YOU LIKE IT //
 
 
 Awesome. Next milestone is: Finalize the complete V1 documentation set

@@ -1,5 +1,6 @@
 from flask import Flask
 from pathlib import Path
+import sqlite3
 
 from app.logging_config import configure_logging
 
@@ -13,11 +14,18 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.config.from_mapping(
         DATABASE=Path(app.root_path).parent / "data" / "app.db",
         ENFORCE_SETUP=True,
+        MAX_CONTENT_LENGTH=101 * 1024 * 1024,
         SECRET_KEY="development-only",
     )
 
     if test_config is not None:
         app.config.update(test_config)
+
+    from app.data_paths import ApplicationDataPaths
+
+    if test_config and "DATA_ROOT" in test_config and "DATABASE" not in test_config:
+        app.config["DATABASE"] = Path(test_config["DATA_ROOT"]) / "app.db"
+    app.config["DATA_PATHS"] = ApplicationDataPaths.from_config(app.config)
 
     configure_logging(app)
 
@@ -30,8 +38,16 @@ def create_app(test_config: dict | None = None) -> Flask:
     from app.database import close_database, initialize_database
 
     app.teardown_appcontext(close_database)
+    from app.migrations import DatabaseMigrationError
+
+    app.config["RECOVERY_MODE"] = False
     with app.app_context():
-        initialize_database()
+        try:
+            initialize_database()
+        except (DatabaseMigrationError, sqlite3.Error):
+            app.logger.exception("Customer database could not be opened.")
+            close_database()
+            app.config["RECOVERY_MODE"] = True
 
     @app.context_processor
     def application_state():
@@ -39,8 +55,11 @@ def create_app(test_config: dict | None = None) -> Flask:
 
         return {
             "business_defaults_setup_complete": (
-                not app.config.get("ENFORCE_SETUP", True)
-                or business_defaults_setup_is_complete()
+                not app.config.get("RECOVERY_MODE")
+                and (
+                    not app.config.get("ENFORCE_SETUP", True)
+                    or business_defaults_setup_is_complete()
+                )
             )
         }
 

@@ -203,8 +203,8 @@ def test_incomplete_or_conflicting_unversioned_database_is_rejected(
     database.commit()
     database.close()
 
-    with pytest.raises(DatabaseMigrationError):
-        create_app({"DATABASE": database_path, "TESTING": True})
+    app = create_app({"DATABASE": database_path, "TESTING": True})
+    assert app.config["RECOVERY_MODE"] is True
 
     database = connect(database_path)
     assert "schema_migrations" not in {
@@ -228,8 +228,8 @@ def test_foreign_key_damage_prevents_unversioned_adoption(database_path):
     database.commit()
     database.close()
 
-    with pytest.raises(DatabaseMigrationError):
-        create_app({"DATABASE": database_path, "TESTING": True})
+    app = create_app({"DATABASE": database_path, "TESTING": True})
+    assert app.config["RECOVERY_MODE"] is True
 
 
 def test_integrity_check_failure_prevents_unversioned_adoption(database_path):
@@ -245,8 +245,8 @@ def test_integrity_check_failure_prevents_unversioned_adoption(database_path):
     database.commit()
     database.close()
 
-    with pytest.raises(DatabaseMigrationError):
-        create_app({"DATABASE": database_path, "TESTING": True})
+    app = create_app({"DATABASE": database_path, "TESTING": True})
+    assert app.config["RECOVERY_MODE"] is True
 
 
 def test_future_version_is_rejected_without_changes(database_path):
@@ -266,8 +266,8 @@ def test_future_version_is_rejected_without_changes(database_path):
     ).fetchall()
     database.close()
 
-    with pytest.raises(DatabaseMigrationError, match="newer"):
-        create_app({"DATABASE": database_path, "TESTING": True})
+    app = create_app({"DATABASE": database_path, "TESTING": True})
+    assert app.config["RECOVERY_MODE"] is True
 
     database = connect(database_path)
     assert database.execute(
@@ -281,8 +281,8 @@ def test_conflicting_migration_ledger_is_rejected(database_path):
     database.commit()
     database.close()
 
-    with pytest.raises(DatabaseMigrationError, match="ledger"):
-        create_app({"DATABASE": database_path, "TESTING": True})
+    app = create_app({"DATABASE": database_path, "TESTING": True})
+    assert app.config["RECOVERY_MODE"] is True
 
 
 def test_future_migrations_run_in_order_and_stop_with_atomic_rollback():

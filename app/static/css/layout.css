@@ -100,3 +100,8 @@
   min-height: auto;
   margin-block: var(--space-5);
 }
+
+.data-safety-panel {
+  min-height: auto;
+  margin-bottom: var(--space-5);
+}

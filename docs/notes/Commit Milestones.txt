@@ -96,11 +96,11 @@ DASHBOARD AND ONBOARDING
 
 DATABASE RELIABILITY
 
-□ >Add database versioning and safe migrations
+☑ Add database versioning and safe migrations
   Track schema versions, run migrations once, support upgrades safely,
   and protect existing customer data.
 
-□ *Add backup, restore, and recovery safeguards
+□ >Add backup, restore, and recovery safeguards
   Build backup and restore, test interrupted writes and recovery, and
   verify customer data stays separate from installed application files.
 
@@ -138,11 +138,11 @@ DESKTOP APPLICATION AND PACKAGING
 
 QUALITY ASSURANCE
 
-□ -Add complete automated end-to-end workflow tests
+□ *Add complete automated end-to-end workflow tests
   Cover onboarding, defaults and overrides, event analysis, saved scenarios,
   comparison, backup and restore, and application closure.
 
-□ -Complete platform acceptance testing and fix V1 defects
+□ *Complete platform acceptance testing and fix V1 defects
   Perform Windows and macOS acceptance testing and resolve all confirmed
   release-blocking defects.
 

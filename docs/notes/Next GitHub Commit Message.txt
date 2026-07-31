@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Add database versioning and safe migrations
-
-- Establish the current application schema as Version 1
-- Add a persistent schema migration ledger
-- Create fresh databases through the migration system
-- Safely adopt compatible existing unversioned databases
-- Apply future migrations once and in numerical order
-- Roll back failed migrations without partial schema changes
-- Reject damaged or newer unsupported databases safely
-- Protect existing customer records, identifiers, and relationships
-- Add migration logging and developer documentation
-- Add migration, startup, rollback, and data-preservation tests
-
----------------------------------------------------------------------------------
-
 Add backup, restore, and recovery safeguards
 
 - Add portable .ftbackup creation with manifests and checksums
@@ -108,6 +93,38 @@ Package macOS application
 - Verify architecture slices, signatures, Gatekeeper status, and bundle contents
 - Add reproducible macOS build automation and artifact checksums
 - Add macOS packaging, frozen-runtime, metadata, and data-preservation tests
+
+---------------------------------------------------------------------------------
+
+Add complete automated end-to-end workflow tests
+
+- Add Playwright-based browser end-to-end testing
+- Cover onboarding, Defaults, Event creation, and live analysis
+- Test Scenario saving, overwriting, loading, renaming, and deletion
+- Test same-Event and cross-Event Scenario comparison
+- Test backup download, restore, replacement, and restart persistence
+- Add a complete customer journey from first launch through restored data
+- Add cross-browser smoke coverage for Chromium, Firefox, and WebKit
+- Add automated desktop-shell startup, closure, cleanup, and restart testing
+- Verify representative workflows operate without external network access
+- Isolate every test from real customer and development data
+- Add failure screenshots, traces, logs, test markers, and developer documentation
+
+---------------------------------------------------------------------------------
+
+Complete platform acceptance testing and fix V1 defects
+
+- Test packaged Windows and macOS release candidates
+- Verify clean installation, upgrade, reinstall, and uninstall behavior
+- Confirm customer data remains separate, intact, and recoverable
+- Test core workflows, calculations, saved scenarios, and comparison
+- Verify backup, restore, migration, recovery, and offline operation
+- Test desktop startup, single-instance protection, and safe shutdown
+- Perform practical accessibility and responsive acceptance checks
+- Document tested environments, artifacts, checksums, and limitations
+- Log, reproduce, fix, rebuild, and retest confirmed release blockers
+- Add regression coverage for resolved V1 defects
+- Record separate Windows and macOS release-readiness outcomes
 
 ---------------------------------------------------------------------------------
 

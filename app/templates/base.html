@@ -44,11 +44,16 @@
             <a data-discard-navigation
               class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
               href="{{ url_for('main.defaults') }}">Business defaults</a>
+            <a data-discard-navigation
+              class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.data_safety') }}">Data safety</a>
           {% else %}
             <a class="nav-link {% if active_page == 'welcome' %}nav-link--active{% endif %}"
               href="{{ url_for('main.welcome') }}">Welcome</a>
             <a class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
               href="{{ url_for('main.defaults') }}">Business defaults</a>
+            <a class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.data_safety') }}">Data safety</a>
           {% endif %}
         </div>
       </nav>
