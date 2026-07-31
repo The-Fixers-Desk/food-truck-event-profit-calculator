@@ -104,13 +104,13 @@ DATABASE RELIABILITY
   Build backup and restore, test interrupted writes and recovery, and
   verify customer data stays separate from installed application files.
 
-□ >Repair mixed event_scenarios schema with a Version 2 migration
+☑ Repair mixed event_scenarios schema with a Version 2 migration
   Rebuild event_scenarios using the approved current schema, remove obsolete
   required demand columns, preserve compatible Scenario data and relationships,
   strengthen schema verification, and log persistence failures without exposing
   technical errors to customers.
 
-□ *Improve Event Inputs guidance, contextual warnings, sales controls, input
+□ >Improve Event Inputs guidance, contextual warnings, sales controls, input
   organization, and customer-facing number formatting
   Explain weather and event-protection percentages, remove Event Inputs demand
   and sales previews, move custom expected sales into the interactive
@@ -125,7 +125,7 @@ DATABASE RELIABILITY
 
 DESIGN AND ACCESSIBILITY
 
-□ Complete V1 UI and UX design and polish
+□ *Complete V1 UI and UX design and polish
   Define the V1 visual system and redesign long workflows to minimize
   scrolling. Convert Event Inputs into a modern guided stepper that keeps
   each stage within approximately one desktop viewport where practical.

@@ -72,7 +72,7 @@
 
     <fieldset class="input-section"
       {% if workspace %}hidden aria-hidden="true"{% endif %}>
-      <legend>Event Identification</legend>
+      <legend>Event information</legend>
       <div class="form-grid">
         {% for name, label, type in (
           ("event_name", "Event name", "text"),
@@ -98,7 +98,9 @@
     </fieldset>
 
     <fieldset class="input-section">
-      <legend>Revenue Assumptions</legend>
+      <legend>Demand and sales potential</legend>
+      <div class="contextual-warnings" data-warning-group="demand"
+        aria-live="polite" hidden></div>
       <div class="form-grid">
         {% for name, label, step in (
           ("estimated_attendance", "Estimated attendance", "1"),
@@ -156,40 +158,17 @@
         {% endfor %}
       </div>
 
-      <section id="demand-preview" class="demand-preview"
-        aria-live="polite" aria-labelledby="demand-preview-title">
-        <h2 id="demand-preview-title">Early demand estimate</h2>
-        <p id="demand-preview-status">
-          Complete the demand and weather fields to see an even-split estimate.
-        </p>
-        <dl id="demand-preview-values" hidden>
-          <div>
-            <dt>Weather-adjusted attendance</dt>
-            <dd data-demand-value="weather-adjusted-attendance"></dd>
-          </div>
-          <div>
-            <dt>Total expected food buyers</dt>
-            <dd data-demand-value="total-expected-food-buyers"></dd>
-          </div>
-          <div>
-            <dt>Total food vendors, including you</dt>
-            <dd data-demand-value="total-food-vendors"></dd>
-          </div>
-          <div>
-            <dt>Expected buyers per vendor at an even split</dt>
-            <dd data-demand-value="estimated-business-buyers"></dd>
-          </div>
-        </dl>
-        <p id="demand-preview-summary" hidden></p>
-        <p id="demand-preview-break-even" hidden></p>
-      </section>
-
       <div class="assumption-step">
         <div class="form-field">
           <div class="label-row">
             <label class="form-label" for="weather_outlook">
               Weather outlook
             </label>
+            <details class="weather-information">
+              <summary aria-label="What do the weather percentages mean?">?</summary>
+              <p>The Weather outlook percentage is the base estimated attendance reduction. Event protection reduces or preserves that weather effect. The percentage beside each protection option is the resulting final attendance reduction. These are planning estimates, not guaranteed attendance outcomes.</p>
+              <p>Example: Minor concern creates a 5% base reduction. Partially covered applies 75% of that weather effect. The final estimated attendance reduction is 3.75%.</p>
+            </details>
             <span class="field-indicator">Estimate</span>
           </div>
           <select class="form-input" id="weather_outlook"
@@ -213,6 +192,7 @@
               </option>
             {% endfor %}
           </select>
+          <p class="form-hint">The percentage is the estimated reduction in event attendance caused by the selected weather.</p>
           {% if errors.get("weather_outlook") %}
             <p class="field-error">{{ errors.weather_outlook }}</p>
           {% endif %}
@@ -262,6 +242,7 @@
                 </label>
               {% endfor %}
             </div>
+            <p class="form-hint">The percentage shown is the final estimated attendance reduction after accounting for how protected the event is.</p>
             {% if errors.get("event_protection") %}
               <p class="field-error">{{ errors.event_protection }}</p>
             {% endif %}
@@ -269,20 +250,17 @@
         </div>
       </div>
 
-      <section class="sales-preview" aria-labelledby="sales-preview-title">
-        <h2 id="sales-preview-title">Estimated sales preview</h2>
-        <p>
-          Your attendance-based sales estimate will appear here as the Event
-          Inputs form is completed.
-        </p>
-        <input id="revenue_method" name="revenue_method" type="hidden"
-          value="{{ form_values.revenue_method }}" />
-        <button class="button-secondary" id="use-custom-sales" type="button"
-          {% if form_values.revenue_method == "manual_sales" %}hidden{% endif %}>
-          Enter a custom expected sales amount
-        </button>
-        <div id="custom-sales-field" class="form-field conditional-field"
-          {% if form_values.revenue_method != "manual_sales" %}hidden{% endif %}>
+      <input id="revenue_method" name="revenue_method" type="hidden"
+        value="{% if workspace %}{{ form_values.revenue_method }}{% else %}attendance{% endif %}" />
+      {% if workspace %}
+        <section class="workspace-revenue-control">
+          <label class="choice-option">
+            <input id="use-custom-sales" type="checkbox"
+              {% if form_values.revenue_method == "manual_sales" %}checked{% endif %} />
+            Use a custom expected sales amount
+          </label>
+          <div id="custom-sales-field" class="form-field conditional-field"
+            {% if form_values.revenue_method != "manual_sales" %}hidden{% endif %}>
           <label class="form-label" for="expected_sales_amount">
             Expected sales amount ($)
           </label>
@@ -296,14 +274,18 @@
           {% if errors.get("expected_sales_amount") %}
             <p class="field-error">{{ errors.expected_sales_amount }}</p>
           {% endif %}
-          <button class="button-secondary" id="use-calculated-sales"
-            type="button">Use the calculated estimate</button>
-        </div>
-      </section>
+          </div>
+        </section>
+      {% else %}
+        <input id="expected_sales_amount" name="expected_sales_amount"
+          type="hidden" value="" />
+      {% endif %}
     </fieldset>
 
     <fieldset class="input-section">
-      <legend>Food and packaging costs</legend>
+      <legend>Food and transaction costs</legend>
+      <div class="contextual-warnings" data-warning-group="food"
+        aria-live="polite" hidden></div>
       <div class="label-row">
         <p class="section-question">
           How do you want to estimate food and packaging costs for this event?
@@ -415,7 +397,9 @@
     </fieldset>
 
     <fieldset class="input-section">
-      <legend>Labor costs</legend>
+      <legend>Labor</legend>
+      <div class="contextual-warnings" data-warning-group="labor"
+        aria-live="polite" hidden></div>
       <p class="form-hint">
         Combined hours include all employees paid at the same rate, including
         setup and cleanup when applicable.
@@ -516,7 +500,9 @@
     </fieldset>
 
     <fieldset class="input-section">
-      <legend>Travel and operating costs</legend>
+      <legend>Fixed event costs and fees</legend>
+      <div class="contextual-warnings" data-warning-group="fixed"
+        aria-live="polite" hidden></div>
       <p class="form-hint">
         Enter any flat event costs you expect. Leave a field blank when no
         amount has been entered.
@@ -649,6 +635,8 @@
 
     <fieldset class="input-section">
       <legend>Profit target</legend>
+      <div class="contextual-warnings" data-warning-group="profit"
+        aria-live="polite" hidden></div>
       <div class="label-row">
         <p class="section-question">
           How do you decide whether this event is worth accepting?
@@ -853,9 +841,8 @@
           <h3>Break-even and target</h3>
           {% for key, label, format in (
             ("break_even_sales", "Break-even sales", "money"),
-            ("exact_break_even_customers", "Exact break-even customers", ""),
             ("minimum_whole_break_even_customers",
-             "Minimum whole break-even customers", "")
+             "Break-even customers", "")
           ) %}
             <div class="result-item">
               <span>{{ label }}</span>

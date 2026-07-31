@@ -1,5 +1,5 @@
 from datetime import date, time
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_FLOOR
 
 from werkzeug.datastructures import MultiDict
 
@@ -124,6 +124,9 @@ def blank_event_inputs_form(
 
 def validate_event_inputs(
     submitted: MultiDict,
+    *,
+    require_identity: bool = True,
+    allow_custom_sales: bool = True,
 ) -> tuple[EventIdentity | None, dict, dict[str, str]]:
     """Validate the currently implemented portions of Event Inputs."""
     values = {
@@ -192,11 +195,17 @@ def validate_event_inputs(
         ("start_time", "Start time"),
         ("location", "Location"),
     ):
-        if not values[name]:
+        if require_identity and not values[name]:
             errors[name] = f"{label} is required."
 
-    event_date = _parse_date(values["event_date"], errors)
-    start_time = _parse_time(values["start_time"], errors)
+    event_date = (
+        _parse_date(values["event_date"], errors)
+        if require_identity else None
+    )
+    start_time = (
+        _parse_time(values["start_time"], errors)
+        if require_identity else None
+    )
 
     _whole_number(
         values, errors, "estimated_attendance", "Estimated attendance"
@@ -227,6 +236,9 @@ def validate_event_inputs(
     else:
         values["event_protection"] = ""
 
+    if not allow_custom_sales:
+        values["revenue_method"] = "attendance"
+        values["expected_sales_amount"] = ""
     revenue_method = values["revenue_method"]
     if revenue_method == "manual_sales":
         _money(
@@ -251,17 +263,22 @@ def validate_event_inputs(
     if errors:
         return None, values, errors
 
-    identity = EventIdentity(
-        event_name=values["event_name"],
-        event_date=event_date,
-        start_time=start_time,
-        location=values["location"],
-    )
+    identity = None
+    if require_identity:
+        identity = EventIdentity(
+            event_name=values["event_name"],
+            event_date=event_date,
+            start_time=start_time,
+            location=values["location"],
+        )
     return identity, values, errors
 
 
 def validate_and_calculate_event_analysis(
     submitted: MultiDict,
+    *,
+    require_identity: bool = True,
+    allow_custom_sales: bool = True,
 ) -> tuple[
     EventIdentity | None,
     dict,
@@ -269,7 +286,11 @@ def validate_and_calculate_event_analysis(
     EventCalculationResult | None,
 ]:
     """Validate a complete event form and calculate its current analysis."""
-    identity, values, errors = validate_event_inputs(submitted)
+    identity, values, errors = validate_event_inputs(
+        submitted,
+        require_identity=require_identity,
+        allow_custom_sales=allow_custom_sales,
+    )
     if errors:
         return identity, values, errors, None
     result = calculate_event_scenario(scenario_from_form_values(values))
@@ -287,9 +308,11 @@ def calculation_result_data(result: EventCalculationResult) -> dict:
             result.total_expected_food_buyers
         ),
         "total_food_vendors": str(result.total_food_vendors),
-        "estimated_business_buyers": _format_decimal(
-            result.estimated_business_buyers
-        ),
+        "estimated_business_buyers": str(int(
+            result.estimated_business_buyers.to_integral_value(
+                rounding=ROUND_FLOOR
+            )
+        )),
         "expected_orders": _format_decimal(result.expected_orders),
         "expected_sales": _format_decimal(result.expected_sales),
         "food_and_packaging_cost": _format_decimal(
@@ -325,11 +348,7 @@ def calculation_result_data(result: EventCalculationResult) -> dict:
             else _format_decimal(result.profit_margin * Decimal("100"))
         ),
         "break_even_sales": _format_decimal(result.break_even_sales),
-        "exact_break_even_customers": (
-            None
-            if result.exact_break_even_customers is None
-            else _format_decimal(result.exact_break_even_customers)
-        ),
+        "break_even_customers": result.minimum_whole_break_even_customers,
         "minimum_whole_break_even_customers": (
             result.minimum_whole_break_even_customers
         ),
@@ -362,15 +381,37 @@ def calculation_result_data(result: EventCalculationResult) -> dict:
                 "is_met": target.is_met,
             }
         ),
-        "warnings": [
-            {
-                "code": warning.code,
-                "severity": warning.severity,
-                "message": warning.message,
-            }
-            for warning in result.warnings
-        ],
+        "warnings": customer_warning_data(result),
     }
+
+
+def customer_warning_data(result: EventCalculationResult) -> list[dict]:
+    """Format structured warnings for customers without leaking fractions."""
+    buyers = int(result.estimated_business_buyers.to_integral_value(
+        rounding=ROUND_FLOOR
+    ))
+    all_buyers = int(result.total_expected_food_buyers.to_integral_value(
+        rounding=ROUND_FLOOR
+    ))
+    break_even = result.minimum_whole_break_even_customers
+    messages = {
+        "even_split_buyers_below_break_even": (
+            f"Expected buyers for your business ({buyers}) are below the "
+            f"break-even requirement ({break_even})."
+        ),
+        "break_even_exceeds_all_expected_food_demand": (
+            f"Break-even requires {break_even} customers, more than all "
+            f"{all_buyers} attendees expected to buy food."
+        ),
+    }
+    return [
+        {
+            "code": warning.code,
+            "severity": warning.severity,
+            "message": messages.get(warning.code, warning.message),
+        }
+        for warning in result.warnings
+    ]
 
 
 def event_scenario_to_form(
@@ -542,9 +583,11 @@ def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
         "equal_share_percentage": _format_decimal(
             result.equal_share_percentage * Decimal("100")
         ),
-        "estimated_business_buyers": _format_decimal(
-            result.estimated_business_buyers
-        ),
+        "estimated_business_buyers": str(int(
+            result.estimated_business_buyers.to_integral_value(
+                rounding=ROUND_FLOOR
+            )
+        )),
     }
 
     _, full_values, full_errors = validate_event_inputs(submitted)
@@ -559,8 +602,8 @@ def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
                 calculation.exact_break_even_customers
                 - calculation.estimated_business_buyers
             )
-            preview["exact_break_even_customers"] = _format_decimal(
-                calculation.exact_break_even_customers
+            preview["break_even_customers"] = (
+                calculation.minimum_whole_break_even_customers
             )
             if difference > 0:
                 preview["break_even_message"] = (

@@ -36,7 +36,7 @@ def test_labor_section_starts_without_employee_rows(client):
         b'id="event-employee-labor-entries"', 1
     )[1].split(b'id="add-event-labor"', 1)[0]
 
-    assert b"Labor costs" in response.data
+    assert b"<legend>Labor</legend>" in response.data
     assert b"Add employee labor" in response.data
     assert b'class="labor-entry"' not in entries_html
     assert b'name="owner_labor_pay"' in response.data

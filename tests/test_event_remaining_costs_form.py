@@ -53,7 +53,7 @@ def valid_event_inputs() -> dict[str, str | list[str]]:
 def test_all_dedicated_cost_and_fee_fields_are_present(client):
     response = client.get("/events/new")
 
-    assert b"Travel and operating costs" in response.data
+    assert b"Fixed event costs and fees" in response.data
     assert b"Event and payment fees" in response.data
     for field_name in DEDICATED_FIELDS:
         assert f'name="{field_name}"'.encode() in response.data

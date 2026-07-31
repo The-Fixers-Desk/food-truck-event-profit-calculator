@@ -50,6 +50,7 @@ from app.event_inputs_form import (
     blank_event_inputs_form,
     calculation_result_data,
     calculate_demand_preview,
+    customer_warning_data,
     event_scenario_to_form,
     protection_reductions,
     scenario_from_form_values,
@@ -247,7 +248,9 @@ def calculator():
     save_error = None
     if request.method == "POST":
         identity, form_values, errors, result = (
-            validate_and_calculate_event_analysis(request.form)
+            validate_and_calculate_event_analysis(
+                request.form, allow_custom_sales=False
+            )
         )
         if result is not None:
             try:
@@ -301,6 +304,19 @@ def demand_preview():
     if errors:
         return jsonify({"ready": False, "errors": errors})
     return jsonify({"ready": True, **preview})
+
+
+@main.post("/event-inputs/warnings")
+def event_input_warnings():
+    """Return contextual structured warnings without persistence writes."""
+    _, _, errors, result = validate_and_calculate_event_analysis(
+        request.form,
+        require_identity=False,
+        allow_custom_sales=False,
+    )
+    if errors:
+        return jsonify({"ready": False, "warnings": []})
+    return jsonify({"ready": True, "warnings": customer_warning_data(result)})
 
 
 @main.post("/event-analysis/calculate")

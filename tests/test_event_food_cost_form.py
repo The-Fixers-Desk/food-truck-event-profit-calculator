@@ -41,7 +41,7 @@ def opening_tag(response_data: bytes, element_id: str) -> bytes:
 def test_food_cost_section_and_all_method_choices_are_present(client):
     page = client.get("/events/new").data.decode()
 
-    assert "Food and packaging costs" in page
+    assert "Food and transaction costs" in page
     assert (
         "How do you want to estimate food and packaging costs for this event?"
         in page

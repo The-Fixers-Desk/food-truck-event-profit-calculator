@@ -1,0 +1,544 @@
+Implement the milestone:
+
+Complete platform acceptance testing and fix V1 defects.
+
+The Windows and macOS packages, desktop shell, complete automated end-to-end
+suite, calculations, persistence, backup and restore, accessibility, and all V1
+customer workflows already exist.
+
+Perform release-candidate acceptance testing against the actual packaged
+Windows and macOS applications. Resolve every confirmed release-blocking defect
+that can be reproduced, then rebuild and retest the affected artifacts.
+
+Do not treat source-mode Flask execution as platform acceptance testing.
+
+Acceptance-test records
+
+Create a structured V1 acceptance-test record in the repository.
+
+For every performed check, record:
+
+- Test identifier
+- Platform
+- Architecture
+- Operating-system version
+- Application version
+- Artifact filename
+- Artifact SHA-256 checksum
+- Clean, upgrade, reinstall, or recovery environment
+- Preconditions
+- Steps performed
+- Expected result
+- Actual result
+- Pass, fail, blocked, or not run
+- Evidence or concise notes
+- Related defect identifier when applicable
+- Retest result after a fix
+
+Clearly distinguish:
+
+- Passed
+- Failed
+- Blocked by an unavailable environment or credential
+- Not run
+
+Never mark an unavailable check as passed.
+
+Release-blocking definition
+
+Treat a confirmed defect as release-blocking when it causes or creates a
+material risk of:
+
+- Failure to install
+- Failure to launch
+- Failure to close cleanly
+- Local server or process remaining active after application closure
+- Data loss
+- Data corruption
+- Partial database writes
+- Unsafe schema migration
+- Customer data being written into installed application resources
+- Customer data being deleted during upgrade, reinstall, replacement, or
+  uninstall
+- Backup creation failure in an otherwise supported state
+- Valid backup restoration failure
+- Invalid backup being accepted
+- Recovery safeguards failing
+- Incorrect financial calculations
+- Incorrect profit, margin, break-even, demand, or warning results
+- Saved assumptions loading incorrectly
+- A core V1 workflow being unusable
+- Scenario version actions overwriting the wrong Scenario
+- Comparison displaying results from the wrong assumptions
+- Setup or route safeguards allowing an unusable application state
+- Single-instance protection allowing conflicting writes
+- Required offline workflows depending on external network access
+- A serious keyboard or screen-reader barrier that prevents completion of a
+  core workflow
+- Windows prerequisite handling preventing supported installation
+- macOS signing, notarization, Gatekeeper, architecture, or bundle defects that
+  prevent the intended supported distribution
+
+Do not classify as release-blocking solely because of:
+
+- Minor spacing inconsistencies
+- Small wording preferences
+- Nonessential animation or transition behavior
+- Cosmetic differences between platforms
+- Development-only unsigned-build warnings that are already documented and do
+  not affect the intended signed release process
+
+Document nonblocking defects separately without expanding this milestone into
+new product work.
+
+Release candidates
+
+Test actual newly built release-candidate artifacts.
+
+Windows:
+
+- PyInstaller one-folder application
+- Inno Setup installer
+
+macOS:
+
+- py2app application bundle
+- Drag-and-drop DMG
+
+Use the centralized application-version source.
+
+Generate and record SHA-256 checksums for every tested artifact.
+
+Do not silently test an older artifact after source changes.
+
+After any packaging-affecting fix:
+
+- Rebuild the affected artifact.
+- Generate a new checksum.
+- Repeat all acceptance checks materially affected by the change.
+
+Windows test matrix
+
+Where clean environments are available, test:
+
+- Windows 10 x64
+- Windows 11 x64
+
+For each tested Windows version, cover the following.
+
+Clean installation:
+
+- Installer launches without requiring administrator elevation.
+- WebView2 detection works when the Runtime is already installed.
+- Bundled offline WebView2 installation works when the Runtime is absent.
+- A WebView2 prerequisite failure stops installation safely.
+- Application files install under the configured per-user program location.
+- Customer data is created under the configured LocalAppData location.
+- No mutable customer data is written beside the executable.
+- Start Menu shortcut works.
+- Desktop shortcut behavior matches the installer choice.
+- Add/Remove Programs metadata is correct.
+- Application launches without a console window.
+- Product title, version, and icon are correct.
+- First-use onboarding works.
+
+Core customer workflow:
+
+- Save Business Defaults.
+- Create a complete Event.
+- Verify automatic Original estimate creation.
+- Use live Event Analysis recalculation.
+- Save as a new Scenario.
+- Overwrite the active Scenario deliberately.
+- Open saved work.
+- Rename and delete permitted records.
+- Compare Scenarios.
+- Download a backup.
+- Restore a valid backup.
+- Reject an invalid backup.
+- Verify restored data after restart.
+
+Desktop behavior:
+
+- Second launch is rejected safely.
+- Closing the window stops the local server.
+- Closing releases the instance lock.
+- Application can start again afterward.
+- Window resizing preserves usable layouts.
+- Keyboard navigation remains usable.
+- No ordinary workflow opens a browser window unexpectedly.
+
+Existing data and upgrade:
+
+- Install over an older supported package.
+- Preserve Defaults, Events, Scenarios, backups, and recovery snapshots.
+- Run pending database migrations safely.
+- Produce only one installed-program entry.
+- Preserve working shortcuts.
+- Open the correct Dashboard or Welcome state afterward.
+
+Same-version reinstall:
+
+- Reinstall successfully.
+- Preserve all customer data.
+- Avoid duplicate shortcuts and installed-program entries.
+
+Uninstall and reinstall:
+
+- Remove installer-owned application files and shortcuts.
+- Preserve LocalAppData customer records.
+- Reinstall successfully.
+- Reconnect to preserved customer data.
+
+Offline operation:
+
+- Install without internet access.
+- Launch without internet access.
+- Complete representative core workflows without internet access.
+- Use only the local loopback server.
+
+Failure and recovery:
+
+- Damaged database enters the established recovery state.
+- Damaged data is not silently deleted or replaced.
+- Restore remains available where designed.
+- Interrupted or failed startup preserves customer data.
+- Installer failure does not remove established customer data.
+- Running-application installation and uninstall handling is safe.
+
+macOS test matrix
+
+Where suitable environments are available, test:
+
+- Apple Silicon arm64
+- Intel x86_64
+- macOS 13 or later
+
+Verify the actual architecture slice used at runtime.
+
+Do not count Rosetta execution as native Apple Silicon acceptance.
+
+For each tested Mac environment, cover the following.
+
+DMG and installation:
+
+- DMG mounts successfully.
+- Volume identity is correct.
+- Application and Applications alias are present.
+- Application copies successfully to /Applications or ~/Applications.
+- Application launches without Terminal.
+- Bundle name, version, identifier, and icon are correct.
+- Customer data is created only under the configured Application Support
+  directory.
+- No mutable data is written into the .app bundle.
+- First-use onboarding works.
+
+Core customer workflow:
+
+- Save Business Defaults.
+- Create a complete Event.
+- Verify automatic Original estimate creation.
+- Use live Event Analysis recalculation.
+- Save as a new Scenario.
+- Overwrite the active Scenario.
+- Open saved work.
+- Rename and delete permitted records.
+- Compare Scenarios.
+- Download a backup.
+- Restore a valid backup.
+- Reject an invalid backup.
+- Verify restored data after restart.
+
+Desktop behavior:
+
+- Second launch is rejected safely.
+- Closing the window stops the local server.
+- Closing releases the instance lock.
+- Application launches again successfully.
+- Window resizing preserves usable layouts.
+- Keyboard navigation remains usable.
+- No ordinary workflow opens a browser unexpectedly.
+
+Application replacement:
+
+- Replace an older .app with the newer release candidate.
+- Preserve Defaults, Events, Scenarios, backups, and recovery snapshots.
+- Run pending schema migrations safely.
+- Continue using the same Application Support directory.
+- Open the correct application state.
+
+Uninstall and reinstall:
+
+- Move the .app to Trash.
+- Preserve Application Support customer data.
+- Reinstall from the DMG.
+- Reconnect to preserved data.
+
+Offline operation:
+
+- Install from the DMG without internet access.
+- Launch without internet access.
+- Complete representative workflows without internet access.
+
+Failure and recovery:
+
+- Damaged database enters the established recovery state.
+- Damaged data remains preserved.
+- Restore remains available where designed.
+- Failed startup does not replace or reset customer data.
+
+macOS release verification
+
+When valid Developer ID and notarization credentials are available:
+
+- Sign nested executable code correctly.
+- Sign the outer application bundle last.
+- Verify Hardened Runtime.
+- Verify bundle identifier and version.
+- Verify arm64 and x86_64 slices.
+- Create and sign the DMG.
+- Submit using notarytool.
+- Verify successful notarization.
+- Staple the ticket.
+- Verify the stapled ticket.
+- Verify Gatekeeper acceptance.
+
+When credentials or required hardware are unavailable:
+
+- Record the checks as blocked or not run.
+- Do not claim the artifact is release-ready for macOS distribution.
+- Do not claim signing or notarization success.
+- Preserve development-build results separately.
+
+Cross-platform data checks
+
+On both platforms, verify:
+
+- Fresh databases are created through the migration system.
+- Existing compatible databases retain every identifier and relationship.
+- Business Defaults persist.
+- Events and Scenarios persist.
+- Ordered employee labor rows persist.
+- Ordered miscellaneous-cost rows persist.
+- Calculated results are regenerated from saved assumptions.
+- Backup files contain the expected data.
+- Restore performs complete replacement rather than merging.
+- Automatic recovery snapshots remain valid.
+- Application upgrades do not relocate or duplicate customer data.
+- Uninstallation or application replacement does not delete customer data.
+
+Cross-platform calculation checks
+
+Using the same manually verifiable fixtures on both platforms, verify displayed:
+
+- Weather-adjusted attendance
+- Total expected food buyers
+- Even-split expected buyers
+- Expected sales
+- Food and packaging cost
+- Payment-processing costs
+- Labor
+- Owner labor pay
+- Total event cost
+- Business profit
+- Profit margin
+- Break-even sales
+- Break-even customers
+- Profit-target evaluation
+- Factual warnings
+
+Compare displayed values with the established manual examples and automated
+calculation tests.
+
+Any platform-specific arithmetic difference is release-blocking.
+
+Accessibility acceptance
+
+On each available platform, perform practical acceptance checks for:
+
+- Complete keyboard use of a core customer journey
+- Visible focus
+- Dialog focus entry and restoration
+- Validation summary and inline errors
+- Repeatable labor and miscellaneous-cost rows
+- Scenario save and overwrite dialogs
+- Saved Event rename and delete flows
+- Scenario comparison
+- Backup and restore
+- 200% zoom or equivalent scaling
+- Narrow supported window sizing
+- Long Event and Scenario names
+- No essential information conveyed only through color
+
+Where available, perform a basic screen-reader workflow using the platform’s
+standard assistive technology.
+
+Record the exact assistive technology and version used.
+
+A barrier that prevents completion of a core workflow is release-blocking.
+
+Defect workflow
+
+Create a concise acceptance-defect log.
+
+For every confirmed defect, record:
+
+- Defect identifier
+- Environment
+- Artifact checksum
+- Reproduction steps
+- Expected behavior
+- Actual behavior
+- Severity
+- Release-blocking decision and rationale
+- Root cause when identified
+- Files changed
+- Automated regression coverage added
+- Focused test result
+- Full-suite result
+- Rebuilt artifact checksum
+- Acceptance retest result
+
+Before fixing:
+
+- Reproduce the problem reliably.
+- Confirm it occurs in the tested release candidate.
+- Distinguish product defects from test-environment failures.
+
+For every release-blocking defect:
+
+1. Add or update an automated regression test where technically practical.
+2. Fix the smallest underlying cause.
+3. Do not work around data-integrity or calculation problems only in the UI.
+4. Run focused tests.
+5. Run the full automated suite.
+6. Run git diff --check.
+7. Rebuild the affected packaged artifact.
+8. Repeat the failed acceptance test.
+9. Repeat adjacent critical workflows that could have regressed.
+10. Update the acceptance record and defect log.
+
+If a blocker cannot be fixed safely within this milestone:
+
+- Leave it open and clearly documented.
+- Do not mark the platform release-ready.
+- Do not conceal it with wording changes or skipped tests.
+
+Change control
+
+Do not add:
+
+- New business features
+- New calculations
+- New Scenario behavior
+- New Dashboard features
+- New comparison behavior
+- New backup formats
+- Automatic updates
+- Cloud services
+- Telemetry
+- License systems
+- Unplanned redesign
+
+Small usability corrections are allowed only when required to resolve a
+confirmed acceptance defect.
+
+Do not broadly refactor stable systems without a defect-driven reason.
+
+Automated regression testing
+
+After acceptance fixes:
+
+- Run all focused tests related to changed behavior.
+- Run the complete unit, integration, route, migration, backup, shell,
+  packaging, accessibility, and end-to-end test suite.
+- Run the Chromium full E2E suite.
+- Run the Firefox and WebKit smoke suites where browser binaries are available.
+- Run desktop lifecycle tests.
+- Run offline tests.
+- Run packaging audits.
+- Run git diff --check.
+
+Do not weaken existing tests to make acceptance fixes pass.
+
+Release-readiness summary
+
+Create a final V1 acceptance summary containing:
+
+- Application version
+- Source revision
+- Tested artifact names and checksums
+- Platforms and architectures tested
+- Clean-install results
+- Upgrade and replacement results
+- Reinstall results
+- Uninstall and data-preservation results
+- Offline results
+- Core-workflow results
+- Backup, restore, and recovery results
+- Accessibility results
+- Signing, notarization, and Gatekeeper results
+- Automated-suite results
+- Fixed release blockers
+- Remaining release blockers
+- Remaining nonblocking defects
+- Blocked or unperformed checks
+- Overall readiness separately for:
+  - Windows
+  - macOS
+
+Use only these readiness outcomes:
+
+- Ready for release
+- Not ready for release
+- Acceptance incomplete
+
+Do not describe a platform as ready when required release-blocking checks are
+failed, blocked, or unperformed.
+
+Documentation
+
+Update packaging and release documentation with:
+
+- Final performed acceptance procedure
+- Test environments used
+- Required clean-environment checks
+- Defect-classification rules
+- Artifact-evidence requirements
+- Rebuild and retest procedure
+- Known environment limitations
+- Remaining manual checks before publication
+
+Scope
+
+Do not:
+
+- Publish V1
+- Tag version 1.0.0
+- Upload release artifacts
+- Announce release readiness without evidence
+- Add unsupported platforms
+- Generate fake acceptance evidence
+- Claim unavailable hardware or credentials were used
+- Commit signing secrets or credentials
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Report every environment actually used.
+2. Report every tested artifact path and checksum.
+3. Report all acceptance checks as passed, failed, blocked, or not run.
+4. List every confirmed defect.
+5. List every release-blocking defect fixed.
+6. List every open release blocker.
+7. Report all focused and full-suite test commands and exact results.
+8. Report all rebuilt artifact paths and checksums.
+9. State Windows readiness.
+10. State macOS readiness.
+11. Clearly identify hardware, credentials, packaging tools, or clean
+    environments that were unavailable.
+
+Keep the response concise but do not omit limitations.
+

@@ -28,7 +28,7 @@ def test_event_inputs_page_opens(client):
 
     assert response.status_code == 200
     assert b"<h1>Event Inputs</h1>" in response.data
-    assert b"Event Identification" in response.data
+    assert b"Event information" in response.data
 
 
 @pytest.mark.parametrize(

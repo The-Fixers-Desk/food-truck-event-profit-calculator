@@ -38,10 +38,10 @@ def test_workspace_contains_all_adjustable_groups_and_actions(client):
     page = client.post("/events/new", data=complete_event_inputs()).data.decode()
 
     for text in (
-        "Revenue Assumptions",
-        "Food and packaging costs",
-        "Labor costs",
-        "Travel and operating costs",
+        "Demand and sales potential",
+        "Food and transaction costs",
+        "Labor",
+        "Fixed event costs and fees",
         "Event and payment fees",
         "Profit target",
         "Additional costs",
@@ -68,14 +68,12 @@ def test_workspace_contains_all_adjustable_groups_and_actions(client):
 def test_initial_workspace_displays_complete_calculation(client):
     page = client.post("/events/new", data=complete_event_inputs()).data.decode()
 
-    assert "$5000" in page
-    assert "$1275.0625" in page
-    assert "$985" in page
-    assert "$2260.0625" in page
-    assert "$2739.9375" in page
-    assert "54.79875%" in page
-    assert "136.9734848484848484848484848" in page
-    assert "custom_sales_assumption" in page
+    assert "$233.75" in page
+    assert "custom_sales_assumption" not in page
+    assert "Exact break-even customers" not in page
+    assert "Break-even customers" in page
+    assert 'id="use-custom-sales" type="checkbox"' in page
+    assert 'id="use-custom-sales" type="checkbox" checked' not in page
 
 
 def test_live_endpoint_recalculates_demand_revenue_and_costs(client):

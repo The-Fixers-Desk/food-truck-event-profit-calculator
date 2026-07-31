@@ -237,6 +237,39 @@
   font-weight: 700;
 }
 
+.weather-information {
+  display: inline-block;
+}
+
+.weather-information summary {
+  display: inline-grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.weather-information p {
+  max-width: 42rem;
+}
+
+.contextual-warnings {
+  margin-bottom: var(--space-4);
+}
+
+.contextual-warning {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: 4px solid #b7791f;
+  background: #fff8e6;
+}
+
+.workspace-revenue-control {
+  margin-top: var(--space-4);
+}
+
 .active-scenario {
   margin: var(--space-3) 0 0;
 }

@@ -31,23 +31,21 @@ def opening_tag(response_data: bytes, element_id: str) -> bytes:
     return match.group()
 
 
-def test_revenue_assumptions_fields_and_preview_are_present(client):
+def test_demand_fields_present_without_result_previews_or_custom_sales(client):
     response = client.get("/events/new")
     page = response.data.decode()
 
-    assert "Revenue Assumptions" in page
+    assert "Demand and sales potential" in page
     assert "Estimated attendance" in page
     assert "Other competing food vendors" in page
     assert "Do not include your own business." in page
     assert "Percentage of attendees expected to buy food" in page
     assert "Average order sale amount ($)" in page
-    assert "Estimated sales preview" in page
-    assert "Enter a custom expected sales amount" in page
-    assert "Early demand estimate" in page
-    assert "Total food vendors, including you" in page
-    assert "Expected buyers per vendor at an even split" in page
+    assert "Estimated sales preview" not in page
+    assert "Use a custom expected sales amount" not in page
+    assert "Early demand estimate" not in page
     script = client.get("/static/js/event_inputs.js").data.decode()
-    assert "/event-inputs/demand-preview" in script
+    assert "/event-inputs/warnings" in script
 
 
 def test_about_estimates_is_collapsed_and_can_be_toggled(client):
@@ -56,6 +54,53 @@ def test_about_estimates_is_collapsed_and_can_be_toggled(client):
     assert b"About estimates" in response.data
     assert b"<details" in response.data
     assert b"<details open" not in response.data
+
+
+def test_weather_percentage_guidance_and_accessible_disclosure(client):
+    page = client.get("/events/new").data.decode()
+
+    assert "What do the weather percentages mean?" in page
+    assert "estimated reduction in event attendance caused" in page
+    assert "final estimated attendance reduction after" in page
+    assert "5% base reduction" in page
+    assert "Partially covered applies 75%" in page
+    assert "3.75%" in page
+    assert "planning estimates, not guaranteed attendance outcomes" in page
+
+
+def test_warning_preview_is_structured_and_performs_no_writes(client, app):
+    from tests.test_complete_event_inputs_workflow import complete_event_inputs
+
+    form_data = complete_event_inputs()
+    form_data["manual_food_cost_total"] = "9000"
+    response = client.post("/event-inputs/warnings", data=form_data)
+
+    payload = response.get_json()
+    assert payload["ready"] is True
+    assert all(set(item) == {"code", "severity", "message"}
+               for item in payload["warnings"])
+    with app.app_context():
+        from app.database import get_database
+        database = get_database()
+        assert database.execute("SELECT COUNT(*) FROM events").fetchone()[0] == 0
+        assert database.execute(
+            "SELECT COUNT(*) FROM event_scenarios"
+        ).fetchone()[0] == 0
+
+
+def test_incomplete_warning_preview_returns_no_stale_warning(client):
+    response = client.post(
+        "/event-inputs/warnings",
+        data={"estimated_attendance": "1000"},
+    )
+    assert response.get_json() == {"ready": False, "warnings": []}
+
+
+def test_warning_javascript_debounces_and_rejects_stale_responses(client):
+    script = client.get("/static/js/event_inputs.js").data.decode()
+    assert "AbortController" in script
+    assert "warningRequestNumber" in script
+    assert "requestNumber !== warningRequestNumber" in script
 
 
 def test_weather_choices_show_selected_reductions(client):
@@ -147,19 +192,15 @@ def test_event_protection_is_required_after_weather_selection(client):
     assert b"Choose the event protection." in response.data
 
 
-def test_custom_expected_sales_is_required_and_preserved_when_active(client):
+def test_initial_submission_ignores_custom_expected_sales(client):
     form_data = valid_event_inputs()
     form_data["revenue_method"] = "manual_sales"
-    form_data["expected_sales_amount"] = ""
-    response = client.post("/events/new", data=form_data)
-    assert b"Expected sales amount is required." in response.data
-
-    form_data["location"] = ""
     form_data["expected_sales_amount"] = "5000"
+    form_data["location"] = ""
     response = client.post("/events/new", data=form_data)
-    assert b'value="manual_sales"' in response.data
-    assert b'value="5000"' in response.data
-    assert b"hidden" not in opening_tag(response.data, "custom-sales-field")
+    assert b'value="attendance"' in response.data
+    assert b'value="5000"' not in response.data
+    assert b'id="custom-sales-field"' not in response.data
 
 
 def test_calculated_estimate_state_clears_hidden_custom_sales(client):
@@ -172,8 +213,7 @@ def test_calculated_estimate_state_clears_hidden_custom_sales(client):
 
     assert b'value="attendance"' in response.data
     assert b'value="9999"' not in response.data
-    assert b"hidden" in opening_tag(response.data, "custom-sales-field")
-    assert b"Use the calculated estimate" in response.data
+    assert b'id="custom-sales-field"' not in response.data
 
 
 @pytest.mark.parametrize(
@@ -256,9 +296,7 @@ def test_demand_preview_uses_weather_and_includes_customer_vendor(client):
     assert preview["equal_share_percentage"].startswith(
         "16.66666666666666666666666667"
     )
-    assert preview["estimated_business_buyers"].startswith(
-        "14.16666666666666666666666667"
-    )
+    assert preview["estimated_business_buyers"] == "14"
 
 
 def test_demand_preview_allows_zero_other_vendors(client):
@@ -328,5 +366,5 @@ def test_demand_preview_adds_break_even_comparison_when_costs_are_ready(
     ).get_json()
 
     assert preview["ready"] is True
-    assert preview["exact_break_even_customers"].startswith("4.59")
+    assert preview["break_even_customers"] == 5
     assert "meets or exceeds" in preview["break_even_message"]

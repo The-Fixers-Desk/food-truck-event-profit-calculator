@@ -1,11 +1,12 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP
 
-from app.calculations import calculate_event_scenario
+from app.calculations import CalculationWarning, calculate_event_scenario
 from app.database import load_event_scenario
+from app.event_inputs_form import customer_warning_data
 
 
 RESULT_ROWS = (
-    ("estimated_business_buyers", "Expected buyers", "count"),
+    ("estimated_business_buyers", "Expected buyers", "buyer_count"),
     ("expected_orders", "Expected orders", "count"),
     ("expected_sales", "Expected sales", "money"),
     ("variable_costs", "Variable costs", "money"),
@@ -16,11 +17,10 @@ RESULT_ROWS = (
     ("business_profit", "Business profit", "money"),
     ("profit_margin", "Profit margin", "percentage"),
     ("break_even_sales", "Break-even sales", "money"),
-    ("exact_break_even_customers", "Exact break-even customers", "count"),
     (
         "minimum_whole_break_even_customers",
-        "Minimum whole break-even customers",
-        "count",
+        "Break-even customers",
+        "break_even_count",
     ),
 )
 
@@ -41,7 +41,14 @@ def build_comparison(
                 "identity": identity,
                 "scenario": scenario,
                 "result": result,
-                "warnings": result.warnings,
+                "warnings": tuple(
+                    CalculationWarning(
+                        warning["code"],
+                        warning["severity"],
+                        warning["message"],
+                    )
+                    for warning in customer_warning_data(result)
+                ),
             }
         )
     if baseline_id not in scenario_ids:
@@ -100,7 +107,7 @@ def _assumption_rows(columns: list[dict]) -> list[dict]:
         (
             "other_competing_food_vendors",
             "Other competing food vendors",
-            "count",
+            "buyer_count",
         ),
         ("total_food_vendors", "Total food vendors", "count"),
         (
@@ -287,7 +294,15 @@ def _difference(value, baseline, kind: str) -> str:
         return "Not available."
     if kind == "category":
         return "" if value == baseline else "Different from baseline"
-    difference = Decimal(value) - Decimal(baseline)
+    value = Decimal(value)
+    baseline = Decimal(baseline)
+    if kind == "buyer_count":
+        value = value.to_integral_value(rounding=ROUND_FLOOR)
+        baseline = baseline.to_integral_value(rounding=ROUND_FLOOR)
+    elif kind == "break_even_count":
+        value = value.to_integral_value(rounding=ROUND_CEILING)
+        baseline = baseline.to_integral_value(rounding=ROUND_CEILING)
+    difference = value - baseline
     sign = "+" if difference > 0 else ""
     if kind == "money":
         return f"{sign}${_number(difference)}"
@@ -353,6 +368,10 @@ def _display(value, kind: str) -> str:
         return f"${_number(Decimal(value))}"
     if kind == "percentage":
         return f"{_number(Decimal(value) * 100)}%"
+    if kind == "buyer_count":
+        return str(int(Decimal(value).to_integral_value(rounding=ROUND_FLOOR)))
+    if kind == "break_even_count":
+        return str(int(Decimal(value).to_integral_value(rounding=ROUND_CEILING)))
     if kind == "count":
         return _number(Decimal(value))
     return str(value)

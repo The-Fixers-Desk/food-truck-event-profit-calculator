@@ -71,6 +71,8 @@ weatherOutlook.addEventListener("change", updateWeatherControls);
 customWeatherInput.addEventListener("input", updateWeatherControls);
 updateWeatherControls();
 
+/* Event Inputs intentionally shows warnings, not a miniature result preview. */
+/*
 const demandPreview = document.querySelector("#demand-preview");
 const demandPreviewStatus = document.querySelector(
   "#demand-preview-status",
@@ -164,16 +166,17 @@ protectionChoices.forEach((choice) => {
   choice.addEventListener("change", scheduleDemandPreview);
 });
 scheduleDemandPreview();
+*/
 
 const revenueMethod = document.querySelector("#revenue_method");
 const useCustomSales = document.querySelector("#use-custom-sales");
 const customSalesField = document.querySelector("#custom-sales-field");
 const expectedSalesAmount = document.querySelector("#expected_sales_amount");
-const useCalculatedSales = document.querySelector("#use-calculated-sales");
 
 function updateSalesControls() {
   const customIsActive = revenueMethod.value === "manual_sales";
-  useCustomSales.hidden = customIsActive;
+  if (!useCustomSales || !customSalesField || !expectedSalesAmount) return;
+  useCustomSales.checked = customIsActive;
   customSalesField.hidden = !customIsActive;
   expectedSalesAmount.required = customIsActive;
   if (!customIsActive) {
@@ -181,17 +184,14 @@ function updateSalesControls() {
   }
 }
 
-useCustomSales.addEventListener("click", () => {
-  revenueMethod.value = "manual_sales";
-  updateSalesControls();
-  scheduleWorkspaceCalculation();
-});
-
-useCalculatedSales.addEventListener("click", () => {
-  revenueMethod.value = "attendance";
-  updateSalesControls();
-  scheduleWorkspaceCalculation();
-});
+if (useCustomSales) {
+  useCustomSales.addEventListener("change", () => {
+    revenueMethod.value = useCustomSales.checked
+      ? "manual_sales" : "attendance";
+    updateSalesControls();
+    scheduleWorkspaceCalculation();
+  });
+}
 
 updateSalesControls();
 
@@ -427,6 +427,81 @@ addAdditionalCost.addEventListener("click", () => {
 
 const workspaceForm = document.querySelector("[data-workspace='true']");
 const workspaceStatus = document.querySelector("#analysis-update-status");
+const eventInputsWarningForm = document.querySelector(
+  "form.form-panel:not([data-workspace='true'])",
+);
+let warningTimer;
+let warningRequest;
+let warningRequestNumber = 0;
+
+const warningGroups = {
+  even_split_buyers_below_break_even: "demand",
+  break_even_exceeds_all_expected_food_demand: "demand",
+  below_profit_target: "profit",
+  estimated_loss: "profit",
+  exactly_at_break_even: "profit",
+};
+
+function clearContextualWarnings() {
+  document.querySelectorAll("[data-warning-group]").forEach((container) => {
+    container.replaceChildren();
+    container.hidden = true;
+  });
+}
+
+function showContextualWarnings(warnings) {
+  clearContextualWarnings();
+  warnings.forEach((warning) => {
+    const group = warningGroups[warning.code];
+    const container = document.querySelector(
+      `[data-warning-group="${group}"]`,
+    );
+    if (!container) return;
+    const notice = document.createElement("p");
+    notice.className = "contextual-warning";
+    const headline = warning.code === "below_profit_target"
+      ? "Current assumptions do not meet your minimum profit target."
+      : warning.code.includes("break_even")
+        ? "Demand may not cover current costs."
+        : warning.code === "estimated_loss"
+          ? "Current assumptions show an estimated loss."
+          : "Current assumptions are exactly at break-even.";
+    notice.textContent = `⚠ ${headline} Based on your current entries and `
+      + `saved business defaults, ${warning.message}`;
+    container.append(notice);
+    container.hidden = false;
+  });
+}
+
+async function updateContextualWarnings() {
+  const requestNumber = ++warningRequestNumber;
+  warningRequest?.abort();
+  warningRequest = new AbortController();
+  try {
+    const response = await fetch("/event-inputs/warnings", {
+      method: "POST",
+      body: new FormData(eventInputsWarningForm),
+      signal: warningRequest.signal,
+    });
+    const payload = await response.json();
+    if (requestNumber !== warningRequestNumber) return;
+    showContextualWarnings(payload.ready ? payload.warnings : []);
+  } catch (error) {
+    if (error.name !== "AbortError") clearContextualWarnings();
+  }
+}
+
+function scheduleContextualWarnings() {
+  clearTimeout(warningTimer);
+  warningTimer = setTimeout(updateContextualWarnings, 300);
+}
+
+if (eventInputsWarningForm) {
+  eventInputsWarningForm.addEventListener("input", scheduleContextualWarnings);
+  eventInputsWarningForm.addEventListener("change", scheduleContextualWarnings);
+  scheduleContextualWarnings();
+}
+
 let workspaceBaseline = workspaceForm
   ? new FormData(workspaceForm)
   : null;
@@ -581,6 +656,9 @@ async function recalculateWorkspace() {
 }
 
 function scheduleWorkspaceCalculation() {
+  if (eventInputsWarningForm) {
+    scheduleContextualWarnings();
+  }
   if (!workspaceForm) {
     return;
   }
