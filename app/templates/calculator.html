@@ -42,6 +42,21 @@
       <div class="workspace-assumptions">
         <h2>Adjustable assumptions</h2>
   {% endif %}
+  <nav class="section-switcher {% if not workspace %}event-stepper{% endif %}"
+    aria-label="{% if workspace %}Assumption sections{% else %}Event Input stages{% endif %}"
+    data-section-navigation>
+    {% if workspace %}
+      {% for number, label in ((2, "Demand and weather"), (3, "Revenue and food costs"), (4, "Labor"), (5, "Event costs and fees"), (6, "Profit target")) %}
+        <button type="button" data-section-target="{{ number }}">{{ label }}</button>
+      {% endfor %}
+    {% else %}
+      {% for number, label in ((1, "Event details"), (2, "Demand and weather"), (3, "Revenue and food costs"), (4, "Labor"), (5, "Event costs and fees"), (6, "Profit target and review")) %}
+        <button type="button" data-section-target="{{ number }}">
+          <span>{{ number }}</span>{{ label }}
+        </button>
+      {% endfor %}
+    {% endif %}
+  </nav>
   <form class="form-panel{% if workspace %} workspace-form{% endif %}"
     method="post" novalidate
     {% if workspace %}
@@ -70,7 +85,7 @@
         value="{{ form_values['baseline_' ~ name] }}" />
     {% endfor %}
 
-    <fieldset class="input-section"
+    <fieldset class="input-section" data-form-section="1"
       {% if workspace %}hidden aria-hidden="true"{% endif %}>
       <legend>Event information</legend>
       <div class="form-grid">
@@ -97,7 +112,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="2">
       <legend>Demand and sales potential</legend>
       <div class="contextual-warnings" data-warning-group="demand"
         aria-live="polite" hidden></div>
@@ -282,7 +297,7 @@
       {% endif %}
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="3">
       <legend>Food and transaction costs</legend>
       <div class="contextual-warnings" data-warning-group="food"
         aria-live="polite" hidden></div>
@@ -396,7 +411,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="4">
       <legend>Labor</legend>
       <div class="contextual-warnings" data-warning-group="labor"
         aria-live="polite" hidden></div>
@@ -499,7 +514,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="5">
       <legend>Fixed event costs and fees</legend>
       <div class="contextual-warnings" data-warning-group="fixed"
         aria-live="polite" hidden></div>
@@ -548,7 +563,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="5">
       <legend>Event and payment fees</legend>
       <div class="form-grid">
         {% for name, label in (
@@ -633,7 +648,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="6">
       <legend>Profit target</legend>
       <div class="contextual-warnings" data-warning-group="profit"
         aria-live="polite" hidden></div>
@@ -712,9 +727,15 @@
           <p class="field-error">{{ errors.minimum_profit_margin }}</p>
         {% endif %}
       </div>
+      {% if not workspace %}
+        <section class="stage-review" aria-labelledby="stage-review-title">
+          <h2 id="stage-review-title">Review your event</h2>
+          <div id="event-review-summary" class="review-grid"></div>
+        </section>
+      {% endif %}
     </fieldset>
 
-    <fieldset class="input-section">
+    <fieldset class="input-section" data-form-section="5">
       <legend>Additional costs</legend>
       <div id="event-additional-cost-entries">
         {% for cost in form_values.additional_costs %}
@@ -752,7 +773,7 @@
       </button>
     </fieldset>
 
-    <div class="form-actions">
+    <div class="form-actions sticky-actions">
       {% if workspace %}
         <button class="button" id="open-save-analysis"
           type="button" disabled>Save</button>
@@ -762,7 +783,14 @@
           Start new analysis
         </a>
       {% else %}
-        <button class="button" type="submit">Continue</button>
+        <button class="button-secondary" id="section-back"
+          type="button">Back</button>
+        <span id="section-progress" aria-live="polite"></span>
+        <button class="button" id="section-continue"
+          type="button">Continue</button>
+        <button class="button" id="analyze-event" type="submit" hidden>
+          Analyze event
+        </button>
       {% endif %}
     </div>
   </form>

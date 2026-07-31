@@ -17,8 +17,14 @@
     {% endfor %}
   {% endwith %}
 
-  <form class="form-panel" method="post" novalidate>
-    <div class="form-grid">
+  <nav class="section-switcher defaults-sections" aria-label="Defaults sections"
+    data-defaults-navigation>
+    {% for number, label in ((1, "Business and sales"), (2, "Food and payment costs"), (3, "Labor and event costs"), (4, "Profit target")) %}
+      <button type="button" data-defaults-target="{{ number }}">{{ label }}</button>
+    {% endfor %}
+  </nav>
+  <form class="form-panel defaults-form" method="post" novalidate>
+    <div class="form-grid" data-defaults-section="1">
       {% macro field(name, label, required=true, hint="") %}
         <div class="form-field">
           <label class="form-label" for="{{ name }}">{{ label }}</label>
@@ -48,7 +54,7 @@
                "Optional flat cost for a typical event") }}
     </div>
 
-    <fieldset class="choice-section">
+    <fieldset class="choice-section" data-defaults-section="2">
       <legend>How do you usually estimate food and packaging costs?</legend>
       <div class="method-confirmation">
         <label class="form-label" for="food_cost_method_choice">
@@ -130,7 +136,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="choice-section">
+    <fieldset class="choice-section" data-defaults-section="4">
       <legend>How do you decide whether an event is worth accepting?</legend>
       <div class="choice-options">
         <label class="choice-option">
@@ -187,7 +193,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="labor-section">
+    <fieldset class="labor-section" data-defaults-section="3">
       <legend>Default labor</legend>
       <p class="form-hint">
         Add each hourly rate and the combined worker-hours typically paid at
@@ -259,7 +265,7 @@
       </button>
     </fieldset>
 
-    <div class="form-actions">
+    <div class="form-actions sticky-actions">
       <button class="button" type="submit">Save defaults</button>
       {% if business_defaults_setup_complete %}
         <a class="button-secondary" href="{{ url_for('main.dashboard') }}">

@@ -899,3 +899,133 @@ if (workspaceForm && saveAnalysisDialog) {
     },
   );
 }
+
+const sectionNavigation = document.querySelector("[data-section-navigation]");
+const formSections = Array.from(document.querySelectorAll("[data-form-section]"));
+
+if (sectionNavigation && formSections.length) {
+  const sectionButtons = Array.from(
+    sectionNavigation.querySelectorAll("[data-section-target]"),
+  );
+  const isWorkspaceSections = Boolean(workspaceForm);
+  const backButton = document.querySelector("#section-back");
+  const continueButton = document.querySelector("#section-continue");
+  const analyzeButton = document.querySelector("#analyze-event");
+  const progress = document.querySelector("#section-progress");
+  let completedThrough = 0;
+  let activeSection = Number(
+    formSections.find((section) => section.querySelector('[aria-invalid="true"]'))
+      ?.dataset.formSection ?? (isWorkspaceSections ? 2 : 1),
+  );
+  if (!isWorkspaceSections && document.querySelector('[aria-invalid="true"]')) {
+    completedThrough = Math.max(0, activeSection - 1);
+  }
+  const revenueSection = formSections.find(
+    (section) => section.dataset.formSection === "3",
+  );
+  const averageOrderField = document.querySelector(
+    "#average_order_sale_amount",
+  )?.closest(".form-field");
+  if (revenueSection && averageOrderField) revenueSection.prepend(averageOrderField);
+  const customRevenueControl = document.querySelector(
+    ".workspace-revenue-control",
+  );
+  if (revenueSection && customRevenueControl) {
+    revenueSection.prepend(customRevenueControl);
+  }
+
+  function sectionFields(number) {
+    return formSections
+      .filter((section) => Number(section.dataset.formSection) === number)
+      .flatMap((section) => Array.from(section.querySelectorAll(
+        "input, select, textarea",
+      )));
+  }
+
+  function updateReview() {
+    const review = document.querySelector("#event-review-summary");
+    if (!review) return;
+    review.replaceChildren();
+    for (let number = 1; number <= 5; number += 1) {
+      const card = document.createElement("article");
+      const heading = document.createElement("h3");
+      heading.textContent = sectionButtons[number - 1].textContent.trim();
+      const values = sectionFields(number)
+        .filter((field) => field.name && field.type !== "hidden" && field.value)
+        .slice(0, 4)
+        .map((field) => {
+          const label = field.labels?.[0]?.textContent.trim();
+          return label ? `${label}: ${field.value}` : field.value;
+        });
+      const summary = document.createElement("p");
+      summary.textContent = values.length
+        ? values.join(" · ") : "No values entered yet.";
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "button-secondary";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => showSection(number));
+      card.append(heading, summary, edit);
+      review.append(card);
+    }
+  }
+
+  function showSection(number) {
+    activeSection = number;
+    formSections.forEach((section) => {
+      section.hidden = Number(section.dataset.formSection) !== number;
+    });
+    sectionButtons.forEach((button) => {
+      const target = Number(button.dataset.sectionTarget);
+      const active = target === number;
+      button.classList.toggle("is-active", active);
+      button.classList.toggle("is-complete", target <= completedThrough);
+      button.setAttribute("aria-current", active ? "step" : "false");
+      if (!isWorkspaceSections) {
+        button.disabled = target > completedThrough + 1 && !active;
+      }
+    });
+    if (backButton) backButton.hidden = number === 1;
+    if (continueButton) continueButton.hidden = number === 6;
+    if (analyzeButton) analyzeButton.hidden = number !== 6;
+    if (progress) progress.textContent = `Step ${number} of 6`;
+    if (number === 6) updateReview();
+  }
+
+  function validateActiveSection() {
+    const invalid = sectionFields(activeSection).find((field) => (
+      !field.closest("[hidden]") && !field.checkValidity()
+    ));
+    if (!invalid) return true;
+    invalid.reportValidity();
+    invalid.focus();
+    sectionButtons.find((button) => (
+      Number(button.dataset.sectionTarget) === activeSection
+    ))?.classList.add("has-error");
+    return false;
+  }
+
+  sectionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = Number(button.dataset.sectionTarget);
+      if (isWorkspaceSections || target <= completedThrough + 1) {
+        showSection(target);
+      }
+    });
+  });
+  backButton?.addEventListener("click", () => showSection(activeSection - 1));
+  continueButton?.addEventListener("click", () => {
+    if (!validateActiveSection()) return;
+    completedThrough = Math.max(completedThrough, activeSection);
+    showSection(activeSection + 1);
+  });
+
+  formSections.forEach((section) => {
+    if (section.querySelector('[aria-invalid="true"]')) {
+      sectionButtons.find((button) => (
+        button.dataset.sectionTarget === section.dataset.formSection
+      ))?.classList.add("has-error");
+    }
+  });
+  showSection(activeSection);
+}

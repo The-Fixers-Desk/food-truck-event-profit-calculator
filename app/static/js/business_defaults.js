@@ -91,3 +91,49 @@ confirmFoodMethod.addEventListener("click", () => {
 });
 
 showConfirmedFoodMethod();
+
+const defaultsNavigation = document.querySelector("[data-defaults-navigation]");
+const defaultsSections = Array.from(
+  document.querySelectorAll("[data-defaults-section]"),
+);
+
+if (defaultsNavigation && defaultsSections.length) {
+  const paymentSection = document.querySelector('[data-defaults-section="2"]');
+  const laborCostSection = document.querySelector('[data-defaults-section="3"]');
+  ["card_sales_percentage", "card_processing_percentage"].forEach((id) => {
+    paymentSection.append(document.querySelector(`#${id}`).closest(".form-field"));
+  });
+  laborCostSection.append(
+    document.querySelector("#default_travel_cost").closest(".form-field"),
+  );
+  const buttons = Array.from(
+    defaultsNavigation.querySelectorAll("[data-defaults-target]"),
+  );
+  const initial = Number(
+    defaultsSections.find((section) => section.querySelector('[aria-invalid="true"]'))
+      ?.dataset.defaultsSection ?? 1,
+  );
+  function showDefaultsSection(number) {
+    defaultsSections.forEach((section) => {
+      section.hidden = Number(section.dataset.defaultsSection) !== number;
+    });
+    buttons.forEach((button) => {
+      const active = Number(button.dataset.defaultsTarget) === number;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-current", active ? "page" : "false");
+    });
+  }
+  defaultsSections.forEach((section) => {
+    if (section.querySelector('[aria-invalid="true"]')) {
+      buttons.find((button) => (
+        button.dataset.defaultsTarget === section.dataset.defaultsSection
+      ))?.classList.add("has-error");
+    }
+  });
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      showDefaultsSection(Number(button.dataset.defaultsTarget));
+    });
+  });
+  showDefaultsSection(initial);
+}

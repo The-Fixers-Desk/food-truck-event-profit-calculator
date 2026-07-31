@@ -12,4 +12,9 @@ Give me the commit message I will use when this is done.
 
 ---------------------------------------------------------------------------------
 
+I agree with everything. Make the prompt for Codex.
+
+---------------------------------------------------------------------------------
+
 Make a milestone list entry, and a Codex prompt for INSERT
+

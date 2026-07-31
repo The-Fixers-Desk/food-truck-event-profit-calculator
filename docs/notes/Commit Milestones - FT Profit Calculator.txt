@@ -122,7 +122,7 @@ DATABASE RELIABILITY
 
 // DID FULL USE TEST HERE //
 
-□ >Add pre-polish functional regression and workflow tests
+☑ Add pre-polish functional regression and workflow tests
   Automate the core V1 workflows that should be verified before visual polish,
   including Scenario actions, persistence after restart, comparison behavior,
   invalid-input safety, live recalculation, backup and restore, Defaults and
@@ -131,7 +131,7 @@ DATABASE RELIABILITY
 
 DESIGN AND ACCESSIBILITY
 
-□ *Complete V1 UI and UX design and polish
+□ >Complete V1 UI and UX design and polish
   Define the V1 visual system and redesign long workflows to minimize
   scrolling. Convert Event Inputs into a modern guided stepper that keeps
   each stage within approximately one desktop viewport where practical.
