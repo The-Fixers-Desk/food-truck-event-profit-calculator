@@ -1,9 +1,9 @@
 def test_calculator_page_loads(client):
-    """The Event Calculator screen should load successfully."""
+    """The Event Inputs screen should load successfully."""
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"Event Calculator" in response.data
+    assert b"Event Inputs" in response.data
 
 
 def test_defaults_page_loads(client):

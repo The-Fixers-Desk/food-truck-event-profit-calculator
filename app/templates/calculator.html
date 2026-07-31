@@ -1,18 +1,45 @@
-{% extends "base.html" %} {% block title %} Event Calculator | Food Truck Event
-Profit Calculator {% endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Event Inputs | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
 <section class="page">
   <header class="page-header">
     <p class="page-eyebrow">Event Analysis</p>
-    <h1>Event Calculator</h1>
-
+    <h1>Event Inputs</h1>
     <p class="page-description">
-      Estimate whether an event is likely to be financially worthwhile for your
-      food truck.
+      Start by identifying the event you want to evaluate.
     </p>
   </header>
 
-  <div class="placeholder-panel">
-    <p>The event calculator will be built here.</p>
-  </div>
+  <form class="form-panel" method="post" novalidate>
+    <fieldset class="input-section">
+      <legend>Event Identification</legend>
+      <div class="form-grid">
+        {% for name, label, type in (
+          ("event_name", "Event name", "text"),
+          ("event_date", "Event date", "date"),
+          ("start_time", "Start time", "time"),
+          ("location", "Location", "text")
+        ) %}
+          <div class="form-field">
+            <label class="form-label" for="{{ name }}">{{ label }}</label>
+            <input class="form-input" id="{{ name }}" name="{{ name }}"
+              type="{{ type }}" value="{{ form_values[name] }}" required
+              {% if errors.get(name) %}
+                aria-invalid="true" aria-describedby="{{ name }}-error"
+              {% endif %} />
+            {% if errors.get(name) %}
+              <p class="field-error" id="{{ name }}-error">
+                {{ errors[name] }}
+              </p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="button" type="submit">Continue</button>
+    </div>
+  </form>
 </section>
 {% endblock %}
