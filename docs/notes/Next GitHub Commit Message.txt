@@ -2,22 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Add backup, restore, and recovery safeguards
-
-- Add portable .ftbackup creation with manifests and checksums
-- Add validated full-database restore with explicit confirmation
-- Create automatic recovery snapshots before restores and migrations
-- Migrate older supported backups safely before replacement
-- Reject corrupt, incompatible, or newer-version backups
-- Replace the live database atomically and recover from failed restores
-- Retain the five newest automatic recovery snapshots
-- Add a centralized application-data directory abstraction
-- Add damaged-database recovery behavior
-- Verify transactional protection against interrupted writes
-- Add backup, restore, migration, recovery, and data-separation tests
-
----------------------------------------------------------------------------------
-
 Complete V1 UI and UX design and polish
 
 - Define the V1 visual direction, design tokens, and reusable components

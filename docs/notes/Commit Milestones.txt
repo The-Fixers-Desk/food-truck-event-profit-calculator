@@ -100,9 +100,18 @@ DATABASE RELIABILITY
   Track schema versions, run migrations once, support upgrades safely,
   and protect existing customer data.
 
-□ >Add backup, restore, and recovery safeguards
+☑ Add backup, restore, and recovery safeguards
   Build backup and restore, test interrupted writes and recovery, and
   verify customer data stays separate from installed application files.
+
+□ Improve Event Inputs guidance, contextual warnings, sales controls, input
+  organization, and customer-facing number formatting
+  Explain weather and event-protection percentages, remove Event Inputs demand
+  and sales previews, move custom expected sales into the interactive
+  workspace, and reorganize related assumptions so warnings appear beside the
+  inputs that support them. Show calculated warnings as soon as enough valid
+  information exists, display expected buyers by always rounding down, and
+  display break-even customers by always rounding up.
 
 
 // DO FULL USE TEST HERE //
@@ -110,10 +119,14 @@ DATABASE RELIABILITY
 
 DESIGN AND ACCESSIBILITY
 
-□ *Complete V1 UI and UX design and polish
-  Define the visual direction and reusable components, then polish Welcome,
-  Dashboard, Defaults, Event Inputs, Results, Saved Events, Comparison,
-  messages, empty states, wording, and visual hierarchy.
+□ Complete V1 UI and UX design and polish
+  Define the V1 visual system and redesign long workflows to minimize
+  scrolling. Convert Event Inputs into a modern guided stepper that keeps
+  each stage within approximately one desktop viewport where practical.
+  Add persistent progress, compact layouts, Back and Continue navigation,
+  step-level validation, preserved values, a sticky action area, and a final
+  review before analysis. Polish Welcome, Dashboard, Defaults, Event Analysis,
+  Saved Events, Comparison, messages, empty states, wording, and hierarchy.
 
 □ *Complete accessibility and responsive behavior
   Add keyboard navigation, focus states, accessible labels and errors,

@@ -2,9 +2,473 @@ Next Codex Prompt
 
 ---------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------
+Implement the corrective milestone:
 
----------------------------------------------------------------------------------
+Improve Event Inputs guidance, contextual warnings, sales controls, input
+organization, and customer-facing number formatting.
+
+The Event and Scenario save failure has been investigated and resolved
+separately. Do not broaden this task into another persistence investigation.
+
+The calculation engine, shared-demand model, structured warnings, Event Inputs
+form, interactive Event Analysis workspace, and Scenario persistence already
+exist.
+
+Make the following customer-experience corrections without changing established
+business formulas.
+
+Weather percentage explanation
+
+The current Weather outlook choices display values such as:
+
+“Minor concern — 5%”
+
+Keep the percentage visible, but clearly explain what it means.
+
+Directly beneath Weather outlook, add concise help text:
+
+“The percentage is the estimated reduction in event attendance caused by the
+selected weather.”
+
+Directly beneath Event protection, add concise help text:
+
+“The percentage shown is the final estimated attendance reduction after
+accounting for how protected the event is.”
+
+Add a small keyboard-accessible question-mark information control beside the
+Weather outlook label.
+
+The control must have an accessible name such as:
+
+“What do the weather percentages mean?”
+
+When activated, display a compact disclosure, popover, or dialog explaining:
+
+- The Weather outlook percentage is the base estimated attendance reduction.
+- Event protection reduces or preserves that weather effect.
+- The percentage displayed beside each protection option is the resulting
+  final attendance reduction.
+- These are planning estimates, not guaranteed attendance outcomes.
+
+Include one concise example:
+
+- Minor concern creates a 5% base reduction.
+- Partially covered applies 75% of that weather effect.
+- The final estimated attendance reduction is 3.75%.
+
+Do not add a dependency merely to implement the information control.
+
+Customer-facing whole-number rules
+
+Preserve exact Decimal values internally for calculations.
+
+Change customer-facing formatting so:
+
+Expected buyers per vendor:
+- Always round down to the lower whole number.
+- Use Decimal floor behavior.
+- Because this value is nonnegative, examples include:
+  - 125.125 displays as 125
+  - 125.999 displays as 125
+  - 125.000 displays as 125
+
+Break-even customers:
+- Always round upward to the minimum whole customer required.
+- Use Decimal ceiling behavior.
+- Examples:
+  - 82.000 displays as 82
+  - 82.0001 displays as 83
+  - 82.63784476351351351351351351 displays as 83
+
+Apply these rules anywhere these customer-facing figures appear, including:
+
+- Event Inputs warnings
+- Event Analysis workspace
+- Saved Scenario review
+- Scenario comparison
+- Warning messages
+- Summary cards
+- Review text
+
+Never expose raw repeating or long Decimal customer counts to the customer.
+
+If the interface currently displays an “Exact break-even customers” value,
+remove that raw customer-facing value or replace it with:
+
+“Break-even customers”
+
+using the rounded-up whole number.
+
+The engine may retain the exact value for calculations, comparisons, and tests.
+
+When comparison differences use break-even customer counts, keep the visible
+values understandable and consistent with the displayed whole-customer rule.
+
+Remove Event Inputs result previews
+
+Remove the current Event Inputs panels or sections titled or functioning as:
+
+- Early demand estimate
+- Estimated sales preview
+
+The Event Inputs workflow must not display a miniature results report before
+the customer reaches the Event Analysis workspace.
+
+Do not show these result values on Event Inputs:
+
+- Weather-adjusted attendance
+- Total expected food buyers
+- Total vendor count
+- Expected buyers per vendor
+- Expected orders
+- Expected sales
+- Total costs
+- Profit
+- Margin
+- Break-even results
+
+Contextual warning messages are still required and are handled below.
+
+Move custom expected sales to the workspace
+
+Remove the custom expected-sales option and amount from Event Inputs entirely.
+
+A newly submitted Event must begin from the calculator’s normal
+attendance-based sales estimate.
+
+For the automatically created Original estimate Scenario:
+
+- Custom expected sales must be inactive.
+- The calculated sales method must be used.
+
+Keep custom expected sales in the interactive Event Analysis workspace.
+
+In the workspace:
+
+- Present it as a secondary Scenario-adjustment control.
+- Use a checkbox, switch, or similarly compact control labeled:
+  “Use a custom expected sales amount”
+- Keep the control off by default for a newly opened calculated Scenario.
+- Reveal the custom amount field only when the control is enabled.
+- When disabled, the custom value must not affect calculations.
+- Preserve the existing factual warning that custom revenue is being combined
+  with demand-based order costs.
+- Preserve existing saved Scenarios that already use custom expected sales.
+- Do not remove custom-sales fields from the domain model or database schema.
+
+Reorganize Event Inputs around causal warning groups
+
+Reorder the existing Event Inputs controls so assumptions that work together
+and can trigger the same warning are kept together.
+
+Do not implement the final guided stepper or complete visual-polish milestone
+yet. Correct the current functional form structure.
+
+Use this organization:
+
+1. Event information
+   - Event name
+   - Event date
+   - Start time
+   - Location
+
+2. Demand and sales potential
+   - Estimated attendance
+   - Weather outlook
+   - Event protection
+   - Custom weather reduction when applicable
+   - Percentage of attendees expected to buy food
+   - Other competing food vendors
+   - Average order sale amount
+
+3. Food and transaction costs
+   - Food and packaging method
+   - Matching food and packaging value
+   - Percentage of sales paid by card
+   - Card-processing percentage
+   - Fixed card-processing fee per card transaction
+   - Organizer commission or revenue share
+
+4. Labor
+   - Employee labor entries
+   - Owner labor pay
+
+5. Fixed event costs and fees
+   - Travel
+   - Parking
+   - Permit
+   - Generator or utility cost
+   - Vendor or booking fee
+   - Named additional costs
+
+6. Profit target
+   - Profit-target type
+   - Matching profit amount or margin
+
+Keep conditional fields visually and programmatically associated with the
+choice that activates them.
+
+Preserve all existing values, validation, repeatable-row ordering, default
+indicators, and form-submission behavior.
+
+Calculated warnings during Event Inputs
+
+Event Inputs must provide warnings at the earliest point where enough valid
+information exists to calculate them.
+
+Do not wait until the customer finishes all remaining fields when the app can
+already identify a material concern.
+
+Warnings are not full results.
+
+Warnings must:
+
+- Use a visible caution triangle.
+- Include a short headline.
+- Include one concise explanation.
+- Appear directly above the input group related to the warning.
+- Use wording such as:
+  “Based on your current entries and saved business defaults…”
+- Update or disappear when related assumptions change.
+- Never block the customer from continuing or submitting.
+- Never be presented as validation errors.
+- Never expose long raw Decimal values.
+
+Use the current valid form state for warning calculations.
+
+Where applicable:
+
+- Use saved Business Defaults already copied into the form.
+- Use the customer’s current overrides instead of the original Defaults.
+- Treat a blank optional cost field according to the form’s established
+  meaning of no entered cost.
+- Do not silently invent a value for a missing required field.
+- Do not display a warning until all inputs required for that particular
+  warning are valid.
+
+As later cost assumptions are entered or changed, recalculate and update the
+warnings.
+
+Warning placement
+
+Demand and sales potential group:
+
+Display relevant warnings here, including:
+
+- Even-split expected buyers are below the current break-even customer
+  requirement.
+- The current break-even requirement exceeds all attendees expected to buy
+  food.
+
+Use the customer-facing whole-number rules:
+
+- Expected buyers round down.
+- Break-even customers round up.
+
+Example style:
+
+“⚠ Demand may not cover current costs. Based on your current entries and saved
+business defaults, the expected buyers for your business are below the number
+required to break even.”
+
+A warning may include the rounded counts when doing so materially improves
+clarity, but do not display a table or general result summary.
+
+Food and transaction cost group:
+
+Update warning calculations when food costs, payment fees, or organizer
+commission change.
+
+Do not invent arbitrary warnings such as:
+
+- Food cost is too high
+- Card use is too high
+- Commission is excessive
+
+Only show warnings supported by the existing calculation and warning rules.
+
+Labor group:
+
+Update current profitability and break-even warnings immediately after employee
+labor or owner labor pay changes.
+
+Fixed event costs and fees group:
+
+Update current profitability and break-even warnings immediately after travel,
+fees, permits, utilities, or named additional costs change.
+
+Profit target group:
+
+When enough valid information exists, show factual target warnings such as:
+
+“⚠ Current assumptions do not meet your minimum profit target.”
+
+Do not reveal the complete profit result here.
+
+A target warning remains nonblocking.
+
+Existing structured-warning rules
+
+Reuse the existing Python calculation engine and structured-warning system.
+
+Do not duplicate calculation formulas or warning conditions in JavaScript.
+
+Use an existing preview endpoint or adapt it into a warnings-only endpoint.
+
+The Event Inputs browser response should contain only the structured warning
+information needed for contextual display, not a complete customer-facing
+result preview.
+
+Use a short debounce.
+
+Prevent older requests from replacing newer warning states.
+
+When related fields become invalid or incomplete:
+
+- Preserve the customer’s entries.
+- Hide or mark stale calculated warnings from that group.
+- Continue showing normal validation only where appropriate.
+- Do not show warnings based on obsolete values.
+
+Warning preview requests must:
+
+- Create no Event records.
+- Create no Scenario records.
+- Modify no Business Defaults.
+- Perform no persistence writes.
+
+Warning semantics
+
+Map warnings to stable causal groups rather than placing everything in one
+generic banner.
+
+At minimum:
+
+- Shared-demand and break-even-demand warnings → Demand and sales potential
+- Margin-unavailable or revenue-method warnings → Revenue controls in the
+  workspace
+- Profit-target warning → Profit target
+- General estimated-loss or exactly-at-break-even warning → Profit target or
+  final Event Inputs status area, without exposing the full result
+
+Avoid showing the same warning in several places simultaneously.
+
+Preserve deterministic warning ordering.
+
+Event submission and workspace behavior
+
+The final Event Inputs submission must continue to:
+
+- Validate the complete Event.
+- Create the Event and Original estimate Scenario through the established
+  transaction.
+- Use calculated expected sales.
+- Open the interactive Event Analysis workspace.
+- Display full financial results only after reaching that workspace.
+
+The workspace must continue supporting:
+
+- Live recalculation
+- Custom expected sales
+- Scenario saving
+- Scenario overwriting
+- Contextual warnings
+- Reset behavior
+
+Do not change the fixed business formulas, shared-demand formula, persistence
+rules, Scenario naming, or save transaction behavior.
+
+Testing
+
+Add or update focused tests covering:
+
+Weather guidance:
+- Weather outlook help text
+- Event protection help text
+- Accessible information-control name
+- Detailed weather explanation
+- The 5% and partially covered 3.75% example
+- Keyboard-accessible open and close behavior where practical
+
+Whole-number formatting:
+- 125.125 expected buyers displaying as 125
+- 125.999 expected buyers displaying as 125
+- Whole expected buyers remaining unchanged
+- Fractional break-even customers always rounding up
+- Whole break-even customers remaining unchanged
+- No customer-facing raw repeating customer values
+- Consistent formatting in workspace, warnings, saved work, and comparison
+
+Removed Event Inputs content:
+- Early demand estimate no longer appearing
+- Estimated sales preview no longer appearing
+- No customer-facing result table on Event Inputs
+- Custom expected-sales control absent from Event Inputs
+
+Workspace custom sales:
+- Custom expected-sales control remains available in the workspace
+- It is inactive by default for Original estimate
+- Enabling it reveals the amount field
+- Disabling it restores calculated revenue behavior
+- Existing saved custom-sales Scenarios remain loadable
+- Custom-sales warning remains factual and contextual
+
+Input organization:
+- Demand and weather controls appearing together
+- Average order value included with demand and sales potential
+- Food and transaction costs grouped together
+- Labor grouped together
+- Fixed event costs grouped together
+- Profit target grouped separately
+- Reorganization preserving all entered values and repeatable rows
+
+Early warnings:
+- No warning before its required inputs are valid
+- Demand warning appearing as soon as sufficient information exists
+- Warnings using saved Defaults and current overrides
+- Warning counts using floor and ceiling display rules
+- Warning updating after weather changes
+- Warning updating after competitor changes
+- Warning updating after food-cost changes
+- Warning updating after labor changes
+- Warning updating after event-cost changes
+- Warning updating after profit-target changes
+- Warning disappearing when corrected
+- Warnings remaining nonblocking
+- No result-preview panel being recreated
+- Warning requests creating no Event or Scenario records
+- Business Defaults remaining unchanged
+- Older preview responses not replacing newer warnings
+
+Regression:
+- Complete valid Event submission still saving successfully
+- Original estimate using calculated sales
+- Complete Event Analysis results remaining correct
+- Existing calculations retaining exact Decimal behavior internally
+- Existing saved Scenarios and comparison remaining functional
+
+Do not add dependencies.
+Do not make unrelated visual-polish changes.
+Do not implement the final Event Inputs stepper in this task.
+Do not modify or reset data/app.db.
+Do not commit.
+
+Afterward:
+
+1. Run focused Event Inputs, warning, formatting, workspace, and route tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize each customer-visible correction.
+5. Explain how to manually test:
+   - Weather explanations
+   - Whole-number formatting
+   - Removal of both previews
+   - Early warning timing
+   - Warning updates after later cost inputs
+   - Workspace custom expected sales
+6. Report the exact test results.
+
+Keep the response concise.
 
 ---------------------------------------------------------------------------------
 
@@ -12,11 +476,43 @@ Implement the milestone:
 
 Complete V1 UI and UX design and polish.
 
-The complete V1 workflows, calculations, persistence, onboarding, backup and
-restore behavior, and customer-facing screens already exist.
+The complete V1 workflows, calculations, validation, persistence, onboarding,
+backup and restore behavior, and customer-facing screens already exist.
 
-Create a cohesive visual design system and apply it consistently across the
-application without changing established product behavior.
+Create a cohesive modern visual system and redesign long workflows so customers
+can operate the application with very little page scrolling.
+
+The Event Inputs form currently renders as one very long page. Replace that
+experience with a guided, compact step-by-step workflow.
+
+Primary experience goal
+
+The application should feel like a polished modern desktop tool rather than a
+long web form.
+
+Prioritize:
+
+- Minimal page-level scrolling
+- Progressive disclosure
+- Compact but comfortable information density
+- Persistent primary actions
+- Clear progress and current location
+- Fast movement between related sections
+- Results remaining visible while assumptions are adjusted
+- Efficient use of desktop-window space
+
+Avoid:
+
+- Very long vertically stacked forms
+- Large amounts of unused space inside cards
+- A wall of unrelated accordions
+- Requiring customers to scroll to the bottom to find primary actions
+- Hiding important information behind unclear controls
+- Excessive nested scrolling
+- Tiny or crowded controls
+- Decorative complexity that does not improve use
+
+Do not change established product behavior.
 
 Visual direction
 
@@ -28,371 +524,389 @@ The application should feel:
 - Trustworthy
 - Practical
 - Approachable to independent food-business owners
-- Information-rich without appearing cluttered
+- Polished enough to feel like a commercial desktop product
+- Information-rich without feeling cluttered
+
+Use:
+
+- A warm off-white application background
+- White or subtly contrasted working surfaces
+- Deep charcoal or navy text
+- Muted secondary text
+- A restrained copper or amber accent
+- Green only for successful and positive financial states
+- Red only for losses, destructive actions, and errors
+- Amber for warnings
+
+Use system fonts only.
 
 Avoid:
 
 - Cartoon food-truck imagery
 - Decorative illustrations
 - Gradients
-- Excessive shadows
 - Glass effects
-- Bright startup-style color palettes
-- Unnecessary animation
-- Visual decoration that competes with financial information
+- Excessive shadows
+- Bright startup-style palettes
+- Unnecessary animations
+- External fonts or remote assets
 
-Implement a polished light theme for V1.
+Color must never be the only communication of meaning.
 
-Use system fonts only. Do not add external fonts or dependencies.
+Reusable design system
 
-Create a restrained palette using:
+Create centralized reusable tokens and components for:
 
-- A warm off-white application background
-- White primary surfaces
-- Deep charcoal or navy primary text
-- Muted secondary text
-- A restrained copper or amber primary accent
-- Green only for positive financial results and success
-- Red only for losses, destructive actions, and errors
-- Amber for warnings and caution states
-
-Do not communicate meaning through color alone. Pair financial and status
-colors with labels, text, icons already available without dependencies, or
-other visible indicators.
-
-Design system
-
-Create centralized reusable CSS variables, classes, partials, macros, or
-components consistent with the project’s current architecture.
-
-Define reusable treatment for:
-
-- Application shell
-- Primary navigation
+- Application shell and navigation
 - Page headers
-- Page descriptions
-- Content sections
-- Form sections
-- Inputs
-- Select controls
-- Textareas
-- Repeatable input rows
+- Section navigation
+- Steppers and progress indicators
+- Tabs or segmented controls
+- Cards and compact panels
+- Form fields and field groups
 - Help text
 - Required and optional indicators
-- Validation errors
-- Primary buttons
-- Secondary buttons
-- Destructive buttons
-- Button groups
+- Estimate, From defaults, and Changed for this event badges
+- Validation messages
+- Error summaries
+- Primary, secondary, and destructive buttons
+- Sticky action bars
 - Metric cards
-- Result summaries
+- Financial-result summaries
 - Status badges
-- Success messages
-- Informational messages
-- Warnings
-- Critical warnings
+- Success, information, warning, and critical messages
 - Empty states
-- Confirmation dialogs
-- Tables and comparison structures
-- Loading and live-updating states
-- Sticky workspace results
-- Screen-level action areas
+- Dialogs
+- Loading and updating states
+- Saved Event and Scenario groups
+- Comparison structures
+- Responsive layouts
 
-Do not leave multiple unrelated visual implementations for equivalent controls.
+Do not maintain multiple unrelated visual implementations of equivalent
+controls.
 
-Preserve semantic HTML and the established accessible labels, error
-relationships, and keyboard behavior.
+Event Inputs guided workflow
 
-Shared application shell
+Replace the single long Event Inputs page with a six-stage guided stepper.
 
-Polish the shared navigation and application shell.
+Stages:
 
-Requirements:
+1. Event details
+2. Demand and weather
+3. Revenue and food costs
+4. Labor
+5. Event costs and fees
+6. Profit target and review
 
-- Clearly display the product name.
-- Make the current section identifiable.
-- Keep primary navigation understandable without icons.
-- Make Dashboard the clear home destination after setup.
-- Maintain access to:
-  - Dashboard
-  - Analyze new event
-  - Saved events
-  - Compare scenarios
-  - Business defaults
-  - Data safety
-- Keep navigation compact enough for the desktop application window.
-- Provide a usable narrow-width navigation treatment without changing route
-  behavior.
-- Preserve dirty-workspace navigation protection.
+Stage 1 — Event details
 
-Welcome screen
+Include:
 
-Polish the Welcome screen as a calm first introduction.
+- Event name
+- Event date
+- Start time
+- Location
 
-- Present the four-step workflow clearly:
-  1. Set business defaults
-  2. Describe an event
-  3. Review the analysis
-  4. Compare options
-- Use a strong but restrained heading.
-- Keep explanations concise.
-- Make “Get started” the obvious primary action.
-- Avoid making the page feel like marketing material.
-- Do not add illustrations or decorative assets.
+Stage 2 — Demand and weather
+
+Include:
+
+- Estimated attendance
+- Percentage of attendees expected to buy food
+- Other competing food vendors
+- Weather outlook
+- Custom weather reduction when applicable
+- Event protection
+- Early demand estimate
+
+Keep the early demand estimate visible within this stage and update it through
+the existing preview behavior.
+
+Stage 3 — Revenue and food costs
+
+Include:
+
+- Average order sale amount
+- Attendance-based expected-sales preview
+- Custom expected-sales option and amount
+- Food and packaging cost method
+- Matching food and packaging value
+
+Preserve the existing method-confirmation and conditional-field behavior.
+
+Stage 4 — Labor
+
+Include:
+
+- Ordered employee labor entries
+- Add employee labor
+- Remove employee labor
+- Owner labor pay
+
+Use a compact row treatment that makes rate and combined paid hours easy to
+scan.
+
+Stage 5 — Event costs and fees
+
+Include:
+
+- Travel cost
+- Parking cost
+- Permit cost
+- Generator or utility cost
+- Sales paid by card percentage
+- Card-processing percentage
+- Fixed card-processing fee per card transaction
+- Vendor or booking fee
+- Organizer commission or revenue share
+- Ordered named additional costs
+- Add and remove additional-cost actions
+
+Use clear visual subgroups without turning the stage into another enormous
+page.
+
+Stage 6 — Profit target and review
+
+Include:
+
+- Profit-target type
+- Matching profit amount or margin
+- A concise review of every prior stage
+- Edit action for each prior stage
+- Final primary action labeled:
+  “Analyze event”
+
+The review should summarize values rather than reproducing the complete form.
+
+Stepper behavior
+
+For desktop-width layouts:
+
+- Use a persistent left-side progress rail or similarly modern vertical step
+  indicator.
+- Clearly identify:
+  - Current stage
+  - Completed stages
+  - Stages containing validation errors
+- Display only the active stage’s editable controls.
+- Use compact two-column field layouts where fields naturally pair.
+- Keep the active stage within approximately one ordinary desktop viewport
+  where practical.
+- Do not introduce large empty gaps simply to force a fixed height.
+
+For narrow layouts:
+
+- Replace the side rail with a compact top progress indicator.
+- Preserve the same stage order and meaning.
+- Stack controls cleanly.
+- Do not create page-wide horizontal scrolling.
+
+Navigation:
+
+- Add Back and Continue actions.
+- Keep Back and Continue visible in a sticky stage action bar where practical.
+- Do not require scrolling to the bottom of a tall stage to navigate.
+- Allow customers to return to any completed stage through the progress
+  indicator.
+- Preserve all entered values and repeatable rows while moving among stages.
+- Do not reset values when moving backward.
+- Do not save an Event or Scenario merely because the customer changed stages.
+
+Validation:
+
+- Prevent advancing past a stage containing invalid required values.
+- Focus the first invalid field.
+- Show field-level errors and a concise stage-level error indication.
+- Reuse existing validation rules and helpers.
+- Do not create a conflicting second set of business-validation rules in
+  JavaScript.
+- Use an existing or focused validation endpoint when server validation is
+  needed.
+- Hidden stages must not interfere with current-stage browser validation.
+- On final server-side validation failure:
+  - Preserve every value and ordered row
+  - Open the first stage containing an error
+  - Mark every affected stage in the progress indicator
+  - Keep errors associated with their original controls
+
+The final Analyze event action must continue using the established submission,
+automatic initial saving, and workspace-opening behavior.
+
+Do not create a draft Event or Scenario during the stepper process.
+
+Low-scroll application design
+
+Apply the low-scroll principle throughout the application, not only Event
+Inputs.
+
+This does not mean eliminating all scrolling. It means avoiding unnecessary
+page-length workflows and keeping the customer’s current task and primary
+actions close at hand.
+
+Welcome
+
+- Keep the four-step introduction compact enough to understand at a glance.
+- Make Get started immediately visible.
+- Avoid marketing-style vertical sections.
 
 Dashboard
 
-Create a useful, uncluttered Dashboard hierarchy.
-
-Emphasize these actions:
-
-- Analyze new event
-- View saved events
-- Compare scenarios
-- Update business defaults
-
-Display:
-
-- Saved Event count
-- Saved Scenario count
-- Comparison readiness
-- Useful first-event guidance when no Events exist
-
-Use compact metric or status cards where appropriate.
-
-Do not add financial charts, recent-activity systems, recommendations, or
-analytics.
+- Keep the primary actions and essential status visible within one ordinary
+  desktop view where practical.
+- Use compact action and metric cards.
+- Avoid large decorative cards or unnecessary explanatory text.
 
 Business Defaults
 
-Polish the complete Defaults workflow.
+The Defaults screen is also long. Organize it using compact section navigation
+or a guided structure rather than one uninterrupted page.
 
-- Group related settings clearly.
-- Improve spacing between major sections.
-- Keep help text close to the relevant control.
-- Make food-cost method selection understandable.
-- Make profit-target choice easy to follow.
-- Make repeatable employee labor rows visually coherent.
-- Clearly distinguish optional values.
-- Preserve From defaults and other established terminology where applicable.
-- Keep saving confirmation and error messages visible without dominating the
-  page.
+Recommended sections:
 
-Do not change field meaning, validation, or persistence behavior.
-
-Event Inputs
-
-Polish the initial Event Inputs experience.
-
-Organize the form into clearly distinguishable sections:
-
-- Event information
-- Demand and weather
-- Revenue assumptions
-- Food and packaging
-- Payment processing
-- Labor
-- Travel and operating costs
-- Event fees
-- Additional costs
+- Business and sales
+- Food and payment costs
+- Labor and event costs
 - Profit target
 
 Requirements:
 
-- Make the progression through the form easy to scan.
-- Keep conditional controls visually associated with the choice that reveals
-  them.
-- Make repeatable labor and miscellaneous-cost rows readable.
-- Keep Estimate, From defaults, and Changed for this event indicators compact
-  and consistent.
-- Give the early demand indicator appropriate emphasis without making it look
-  like a final result.
-- Make the primary action to analyze the Event clear.
-- Preserve every existing field, rule, and validation behavior.
+- Keep Save changes visible through a sticky action area.
+- Preserve all existing fields, conditional behavior, validation, and
+  persistence.
+- Make switching sections fast.
+- Clearly show which sections contain validation errors.
+- Do not require customers to scroll through every section to update one value.
 
 Interactive Event Analysis workspace
 
-Treat this as the flagship V1 screen.
+Treat this as the flagship screen.
 
-On suitable desktop widths, create two peer areas:
+Use a compact control-panel experience.
 
-1. Adjustable assumptions
-2. Analysis results
+Recommended wide-screen structure:
 
-The results must not feel like a small sidebar attached to a form. Assumptions
-and results should have comparable visual importance.
+- Event and active Scenario header
+- Persistent key-results summary
+- Adjustable-assumption section navigation
+- Active assumption panel
+- Detailed results and warnings
 
-Assumptions:
+The customer should be able to switch among assumption groups without
+scrolling through every field.
 
-- Group controls into understandable sections.
-- Use collapsible sections only when they improve scanning and do not hide
-  important active warnings or errors.
-- Keep repeatable labor and additional-cost rows manageable.
-- Make changed or invalid controls identifiable.
-- Preserve the live recalculation workflow.
+Assumption groups may include:
+
+- Demand and weather
+- Revenue
+- Food and payment costs
+- Labor
+- Event costs and fees
+- Profit target
+
+Requirements:
+
+- Show only one primary assumption group at a time or otherwise use progressive
+  disclosure that substantially reduces scrolling.
+- Keep key financial results visible while assumptions are changed.
+- Keep assumptions and results equally important.
+- Preserve automatic recalculation.
 - Do not add a Calculate button.
+- Keep Reset changes and Save actions visible.
+- Keep invalid-field and updating states clear.
+- Do not duplicate calculation formulas in the browser.
 
-Results:
+On narrow screens:
 
-Create a strong top-level summary containing:
-
-- Expected sales
-- Total event cost
-- Owner labor pay
-- Business profit
-- Profit margin
-- Break-even sales
-- Minimum whole break-even customers
-- Profit-target status
-
-Clearly separate:
-
-- Owner labor pay
-- Business profit
-
-Add readable supporting areas for:
-
-- Demand estimate
-- Cost breakdown
-- Exact break-even information
-- Structured factual warnings
-
-Positive profit, loss, and exactly-at-break-even states must be distinguishable
-through wording and structure in addition to color.
-
-Keep the result summary visible while scrolling on desktop where practical.
-
-On narrow widths:
-
-- Place the primary financial summary before the assumption controls.
-- Preserve a logical reading and keyboard order.
-- Avoid page-wide horizontal scrolling.
-
-Live-updating behavior:
-
-- Polish the updating indicator.
-- Make invalid-input status clear but unobtrusive.
-- Keep the latest valid results visually recognizable while corrections are
-  required.
-- Do not change debounce, request-order, validation, or calculation behavior.
-
-Scenario save behavior
-
-Polish the existing Save workflow.
-
-- Make the active Event and Scenario identifiable.
-- Make unsaved-change status understandable.
-- Keep one primary Save action.
-- Make “Save as new scenario” visibly selected by default.
-- Clearly distinguish it from “Overwrite current scenario.”
-- Make overwrite confirmation appropriately serious without being alarming.
-- Preserve all current validation and persistence rules.
+- Keep the key-results summary near the top.
+- Use compact section selection.
+- Stack the active controls and detailed results.
+- Preserve logical source and keyboard order.
 
 Saved Events
 
-Create a scannable grouped Saved Events screen.
-
-For each Event:
-
-- Give the Event identity a clear group header.
-- Display date, time, location, Scenario count, and modified information
-  without overwhelming the Event name.
-- Keep Event-level rename and delete actions visually separate from
-  Scenario-level actions.
-
-For each Scenario:
-
-- Make the Scenario name easy to scan.
-- Keep Open analysis as the primary row action.
-- Present Rename and Delete as secondary actions.
-- Preserve modified timestamps and existing ordering.
-
-Polish:
-
-- Empty state
-- Rename flows
-- Delete confirmations
-- Final-Scenario deletion explanation
-- Success and error messages
-
-Do not add search, filters, pagination, or new management behavior.
+- Use compact Event group headers.
+- Collapse or progressively disclose Scenario lists when useful.
+- Keep Open analysis visually primary.
+- Keep Rename and Delete available without creating overly tall rows.
+- Preserve all existing management behavior.
+- Make empty states concise.
 
 Comparison
 
-Polish the complete Scenario comparison workflow.
-
-Selection:
-
-- Make Scenario selection understandable within grouped Events.
-- Show the two-to-four Scenario requirement.
-- Keep selected count visible.
-- Make Compare selected the clear action.
-- Display over-selection and insufficient-selection errors clearly.
-
-Comparison view:
-
-- Preserve aligned relationships between row labels and Scenario values.
-- Clearly mark the active baseline.
-- Make changing the baseline understandable.
-- Show differences with explicit plus or minus values and units.
-- Treat percentage changes as percentage-point differences.
-- Make highest profit, lowest cost, lowest break-even, target status, and ties
-  visible through text labels in addition to styling.
-- Keep Show differences only easy to find.
-- Preserve Open analysis actions.
-
-On narrower widths:
-
-- Use readable stacked Scenario groups or another responsive structure.
-- Avoid losing row labels or Scenario identity.
-- Use localized horizontal scrolling only where an aligned comparison truly
-  cannot remain legible otherwise.
-
-Do not add charts, scoring, or recommendations.
+- Keep Scenario identity and baseline information persistent.
+- Use compact aligned rows.
+- Keep Show differences only and baseline controls easy to reach.
+- Use localized scrolling only when preserving aligned comparison data truly
+  requires it.
+- Do not create page-wide two-dimensional scrolling.
+- Preserve every existing comparison rule and highlight.
 
 Data Safety
 
-Polish backup, restore, and recovery screens.
+- Keep Download backup and Restore backup immediately understandable.
+- Avoid excessive vertical explanation.
+- Use concise expandable details where longer safety explanations are needed.
+- Preserve all confirmation and recovery safeguards.
 
-- Make Download backup and Restore backup distinct.
-- Explain backup and complete-replacement restore behavior plainly.
-- Give restore confirmation appropriate visual seriousness.
-- Clearly present rejected-backup and recovery messages.
-- Keep technical details out of the normal customer-facing presentation.
-- Do not alter backup, restore, migration, or recovery behavior.
+Dialogs and destructive flows
 
-Messages and states
+- Keep dialogs compact and focused.
+- Do not place long forms inside small dialogs.
+- Keep the primary and cancel actions visible.
+- Make destructive actions clearly distinct.
+- Preserve existing confirmation requirements.
 
-Audit all customer-facing states across the application.
+Sticky actions
 
-Create consistent treatments for:
+Use sticky action areas where they materially reduce scrolling, including:
 
-- Success
-- Information
-- Warning
-- Critical warning
-- Validation errors
-- Application errors
-- Empty states
-- Updating
-- Saving
-- Disabled actions
-- Unavailable calculations
-- Not-found states
-- Recovery-required states
+- Event Inputs stage navigation
+- Business Defaults save action
+- Event Analysis Save and Reset actions
+- Comparison controls where appropriate
 
-Messages should:
+Sticky elements must:
 
-- State what happened
-- Explain what the customer can do next when relevant
-- Avoid raw technical terminology
-- Avoid blaming the customer
-- Avoid excessive punctuation
-- Avoid disappearing before they can reasonably be read
+- Remain within their screen or panel
+- Not obscure focused controls
+- Not cover validation messages
+- Not consume excessive vertical space
+- Degrade safely on narrow windows
+
+Information density
+
+Reduce excess vertical length by:
+
+- Tightening oversized section padding
+- Pairing related fields in columns
+- Using concise help text
+- Moving lengthy explanations into accessible details or information controls
+- Using compact badges
+- Avoiding repeated headings and instructions
+- Showing only fields relevant to the active choice
+- Summarizing completed sections instead of repeating them
+
+Do not make controls or text uncomfortably small.
+
+Visual polish by screen
+
+Polish:
+
+- Shared shell and navigation
+- Welcome
+- Dashboard
+- Business Defaults
+- Event Inputs stepper
+- Event Analysis workspace
+- Scenario Save flow
+- Saved Events
+- Comparison selection and comparison results
+- Data Safety
+- Recovery screen
+- Not-found and application-error screens
+- Success, validation, warning, updating, and empty states
 
 Wording audit
-
-Review visible wording across all screens.
 
 Use consistent plain-language terminology:
 
@@ -413,116 +927,155 @@ Use consistent plain-language terminology:
 - Save as new scenario
 - Overwrite current scenario
 
-Use sentence case for headings, labels, and buttons unless a proper name
-requires otherwise.
+Use sentence case.
 
-Do not change established business meaning while editing wording.
+Avoid unexplained accounting or technical jargon.
 
-Avoid unexplained accounting or software jargon.
+Do not change business meaning while improving wording.
 
 Responsive behavior
 
-Provide a strong functional responsive foundation for all screens.
+Support the expected desktop application window and widths down to
+approximately 320 CSS pixels.
 
-Support the application’s expected desktop window sizes and narrower layouts.
+Requirements:
 
-- Prevent accidental page-wide horizontal overflow.
-- Allow forms to move from multiple columns to one column.
-- Keep buttons reachable and readable.
-- Keep validation messages associated with fields.
-- Preserve comparison readability.
-- Preserve workspace results prominence.
-- Do not use fixed viewport heights that trap content.
-- Do not create nested scrolling areas unnecessarily.
+- No accidental page-wide horizontal scrolling
+- Forms collapse cleanly
+- Buttons wrap
+- Long Event and Scenario names wrap safely
+- Sticky elements do not obscure content
+- Dialogs remain usable
+- Comparison remains understandable
+- Repeatable rows remain editable
+- No fixed-height layouts that trap content
+- Avoid unnecessary nested scrolling
 
-The later accessibility milestone will perform the complete accessibility and
-responsive review. Do not duplicate that milestone, but do not knowingly
-introduce inaccessible structure.
+Accessibility foundation
 
-CSS and template quality
+The complete accessibility milestone follows this work, but this milestone
+must preserve and improve:
 
-- Remove obsolete or clearly duplicated presentation rules after confirming
-  they are unused.
-- Keep styles organized by tokens, shared components, layout, and
-  screen-specific needs.
-- Avoid large amounts of inline styling.
-- Avoid specificity hacks and unnecessary !important rules.
-- Preserve separation between presentation and business behavior.
-- Do not introduce JavaScript solely for decoration.
-- Do not duplicate existing interaction logic.
+- Semantic controls
+- Visible labels
+- Heading structure
+- Keyboard-operable step navigation
+- Logical source order
+- Visible focus states
+- Error associations
+- Status text
+- Reduced-motion preferences
 
-Regression safety
+Do not knowingly introduce inaccessible custom controls.
+
+Use native HTML controls and vanilla JavaScript.
+
+Do not add a UI framework or new dependency.
+
+Regression boundaries
 
 Do not change:
 
 - Calculations
+- Demand formulas
 - Break-even rules
 - Warning conditions
-- Demand formulas
-- Form validation
-- Persistence
-- Migration behavior
-- Backup or restore behavior
-- Scenario naming rules
+- Validation rules
+- Persistence behavior
+- Scenario save behavior
 - Comparison rules
-- Route protection
-- First-use logic
-- Dirty-state behavior
+- Setup detection
+- Navigation safeguards
+- Dirty-workspace protection
+- Backup or restore behavior
+- Migration behavior
 
-Update automated tests only where customer-facing wording or semantic template
-structure legitimately changed.
+Do not create a second Event Inputs workflow.
 
-Add focused template or route assertions for major new shared components and
-critical states where useful.
+Refactor the existing templates and browser behavior into the guided experience.
 
-Do not add screenshot-testing dependencies.
+Testing
+
+Add or update focused tests covering:
+
+- Six Event Inputs stages appearing in the correct order
+- Only the active stage being exposed as active
+- Back and Continue navigation
+- Values surviving forward and backward movement
+- Repeatable rows surviving stage changes
+- Current-stage validation
+- Preventing invalid advancement
+- First invalid field focus behavior where practical
+- Error indicators on affected stages
+- Final review summaries
+- Edit links returning to the correct stage
+- Final Analyze event using the established submission workflow
+- Invalid final submission returning to the correct stage
+- No Event or Scenario creation before final submission
+- Sticky action structures
+- Defaults section navigation
+- Workspace assumption-group navigation
+- Key results remaining present in the workspace
+- Existing customer workflows remaining functional
+- Narrow-layout structure where practical to assert
+- No changes to established calculations or persistence behavior
+
+Update existing template assertions only where structure or visible wording
+legitimately changed.
+
+Do not add screenshot-regression dependencies.
 
 Manual review checklist
 
-Create a concise developer checklist covering:
+Add a concise developer checklist covering:
 
-- Fresh Welcome flow
-- Dashboard with and without saved work
-- Defaults
-- Complete Event Inputs form
-- Event Analysis with profit, loss, and validation states
-- Save as new and overwrite flows
-- Saved Events empty and populated states
-- Scenario rename and delete states
+- Event Inputs at a normal desktop window size
+- Every Event Inputs stage
+- Back and Continue behavior
+- Errors in each stage
+- Review and Edit behavior
+- Repeatable labor and additional-cost rows
+- Final Event submission
+- Defaults section navigation
+- Workspace assumption navigation
+- Workspace live recalculation
+- Saved Events with many Scenarios
 - Two-, three-, and four-Scenario comparison
-- Data Safety and restore confirmation
-- Friendly error and recovery screens
-- Supported wide and narrow window sizes
-- Keyboard-visible control order at a basic level
-- Consistency of terminology and components
+- Data Safety
+- Wide and narrow windows
+- Long names and validation messages
+- Keyboard movement through the stepper
+- Sticky controls not obscuring content
 
 Scope
 
 Do not implement:
 
-- Dark mode
+- New business functionality
 - New calculations
-- New workflows
+- New persistence behavior
+- Autosaved Event drafts
+- Dark mode
 - Charts
-- Animations
+- Decorative animation
 - New dependencies
-- Final desktop icons
-- Windows or macOS packaging
+- Windows or macOS packaging changes
 - Complete accessibility certification
-- Full end-to-end acceptance testing
 
 Do not make unrelated changes.
 Do not commit.
 
 Afterward:
 
-1. Run focused template, route, and interaction tests.
+1. Run focused template, route, form, and interaction tests.
 2. Run the full test suite.
 3. Run git diff --check.
-4. Summarize the visual system and major screen changes.
-5. List every screen manually reviewed.
-6. Report any existing screen or state that could not be exercised.
-7. Report the test results.
+4. Summarize the new Event Inputs workflow.
+5. Summarize how scrolling was reduced across the application.
+6. Explain how to manually test every Event Inputs stage.
+7. List every screen manually reviewed.
+8. Report any state that could not be exercised.
+9. Report the test results.
 
 Keep the response concise.
 
