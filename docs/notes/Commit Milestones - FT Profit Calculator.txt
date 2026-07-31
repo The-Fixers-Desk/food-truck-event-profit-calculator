@@ -152,7 +152,7 @@ controls, cards, tables, badges, alerts, empty states, and reusable layout
 components. Build reusable design primitives before redesigning individual
 screens.
 
-□ >Redesign application layout and navigation
+☑ Redesign application layout and navigation
 
 Transform the application from a collection of pages into a cohesive desktop
 application. Improve navigation, page structure, screen hierarchy, spacing,
@@ -160,7 +160,7 @@ content widths, persistent actions, visual rhythm, and overall information
 architecture. Reduce unnecessary scrolling and create a layout consistent with
 modern desktop applications such as Notion, ChatGPT, Linear, Stripe, and Zillow.
 
-□ -Redesign forms and input workflows
+□ >Redesign forms and input workflows
 
 Redesign Business Defaults and Event Inputs for speed, clarity, and low
 cognitive load. Convert long forms into compact guided workflows that minimize

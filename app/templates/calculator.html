@@ -49,7 +49,8 @@
       <div class="workspace-assumptions">
         <h2>Adjustable assumptions</h2>
   {% endif %}
-  <nav class="section-switcher {% if not workspace %}event-stepper{% endif %}"
+  <div class="{% if not workspace %}guided-workflow{% endif %}">
+  <nav class="section-switcher {% if not workspace %}workflow-stepper event-stepper{% endif %}"
     aria-label="{% if workspace %}Assumption sections{% else %}Event Input stages{% endif %}"
     data-section-navigation>
     {% if workspace %}
@@ -59,7 +60,7 @@
     {% else %}
       {% for number, label in ((1, "Event details"), (2, "Demand and weather"), (3, "Revenue and food costs"), (4, "Labor"), (5, "Event costs and fees"), (6, "Profit target and review")) %}
         <button type="button" data-section-target="{{ number }}">
-          <span>{{ number }}</span>{{ label }}
+          <span class="stage-completion-indicator">{{ number }}</span>{{ label }}
         </button>
       {% endfor %}
     {% endif %}
@@ -81,7 +82,7 @@
       <p class="field-error" role="alert">{{ save_error }}</p>
     {% endif %}
     {% if errors %}
-      <section class="error-summary" id="event-error-summary" role="alert"
+      <section class="error-summary validation-summary" id="event-error-summary" role="alert"
         aria-labelledby="event-error-summary-title" tabindex="-1">
         <h2 id="event-error-summary-title">Correct the highlighted fields</h2>
         <p>Your entries are preserved. Review the fields marked with errors.</p>
@@ -102,7 +103,7 @@
     <fieldset class="input-section" data-form-section="1"
       {% if workspace %}hidden aria-hidden="true"{% endif %}>
       <legend>Event information</legend>
-      <div class="form-grid">
+      <div class="form-grid grouped-form-layout">
         {% for name, label, type in (
           ("event_name", "Event name", "text"),
           ("event_date", "Event date", "date"),
@@ -808,6 +809,7 @@
       {% endif %}
     </div>
   </form>
+  </div>
   {% if workspace %}
       </div>
       <aside class="analysis-results" aria-labelledby="analysis-results-title">

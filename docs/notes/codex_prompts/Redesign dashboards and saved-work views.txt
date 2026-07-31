@@ -1,0 +1,734 @@
+Implement the milestone:
+
+Redesign dashboards and saved-work views.
+
+The V1 design system, shared application shell, guided form workflows, and
+redesigned Event Analysis workspace now exist.
+
+Redesign the Dashboard, Welcome, Saved Events, Scenario Comparison, Data Safety,
+and related management screens into one cohesive, efficient system.
+
+Apply the established V1 design system, application shell, reusable page
+layouts, form components, workspace components, and action hierarchy.
+
+Do not change calculations, persistence, routes, database behavior, backup
+semantics, comparison rules, or workflow meaning.
+
+Primary objective
+
+These screens should feel like a unified professional desktop application, not
+a collection of disconnected management pages.
+
+The quality bar is comparable in clarity, restraint, scanability, and workflow
+efficiency to products such as:
+
+- Notion
+- ChatGPT
+- Linear
+- Stripe Dashboard
+- Zillow
+
+Do not imitate those products.
+
+Use them only as references for:
+
+- information architecture
+- management-screen density
+- restrained use of cards
+- clear empty states
+- searchable libraries
+- aligned comparisons
+- professional onboarding
+- action hierarchy
+
+Shared management patterns
+
+Create or refine reusable patterns for:
+
+- search
+- sort
+- lightweight filtering
+- compact management rows
+- event and scenario identity
+- status badges
+- modified-date display
+- row actions
+- overflow actions
+- empty states
+- confirmation dialogs
+- selection state
+- selected-count summaries
+- compact task panels
+- concise supporting explanations
+
+Equivalent actions and records should look and behave consistently across all
+management screens.
+
+Do not build a separate visual language for each page.
+
+Dashboard
+
+Redesign the Dashboard as a decision and launch screen.
+
+It should answer:
+
+- What should I do next?
+- What have I worked on recently?
+- Is anything asking for attention?
+
+Primary action:
+
+Analyze new event
+
+Recommended structure:
+
+1. Compact welcome or page context
+2. Primary Analyze new event action
+3. Continue where you left off
+4. Recent Events or Scenarios
+5. Useful shortcuts to:
+   - Saved Events
+   - Business Defaults
+   - Data Safety
+
+Use only genuinely useful summaries.
+
+Do not add:
+
+- fake analytics
+- vanity metrics
+- invented trends
+- decorative charts
+- business statistics not already supported by application data
+
+If the app has no recent work, show a concise empty state with one obvious
+action.
+
+The Dashboard should fit within one ordinary desktop viewport where practical.
+
+Welcome and first-use orientation
+
+Redesign Welcome as brief orientation into a professional tool.
+
+The screen should:
+
+- explain the product within seconds
+- present the established four-step introduction
+- make Get started immediately obvious
+- show what the customer will accomplish
+- preserve setup detection and current onboarding flow
+
+Avoid:
+
+- long paragraphs
+- large marketing-style sections
+- decorative landing-page content
+- testimonials
+- invented product claims
+- excessive scrolling
+
+Primary action:
+
+Get started
+
+The four steps should feel compact, sequential, and operational.
+
+Do not change the number, meaning, or routing of onboarding steps.
+
+Saved Events
+
+Redesign Saved Events as a compact work library.
+
+It should optimize for:
+
+- finding work
+- understanding Event and Scenario identity
+- reopening analysis quickly
+- managing saved records safely
+
+Primary action for each record:
+
+Open analysis
+
+Add or refine lightweight controls for:
+
+- search by Event or Scenario name
+- sort by modified date
+- sort by Event date
+- sort by name
+
+Use only existing record data.
+
+Do not add new persistence merely to support search or sorting.
+
+Preferred layout:
+
+- compact Event rows or grouped sections
+- Event name
+- Event date
+- location where useful
+- Scenario count
+- latest activity or modified date
+- clear primary open action
+- secondary rename and delete actions
+- progressive disclosure for Scenario lists where useful
+
+Do not make every Event a large card.
+
+Do not hide all Scenario information behind multiple unnecessary clicks.
+
+Scenario rows should clearly show:
+
+- Scenario name
+- associated Event
+- relevant status or outcome where already available
+- modified date where available
+- Open analysis action
+- secondary rename or delete actions
+
+Preserve:
+
+- final-Scenario deletion protection
+- Event deletion confirmation
+- rename validation
+- duplicate-name rules
+- missing-record handling
+- persistence after restart
+
+Empty state:
+
+- title explaining that no Events are saved
+- one concise sentence
+- primary Analyze new event action
+
+Search and sort behavior
+
+Keep filtering lightweight.
+
+Support only:
+
+- search
+- sort
+- simple current-view controls already supported by data
+
+Do not add:
+
+- folders
+- tags
+- saved filters
+- favorites
+- bulk actions
+- bulk delete
+- advanced query builders
+- cloud-backed search
+
+Search should be:
+
+- fast
+- case-insensitive where current conventions permit
+- clearable
+- keyboard accessible
+
+Show a useful no-results state distinct from the no-data empty state.
+
+Scenario Comparison selection
+
+Treat Scenario selection and comparison results as separate jobs.
+
+Redesign the selection screen for:
+
+- finding Scenarios
+- understanding which Event each belongs to
+- selecting two to four quickly
+- seeing the selected count
+- starting comparison confidently
+
+Primary action:
+
+Compare selected
+
+Requirements:
+
+- clear Scenario identity
+- clear Event identity
+- compact selection rows
+- visible selected state
+- selected-count summary
+- support for two to four Scenarios
+- clear prevention or explanation when selection exceeds four
+- insufficient-selection guidance
+- lightweight search and sorting where helpful and supported
+
+Do not duplicate Scenario records.
+
+Do not introduce a new selection persistence model.
+
+Scenario Comparison results
+
+Redesign comparison results for aligned, fast scanning.
+
+The screen should prioritize:
+
+1. Scenario identity
+2. Baseline identity
+3. Business profit
+4. Target status
+5. Break-even
+6. Revenue and total costs
+7. Assumption differences
+8. Warning differences
+
+Preserve:
+
+- baseline selection
+- Show differences only
+- same-Event comparison
+- cross-Event comparison
+- two-, three-, and four-Scenario comparison
+- percentage-point differences
+- tie labels
+- opening any compared Scenario
+- current calculation and warning semantics
+
+Use:
+
+- aligned rows
+- compact headers
+- persistent Scenario identity
+- restrained emphasis
+- clear difference markers
+- sticky baseline and filter controls where appropriate
+
+Avoid:
+
+- unrelated card grids
+- page-wide two-dimensional scrolling
+- repeated Scenario names in every row
+- excessive color
+- visually equal emphasis for every metric
+
+When horizontal comparison space becomes constrained:
+
+- preserve Scenario identity
+- simplify before scrolling
+- use localized horizontal scrolling only when necessary to keep aligned data
+  legible
+- keep controls and labels outside the scroller where practical
+
+Show differences only should be easy to locate and understand.
+
+Primary action:
+
+Open analysis
+
+Do not change comparison calculations or baseline semantics.
+
+Data Safety
+
+Redesign Data Safety to create confidence without unnecessary alarm.
+
+Use two clear primary task areas:
+
+1. Download backup
+2. Restore backup
+
+Primary normal action:
+
+Download backup
+
+Restore should remain clearly available but visually distinct because it is a
+higher-impact action.
+
+Explain concisely:
+
+- what the backup includes
+- that restore replaces current application data
+- that restore is not a merge
+- when a recovery snapshot is created
+- that backups remain local
+
+Put longer or technical explanations behind progressive disclosure.
+
+Do not expose:
+
+- internal paths
+- database implementation details
+- raw archive structure
+- stack traces
+- SQL terminology
+
+Preserve all existing:
+
+- backup validation
+- checksum validation
+- unsupported-version rejection
+- restore confirmation
+- pre-restore recovery snapshot
+- replacement behavior
+- failure safeguards
+- recovery behavior
+
+The screen should not look like an emergency state during normal use.
+
+Recovery screens may remain more caution-oriented where appropriate.
+
+Empty states
+
+Create one reusable empty-state pattern.
+
+Every empty state should contain:
+
+- concise title
+- one-sentence explanation
+- one obvious next action
+
+Examples:
+
+No saved Events:
+- Analyze new event
+
+No recent work:
+- Start your first analysis
+
+No comparison selection:
+- Select Scenarios
+
+No search results:
+- Clear search or adjust the query
+
+Avoid:
+
+- decorative illustrations without meaning
+- long explanatory text
+- multiple competing actions
+- giant full-page cards
+
+Action hierarchy
+
+Use these priorities:
+
+Dashboard:
+- Analyze new event
+
+Welcome:
+- Get started
+
+Saved Events:
+- Open analysis
+
+Scenario selection:
+- Compare selected
+
+Comparison results:
+- Open analysis
+
+Data Safety:
+- Download backup
+
+Rename, delete, restore, clear, and secondary navigation actions must not compete
+visually with the normal primary task.
+
+Destructive actions should remain clear and deliberate.
+
+Cards and rows
+
+Use cards only when a bounded object or task genuinely benefits from them.
+
+Prefer compact rows and aligned groups for:
+
+- Events
+- Scenarios
+- comparison selection
+- recent work
+
+Use task cards where appropriate for:
+
+- Dashboard shortcuts
+- Download backup
+- Restore backup
+
+Do not wrap entire pages inside cards.
+
+Do not create deeply nested cards.
+
+Dates and metadata
+
+Standardize:
+
+- Event date display
+- modified date display
+- relative versus absolute date usage
+- metadata separators
+- Scenario count labels
+- Event and Scenario identity
+
+Use plain-language formatting.
+
+Do not display raw timestamps.
+
+Use existing date data only.
+
+Responsive behavior
+
+Desktop:
+
+- use broad workspace widths
+- preserve compact rows
+- keep primary controls visible
+- use available horizontal space efficiently
+
+Narrow layouts:
+
+- stack rows and metadata cleanly
+- preserve primary action visibility
+- preserve search and sort access
+- keep selection state understandable
+- keep comparison identity visible
+- avoid page-wide horizontal overflow where possible
+
+Do not create a separate unrelated mobile workflow.
+
+Accessibility
+
+Maintain or improve:
+
+- semantic page headings
+- accessible search labels
+- accessible sort controls
+- table or list semantics
+- selected-state announcements
+- comparison headers
+- current baseline communication
+- keyboard-operable row actions
+- accessible confirmation dialogs
+- visible focus
+- color-independent status and difference indicators
+
+Search results and selected-count changes should be announced appropriately
+where current architecture supports it.
+
+Design system
+
+Use the established:
+
+- application shell
+- typography
+- spacing
+- buttons
+- inputs
+- cards
+- rows
+- tables
+- badges
+- alerts
+- empty states
+- dialogs
+- sticky controls
+- color and elevation systems
+
+Do not invent screen-specific component styles unless a truly new reusable
+management pattern is required.
+
+Reusable components
+
+Create or refine reusable components for:
+
+- recent-work row
+- Event library row
+- Scenario row
+- search and sort toolbar
+- no-results state
+- selection row
+- selected-count bar
+- comparison header
+- comparison difference row
+- task panel
+- safety action panel
+- concise onboarding step
+- management overflow actions
+
+Future products should be able to reuse these patterns.
+
+No functionality changes
+
+Do not change:
+
+- route URLs
+- setup behavior
+- Event or Scenario persistence
+- rename semantics
+- delete semantics
+- Scenario selection limits
+- comparison calculations
+- baseline behavior
+- warning behavior
+- backup format
+- restore behavior
+- migration behavior
+- database schema
+- recovery safeguards
+
+Small template, query, or JavaScript refactors are allowed only when necessary
+to support presentation, client-side search, sorting, or reusable management
+components.
+
+Do not add database columns or new stored customer preferences.
+
+Testing
+
+Add or update focused automated tests covering:
+
+Dashboard:
+- primary Analyze new event action
+- recent-work rendering
+- continue-work behavior
+- empty state
+- shortcuts
+- no fake metrics
+
+Welcome:
+- four-step orientation
+- primary Get started action
+- correct setup route behavior
+- compact content structure
+
+Saved Events:
+- Event and Scenario rendering
+- search by Event name
+- search by Scenario name
+- no-results state
+- clear search
+- sort by modified date
+- sort by Event date
+- sort by name
+- open analysis
+- rename
+- delete
+- final-Scenario protection
+- Event deletion
+- persistence after restart
+
+Comparison selection:
+- Scenario and Event identity
+- selecting two to four
+- selected count
+- maximum-selection prevention
+- insufficient-selection guidance
+- Compare selected action
+- search or sorting where implemented
+
+Comparison results:
+- baseline identity
+- changing baseline
+- aligned financial differences
+- percentage-point differences
+- warning differences
+- Show differences only
+- ties
+- two-, three-, and four-Scenario layouts
+- opening each Scenario
+- no record creation
+
+Data Safety:
+- Download backup remains available
+- restore remains available
+- explanations are concise
+- confirmation behavior remains intact
+- invalid restore remains safe
+- successful restore still replaces data
+- recovery snapshot behavior remains intact
+
+Empty states:
+- no saved Events
+- no recent work
+- no search results
+- insufficient comparison selection
+- each contains one clear primary next action
+
+Responsive:
+- management rows stack safely
+- search and sort remain available
+- comparison identity remains visible
+- selected-count and primary actions remain reachable
+- no accidental page-wide overflow where practical to assert
+
+Accessibility:
+- search and sort labels
+- list or table semantics
+- selection state
+- baseline state
+- row-action names
+- empty-state actions
+- focus and keyboard behavior
+
+Regression:
+- Dashboard route works
+- onboarding works
+- Event Analysis opens
+- Saved Events persistence works
+- comparison calculations are unchanged
+- backup and restore are unchanged
+- recovery behavior is unchanged
+- application shell remains intact
+
+Manual review checklist
+
+Add a concise manual checklist covering:
+
+- first-use Welcome
+- Dashboard with no work
+- Dashboard with recent work
+- Saved Events with one Event
+- Saved Events with many Events and Scenarios
+- search and sorting
+- no-results state
+- rename and delete actions
+- comparison selection with two to four Scenarios
+- same-Event and cross-Event comparison
+- Show differences only
+- baseline changes
+- long Event and Scenario names
+- Data Safety
+- invalid restore
+- normal and narrow desktop windows
+- keyboard navigation
+- visible primary-action hierarchy
+
+Scope
+
+Do not implement:
+
+- new dashboard analytics
+- charts
+- tags
+- folders
+- favorites
+- bulk actions
+- sharing
+- cloud sync
+- new comparison calculations
+- new backup features
+- new onboarding steps
+- automatic updates
+- final microinteraction polish
+- platform packaging changes
+- new dependencies
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused Dashboard, onboarding, Saved Events, comparison, Data Safety,
+   search, sort, responsive, and accessibility tests.
+2. Run all affected persistence, backup, restore, and comparison tests.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Summarize each redesigned management screen.
+6. Explain the shared management patterns introduced.
+7. Explain how discoverability and workflow efficiency were improved.
+8. List every reusable component created or refined.
+9. Report any state that could not be exercised.
+10. Report the exact test results.
+
+Keep the response concise.

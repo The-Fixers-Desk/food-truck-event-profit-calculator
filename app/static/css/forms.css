@@ -127,6 +127,45 @@
   font-size: 0.875rem;
 }
 
+#defaults-progress {
+  margin-right: auto;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.guided-workflow,
+.workflow-stage {
+  min-width: 0;
+}
+
+.validation-summary {
+  margin-bottom: var(--space-4);
+}
+
+.review-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: start;
+  padding: var(--space-3);
+  border-bottom: var(--divider-default);
+}
+
+.review-section h3,
+.review-section p {
+  margin: 0;
+}
+
+.review-section p {
+  grid-column: 1;
+  color: var(--color-text-muted);
+}
+
+.review-section .button-secondary {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
 .stage-review {
   margin-top: var(--space-5);
   padding-top: var(--space-4);
@@ -452,15 +491,24 @@
 }
 
 @media (min-width: 900px) {
-  .event-stepper {
-    position: sticky;
-    z-index: 6;
-    top: 0;
-    padding-block: var(--space-2);
-    background: var(--color-background);
+  .guided-workflow {
+    display: grid;
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
   }
 
-  .event-stepper button { flex: 1 1 0; }
+  .workflow-stepper {
+    position: sticky;
+    z-index: 6;
+    top: 4rem;
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    border-bottom: 0;
+  }
+
+  .workflow-stepper button { width: 100%; }
 }
 
 @media (max-width: 800px) {

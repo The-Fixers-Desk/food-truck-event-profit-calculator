@@ -17,21 +17,25 @@
     {% endfor %}
   {% endwith %}
 
-  <nav class="section-switcher defaults-sections" aria-label="Defaults sections"
-    data-defaults-navigation>
-    {% for number, label in ((1, "Business and sales"), (2, "Food and payment costs"), (3, "Labor and event costs"), (4, "Profit target")) %}
-      <button type="button" data-defaults-target="{{ number }}">{{ label }}</button>
-    {% endfor %}
-  </nav>
-  <form class="form-panel defaults-form" method="post" novalidate>
+  <div class="guided-workflow">
+    <nav class="section-switcher workflow-stepper defaults-sections"
+      aria-label="Defaults setup stages" data-defaults-navigation>
+      {% for number, label in ((1, "Business and sales"), (2, "Food and payment costs"), (3, "Labor and event costs"), (4, "Profit target"), (5, "Review and save")) %}
+        <button type="button" data-defaults-target="{{ number }}">
+          <span class="stage-completion-indicator">{{ number }}</span>{{ label }}
+        </button>
+      {% endfor %}
+    </nav>
+    <form class="form-panel defaults-form workflow-stage" method="post"
+      novalidate>
     {% if errors %}
-      <section class="error-summary" id="defaults-error-summary" role="alert"
+      <section class="error-summary validation-summary" id="defaults-error-summary" role="alert"
         aria-labelledby="defaults-error-summary-title" tabindex="-1">
         <h2 id="defaults-error-summary-title">Correct the highlighted fields</h2>
         <p>Your entries are preserved. Review the fields marked with errors.</p>
       </section>
     {% endif %}
-    <div class="form-grid" data-defaults-section="1">
+    <div class="form-grid grouped-form-layout" data-defaults-section="1">
       {% macro field(name, label, required=true, hint="") %}
         <div class="form-field">
           <label class="form-label" for="{{ name }}">{{ label }}</label>
@@ -148,7 +152,7 @@
       <div class="choice-options">
         <label class="choice-option">
           <input type="radio" name="profit_target_type"
-            value="profit_amount"
+            value="profit_amount" required
             {% if form_values.profit_target_type == "profit_amount" %}
               checked
             {% endif %} />
@@ -272,15 +276,32 @@
       </button>
     </fieldset>
 
+    <section class="stage-review" data-defaults-section="5"
+      aria-labelledby="defaults-review-title">
+      <h2 id="defaults-review-title">Review your business defaults</h2>
+      <p class="form-hint">
+        Check the key values below. Use Edit to revisit a section before saving.
+      </p>
+      <div id="defaults-review-summary" class="review-grid"></div>
+    </section>
+
     <div class="form-actions sticky-actions">
-      <button class="button" type="submit">Save defaults</button>
+      <button class="button-secondary" id="defaults-back"
+        type="button">Back</button>
+      <span id="defaults-progress" aria-live="polite"></span>
+      <button class="button" id="defaults-continue"
+        type="button">Continue</button>
+      <button class="button" id="save-defaults" type="submit" hidden>
+        Save changes
+      </button>
       {% if business_defaults_setup_complete %}
         <a class="button-secondary" href="{{ url_for('main.dashboard') }}">
           Back to Dashboard
         </a>
       {% endif %}
     </div>
-  </form>
+    </form>
+  </div>
 </section>
 
 <template id="labor-entry-template">

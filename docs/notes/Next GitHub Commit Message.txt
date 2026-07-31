@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Redesign application layout and navigation
-
-- Add a persistent desktop application shell with shared navigation
-- Introduce a compact context bar and consistent main workspace structure
-- Separate global destinations from screen-specific workflow navigation
-- Standardize task-specific content widths and page-layout patterns
-- Improve primary-action hierarchy, spacing, and visual rhythm
-- Reduce unnecessary cards, empty margins, and page-level scrolling
-- Add responsive navigation behavior for narrow application windows
-- Preserve setup, recovery, dirty-state, routing, and accessibility safeguards
-- Apply the shared shell across all current application screens
-- Add shell, navigation, responsive, and regression test coverage
-
----------------------------------------------------------------------------------
-
 Redesign Business Defaults and Event Inputs workflows
 
 - Convert Business Defaults and Event Inputs into guided multi-stage workflows
@@ -28,6 +13,34 @@ Redesign Business Defaults and Event Inputs workflows
 - Improve error recovery, stage indicators, and accessibility
 - Reuse the shared V1 design system throughout both workflows
 - Add regression, responsive, accessibility, and workflow test coverage
+
+---------------------------------------------------------------------------------
+
+Redesign the Event Analysis workspace
+
+- Transform Event Analysis into a decision-focused workspace
+- Separate assumptions from financial results with a two-region desktop layout
+- Prioritize business profit, target status, break-even, and warnings
+- Add a dedicated Scenario management area with persistent actions
+- Introduce reusable decision summary, metric, warning, and calculation components
+- Improve information hierarchy through progressive disclosure and grouped breakdowns
+- Optimize the workspace for widescreen desktop use while preserving responsive behavior
+- Maintain live recalculation and all existing business logic
+- Add accessibility, responsive, and regression test coverage
+
+---------------------------------------------------------------------------------
+
+Redesign Dashboard and saved-work views
+
+- Redesign Dashboard and Welcome as compact, task-focused launch experiences
+- Transform Saved Events into a searchable and sortable work library
+- Improve Event and Scenario identity, metadata, row actions, and empty states
+- Redesign Scenario selection and comparison for faster, clearer scanning
+- Improve baseline controls, differences-only behavior, and comparison readability
+- Redesign Data Safety around clear backup and restore task areas
+- Standardize management rows, toolbars, selection states, dialogs, and task panels
+- Preserve all existing persistence, comparison, backup, restore, and recovery behavior
+- Add responsive, accessibility, management-workflow, and regression test coverage
 
 ---------------------------------------------------------------------------------
 

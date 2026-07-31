@@ -1,0 +1,525 @@
+Implement the milestone:
+
+Redesign the Event Analysis workspace.
+
+The V1 design system, application shell, and guided form workflows now exist.
+
+Redesign the Event Analysis workspace into the application's primary
+decision-making environment.
+
+Apply the established V1 design system, shared application shell, and reusable
+layout components.
+
+Do not change business logic, calculations, persistence, routes, database
+behavior, or calculation semantics.
+
+The live recalculation engine already works correctly.
+
+This milestone is about presenting information so users can make business
+decisions quickly and confidently.
+
+Primary objective
+
+The Event Analysis workspace is the centerpiece of the application.
+
+It should receive the greatest design attention of any screen in the product.
+
+If tradeoffs must be made, prioritize:
+
+- decision-making speed
+- clarity
+- information hierarchy
+- workflow efficiency
+
+over implementation simplicity.
+
+The workspace should feel comparable in quality—not appearance—to professional
+desktop applications such as:
+
+- Notion
+- ChatGPT
+- Linear
+- Stripe Dashboard
+- Bloomberg Terminal (information hierarchy only)
+
+Do not imitate these products.
+
+Use them only as references for:
+
+- information density
+- visual hierarchy
+- workspace organization
+- efficient desktop layouts
+- restrained design
+
+Primary design principle
+
+The Event Analysis workspace is not a report.
+
+It is not a calculator.
+
+It is a decision-making tool.
+
+Every design decision should help answer:
+
+"Should I work this event?"
+
+or
+
+"What should I change to make this event worthwhile?"
+
+Workspace structure
+
+Create a persistent two-region workspace.
+
+Left region
+
+Assumptions.
+
+Right region
+
+Business results.
+
+The user should never lose sight of:
+
+- assumptions
+- financial outcome
+
+while working.
+
+Do not stack the entire interface vertically unless narrow layouts require it.
+
+Desktop layout
+
+Preferred structure:
+
+LEFT
+
+- scenario controls
+- assumption groups
+
+RIGHT
+
+Top
+
+- decision summary
+
+Middle
+
+- primary metrics
+
+Bottom
+
+- detailed financial breakdown
+
+Visual hierarchy
+
+The eye should naturally prioritize information in approximately this order:
+
+1. Business Profit
+2. Profit Target status
+3. Break-even customers
+4. Major warnings
+5. Revenue
+6. Total costs
+7. Supporting calculations
+
+Not every number deserves equal visual weight.
+
+Decision summary
+
+Create a reusable decision summary area.
+
+It should communicate the current business outcome immediately.
+
+Include prominent presentation of:
+
+- Business Profit
+- Profit Margin
+- Target met or not met
+- Break-even customers
+- Overall recommendation state
+
+Do not require users to inspect detailed calculations before understanding the
+result.
+
+Primary metrics
+
+Create a reusable metrics area emphasizing:
+
+- revenue
+- food costs
+- labor costs
+- fixed costs
+- organizer fees
+- total costs
+- owner pay
+
+Metrics should be:
+
+- scannable
+- aligned
+- comparable
+- visually balanced
+
+Use typography and spacing rather than excessive decoration.
+
+Warnings
+
+Warnings should become actionable.
+
+Instead of merely stating:
+
+High competition
+
+Prefer messages that explain:
+
+- why
+- consequence
+- approximate impact
+
+Example:
+
+Expected buyers per vendor
+
+68
+
+Break-even customers
+
+102
+
+Approximately 34 additional customers are needed.
+
+When reasonable, include factual guidance derived from existing calculations.
+
+Do not invent optimization recommendations unsupported by current business
+logic.
+
+Assumptions panel
+
+Treat assumptions as controls rather than another long form.
+
+Group assumptions into collapsible sections such as:
+
+- Demand
+- Revenue
+- Labor
+- Costs
+- Fees
+
+Only one section should normally expand by default.
+
+Preserve all existing live recalculation behavior.
+
+Scenario management
+
+Create a dedicated persistent scenario-management region.
+
+Include:
+
+- Scenario name
+- Save
+- Save as new
+- Reset changes
+- Rename
+- Compare
+
+These actions should always be easy to locate.
+
+Do not scatter Scenario actions throughout the page.
+
+Live recalculation
+
+Every assumption change should feel immediate.
+
+Users should never wonder whether calculations updated.
+
+Subtle visual acknowledgement is acceptable.
+
+Avoid loading indicators unless a real asynchronous delay exists.
+
+Progressive disclosure
+
+Do not overwhelm users with detailed calculations.
+
+Present:
+
+Top
+
+The answer.
+
+Bottom
+
+The explanation.
+
+Use expandable sections for:
+
+- revenue details
+- cost breakdowns
+- fee calculations
+- assumption explanations
+
+Do not hide critical decision metrics.
+
+Detailed calculations remain available but should not dominate the workspace.
+
+Financial breakdown
+
+Create reusable expandable sections for:
+
+Revenue
+
+Food
+
+Labor
+
+Fees
+
+Additional costs
+
+Profit calculations
+
+Maintain current calculation accuracy.
+
+Do not change formulas.
+
+Comparison readiness
+
+Design the workspace so future comparison interactions naturally align with the
+same visual hierarchy.
+
+Do not redesign the comparison screen yet.
+
+Sticky actions
+
+Where appropriate, use the established sticky action patterns for:
+
+Scenario actions
+
+Assumption editing
+
+Important controls should remain convenient without covering content.
+
+Content density
+
+The workspace should feel information-rich without feeling crowded.
+
+Avoid:
+
+- oversized cards
+- excessive whitespace
+- unnecessary repeated headings
+- decorative graphics
+- redundant labels
+
+Use:
+
+- typography
+- spacing
+- alignment
+- grouping
+- subtle dividers
+
+to create structure.
+
+Desktop optimization
+
+Optimize primarily for widescreen desktop use.
+
+Use available horizontal space efficiently.
+
+Avoid:
+
+- large unused margins
+- narrow centered layouts
+- unnecessary scrolling
+
+Accessibility
+
+Maintain or improve:
+
+- keyboard navigation
+- logical reading order
+- semantic headings
+- accessible expandable sections
+- accessible alerts
+- visible focus
+- color-independent status communication
+
+Responsive behavior
+
+Narrow layouts may stack regions vertically.
+
+Maintain:
+
+- decision summary first
+- assumptions second
+- calculations afterward
+
+Preserve usability without creating an entirely different workflow.
+
+Design system
+
+Use the existing:
+
+- typography
+- spacing
+- cards
+- tables
+- alerts
+- badges
+- buttons
+- shell
+- color system
+
+Do not invent competing styles.
+
+Reusable components
+
+Create reusable workspace components including:
+
+- decision summary
+- financial metric card
+- assumption section
+- expandable calculation section
+- scenario action bar
+- warning panel
+- recommendation summary
+- grouped financial breakdown
+
+Future products should be able to reuse these components.
+
+Regression requirements
+
+Do not change:
+
+- calculations
+- formulas
+- persistence
+- warnings
+- business rules
+- Event creation
+- Scenario saving
+- comparison logic
+- migrations
+- backup
+- restore
+
+Small template or JavaScript refactors are allowed only where required to
+support the redesigned workspace.
+
+Testing
+
+Add or update automated tests covering:
+
+Workspace rendering
+
+- decision summary renders
+- primary metrics render
+- assumption groups render
+- financial breakdown renders
+- scenario controls remain available
+
+Live updates
+
+- editing assumptions updates all dependent metrics
+- warnings update correctly
+- recommendation state updates correctly
+- no calculation regression occurs
+
+Progressive disclosure
+
+- expandable sections open and close correctly
+- hidden details remain accessible
+- summary metrics remain visible
+
+Scenario controls
+
+- save
+- save as new
+- rename
+- reset
+- compare
+
+remain fully functional.
+
+Accessibility
+
+Verify:
+
+- keyboard navigation
+- heading hierarchy
+- expandable controls
+- alerts
+- focus management
+
+Responsive
+
+Verify:
+
+- desktop workspace
+- narrow layout
+- preserved decision hierarchy
+- preserved functionality
+
+Regression
+
+Verify:
+
+- calculations unchanged
+- Event workflow unchanged
+- Saved Events unchanged
+- Comparison unchanged
+- Defaults unchanged
+- Backup unchanged
+- Restore unchanged
+
+Manual review checklist
+
+Add a concise checklist covering:
+
+- immediate understanding of business outcome
+- scenario editing
+- rapid assumption changes
+- warning clarity
+- break-even visibility
+- target visibility
+- long calculation sections
+- keyboard navigation
+- desktop usability
+- narrow layout usability
+- information density
+- minimal scrolling
+
+Scope
+
+Do not implement:
+
+- Dashboard redesign
+- Saved Events redesign
+- Comparison redesign
+- charts or graphs
+- AI recommendations
+- new calculations
+- new warnings
+- new business logic
+- new dependencies
+- animation-heavy interactions
+
+Do not make unrelated changes.
+
+Do not commit.
+
+Afterward:
+
+1. Run focused workspace, calculation, scenario, accessibility, responsive,
+   and regression tests.
+2. Run the full automated test suite.
+3. Run git diff --check.
+4. Summarize the redesigned Event Analysis workspace.
+5. Explain how decision-making speed and visual hierarchy were improved.
+6. List every reusable workspace component introduced.
+7. Report any design limitation that could not be addressed.
+8. Report the exact test results.
+
+Keep the response concise.

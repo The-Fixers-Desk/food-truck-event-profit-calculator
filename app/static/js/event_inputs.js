@@ -968,10 +968,14 @@ if (sectionNavigation && formSections.length) {
   const progress = document.querySelector("#section-progress");
   let completedThrough = 0;
   let activeSection = Number(
-    formSections.find((section) => section.querySelector('[aria-invalid="true"]'))
+    formSections.find((section) => section.querySelector(
+      '[aria-invalid="true"], .field-error',
+    ))
       ?.dataset.formSection ?? (isWorkspaceSections ? 2 : 1),
   );
-  if (!isWorkspaceSections && document.querySelector('[aria-invalid="true"]')) {
+  if (!isWorkspaceSections && document.querySelector(
+    '[aria-invalid="true"], .field-error',
+  )) {
     completedThrough = Math.max(0, activeSection - 1);
   }
   const revenueSection = formSections.find(
@@ -1002,6 +1006,7 @@ if (sectionNavigation && formSections.length) {
     review.replaceChildren();
     for (let number = 1; number <= 5; number += 1) {
       const card = document.createElement("article");
+      card.className = "review-section";
       const heading = document.createElement("h3");
       heading.textContent = sectionButtons[number - 1].textContent.trim();
       const values = sectionFields(number)
@@ -1075,7 +1080,7 @@ if (sectionNavigation && formSections.length) {
   });
 
   formSections.forEach((section) => {
-    if (section.querySelector('[aria-invalid="true"]')) {
+    if (section.querySelector('[aria-invalid="true"], .field-error')) {
       sectionButtons.find((button) => (
         button.dataset.sectionTarget === section.dataset.formSection
       ))?.classList.add("has-error");
@@ -1084,7 +1089,10 @@ if (sectionNavigation && formSections.length) {
   showSection(activeSection);
 }
 
-document.querySelector(".error-summary")?.focus();
+const firstEventError = document.querySelector('[aria-invalid="true"]')
+  ?? document.querySelector("[data-form-section] .field-error")
+    ?.closest("[data-form-section]")?.querySelector("input, select, textarea");
+if (firstEventError) window.requestAnimationFrame(() => firstEventError.focus());
 document.querySelectorAll('[aria-invalid="true"]').forEach((input, index) => {
   const error = input.closest(".form-field, fieldset")?.querySelector(".field-error");
   if (!error) return;

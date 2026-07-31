@@ -69,11 +69,17 @@ def test_defaults_has_fast_section_navigation_and_sticky_save(client):
         "Food and payment costs",
         "Labor and event costs",
         "Profit target",
+        "Review and save",
     ):
         assert label in page
-    assert page.count("data-defaults-target=") == 4
+    assert page.count("data-defaults-target=") == 5
+    assert 'id="defaults-back"' in page
+    assert 'id="defaults-continue"' in page
+    assert 'id="save-defaults"' in page
     assert "sticky-actions" in page
     assert "showDefaultsSection" in script
+    assert "validateDefaultsSection" in script
+    assert "updateDefaultsReview" in script
     assert "has-error" in script
 
 
