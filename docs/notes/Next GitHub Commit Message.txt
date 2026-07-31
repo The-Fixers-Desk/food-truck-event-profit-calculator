@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Complete saved event and scenario management
-
-- Add a Saved Events screen grouped by Event and Scenario
-- Open saved Scenarios directly in the interactive analysis workspace
-- Recalculate results from persisted assumptions when loading
-- Support Event and Scenario renaming with validation
-- Support confirmed Scenario and Event deletion
-- Prevent deleting an Event’s final Scenario by itself
-- Protect unsaved workspace changes before navigation
-- Preserve ordered labor and miscellaneous-cost entries
-- Verify saved data, renames, deletions, and loading after restart
-- Add saved-work, persistence, route, and workspace tests
-
----------------------------------------------------------------------------------
-
 Build complete event comparison workflow
 
 - Add selection for comparing two to four saved Scenarios
@@ -90,6 +75,22 @@ Complete V1 UI and UX design and polish
 - Improve responsive layouts and visual hierarchy
 - Remove obsolete or duplicated presentation styles
 - Add focused template assertions and a manual UI review checklist
+
+---------------------------------------------------------------------------------
+
+Complete accessibility and responsive behavior
+
+- Add complete keyboard navigation and visible focus states
+- Improve semantic page structure, landmarks, headings, and page titles
+- Add accessible labels, help-text relationships, and error summaries
+- Add dialog focus management and accessible confirmation behavior
+- Improve live calculation, save, comparison, and recovery announcements
+- Make repeatable labor and cost rows accessible and keyboard-friendly
+- Improve screen-reader structure for Saved Events and Scenario comparison
+- Strengthen contrast and non-color status communication
+- Support responsive layouts down to narrow application widths
+- Verify zoom, long-content, dialog, table, and workspace behavior
+- Add accessibility assertions, developer guidance, and a manual review checklist
 
 ---------------------------------------------------------------------------------
 

@@ -10,6 +10,19 @@
     </p>
   </header>
 
+  <form id="comparison-selection-form" method="post"
+    action="{{ url_for('main.comparison') }}">
+    <button class="button" id="compare-selected" type="submit" disabled>
+      Compare selected
+    </button>
+    <p id="comparison-selection-status" aria-live="polite">
+      Select two to four Scenarios.
+    </p>
+    {% if comparison_error %}
+      <p class="field-error" role="alert">{{ comparison_error }}</p>
+    {% endif %}
+  </form>
+
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
       <p class="flash-message flash-message--{{ category }}" role="status">
@@ -93,6 +106,16 @@
           {% for scenario in event.scenarios %}
             <section class="saved-scenario"
               data-scenario-id="{{ scenario.id }}">
+              <label class="comparison-selection">
+                <input type="checkbox" name="scenario_id"
+                  value="{{ scenario.id }}"
+                  form="comparison-selection-form"
+                  {% if scenario.id|string in selected_scenarios %}
+                    checked
+                  {% endif %} />
+                Select {{ event.event_name }} — {{ scenario.scenario_name }}
+                for comparison
+              </label>
               <div>
                 <h3>{{ scenario.scenario_name }}</h3>
                 <p>Last modified {{ scenario.updated_at }}</p>
@@ -160,5 +183,8 @@
       </article>
     {% endfor %}
   </div>
+  <script src="{{
+    url_for('static', filename='js/saved_events.js')
+  }}"></script>
 </section>
 {% endblock %}

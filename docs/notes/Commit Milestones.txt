@@ -75,12 +75,12 @@ CALCULATION AND RESULTS
 
 SAVED WORK AND COMPARISON
 
-□ >Complete saved event and scenario management
+☑ Complete saved event and scenario management
   List saved events and their scenarios, load any scenario directly into
   the interactive Event Analysis workspace, rename, delete, and verify
   persistence after restart.
 
-□ *Build the complete event comparison workflow
+□ >Build the complete event comparison workflow
   Select scenarios, compare their financial results and assumptions,
   highlight meaningful differences, and open either scenario in the
   interactive workspace.
@@ -115,7 +115,7 @@ DESIGN AND ACCESSIBILITY
   Dashboard, Defaults, Event Inputs, Results, Saved Events, Comparison,
   messages, empty states, wording, and visual hierarchy.
 
-□ Complete accessibility and responsive behavior
+□ *Complete accessibility and responsive behavior
   Add keyboard navigation, focus states, accessible labels and errors,
   contrast, responsive layouts, and screen-reader structure.
 

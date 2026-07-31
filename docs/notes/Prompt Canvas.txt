@@ -2,18 +2,6 @@ Prompt Canvas
 
 ---------------------------------------------------------------------------------
 
-Awesome. Next milestone is: Complete accessibility and responsive behavior
-  Add keyboard navigation, focus states, accessible labels and errors,
-  contrast, responsive layouts, and screen-reader structure.
-
-Anything we need to do before we make a prompt for Codex?
-
----------------------------------------------------------------------------------
-
-Give me the commit message I will use when this is done.
-
----------------------------------------------------------------------------------
-
 Awesome. Next milestone is: Build the desktop application shell
   Add the dedicated window, automatic local-server startup, safe shutdown,
   single-instance protection, product identity, loading and error screens,
@@ -26,4 +14,24 @@ Anything we need to do before we make a prompt for Codex?
 Give me the commit message I will use when this is done.
 
 ---------------------------------------------------------------------------------
+
+Awesome. Next milestone is: Package the Windows application
+  Bundle dependencies, add metadata and icons, create the installer and
+  shortcuts, use the correct data location, and verify installation behavior.
+
+Anything we need to do before we make a prompt for Codex?
+
+---------------------------------------------------------------------------------
+
+Give me the commit message I will use when this is done.
+
+---------------------------------------------------------------------------------
+
+Awesome. Next milestone is: INSERT
+
+Anything we need to do before we make a prompt for Codex?
+
+---------------------------------------------------------------------------------
+
+Give me the commit message I will use when this is done.
 

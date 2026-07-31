@@ -13,6 +13,7 @@ from flask import (
 
 from app.business_defaults_form import defaults_to_form, validate_defaults_form
 from app.calculations import calculate_event_scenario
+from app.comparison import build_comparison
 from app.database import (
     FinalScenarioDeletionError,
     ScenarioNameConflict,
@@ -386,10 +387,44 @@ def delete_saved_event(event_id: int):
     return redirect(url_for("main.saved_events"))
 
 
-@main.get("/comparison")
+@main.route("/comparison", methods=("GET", "POST"))
 def comparison():
-    """Keep the former navigation URL as a Saved Events alias."""
-    return redirect(url_for("main.saved_events"))
+    """Validate selected Scenarios and render read-only comparison."""
+    if request.method == "GET":
+        return redirect(url_for("main.saved_events"))
+    raw_ids = request.form.getlist("scenario_id")
+    if len(raw_ids) < 2:
+        return _render_saved_events(
+            comparison_error="Select at least two Scenarios to compare.",
+            selected_scenarios=raw_ids,
+        )
+    if len(raw_ids) > 4:
+        return _render_saved_events(
+            comparison_error="Select no more than four Scenarios.",
+            selected_scenarios=raw_ids,
+        )
+    if len(set(raw_ids)) != len(raw_ids):
+        return _render_saved_events(
+            comparison_error=(
+                "The same Scenario cannot be selected more than once."
+            ),
+            selected_scenarios=raw_ids,
+        )
+    try:
+        scenario_ids = [int(value) for value in raw_ids]
+        comparison_data = build_comparison(scenario_ids)
+    except (ValueError, sqlite3.Error):
+        return _render_saved_events(
+            comparison_error=(
+                "One or more selected Scenarios are no longer available."
+            ),
+            selected_scenarios=raw_ids,
+        )
+    return render_template(
+        "comparison.html",
+        active_page="saved_events",
+        comparison=comparison_data,
+    )
 
 
 def _render_saved_events(
@@ -398,6 +433,8 @@ def _render_saved_events(
     event_values: dict | None = None,
     scenario_errors: dict | None = None,
     scenario_values: dict | None = None,
+    comparison_error: str | None = None,
+    selected_scenarios: list[str] | None = None,
 ):
     return render_template(
         "saved_events.html",
@@ -407,6 +444,8 @@ def _render_saved_events(
         event_values=event_values or {},
         scenario_errors=scenario_errors or {},
         scenario_values=scenario_values or {},
+        comparison_error=comparison_error,
+        selected_scenarios=set(selected_scenarios or []),
     )
     delete_event,
     delete_event_scenario,

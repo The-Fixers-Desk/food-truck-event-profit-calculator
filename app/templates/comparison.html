@@ -1,17 +1,206 @@
-{% extends "base.html" %} {% block title %} Comparison | Food Truck Event Profit
-Calculator {% endblock %} {% block content %}
-<section class="page">
+{% extends "base.html" %}
+{% block title %}Scenario Comparison | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
+<section class="page comparison-page">
   <header class="page-header">
     <p class="page-eyebrow">Saved Analyses</p>
-    <h1>Comparison</h1>
-
+    <h1>Scenario Comparison</h1>
     <p class="page-description">
-      Review and compare previously saved event analyses.
+      Compare saved assumptions and recalculated results. The first selected
+      Scenario is the initial baseline.
     </p>
   </header>
 
-  <div class="placeholder-panel">
-    <p>Saved event comparisons will appear here.</p>
+  <fieldset class="baseline-selector">
+    <legend>Comparison baseline</legend>
+    {% for column in comparison.columns %}
+      <label class="choice-option">
+        <input type="radio" name="comparison_baseline"
+          value="{{ column.scenario_id }}"
+          {% if column.scenario_id == comparison.baseline_id %}checked{% endif %} />
+        {{ column.identity.event_name }} — {{ column.scenario.scenario_name }}
+      </label>
+    {% endfor %}
+  </fieldset>
+  <p id="baseline-status" aria-live="polite">
+    Baseline:
+    {% for column in comparison.columns %}
+      {% if column.scenario_id == comparison.baseline_id %}
+        {{ column.identity.event_name }} — {{ column.scenario.scenario_name }}
+      {% endif %}
+    {% endfor %}
+  </p>
+
+  <label class="choice-option differences-only-control">
+    <input id="show-differences-only" type="checkbox" />
+    Show differences only
+  </label>
+
+  <div class="comparison-identities">
+    {% for column in comparison.columns %}
+      <article class="comparison-identity"
+        data-scenario-id="{{ column.scenario_id }}">
+        <p class="baseline-label"
+          {% if column.scenario_id != comparison.baseline_id %}hidden{% endif %}>
+          Baseline
+        </p>
+        <h2>{{ column.identity.event_name }}</h2>
+        <h3>{{ column.scenario.scenario_name }}</h3>
+        <p>
+          {{ column.identity.event_date }} at
+          {{ column.identity.start_time.strftime("%H:%M") }}
+        </p>
+        <p>{{ column.identity.location }}</p>
+        <a class="button-secondary"
+          href="{{ url_for('main.open_saved_scenario',
+                           event_id=column.event_id,
+                           scenario_id=column.scenario_id) }}">
+          Open analysis
+        </a>
+        <ul class="comparison-highlights">
+          {% if column.scenario_id in comparison.highlights.highest_profit %}
+            <li>Highest business profit (tie included)</li>
+          {% endif %}
+          {% if column.scenario_id in comparison.highlights.lowest_cost %}
+            <li>Lowest total event cost (tie included)</li>
+          {% endif %}
+          {% if column.scenario_id in comparison.highlights.lowest_break_even %}
+            <li>Lowest whole-customer break-even (tie included)</li>
+          {% endif %}
+          {% if column.scenario_id in comparison.highlights.target_met %}
+            <li>Selected profit target met</li>
+          {% endif %}
+          {% if column.scenario_id in comparison.highlights.target_not_met %}
+            <li>Selected profit target not met</li>
+          {% endif %}
+        </ul>
+      </article>
+    {% endfor %}
   </div>
+
+  <section class="comparison-section">
+    <h2>Financial results</h2>
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th scope="col">Result</th>
+            {% for column in comparison.columns %}
+              <th scope="col">
+                {{ column.identity.event_name }}<br />
+                {{ column.scenario.scenario_name }}
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in comparison.result_rows %}
+            <tr data-comparison-row="{{ row.key }}">
+              <th scope="row">{{ row.label }}</th>
+              {% for column in comparison.columns %}
+                <td>
+                  <strong>{{ row.display[column.scenario_id] }}</strong>
+                  {% for baseline in comparison.columns %}
+                    <span class="comparison-difference"
+                      data-baseline="{{ baseline.scenario_id }}"
+                      {% if baseline.scenario_id != comparison.baseline_id %}
+                        hidden
+                      {% endif %}>
+                      {% if baseline.scenario_id == column.scenario_id %}
+                        Baseline
+                      {% else %}
+                        {{ row.differences[baseline.scenario_id][
+                          column.scenario_id
+                        ] }}
+                      {% endif %}
+                    </span>
+                  {% endfor %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="comparison-section">
+    <h2>Saved assumptions</h2>
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th scope="col">Assumption</th>
+            {% for column in comparison.columns %}
+              <th scope="col">
+                {{ column.identity.event_name }}<br />
+                {{ column.scenario.scenario_name }}
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in comparison.assumption_rows %}
+            <tr data-assumption-row="{{ row.key }}"
+              data-identical="{{ row.identical|string|lower }}">
+              <th scope="row">{{ row.label }}</th>
+              {% for column in comparison.columns %}
+                <td>
+                  <strong>{{ row.display[column.scenario_id] }}</strong>
+                  {% for baseline in comparison.columns %}
+                    <span class="comparison-difference"
+                      data-baseline="{{ baseline.scenario_id }}"
+                      {% if baseline.scenario_id != comparison.baseline_id %}
+                        hidden
+                      {% endif %}>
+                      {% if baseline.scenario_id == column.scenario_id %}
+                        Baseline
+                      {% else %}
+                        {{ row.differences[baseline.scenario_id][
+                          column.scenario_id
+                        ] }}
+                      {% endif %}
+                    </span>
+                  {% endfor %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="comparison-section">
+    <h2>Current factual warnings</h2>
+    <div class="comparison-warning-grid">
+      {% for column in comparison.columns %}
+        <article>
+          <h3>
+            {{ column.identity.event_name }} —
+            {{ column.scenario.scenario_name }}
+          </h3>
+          <ul>
+            {% for warning in column.warnings %}
+              <li>
+                {{ warning.message }}
+                {% if warning in comparison.highlights.warning_differences[
+                      column.scenario_id
+                    ] %}
+                  <strong>Only some selected Scenarios have this notice.</strong>
+                {% endif %}
+              </li>
+            {% else %}
+              <li>No factual notices.</li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <script src="{{
+    url_for('static', filename='js/comparison.js')
+  }}"></script>
 </section>
 {% endblock %}

@@ -4,345 +4,6 @@ Next Codex Prompt
 
 Implement the milestone:
 
-Build the complete event comparison workflow.
-
-Saved Event and Scenario management, the interactive Event Analysis workspace,
-scenario persistence, and the complete calculation engine already exist.
-
-Build a read-only comparison workflow for saved Scenarios. Reuse existing
-repositories, models, calculation logic, warnings, and workspace behavior.
-
-Scenario selection
-
-Allow customers to select saved Scenarios for comparison from the Saved Events
-screen.
-
-- Require at least two Scenarios.
-- Allow no more than four Scenarios.
-- Allow Scenarios from the same Event.
-- Allow Scenarios from different Events.
-- Do not allow the same Scenario to be selected more than once.
-- Identify every selection using both:
-  - Event name
-  - Scenario name
-- Add a “Compare selected” action.
-- Disable or reject comparison when fewer than two Scenarios are selected.
-- Show a clear validation message when the customer attempts to select more
-  than four.
-
-Preserve the existing Saved Events grouping and management actions.
-
-Comparison calculations
-
-For every selected Scenario:
-
-- Load the Event identity and complete saved assumptions.
-- Preserve ordered employee labor and miscellaneous-cost entries.
-- Validate the persisted assumptions through existing domain behavior.
-- Recalculate all financial results using the existing Python calculation
-  engine.
-- Include current break-even values, profit-target evaluation, and factual
-  warnings.
-
-Do not:
-
-- Read calculated results from the database
-- Persist comparison results
-- Duplicate calculation formulas in JavaScript or templates
-- Create Event or Scenario records while comparing
-
-Missing or invalid saved data should produce a customer-facing error without
-crashing the complete comparison.
-
-Baseline behavior
-
-Use the first selected Scenario as the initial comparison baseline.
-
-Clearly label it:
-
-“Baseline”
-
-Allow the customer to make any selected Scenario the baseline without leaving
-or rebuilding the comparison.
-
-Changing the baseline must update displayed differences but must not alter any
-saved data.
-
-Difference rules
-
-Compare every non-baseline Scenario with the active baseline.
-
-For money values and customer or order counts:
-
-Difference =
-compared Scenario value - baseline value
-
-For percentages, rates, and profit margin:
-
-- Display the difference in percentage points.
-- Do not describe a percentage-point difference as a relative percentage
-  increase or decrease.
-
-For categorical assumptions:
-
-- Show the baseline value and compared value.
-- Highlight the row when values differ.
-
-For unavailable results:
-
-- Display “Not available.”
-- Do not calculate or display a misleading numeric difference.
-
-Use exact calculation values for comparisons and apply customer-facing display
-rounding only when rendering.
-
-Comparison summary
-
-For each selected Scenario, display:
-
-- Event name
-- Scenario name
-- Event date and start time
-- Location
-- Expected buyers
-- Expected orders
-- Expected sales
-- Variable costs
-- Fixed costs
-- Employee labor
-- Owner labor pay
-- Total event cost
-- Business profit
-- Profit margin
-- Break-even sales
-- Exact break-even customers
-- Minimum whole break-even customers
-- Profit-target status
-- Current factual warnings
-
-Clearly distinguish owner labor pay from business profit.
-
-Meaningful factual highlights
-
-Across selected Scenarios, factually identify:
-
-- Highest business profit
-- Lowest total event cost
-- Lowest minimum whole break-even customer requirement
-- Scenarios meeting their selected profit target
-- Scenarios not meeting their selected profit target
-- Warnings that appear in only some selected Scenarios
-
-Handle ties accurately.
-
-Do not:
-
-- Declare one Scenario the winner
-- Recommend accepting or rejecting an Event
-- Create arbitrary scoring
-- Add arbitrary definitions of a good or bad result
-
-Assumption comparison
-
-Compare the saved assumptions that produced each result, including:
-
-Demand:
-- Estimated attendance
-- Weather outlook
-- Custom weather reduction
-- Event protection
-- Percentage expected to buy food
-- Other competing food vendors
-- Total vendor count
-- Even-split expected buyers
-
-Revenue:
-- Average order amount
-- Calculated or custom expected-sales method
-- Custom expected-sales amount when active
-
-Food and payment costs:
-- Food and packaging cost method and value
-- Percentage of sales paid by card
-- Card-processing percentage
-- Fixed card-processing fee per transaction
-
-Labor:
-- Employee labor entries
-- Total employee labor cost
-- Owner labor pay
-
-Event costs:
-- Travel
-- Parking
-- Permit
-- Generator or utility cost
-- Vendor or booking fee
-- Organizer commission
-- Named miscellaneous costs
-
-Profit target:
-- Target type
-- Target value
-
-For repeatable labor and miscellaneous-cost entries:
-
-- Provide a readable summary for each Scenario.
-- Preserve entry order.
-- Highlight the category when the ordered entries differ.
-- Do not attempt to infer that differently named rows represent the same cost.
-
-Differences-only control
-
-Add a control labeled:
-
-“Show differences only”
-
-When active:
-
-- Hide assumption rows whose values are identical across every selected
-  Scenario.
-- Keep the principal financial-result summary visible.
-- Keep Event and Scenario identity visible.
-- Do not hide unavailable or warning information merely because it appears in
-  multiple Scenarios.
-
-Opening a Scenario
-
-Provide an “Open analysis” action for every compared Scenario.
-
-When selected:
-
-- Open the existing interactive Event Analysis workspace.
-- Load that saved Scenario as the active Scenario.
-- Use its saved assumptions as the Reset changes baseline.
-- Recalculate through the existing engine.
-- Begin with a clean workspace and no unsaved changes.
-- Do not create duplicate records.
-
-Reuse the existing unsaved-change navigation protection when comparison is
-entered from a dirty workspace.
-
-Layout and accessibility
-
-Create a functional, readable comparison layout.
-
-For wider windows:
-
-- Display selected Scenarios in aligned comparison columns.
-- Keep row labels clear.
-- Avoid losing the relationship between a value and its Scenario.
-
-For narrower windows:
-
-- Use readable stacked Scenario sections or another responsive structure.
-- Do not force the entire application page into horizontal scrolling.
-- Preserve logical keyboard and screen-reader order.
-
-Use proper table or semantic comparison structure where appropriate.
-
-Ensure:
-
-- Scenario-selection controls have accessible labels
-- Baseline changes are announced
-- Comparison validation is accessible
-- Highlights are conveyed through text, not color alone
-
-Do not perform final visual polish in this milestone.
-
-Empty and error states
-
-Support:
-
-- No saved Events
-- Only one saved Scenario
-- Fewer than two selected Scenarios
-- More than four attempted selections
-- A selected Scenario being deleted or missing before comparison loads
-- Saved assumptions that cannot be validated or calculated
-
-Provide clear next actions where possible.
-
-Persistence and data integrity
-
-- Comparison must not modify Events, Scenarios, Business Defaults, or ordered
-  child rows.
-- Do not save comparison selection sets.
-- Do not add stored calculation-result columns.
-- Do not delete, reset, or replace data/app.db.
-- Preserve unrelated customer data.
-
-Scope
-
-Do not implement:
-
-- Editing assumptions directly in comparison
-- Saving a Scenario from the comparison page
-- Automated recommendations
-- Scenario scoring
-- Charts requiring new dependencies
-- Search, filtering, or pagination
-- Dashboard behavior
-- Final UI and UX polish
-
-Do not add dependencies.
-Do not make unrelated changes.
-Do not commit.
-
-Testing
-
-Add or update tests covering:
-
-- Selecting two, three, and four Scenarios
-- Comparing Scenarios from one Event
-- Comparing Scenarios from different Events
-- Preventing duplicate selections
-- Fewer than two selection validation
-- More than four selection validation
-- First selected Scenario becoming the baseline
-- Changing the active baseline
-- Recalculating each Scenario from saved assumptions
-- Comparison creating or modifying no database records
-- Money and count differences
-- Percentage-point differences
-- Categorical assumption differences
-- Unavailable values
-- Highest-profit highlighting
-- Lowest-cost highlighting
-- Lowest-break-even highlighting
-- Accurate tie handling
-- Profit-target comparison
-- Warning differences
-- Complete assumption comparison
-- Ordered labor and miscellaneous-cost differences
-- Show differences only behavior
-- Opening each compared Scenario in the existing workspace
-- Opened workspace beginning clean
-- Missing and invalid Scenario handling
-- Empty and insufficient-data states
-- Business Defaults and saved Scenarios remaining unchanged
-- Accessible and responsive comparison structure where practical
-
-Afterward:
-
-1. Run focused comparison, repository, route, and workspace tests.
-2. Run the full test suite.
-3. Run git diff --check.
-4. Summarize the customer-visible comparison workflow.
-5. Explain how to manually test:
-   - Same-Event comparison
-   - Different-Event comparison
-   - Baseline changes
-   - Differences-only behavior
-   - Opening a Scenario
-6. Report the test results.
-
-Keep the response concise.
-
----------------------------------------------------------------------------------
-
-Implement the milestone:
-
 Build the Dashboard and first-use application flow.
 
 Business Defaults, Event Inputs, automatic Event and Scenario saving, the
@@ -1818,6 +1479,571 @@ Afterward:
 4. Summarize the visual system and major screen changes.
 5. List every screen manually reviewed.
 6. Report any existing screen or state that could not be exercised.
+7. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Complete accessibility and responsive behavior.
+
+The V1 workflows and UI design system already exist.
+
+Audit and improve the complete application so all customer workflows are
+keyboard-operable, screen-reader understandable, visibly focusable, readable,
+and functional across supported desktop and narrow window sizes.
+
+Do not change established calculations, validation, persistence, workflows, or
+business rules.
+
+Accessibility target
+
+Implement a practical AA-level accessibility standard across the application.
+
+Use semantic HTML first. Add ARIA only where native HTML does not already
+provide the necessary meaning or behavior.
+
+Do not add accessibility attributes that conflict with native control
+semantics.
+
+Shared document structure
+
+Audit every page for:
+
+- One clear page-level heading
+- Logical heading hierarchy
+- Header, navigation, main, and footer landmarks where applicable
+- A descriptive page title
+- A skip link that moves keyboard focus to the main content
+- Clear identification of the current navigation destination
+- Logical source and reading order
+- Unique element IDs
+- Valid label-to-control relationships
+
+Do not use headings merely for visual styling.
+
+Keyboard navigation
+
+Ensure every customer action is fully usable with a keyboard, including:
+
+- Shared navigation
+- Welcome and Dashboard actions
+- Business Defaults
+- Event Inputs
+- Conditional fields
+- Food-cost method selection
+- Profit-target selection
+- Repeatable employee labor rows
+- Repeatable miscellaneous-cost rows
+- Interactive Event Analysis assumptions
+- Reset changes
+- Scenario Save flow
+- Save as new Scenario
+- Overwrite confirmation
+- Saved Event and Scenario actions
+- Rename and delete flows
+- Scenario comparison selection
+- Comparison baseline changes
+- Show differences only
+- Open analysis
+- Backup download
+- Restore upload and confirmation
+- Recovery-state actions
+
+Requirements:
+
+- Use native buttons, links, inputs, selects, and other controls where
+  appropriate.
+- Do not make noninteractive elements clickable without proper semantics.
+- Enter and Space must behave according to native control expectations.
+- Do not create positive tabindex values.
+- Do not create keyboard traps outside deliberate modal dialogs.
+- Preserve a logical Tab and Shift+Tab order.
+- Ensure dynamically added repeatable rows enter the normal keyboard order.
+- After removing a repeatable row, move focus to a sensible nearby control.
+
+Visible focus
+
+Provide a clearly visible focus indicator for all interactive elements.
+
+- The indicator must remain visible against every supported background and
+  state.
+- Do not remove browser outlines unless replacing them with an equally or more
+  visible treatment.
+- Ensure destructive, disabled, selected, invalid, and warning states still
+  have visible focus.
+- Focus visibility must not rely on color alone.
+
+Dialogs and confirmation flows
+
+Audit every modal or dialog-like flow, including:
+
+- Scenario Save
+- Overwrite confirmation
+- Rename Event
+- Rename Scenario
+- Delete Scenario
+- Delete Event
+- Restore confirmation
+- Unsaved-change confirmation
+
+Requirements:
+
+- Give the dialog an accessible name and description.
+- Move focus into the dialog when opened.
+- Place initial focus on a sensible control.
+- Keep Tab and Shift+Tab within the open modal dialog.
+- Allow Escape to close non-destructive dialogs when safe.
+- Do not let Escape accidentally confirm a destructive action.
+- Restore focus to the opening control when closed.
+- Prevent background controls from receiving interaction while the modal is
+  active.
+- Announce validation errors within the dialog.
+- Keep confirmation wording explicit about the affected Event, Scenario, or
+  data.
+
+Forms and labels
+
+Audit all form controls.
+
+Requirements:
+
+- Every control must have a persistent visible label.
+- Do not rely on placeholders as labels.
+- Connect help text and units to the relevant control.
+- Clearly identify optional versus required fields.
+- Ensure conditional controls remain understandable when revealed.
+- Hidden or inactive controls must not remain focusable or exposed as active
+  inputs to assistive technology.
+- Group related radios and checkboxes using fieldsets and legends where
+  appropriate.
+- Give add and remove actions descriptive accessible names.
+
+For repeated rows, accessible names must distinguish the row when practical,
+such as:
+
+- “Remove employee labor entry 2”
+- “Additional cost 3 name”
+- “Additional cost 3 amount”
+
+Validation and error handling
+
+For invalid controls:
+
+- Set an appropriate invalid state.
+- Connect the visible error message to the control.
+- Preserve existing customer input.
+- Do not announce the same error repeatedly without a meaningful state change.
+
+After a submitted form contains errors:
+
+- Display a page-level error summary.
+- Move focus to the summary.
+- Provide links or equivalent navigation to each invalid field.
+- Keep inline errors beside their controls.
+
+For live Event Analysis edits:
+
+- Keep the latest valid results visible.
+- Clearly identify invalid controls.
+- Announce a concise status such as:
+  “Results have not updated. Correct the highlighted fields.”
+- Announce successful recalculation only after the debounced request completes.
+- Do not create excessive announcements for individual keystrokes.
+- Ensure older calculation responses cannot produce misleading announcements.
+
+Status messages
+
+Use appropriate live regions or status semantics for meaningful asynchronous
+changes, including:
+
+- Analysis updating
+- Analysis updated
+- Validation preventing recalculation
+- Scenario saved
+- Scenario overwritten
+- Rename success
+- Delete success
+- Backup creation
+- Restore success or rejection
+- Comparison baseline change
+- Application recovery state
+
+Use polite announcements for ordinary status changes.
+
+Reserve assertive interruption for errors requiring immediate attention.
+
+Do not announce large result sections in full after every update.
+
+Event Analysis workspace structure
+
+Preserve the workspace as the flagship interactive experience.
+
+Use one logical source order across supported widths.
+
+Recommended structure:
+
+1. Event and active Scenario identity
+2. Compact key financial-results summary
+3. Adjustable assumptions
+4. Detailed results, breakdowns, targets, and warnings
+5. Workspace actions where appropriate
+
+On wider layouts:
+
+- Place adjustable assumptions and detailed results in peer columns.
+- Keep the compact summary clearly visible above them.
+- Keep detailed results visible while scrolling where practical.
+
+On narrow layouts:
+
+- Stack the same source structure.
+- Keep the key summary before the controls.
+- Do not use CSS visual ordering that conflicts with source, keyboard, or
+  screen-reader order.
+- Avoid nested scrolling regions.
+
+Ensure:
+
+- Result labels and values are programmatically associated.
+- Profit, loss, and break-even states include explicit text.
+- Owner labor pay remains clearly separate from business profit.
+- Unavailable values are announced as unavailable rather than zero.
+- Warning severity is conveyed in text, not color alone.
+
+Repeatable controls
+
+For employee labor and miscellaneous-cost rows:
+
+- Give each row a semantic grouping and an understandable accessible name.
+- Maintain predictable focus when rows are added or removed.
+- Announce row addition or removal concisely.
+- Preserve visual and source order.
+- Ensure remove buttons identify the row they affect.
+- Do not depend on drag-and-drop interaction.
+
+Saved Events
+
+Audit the Saved Events workflow.
+
+- Event headings must clearly group their Scenario rows.
+- Event-level and Scenario-level actions must be distinguishable.
+- Modified times must have readable text equivalents.
+- Confirmation flows must identify exactly what will be renamed or deleted.
+- The final-Scenario deletion restriction must be announced clearly.
+- Empty states must expose a clear next action.
+- Opening a Scenario must remain keyboard accessible.
+
+Comparison
+
+Use an accessible comparison structure.
+
+Selection:
+
+- Give each Scenario selection control a complete Event-and-Scenario label.
+- Announce selected count.
+- Announce the maximum of four.
+- Make over-selection and insufficient-selection errors accessible.
+- Keep Compare selected reachable and understandable when disabled.
+
+Comparison view:
+
+- Use semantic table structure when aligned row and column comparison is
+  presented.
+- Provide explicit column headings for every Scenario.
+- Identify the baseline in text.
+- Associate row headings with all corresponding values.
+- Include units in accessible text.
+- Express percentage differences as percentage points.
+- Express ties and highlights in text, not merely styling.
+- Ensure Show differences only has an accessible state.
+- Announce baseline changes concisely.
+
+For narrow widths:
+
+- Prefer a readable stacked representation when possible.
+- When alignment requires horizontal scrolling, constrain scrolling to the
+  comparison region.
+- Give the region a clear accessible label and keyboard access.
+- Keep Scenario identity and row labels available while scrolling where
+  practical.
+- Do not create page-wide horizontal overflow.
+
+Tables and data structures
+
+Audit every table-like presentation.
+
+- Use real tables for genuinely tabular information.
+- Include captions or accessible names where needed.
+- Mark column and row headers properly.
+- Do not use tables solely for layout.
+- Ensure responsive adaptations preserve header relationships.
+- Provide text for empty and unavailable cells.
+
+Contrast and non-color communication
+
+Audit the complete V1 palette and component states.
+
+Verify sufficient contrast for:
+
+- Primary and secondary text
+- Links
+- Button text
+- Input borders
+- Focus indicators
+- Validation errors
+- Success states
+- Warning and critical states
+- Disabled controls
+- Selected comparison rows
+- Profit and loss values
+- Placeholder text where retained
+- Text displayed over accent backgrounds
+
+Adjust centralized design tokens rather than patching isolated controls where
+possible.
+
+Ensure color is never the only indication of:
+
+- Profit versus loss
+- Warning severity
+- Selected state
+- Active navigation
+- Invalid fields
+- Comparison highlights
+- Destructive actions
+- Target status
+
+Use visible text, labels, shapes, borders, or icons already available without
+new dependencies.
+
+Text resizing and zoom
+
+Verify the application remains functional with:
+
+- Browser text enlargement
+- Browser zoom up to 200%
+- Narrow application windows
+- Long Event and Scenario names
+- Larger validation messages
+- Operating-system font scaling where the browser exposes it
+
+Requirements:
+
+- Content must not overlap or become clipped.
+- Controls must remain reachable.
+- Text must not require two-dimensional page scrolling.
+- Avoid fixed heights that truncate content.
+- Allow buttons and action groups to wrap.
+- Avoid fixed pixel widths for text-heavy components.
+
+Responsive support
+
+Support widths down to approximately 320 CSS pixels.
+
+Audit:
+
+- Welcome
+- Dashboard
+- Navigation
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- Save dialogs
+- Saved Events
+- Comparison selection
+- Comparison results
+- Data Safety
+- Recovery and error screens
+
+Requirements:
+
+- No accidental page-wide horizontal scrolling.
+- Forms collapse cleanly to one column.
+- Paired controls wrap predictably.
+- Repeatable rows remain editable.
+- Dialogs fit within the available width and height.
+- Action buttons remain fully visible.
+- Long names wrap without covering controls.
+- Sticky content must not obscure headings, errors, or focused controls.
+- Fixed navigation must not obscure anchored or focused content.
+- Avoid viewport-height layouts that trap page content.
+- Avoid unnecessary nested scrolling.
+
+Touch and pointer usability
+
+Although this is primarily a desktop product:
+
+- Give controls practical hit areas.
+- Avoid placing destructive and primary actions too close together.
+- Do not require hover to reveal essential actions or information.
+- Ensure tooltips, when present, are not the only source of necessary
+  information.
+- Keep hover styling supplementary to visible labels.
+
+Screen-reader-only content
+
+Add visually hidden text only where it materially clarifies:
+
+- Units
+- Status
+- Baseline identity
+- Repeated-row actions
+- Difference direction
+- Icon meaning
+
+Do not duplicate entire visible sections for screen readers.
+
+Reduced motion
+
+The application should remain fully understandable when reduced-motion
+preferences are enabled.
+
+- Disable or reduce nonessential transitions.
+- Do not add new animation.
+- Ensure updating and status changes do not depend on motion.
+
+Route and state behavior
+
+Preserve:
+
+- Setup protection
+- Dirty-workspace protection
+- Dialog cancellation behavior
+- Current Scenario identity
+- Reset baselines
+- Comparison selection rules
+- Backup and restore safeguards
+- Recovery-state route restrictions
+
+Accessibility improvements must not bypass or alter established route logic.
+
+Testing
+
+Do not add dependencies unless an accessibility-testing dependency is already
+approved in the repository. Prefer existing test infrastructure and direct
+semantic assertions.
+
+Add or update automated tests covering:
+
+- Skip-link destination
+- Page titles and primary headings
+- Navigation landmarks and current-page indication
+- Visible labels for all customer controls
+- Form help and error associations
+- Page-level error-summary behavior
+- Invalid field states
+- Conditional hidden-control behavior
+- Repeatable-row accessible names
+- Logical DOM order
+- Dialog names, descriptions, and focus-management hooks
+- Keyboard-close behavior where practical
+- Live status regions
+- Workspace updating and invalid-edit announcements
+- Profit, loss, warning, and target states containing textual meaning
+- Saved Events grouping semantics
+- Scenario-selection accessible labels
+- Comparison table headings and baseline text
+- Show differences only state
+- Empty and error-state headings and next actions
+- Responsive structure classes or template behavior where practical
+- No customer workflow regressions
+
+Add a manual accessibility review checklist covering:
+
+Keyboard:
+- Complete application operation without a mouse
+- Tab and reverse-Tab order
+- Visible focus
+- Dialog focus trapping and restoration
+- Escape behavior
+- Dynamic row focus handling
+
+Screen reader:
+- Page titles and landmarks
+- Heading structure
+- Form labels and help text
+- Validation summary and inline errors
+- Live analysis updates
+- Scenario saving
+- Saved Events
+- Comparison
+- Backup, restore, and recovery
+
+Visual:
+- Contrast of every component state
+- 200% zoom
+- Increased text size
+- 320-pixel-wide layout
+- Long names and messages
+- Profit, loss, warning, and error states without reliance on color
+
+Responsive:
+- Common desktop application sizes
+- Narrow windows
+- Comparison overflow behavior
+- Workspace stacking
+- Dialog sizing
+- Navigation behavior
+
+Test at least these customer workflows manually:
+
+- Fresh onboarding
+- Updating Defaults
+- Creating a complete Event
+- Correcting Event Inputs errors
+- Editing the live analysis
+- Correcting invalid live edits
+- Saving as a new Scenario
+- Overwriting a Scenario
+- Renaming and deleting saved work
+- Comparing two to four Scenarios
+- Downloading a backup
+- Rejecting an invalid restore
+- Confirming a valid restore
+- Entering the damaged-database recovery state
+
+Documentation
+
+Add concise developer guidance covering:
+
+- Semantic HTML expectations
+- Keyboard and focus-management rules
+- Error-summary pattern
+- Live-region usage
+- Responsive source-order requirements
+- Comparison-table accessibility
+- Contrast and non-color requirements
+- Required manual accessibility review before release
+
+Scope
+
+Do not implement:
+
+- New business functionality
+- New calculations
+- New persistence behavior
+- Dark mode
+- New charts
+- New animations
+- Windows or macOS packaging
+- Full external accessibility certification
+- Changes unrelated to accessibility or responsive behavior
+
+Do not add dependencies.
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused template, route, interaction, and accessibility tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the accessibility and responsive changes by workflow.
+5. List the manual checks completed.
+6. Report any state that could not be exercised.
 7. Report the test results.
 
 Keep the response concise.
