@@ -4,240 +4,6 @@ Next Codex Prompt
 
 Implement the milestone:
 
-Complete saved event and scenario management.
-
-Automatic initial saving, scenario version actions, the interactive Event
-Analysis workspace, calculation engine, persistence schema, and transactional
-repositories already exist.
-
-Build the customer-facing Saved Events management workflow without duplicating
-the workspace or calculation logic.
-
-Saved Events page
-
-Add a Saved Events screen accessible through the existing application
-navigation.
-
-Group saved Scenarios beneath their parent Event.
-
-For each Event, display:
-
-- Event name
-- Event date
-- Start time
-- Location
-- Number of saved Scenarios
-- Last modified time
-
-For each Scenario, display:
-
-- Scenario name
-- Last modified time
-- An “Open analysis” action
-- Rename action
-- Delete action
-
-Order Events by most recently modified first.
-
-Order Scenarios within each Event by most recently modified first.
-
-Use deterministic secondary ordering when timestamps are equal.
-
-Include a useful empty state when no Events have been saved.
-
-Do not build the Dashboard in this milestone.
-
-Opening a saved Scenario
-
-When “Open analysis” is selected:
-
-- Load the Event identity.
-- Load the Scenario’s complete saved assumptions.
-- Preserve the order of employee labor and miscellaneous-cost entries.
-- Validate the persisted assumptions through the existing domain behavior.
-- Recalculate all results, break-even values, target evaluations, and warnings
-  through the existing Python calculation engine.
-- Open the existing interactive Event Analysis workspace.
-- Make the selected Scenario the active Scenario.
-- Use the saved assumptions as the Reset changes baseline.
-- Begin with a clean, non-dirty workspace state.
-
-Do not create a second workspace implementation.
-
-Do not load or persist calculated results.
-
-If an Event or Scenario does not exist, show the application’s normal
-customer-facing not-found behavior rather than crashing.
-
-Renaming Events
-
-Allow the Event name to be renamed.
-
-Rules:
-
-- Require a nonblank name after trimming surrounding whitespace.
-- Event names do not need to be unique.
-- Update only the Event name and modified timestamp.
-- Do not change its date, start time, location, Scenarios, or assumptions.
-- Preserve the entered value and show a clear validation error after failure.
-
-Do not add general Event identity editing in this milestone.
-
-Renaming Scenarios
-
-Allow an individual Scenario to be renamed.
-
-Rules:
-
-- Require a nonblank name after trimming surrounding whitespace.
-- Scenario names must remain unique within the same Event.
-- Compare uniqueness without regard to capitalization or surrounding spaces.
-- The same name may be used under different Events.
-- Do not silently add numbers or alter duplicate names.
-- Update only the Scenario name and modified timestamp.
-- Do not change its assumptions or sibling Scenarios.
-- If the renamed Scenario is currently active in the workspace, ensure its
-  displayed active name is correct when next loaded or refreshed.
-
-Delete Scenario
-
-Add a confirmed Scenario deletion action.
-
-- Clearly identify the Scenario being deleted.
-- Delete only the selected Scenario.
-- Do not modify sibling Scenarios or the parent Event.
-- Do not allow the final remaining Scenario belonging to an Event to be
-  deleted individually.
-- When deletion is blocked, explain that the complete Event can be deleted
-  instead.
-- After successful deletion, remain on the Saved Events screen and show a
-  success state.
-
-Delete Event
-
-Add a separate confirmed Event deletion action.
-
-- Clearly identify the Event.
-- State how many saved Scenarios will also be deleted.
-- Require explicit confirmation.
-- Delete the Event and all of its Scenarios and ordered child records through
-  the established cascading relationships.
-- Perform the deletion transactionally.
-- After success, remain on the Saved Events screen and show a success state.
-
-Do not allow a failed deletion to leave partially deleted data.
-
-Unsaved-change protection
-
-Reuse the workspace’s existing dirty-state behavior.
-
-When the active workspace contains unsaved changes and the customer attempts
-to:
-
-- Navigate to Saved Events
-- Open a different saved Scenario
-- Leave through another application navigation action that would discard the
-  workspace state
-
-require confirmation before discarding the unsaved changes.
-
-If the customer cancels:
-
-- Remain in the current workspace
-- Preserve all assumptions, rows, validation state, and current results
-
-If the customer confirms:
-
-- Continue to the requested destination
-- Do not alter the active saved Scenario
-
-Do not show a discard warning when the workspace is clean.
-
-Persistence after restart
-
-Verify that after closing and recreating the application:
-
-- Saved Events remain listed
-- Scenario names and Event names remain updated
-- Deleted records remain deleted
-- Ordered child rows remain intact
-- Any remaining Scenario can be loaded into the workspace
-- Recalculated results match its saved assumptions
-
-Data integrity
-
-- Reuse the existing repositories and transaction patterns.
-- Continue using scaled integer persistence conventions.
-- Do not delete, reset, or manually replace data/app.db.
-- Preserve Business Defaults and unrelated customer data.
-- Do not add stored calculated-result columns.
-- Do not create duplicate Event or Scenario records merely by opening them.
-
-Scope
-
-Do not implement:
-
-- Scenario comparison
-- Financial comparison summaries
-- Event date, time, or location editing
-- Moving a Scenario between Events
-- Scenario reordering
-- Dashboard behavior
-- Search, filtering, or pagination
-- Backup and restore
-- Final UI and UX polish
-
-Do not add dependencies.
-Do not make unrelated changes.
-Do not commit.
-
-Testing
-
-Add or update tests covering:
-
-- Saved Events empty state
-- Events grouped with their Scenarios
-- Event and Scenario ordering
-- Complete Event identity display
-- Opening every saved Scenario in the existing workspace
-- Saved assumptions and ordered rows loading correctly
-- Results being recalculated rather than loaded from storage
-- Loaded Scenario becoming the active reset baseline
-- Loaded workspace beginning clean
-- Missing Event and Scenario handling
-- Valid and invalid Event-name changes
-- Event renaming leaving identity and Scenarios unchanged
-- Valid Scenario renaming
-- Blank Scenario-name validation
-- Duplicate, trimmed, and case-insensitive Scenario-name validation
-- Same Scenario name under different Events
-- Deleting a non-final Scenario
-- Preventing individual deletion of the final Scenario
-- Confirmed Event deletion cascading to all Scenarios and children
-- Transaction rollback after deletion failure
-- Unsaved-change confirmation when leaving a dirty workspace
-- Cancellation preserving the workspace
-- Clean navigation requiring no confirmation
-- Persistence after application restart
-- Business Defaults and unrelated data remaining unchanged
-- Opening a Scenario creating no duplicate records
-
-Afterward:
-
-1. Run focused saved-work, repository, route, and workspace tests.
-2. Run the full test suite.
-3. Run git diff --check.
-4. Summarize the customer-visible management workflow.
-5. Explain how to manually test opening, renaming, deleting, dirty-state
-   protection, and restart persistence.
-6. Report the test results.
-
-Keep the response concise.
-
----------------------------------------------------------------------------------
-
-Implement the milestone:
-
 Build the complete event comparison workflow.
 
 Saved Event and Scenario management, the interactive Event Analysis workspace,
@@ -1109,4 +875,953 @@ Afterward:
 Keep the response concise.
 
 ---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Add backup, restore, and recovery safeguards.
+
+Database versioning and safe migrations, transactional repositories, and the
+complete customer-data schema already exist.
+
+Build customer-facing backup and restore behavior, automatic recovery
+snapshots, interrupted-operation safeguards, and a centralized customer-data
+location.
+
+Backup format
+
+Create a versioned portable backup format using the file extension:
+
+.ftbackup
+
+The backup should be a ZIP-compatible archive created with Python’s standard
+library and contain:
+
+- A consistent SQLite database snapshot
+- A JSON manifest
+
+The manifest must contain at least:
+
+- Backup-format version
+- Application version
+- Database schema version
+- Backup creation timestamp
+- Database filename
+- SHA-256 checksum of the database snapshot
+
+Use SQLite’s supported connection backup API to create the snapshot.
+
+Do not copy the active database file directly.
+
+Before producing a customer backup:
+
+- Complete or safely coordinate active database work.
+- Create the database snapshot in a temporary location beneath the configured
+  application-data directory.
+- Run an SQLite integrity check on the completed snapshot.
+- Run a foreign-key check.
+- Calculate and record its checksum.
+- Package the snapshot and manifest.
+- Remove temporary working files after success or failure.
+
+Do not include:
+
+- Logs
+- Caches
+- Temporary uploads
+- Previous backups
+- Application code or installed files
+
+Customer-facing backup workflow
+
+Add a functional Data Safety screen accessible from the established
+application navigation or Dashboard.
+
+Provide a clear action labeled:
+
+“Download backup”
+
+When selected:
+
+- Create a fresh backup.
+- Return it as a downloadable .ftbackup file.
+- Use a useful timestamped filename.
+- Do not expose server or local filesystem paths.
+- Do not modify customer data.
+
+If backup creation fails:
+
+- Do not return a partial archive.
+- Remove incomplete temporary files.
+- Preserve the live database.
+- Show the existing friendly customer-facing error behavior.
+- Log the technical cause without logging customer content.
+
+Restore workflow
+
+Provide a customer-facing action labeled:
+
+“Restore backup”
+
+Allow the customer to select a .ftbackup file through the existing local web
+interface.
+
+Restore is a complete replacement operation. It does not merge records.
+
+Clearly explain that restoring will replace the current:
+
+- Business Defaults
+- Events
+- Scenarios
+- Labor entries
+- Miscellaneous-cost entries
+- Other saved application data
+
+Require explicit confirmation before replacing the current database.
+
+Backup validation
+
+Before modifying the live database:
+
+- Save the uploaded archive to a controlled temporary location beneath the
+  application-data directory.
+- Reject unexpectedly large, malformed, unsafe, or path-traversing archives.
+- Read and validate the manifest.
+- Verify the supported backup-format version.
+- Verify required manifest values.
+- Extract only the expected database file.
+- Verify the SHA-256 checksum.
+- Verify that the extracted file is a recognizable SQLite database.
+- Run an SQLite integrity check.
+- Run a foreign-key check.
+- Inspect its migration ledger and schema version.
+- Verify that its schema is recognizable and supported.
+
+Do not trust filenames or paths contained in the archive.
+
+Schema compatibility
+
+When the restored database is at the current supported schema version:
+
+- Restore it without unnecessary schema writes.
+
+When it is from an older supported schema version:
+
+- Restore it to a staging location.
+- Run the existing migration system against the staged database.
+- Validate the fully migrated database before replacing the live database.
+
+When its schema version is newer than the application supports:
+
+- Reject the restore.
+- Explain that the backup requires a newer application version.
+- Do not modify current customer data.
+
+When the database is damaged, incomplete, foreign-key-invalid, or incompatible:
+
+- Reject the restore safely.
+- Preserve current customer data.
+- Show a useful customer-facing message.
+
+Pre-restore recovery snapshot
+
+Immediately before replacing the current database:
+
+- Create an automatic recovery snapshot of the current live database using the
+  same safe SQLite backup mechanism.
+- Store it in an automatic-recovery directory beneath the application-data
+  directory.
+- Include a manifest or metadata identifying it as a pre-restore snapshot.
+- If the recovery snapshot cannot be created and validated, abort the restore.
+
+Restore replacement
+
+Never overwrite the active database incrementally.
+
+Use this general sequence:
+
+1. Validate and, if necessary, migrate the uploaded database in staging.
+2. Validate the staged final database.
+3. Create and validate a pre-restore recovery snapshot.
+4. Close or coordinate all active live-database connections.
+5. Replace the live database using a safe atomic filesystem operation where
+   supported.
+6. Reopen the database.
+7. Verify schema version, integrity, and foreign keys.
+8. Confirm normal repository access before reporting success.
+
+If replacement or post-replacement verification fails:
+
+- Do not leave a partially written database.
+- Attempt to restore the validated pre-restore recovery snapshot.
+- Preserve failed files for technical diagnosis when safe.
+- Stop normal operation rather than continuing with uncertain data.
+- Log the recovery sequence without exposing customer content.
+
+After a successful restore:
+
+- Clear stale session references to Events, Scenarios, workspaces, and
+  temporary navigation state.
+- Re-evaluate setup completion from restored Business Defaults.
+- Open the appropriate Welcome or Dashboard route.
+- Display a clear success message.
+
+Automatic migration recovery snapshots
+
+Integrate with the existing migration startup process.
+
+Before applying one or more missing production migrations to a customer
+database:
+
+- Create and validate an automatic pre-migration recovery snapshot.
+- Abort migration if that snapshot cannot be safely created.
+- Do not create another snapshot when the database is already current and no
+  migration will run.
+
+A failed migration must continue using the migration system’s existing
+transaction and rollback rules.
+
+Do not silently restore a pre-migration snapshot unless needed to recover from
+a database state that cannot be returned to its prior version transactionally.
+
+Automatic recovery retention
+
+Keep the five most recent validated automatic recovery snapshots.
+
+After successfully creating a new automatic snapshot:
+
+- Remove only older snapshots beyond the retention limit.
+- Never delete the newly created snapshot.
+- Ignore unrelated files.
+- Do not let cleanup failure invalidate an otherwise valid snapshot or
+  operation; log the cleanup failure instead.
+
+Customer-created downloaded backups are not managed by this retention rule.
+
+Damaged-database startup behavior
+
+At startup, continue using the migration system’s compatibility checks.
+
+When the live database fails integrity, foreign-key, schema, or migration
+validation:
+
+- Do not modify or delete the damaged database automatically.
+- Do not silently replace it with a recovery snapshot.
+- Preserve the damaged database.
+- Prevent normal routes and repositories from using it.
+- Show a friendly recovery state explaining that customer data could not be
+  opened and that a valid backup may be restored.
+
+When practical, make the Restore backup workflow available from this recovery
+state without exposing unrelated application functions.
+
+Interrupted-write safeguards
+
+Review all customer-data write paths involved in:
+
+- Business Defaults
+- Initial Event and Scenario creation
+- Scenario overwrite
+- Save as new Scenario
+- Renaming
+- Deletion
+- Migration
+- Restore
+
+Verify that established transaction behavior prevents partial writes.
+
+Add failure-injection tests showing that interruption or exceptions during:
+
+- Parent-record writes
+- Child-row replacement
+- Migration
+- Backup creation
+- Restore staging
+- Atomic replacement
+
+do not leave partially committed customer records or an unusable live
+database.
+
+Do not create application-level autosaving in this milestone.
+
+Application-data directory
+
+Create one centralized application-data path service or equivalent abstraction.
+
+All mutable runtime files must be resolved through it, including:
+
+- Live customer database
+- Automatic recovery snapshots
+- Backup and restore staging files
+- Temporary customer-data files
+
+Requirements:
+
+- Allow tests to provide isolated temporary directories.
+- Allow the runtime or future desktop package to configure the customer-data
+  root.
+- Do not scatter direct references to data/app.db through the codebase.
+- Do not write customer data beside Python modules, templates, static assets,
+  or packaged application files when an external data root is configured.
+- Prevent customer-supplied filenames from escaping the data root.
+- Preserve compatibility with the current development database path.
+- Do not move or delete the real data/app.db unexpectedly.
+
+The later Windows and macOS packaging milestones will assign final
+platform-specific customer-data directories. Do not implement those
+platform-specific locations here.
+
+Security and privacy
+
+- Do not log Business Defaults, Event names, assumptions, or other customer
+  record contents.
+- Do not include secrets or absolute local paths in the manifest.
+- Use safe archive extraction.
+- Accept only the expected backup structure.
+- Place restore-upload limits appropriate for the application’s SQLite data.
+- Remove temporary uploaded and extracted files after success or failure.
+
+Testing
+
+Add focused automated tests covering:
+
+Backup:
+- Creating a valid .ftbackup archive
+- Manifest fields and backup-format version
+- Database checksum
+- Snapshot integrity and foreign-key checks
+- Complete customer data appearing in the snapshot
+- Live database remaining unchanged
+- Backup creation while the live database is open
+- Failed backup producing no partial downloadable archive
+- Temporary-file cleanup
+- Unsafe output filenames being prevented
+
+Restore validation:
+- Valid current-version backup
+- Valid older supported backup being migrated in staging
+- Newer unsupported backup being rejected
+- Invalid archive
+- Missing manifest
+- Invalid manifest
+- Checksum mismatch
+- Missing database file
+- Additional unexpected archive paths
+- Path traversal attempts
+- Corrupt SQLite database
+- Integrity-check failure
+- Foreign-key-check failure
+- Incompatible schema
+- Oversized upload handling
+
+Restore behavior:
+- Complete replacement of existing customer data
+- No merging of old and restored records
+- Pre-restore recovery snapshot creation
+- Restore aborting when the safety snapshot fails
+- Atomic replacement
+- Post-restore integrity verification
+- Session and stale-workspace state being cleared
+- Correct Welcome or Dashboard destination after restore
+- Current database remaining unchanged after validation failure
+- Recovery after replacement or post-verification failure
+
+Automatic recovery:
+- Snapshot before a real pending migration
+- No snapshot when no migration is needed
+- Snapshot validation
+- Retaining the five newest snapshots
+- Removing only older managed snapshots
+- Cleanup failure not corrupting the database operation
+
+Interrupted writes:
+- Business Defaults rollback
+- Initial Event and Scenario transaction rollback
+- Scenario child-row replacement rollback
+- Rename and delete rollback
+- Migration rollback
+- Restore interruption at each major stage
+- Live database remaining valid after simulated failures
+
+Data separation:
+- All mutable paths resolving beneath the configured application-data root
+- Isolated test data directories
+- No writes to application-code or package directories
+- Safe filename handling
+- Compatibility with the established development database location
+
+Restart and recovery:
+- Restored data remaining available after application restart
+- Automatic recovery snapshots remaining valid after restart
+- Damaged live database entering the friendly recovery state
+- Damaged database never being silently overwritten
+
+Documentation
+
+Add concise developer documentation covering:
+
+- Backup archive structure
+- Backup-format versioning
+- Restore validation sequence
+- Schema-version compatibility behavior
+- Automatic recovery snapshot policy
+- Five-snapshot retention rule
+- Interrupted-operation recovery
+- Application-data directory abstraction
+- How future desktop packaging should configure the data root
+
+Scope
+
+Do not implement:
+
+- Cloud backup
+- Scheduled customer backups
+- Backup synchronization
+- Password-protected or encrypted archives
+- Importing individual Events or Scenarios
+- Merging databases
+- Windows-specific customer-data locations
+- macOS-specific customer-data locations
+- Desktop file-picker integration
+- Application update delivery
+- Final visual design
+
+Do not add dependencies.
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused backup, restore, migration, data-path, and recovery tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the customer-facing backup and restore workflow.
+5. Explain how the live database is protected during restore and migration.
+6. Explain how automatic recovery snapshots are retained.
+7. Explain how to manually test backup, restore, rejection, and recovery.
+8. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Complete V1 UI and UX design and polish.
+
+The complete V1 workflows, calculations, persistence, onboarding, backup and
+restore behavior, and customer-facing screens already exist.
+
+Create a cohesive visual design system and apply it consistently across the
+application without changing established product behavior.
+
+Visual direction
+
+Use a calm, capable, modern business-tool aesthetic.
+
+The application should feel:
+
+- Professional
+- Trustworthy
+- Practical
+- Approachable to independent food-business owners
+- Information-rich without appearing cluttered
+
+Avoid:
+
+- Cartoon food-truck imagery
+- Decorative illustrations
+- Gradients
+- Excessive shadows
+- Glass effects
+- Bright startup-style color palettes
+- Unnecessary animation
+- Visual decoration that competes with financial information
+
+Implement a polished light theme for V1.
+
+Use system fonts only. Do not add external fonts or dependencies.
+
+Create a restrained palette using:
+
+- A warm off-white application background
+- White primary surfaces
+- Deep charcoal or navy primary text
+- Muted secondary text
+- A restrained copper or amber primary accent
+- Green only for positive financial results and success
+- Red only for losses, destructive actions, and errors
+- Amber for warnings and caution states
+
+Do not communicate meaning through color alone. Pair financial and status
+colors with labels, text, icons already available without dependencies, or
+other visible indicators.
+
+Design system
+
+Create centralized reusable CSS variables, classes, partials, macros, or
+components consistent with the project’s current architecture.
+
+Define reusable treatment for:
+
+- Application shell
+- Primary navigation
+- Page headers
+- Page descriptions
+- Content sections
+- Form sections
+- Inputs
+- Select controls
+- Textareas
+- Repeatable input rows
+- Help text
+- Required and optional indicators
+- Validation errors
+- Primary buttons
+- Secondary buttons
+- Destructive buttons
+- Button groups
+- Metric cards
+- Result summaries
+- Status badges
+- Success messages
+- Informational messages
+- Warnings
+- Critical warnings
+- Empty states
+- Confirmation dialogs
+- Tables and comparison structures
+- Loading and live-updating states
+- Sticky workspace results
+- Screen-level action areas
+
+Do not leave multiple unrelated visual implementations for equivalent controls.
+
+Preserve semantic HTML and the established accessible labels, error
+relationships, and keyboard behavior.
+
+Shared application shell
+
+Polish the shared navigation and application shell.
+
+Requirements:
+
+- Clearly display the product name.
+- Make the current section identifiable.
+- Keep primary navigation understandable without icons.
+- Make Dashboard the clear home destination after setup.
+- Maintain access to:
+  - Dashboard
+  - Analyze new event
+  - Saved events
+  - Compare scenarios
+  - Business defaults
+  - Data safety
+- Keep navigation compact enough for the desktop application window.
+- Provide a usable narrow-width navigation treatment without changing route
+  behavior.
+- Preserve dirty-workspace navigation protection.
+
+Welcome screen
+
+Polish the Welcome screen as a calm first introduction.
+
+- Present the four-step workflow clearly:
+  1. Set business defaults
+  2. Describe an event
+  3. Review the analysis
+  4. Compare options
+- Use a strong but restrained heading.
+- Keep explanations concise.
+- Make “Get started” the obvious primary action.
+- Avoid making the page feel like marketing material.
+- Do not add illustrations or decorative assets.
+
+Dashboard
+
+Create a useful, uncluttered Dashboard hierarchy.
+
+Emphasize these actions:
+
+- Analyze new event
+- View saved events
+- Compare scenarios
+- Update business defaults
+
+Display:
+
+- Saved Event count
+- Saved Scenario count
+- Comparison readiness
+- Useful first-event guidance when no Events exist
+
+Use compact metric or status cards where appropriate.
+
+Do not add financial charts, recent-activity systems, recommendations, or
+analytics.
+
+Business Defaults
+
+Polish the complete Defaults workflow.
+
+- Group related settings clearly.
+- Improve spacing between major sections.
+- Keep help text close to the relevant control.
+- Make food-cost method selection understandable.
+- Make profit-target choice easy to follow.
+- Make repeatable employee labor rows visually coherent.
+- Clearly distinguish optional values.
+- Preserve From defaults and other established terminology where applicable.
+- Keep saving confirmation and error messages visible without dominating the
+  page.
+
+Do not change field meaning, validation, or persistence behavior.
+
+Event Inputs
+
+Polish the initial Event Inputs experience.
+
+Organize the form into clearly distinguishable sections:
+
+- Event information
+- Demand and weather
+- Revenue assumptions
+- Food and packaging
+- Payment processing
+- Labor
+- Travel and operating costs
+- Event fees
+- Additional costs
+- Profit target
+
+Requirements:
+
+- Make the progression through the form easy to scan.
+- Keep conditional controls visually associated with the choice that reveals
+  them.
+- Make repeatable labor and miscellaneous-cost rows readable.
+- Keep Estimate, From defaults, and Changed for this event indicators compact
+  and consistent.
+- Give the early demand indicator appropriate emphasis without making it look
+  like a final result.
+- Make the primary action to analyze the Event clear.
+- Preserve every existing field, rule, and validation behavior.
+
+Interactive Event Analysis workspace
+
+Treat this as the flagship V1 screen.
+
+On suitable desktop widths, create two peer areas:
+
+1. Adjustable assumptions
+2. Analysis results
+
+The results must not feel like a small sidebar attached to a form. Assumptions
+and results should have comparable visual importance.
+
+Assumptions:
+
+- Group controls into understandable sections.
+- Use collapsible sections only when they improve scanning and do not hide
+  important active warnings or errors.
+- Keep repeatable labor and additional-cost rows manageable.
+- Make changed or invalid controls identifiable.
+- Preserve the live recalculation workflow.
+- Do not add a Calculate button.
+
+Results:
+
+Create a strong top-level summary containing:
+
+- Expected sales
+- Total event cost
+- Owner labor pay
+- Business profit
+- Profit margin
+- Break-even sales
+- Minimum whole break-even customers
+- Profit-target status
+
+Clearly separate:
+
+- Owner labor pay
+- Business profit
+
+Add readable supporting areas for:
+
+- Demand estimate
+- Cost breakdown
+- Exact break-even information
+- Structured factual warnings
+
+Positive profit, loss, and exactly-at-break-even states must be distinguishable
+through wording and structure in addition to color.
+
+Keep the result summary visible while scrolling on desktop where practical.
+
+On narrow widths:
+
+- Place the primary financial summary before the assumption controls.
+- Preserve a logical reading and keyboard order.
+- Avoid page-wide horizontal scrolling.
+
+Live-updating behavior:
+
+- Polish the updating indicator.
+- Make invalid-input status clear but unobtrusive.
+- Keep the latest valid results visually recognizable while corrections are
+  required.
+- Do not change debounce, request-order, validation, or calculation behavior.
+
+Scenario save behavior
+
+Polish the existing Save workflow.
+
+- Make the active Event and Scenario identifiable.
+- Make unsaved-change status understandable.
+- Keep one primary Save action.
+- Make “Save as new scenario” visibly selected by default.
+- Clearly distinguish it from “Overwrite current scenario.”
+- Make overwrite confirmation appropriately serious without being alarming.
+- Preserve all current validation and persistence rules.
+
+Saved Events
+
+Create a scannable grouped Saved Events screen.
+
+For each Event:
+
+- Give the Event identity a clear group header.
+- Display date, time, location, Scenario count, and modified information
+  without overwhelming the Event name.
+- Keep Event-level rename and delete actions visually separate from
+  Scenario-level actions.
+
+For each Scenario:
+
+- Make the Scenario name easy to scan.
+- Keep Open analysis as the primary row action.
+- Present Rename and Delete as secondary actions.
+- Preserve modified timestamps and existing ordering.
+
+Polish:
+
+- Empty state
+- Rename flows
+- Delete confirmations
+- Final-Scenario deletion explanation
+- Success and error messages
+
+Do not add search, filters, pagination, or new management behavior.
+
+Comparison
+
+Polish the complete Scenario comparison workflow.
+
+Selection:
+
+- Make Scenario selection understandable within grouped Events.
+- Show the two-to-four Scenario requirement.
+- Keep selected count visible.
+- Make Compare selected the clear action.
+- Display over-selection and insufficient-selection errors clearly.
+
+Comparison view:
+
+- Preserve aligned relationships between row labels and Scenario values.
+- Clearly mark the active baseline.
+- Make changing the baseline understandable.
+- Show differences with explicit plus or minus values and units.
+- Treat percentage changes as percentage-point differences.
+- Make highest profit, lowest cost, lowest break-even, target status, and ties
+  visible through text labels in addition to styling.
+- Keep Show differences only easy to find.
+- Preserve Open analysis actions.
+
+On narrower widths:
+
+- Use readable stacked Scenario groups or another responsive structure.
+- Avoid losing row labels or Scenario identity.
+- Use localized horizontal scrolling only where an aligned comparison truly
+  cannot remain legible otherwise.
+
+Do not add charts, scoring, or recommendations.
+
+Data Safety
+
+Polish backup, restore, and recovery screens.
+
+- Make Download backup and Restore backup distinct.
+- Explain backup and complete-replacement restore behavior plainly.
+- Give restore confirmation appropriate visual seriousness.
+- Clearly present rejected-backup and recovery messages.
+- Keep technical details out of the normal customer-facing presentation.
+- Do not alter backup, restore, migration, or recovery behavior.
+
+Messages and states
+
+Audit all customer-facing states across the application.
+
+Create consistent treatments for:
+
+- Success
+- Information
+- Warning
+- Critical warning
+- Validation errors
+- Application errors
+- Empty states
+- Updating
+- Saving
+- Disabled actions
+- Unavailable calculations
+- Not-found states
+- Recovery-required states
+
+Messages should:
+
+- State what happened
+- Explain what the customer can do next when relevant
+- Avoid raw technical terminology
+- Avoid blaming the customer
+- Avoid excessive punctuation
+- Avoid disappearing before they can reasonably be read
+
+Wording audit
+
+Review visible wording across all screens.
+
+Use consistent plain-language terminology:
+
+- Business Defaults
+- Event
+- Scenario
+- Event Analysis
+- Expected food buyers
+- Other competing food vendors
+- Expected buyers for your business
+- Expected sales
+- Total event cost
+- Owner labor pay
+- Business profit
+- Profit margin
+- Break-even sales
+- Break-even customers
+- Save as new scenario
+- Overwrite current scenario
+
+Use sentence case for headings, labels, and buttons unless a proper name
+requires otherwise.
+
+Do not change established business meaning while editing wording.
+
+Avoid unexplained accounting or software jargon.
+
+Responsive behavior
+
+Provide a strong functional responsive foundation for all screens.
+
+Support the application’s expected desktop window sizes and narrower layouts.
+
+- Prevent accidental page-wide horizontal overflow.
+- Allow forms to move from multiple columns to one column.
+- Keep buttons reachable and readable.
+- Keep validation messages associated with fields.
+- Preserve comparison readability.
+- Preserve workspace results prominence.
+- Do not use fixed viewport heights that trap content.
+- Do not create nested scrolling areas unnecessarily.
+
+The later accessibility milestone will perform the complete accessibility and
+responsive review. Do not duplicate that milestone, but do not knowingly
+introduce inaccessible structure.
+
+CSS and template quality
+
+- Remove obsolete or clearly duplicated presentation rules after confirming
+  they are unused.
+- Keep styles organized by tokens, shared components, layout, and
+  screen-specific needs.
+- Avoid large amounts of inline styling.
+- Avoid specificity hacks and unnecessary !important rules.
+- Preserve separation between presentation and business behavior.
+- Do not introduce JavaScript solely for decoration.
+- Do not duplicate existing interaction logic.
+
+Regression safety
+
+Do not change:
+
+- Calculations
+- Break-even rules
+- Warning conditions
+- Demand formulas
+- Form validation
+- Persistence
+- Migration behavior
+- Backup or restore behavior
+- Scenario naming rules
+- Comparison rules
+- Route protection
+- First-use logic
+- Dirty-state behavior
+
+Update automated tests only where customer-facing wording or semantic template
+structure legitimately changed.
+
+Add focused template or route assertions for major new shared components and
+critical states where useful.
+
+Do not add screenshot-testing dependencies.
+
+Manual review checklist
+
+Create a concise developer checklist covering:
+
+- Fresh Welcome flow
+- Dashboard with and without saved work
+- Defaults
+- Complete Event Inputs form
+- Event Analysis with profit, loss, and validation states
+- Save as new and overwrite flows
+- Saved Events empty and populated states
+- Scenario rename and delete states
+- Two-, three-, and four-Scenario comparison
+- Data Safety and restore confirmation
+- Friendly error and recovery screens
+- Supported wide and narrow window sizes
+- Keyboard-visible control order at a basic level
+- Consistency of terminology and components
+
+Scope
+
+Do not implement:
+
+- Dark mode
+- New calculations
+- New workflows
+- Charts
+- Animations
+- New dependencies
+- Final desktop icons
+- Windows or macOS packaging
+- Complete accessibility certification
+- Full end-to-end acceptance testing
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused template, route, and interaction tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the visual system and major screen changes.
+5. List every screen manually reviewed.
+6. Report any existing screen or state that could not be exercised.
+7. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
 

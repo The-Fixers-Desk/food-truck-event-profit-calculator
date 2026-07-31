@@ -14,9 +14,16 @@ def test_defaults_page_loads(client):
     assert b"Defaults" in response.data
 
 
-def test_comparison_page_loads(client):
-    """The Comparison screen should load successfully."""
-    response = client.get("/comparison")
+def test_saved_events_page_loads(client):
+    """The Saved Events screen should load successfully."""
+    response = client.get("/saved-events")
 
     assert response.status_code == 200
-    assert b"Comparison" in response.data
+    assert b"Saved Events" in response.data
+
+
+def test_former_comparison_url_redirects_to_saved_events(client):
+    response = client.get("/comparison")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/saved-events")

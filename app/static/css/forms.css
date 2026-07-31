@@ -257,6 +257,71 @@
   font-family: var(--font-heading);
 }
 
+.saved-event-list,
+.saved-scenario-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.saved-event {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-panel);
+}
+
+.saved-event__header h2,
+.saved-scenario h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+}
+
+.saved-event__header p,
+.saved-scenario p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+.saved-scenario-list {
+  margin-top: var(--space-5);
+}
+
+.saved-scenario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-background);
+  border-radius: var(--radius-small);
+}
+
+.management-action {
+  margin-top: var(--space-3);
+}
+
+.management-action summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.management-action form {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 520px;
+  margin-top: var(--space-3);
+}
+
+.danger-action summary {
+  color: #8b1a1a;
+}
+
+@media (max-width: 600px) {
+  .saved-scenario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .live-field-error {
   margin: 0;
   color: #a12622;

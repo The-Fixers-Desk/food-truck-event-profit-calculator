@@ -308,6 +308,162 @@ class ScenarioNameConflict(ValueError):
     """Raised when an Event already has the requested Scenario name."""
 
 
+class FinalScenarioDeletionError(ValueError):
+    """Raised when individual deletion would leave an Event empty."""
+
+
+def list_saved_events() -> list[dict]:
+    """Return Events and Scenarios in deterministic modified-first order."""
+    database = get_database()
+    event_rows = database.execute(
+        """
+        SELECT e.*, COUNT(s.id) AS scenario_count,
+               CASE
+                   WHEN MAX(s.updated_at) > e.updated_at
+                   THEN MAX(s.updated_at)
+                   ELSE e.updated_at
+               END AS last_modified
+        FROM events AS e
+        JOIN event_scenarios AS s ON s.event_id = e.id
+        GROUP BY e.id
+        ORDER BY last_modified DESC, e.id DESC
+        """
+    ).fetchall()
+    events = []
+    for event in event_rows:
+        scenarios = database.execute(
+            """
+            SELECT id, scenario_name, updated_at
+            FROM event_scenarios
+            WHERE event_id = ?
+            ORDER BY updated_at DESC, id DESC
+            """,
+            (event["id"],),
+        ).fetchall()
+        events.append(
+            {
+                "id": event["id"],
+                "event_name": event["event_name"],
+                "event_date": event["event_date"],
+                "start_time": _minutes_to_clock(
+                    event["start_time_minutes"]
+                ),
+                "location": event["location"],
+                "scenario_count": event["scenario_count"],
+                "last_modified": event["last_modified"],
+                "scenarios": [dict(row) for row in scenarios],
+            }
+        )
+    return events
+
+
+def rename_event(event_id: int, name: str) -> bool:
+    """Rename only an Event and update its modified timestamp."""
+    database = get_database()
+    with database:
+        cursor = database.execute(
+            """
+            UPDATE events
+            SET event_name = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (name.strip(), event_id),
+        )
+    return cursor.rowcount == 1
+
+
+def rename_event_scenario(scenario_id: int, name: str) -> bool:
+    """Rename one Scenario while enforcing per-Event uniqueness."""
+    database = get_database()
+    row = database.execute(
+        "SELECT event_id FROM event_scenarios WHERE id = ?",
+        (scenario_id,),
+    ).fetchone()
+    if row is None:
+        return False
+    event_id = row["event_id"]
+    if database.execute(
+        """
+        SELECT 1 FROM event_scenarios
+        WHERE event_id = ? AND id <> ?
+          AND lower(trim(scenario_name)) = lower(?)
+        """,
+        (event_id, scenario_id, name.strip()),
+    ).fetchone():
+        raise ScenarioNameConflict(
+            "A scenario with this name already exists for this event."
+        )
+    try:
+        with database:
+            database.execute(
+                """
+                UPDATE event_scenarios
+                SET scenario_name = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (name.strip(), scenario_id),
+            )
+            _touch_event(database, event_id)
+    except sqlite3.IntegrityError as error:
+        raise ScenarioNameConflict(
+            "A scenario with this name already exists for this event."
+        ) from error
+    return True
+
+
+def delete_event_scenario(scenario_id: int) -> bool:
+    """Delete a non-final Scenario and its children transactionally."""
+    database = get_database()
+    row = database.execute(
+        "SELECT event_id FROM event_scenarios WHERE id = ?",
+        (scenario_id,),
+    ).fetchone()
+    if row is None:
+        return False
+    event_id = row["event_id"]
+    count = database.execute(
+        "SELECT COUNT(*) FROM event_scenarios WHERE event_id = ?",
+        (event_id,),
+    ).fetchone()[0]
+    if count <= 1:
+        raise FinalScenarioDeletionError(
+            "The final scenario cannot be deleted individually. "
+            "Delete the complete event instead."
+        )
+    with database:
+        database.execute(
+            "DELETE FROM event_scenarios WHERE id = ?",
+            (scenario_id,),
+        )
+        _touch_event(database, event_id)
+    return True
+
+
+def delete_event(event_id: int) -> bool:
+    """Transactionally delete an Event and all cascading child records."""
+    database = get_database()
+    with database:
+        return _delete_event_row(database, event_id) == 1
+
+
+def _delete_event_row(
+    database: sqlite3.Connection,
+    event_id: int,
+) -> int:
+    return database.execute(
+        "DELETE FROM events WHERE id = ?", (event_id,)
+    ).rowcount
+
+
+def _touch_event(database: sqlite3.Connection, event_id: int) -> None:
+    database.execute(
+        """
+        UPDATE events SET updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        """,
+        (event_id,),
+    )
+
+
 def create_event_with_initial_scenario(
     identity: EventIdentity,
     scenario: EventScenario,
@@ -349,7 +505,11 @@ def create_event_scenario(
         )
     try:
         with database:
-            return _insert_event_scenario(database, event_id, scenario)
+            scenario_id = _insert_event_scenario(
+                database, event_id, scenario
+            )
+            _touch_event(database, event_id)
+            return scenario_id
     except sqlite3.IntegrityError as error:
         if _scenario_name_exists(database, event_id, name):
             raise ScenarioNameConflict(
@@ -408,6 +568,7 @@ def overwrite_event_scenario(
             (*values, scenario_id),
         )
         _insert_scenario_children(database, scenario_id, stored_scenario)
+        _touch_event(database, existing["event_id"])
 
 
 def load_event_scenario(
@@ -708,6 +869,10 @@ def _scenario_name_exists(
         """,
         (event_id, name.strip()),
     ).fetchone() is not None
+
+
+def _minutes_to_clock(value: int) -> str:
+    return f"{value // 60:02d}:{value % 60:02d}"
 
 
 def _upgrade_food_cost_schema(

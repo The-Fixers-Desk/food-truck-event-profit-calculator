@@ -2,21 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Add automatic initial saving and scenario version actions
-
-- Save each valid Event Inputs submission as a new Event
-- Create an Original estimate Scenario before opening the workspace
-- Persist complete scenario assumptions and ordered cost rows
-- Add one Save action for workspace changes
-- Default Save to creating a new Scenario
-- Allow deliberate overwriting of the active Scenario
-- Track unsaved changes and update the reset baseline after saving
-- Prevent duplicate Scenario names within the same Event
-- Protect all Event and Scenario writes with transactions
-- Add persistence, validation, versioning, and rollback tests
-
----------------------------------------------------------------------------------
-
 Complete saved event and scenario management
 
 - Add a Saved Events screen grouped by Event and Scenario
@@ -74,6 +59,37 @@ Add database versioning and safe migrations
 - Protect existing customer records, identifiers, and relationships
 - Add migration logging and developer documentation
 - Add migration, startup, rollback, and data-preservation tests
+
+---------------------------------------------------------------------------------
+
+Add backup, restore, and recovery safeguards
+
+- Add portable .ftbackup creation with manifests and checksums
+- Add validated full-database restore with explicit confirmation
+- Create automatic recovery snapshots before restores and migrations
+- Migrate older supported backups safely before replacement
+- Reject corrupt, incompatible, or newer-version backups
+- Replace the live database atomically and recover from failed restores
+- Retain the five newest automatic recovery snapshots
+- Add a centralized application-data directory abstraction
+- Add damaged-database recovery behavior
+- Verify transactional protection against interrupted writes
+- Add backup, restore, migration, recovery, and data-separation tests
+
+---------------------------------------------------------------------------------
+
+Complete V1 UI and UX design and polish
+
+- Define the V1 visual direction, design tokens, and reusable components
+- Polish the shared application shell and navigation
+- Improve Welcome, Dashboard, Defaults, and Event Inputs
+- Polish the interactive Event Analysis workspace and live result states
+- Improve Scenario saving, Saved Events, and Comparison workflows
+- Polish Data Safety, recovery, empty, success, warning, and error states
+- Standardize customer-facing wording and terminology
+- Improve responsive layouts and visual hierarchy
+- Remove obsolete or duplicated presentation styles
+- Add focused template assertions and a manual UI review checklist
 
 ---------------------------------------------------------------------------------
 

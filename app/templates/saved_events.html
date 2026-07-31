@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Saved Events | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <p class="page-eyebrow">Saved Analyses</p>
+    <h1>Saved Events</h1>
+    <p class="page-description">
+      Open and manage saved event scenarios.
+    </p>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <p class="flash-message flash-message--{{ category }}" role="status">
+        {{ message }}
+      </p>
+    {% endfor %}
+  {% endwith %}
+
+  {% if not events %}
+    <div class="placeholder-panel saved-events-empty">
+      <h2>No saved events yet</h2>
+      <p>
+        Complete a new Event Inputs form to create your first saved analysis.
+      </p>
+      <a class="button" href="{{ url_for('main.calculator') }}">
+        Start an event analysis
+      </a>
+    </div>
+  {% endif %}
+
+  <div class="saved-event-list">
+    {% for event in events %}
+      <article class="saved-event" data-event-id="{{ event.id }}">
+        <header class="saved-event__header">
+          <div>
+            <h2>{{ event.event_name }}</h2>
+            <p>
+              {{ event.event_date }} at {{ event.start_time }}
+              · {{ event.location }}
+            </p>
+            <p>
+              {{ event.scenario_count }} saved
+              Scenario{% if event.scenario_count != 1 %}s{% endif %}
+              · Last modified {{ event.last_modified }}
+            </p>
+          </div>
+        </header>
+
+        <details class="management-action"
+          {% if event_errors.get(event.id) %}open{% endif %}>
+          <summary>Rename Event</summary>
+          <form method="post"
+            action="{{ url_for('main.rename_saved_event',
+                               event_id=event.id) }}">
+            <label class="form-label" for="event-name-{{ event.id }}">
+              Event name
+            </label>
+            <input class="form-input" id="event-name-{{ event.id }}"
+              name="event_name" type="text"
+              value="{{ event_values.get(event.id, event.event_name) }}"
+              required />
+            {% if event_errors.get(event.id) %}
+              <p class="field-error">{{ event_errors[event.id] }}</p>
+            {% endif %}
+            <button class="button-secondary" type="submit">Rename Event</button>
+          </form>
+        </details>
+
+        <details class="management-action danger-action"
+          {% if event_errors.get(event.id) %}open{% endif %}>
+          <summary>Delete Event</summary>
+          <form method="post"
+            action="{{ url_for('main.delete_saved_event',
+                               event_id=event.id) }}">
+            <p>
+              Delete “{{ event.event_name }}” and all
+              {{ event.scenario_count }} saved Scenarios.
+            </p>
+            <label class="choice-option">
+              <input type="checkbox" name="confirmed" value="yes" />
+              I understand this Event and its Scenarios will be deleted.
+            </label>
+            {% if event_errors.get(event.id) %}
+              <p class="field-error">{{ event_errors[event.id] }}</p>
+            {% endif %}
+            <button class="button-secondary" type="submit">Delete Event</button>
+          </form>
+        </details>
+
+        <div class="saved-scenario-list">
+          {% for scenario in event.scenarios %}
+            <section class="saved-scenario"
+              data-scenario-id="{{ scenario.id }}">
+              <div>
+                <h3>{{ scenario.scenario_name }}</h3>
+                <p>Last modified {{ scenario.updated_at }}</p>
+              </div>
+              <a class="button-secondary"
+                href="{{ url_for('main.open_saved_scenario',
+                                 event_id=event.id,
+                                 scenario_id=scenario.id) }}">
+                Open analysis
+              </a>
+
+              <details class="management-action"
+                {% if scenario_errors.get(scenario.id) %}open{% endif %}>
+                <summary>Rename</summary>
+                <form method="post"
+                  action="{{ url_for('main.rename_saved_scenario',
+                                     event_id=event.id,
+                                     scenario_id=scenario.id) }}">
+                  <label class="form-label"
+                    for="scenario-name-{{ scenario.id }}">
+                    Scenario name
+                  </label>
+                  <input class="form-input"
+                    id="scenario-name-{{ scenario.id }}"
+                    name="scenario_name" type="text"
+                    value="{{ scenario_values.get(
+                      scenario.id, scenario.scenario_name
+                    ) }}" required />
+                  {% if scenario_errors.get(scenario.id) %}
+                    <p class="field-error">
+                      {{ scenario_errors[scenario.id] }}
+                    </p>
+                  {% endif %}
+                  <button class="button-secondary" type="submit">
+                    Rename
+                  </button>
+                </form>
+              </details>
+
+              <details class="management-action danger-action"
+                {% if scenario_errors.get(scenario.id) %}open{% endif %}>
+                <summary>Delete</summary>
+                <form method="post"
+                  action="{{ url_for('main.delete_saved_scenario',
+                                     event_id=event.id,
+                                     scenario_id=scenario.id) }}">
+                  <p>Delete “{{ scenario.scenario_name }}”?</p>
+                  <label class="choice-option">
+                    <input type="checkbox" name="confirmed" value="yes" />
+                    Confirm Scenario deletion.
+                  </label>
+                  {% if scenario_errors.get(scenario.id) %}
+                    <p class="field-error">
+                      {{ scenario_errors[scenario.id] }}
+                    </p>
+                  {% endif %}
+                  <button class="button-secondary" type="submit">
+                    Delete
+                  </button>
+                </form>
+              </details>
+            </section>
+          {% endfor %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

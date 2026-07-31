@@ -2,13 +2,28 @@ Prompt Canvas
 
 ---------------------------------------------------------------------------------
 
-Awesome. Next milestone is: Complete V1 UI and UX design and polish
-  Define the visual direction and reusable components, then polish Welcome,
-  Dashboard, Defaults, Event Inputs, Results, Saved Events, Comparison,
-  messages, empty states, wording, and visual hierarchy.
+Awesome. Next milestone is: Complete accessibility and responsive behavior
+  Add keyboard navigation, focus states, accessible labels and errors,
+  contrast, responsive layouts, and screen-reader structure.
 
 Anything we need to do before we make a prompt for Codex?
 
 ---------------------------------------------------------------------------------
 
 Give me the commit message I will use when this is done.
+
+---------------------------------------------------------------------------------
+
+Awesome. Next milestone is: Build the desktop application shell
+  Add the dedicated window, automatic local-server startup, safe shutdown,
+  single-instance protection, product identity, loading and error screens,
+  and verified offline use.
+
+Anything we need to do before we make a prompt for Codex?
+
+---------------------------------------------------------------------------------
+
+Give me the commit message I will use when this is done.
+
+---------------------------------------------------------------------------------
+

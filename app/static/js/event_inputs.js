@@ -667,6 +667,7 @@ function restoreWorkspaceBaseline() {
 }
 
 if (workspaceForm) {
+  let discardNavigationApproved = false;
   workspaceForm.addEventListener("submit", (event) => {
     event.preventDefault();
   });
@@ -676,6 +677,28 @@ if (workspaceForm) {
     "click",
     restoreWorkspaceBaseline,
   );
+  document.querySelectorAll("a[href]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (workspaceForm.dataset.dirty === "true") {
+        if (!window.confirm(
+          "Discard unsaved changes and leave this analysis?",
+        )) {
+          event.preventDefault();
+        } else {
+          discardNavigationApproved = true;
+        }
+      }
+    });
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (
+      workspaceForm.dataset.dirty === "true"
+      && !discardNavigationApproved
+    ) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
   updateWorkspaceDirtyState();
 }
 
