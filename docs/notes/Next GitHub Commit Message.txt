@@ -2,12 +2,13 @@ Next GitHub Commit Message
 
 ----------------------------------------------------------------------------------------------------------
 
-Build food and packaging cost section
+Build labor cost section
 
-- Add the food and packaging cost section to Event Inputs
-- Support average cost per order, percentage of sales, and total event cost methods
-- Add the dropdown and Use this method interaction
-- Show only the selected method’s matching field
-- Clear hidden values when switching methods
-- Preserve entered values when validation fails
-- Add field validation and automated tests
+- Add the Labor costs section to Event Inputs
+- Support zero or more employee labor entries
+- Add hourly rate and combined paid-hours fields
+- Add employee labor add and remove controls
+- Add optional owner labor pay for the event
+- Keep owner pay separate from business profit
+- Preserve labor entries and values when validation fails
+- Add labor validation and automated tests

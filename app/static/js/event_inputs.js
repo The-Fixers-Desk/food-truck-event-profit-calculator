@@ -145,3 +145,27 @@ confirmEventFoodMethod.addEventListener("click", () => {
 });
 
 showConfirmedEventFoodMethod();
+
+const employeeLaborEntries = document.querySelector(
+  "#event-employee-labor-entries",
+);
+const employeeLaborTemplate = document.querySelector(
+  "#event-employee-labor-template",
+);
+const addEmployeeLabor = document.querySelector("#add-event-labor");
+
+function connectEventLaborRemove(button) {
+  button.addEventListener("click", () => {
+    button.closest(".labor-entry").remove();
+  });
+}
+
+employeeLaborEntries
+  .querySelectorAll(".remove-event-labor")
+  .forEach(connectEventLaborRemove);
+
+addEmployeeLabor.addEventListener("click", () => {
+  const entry = employeeLaborTemplate.content.cloneNode(true);
+  connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
+  employeeLaborEntries.append(entry);
+});

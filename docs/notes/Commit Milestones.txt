@@ -31,7 +31,7 @@ Total Milestones- 13
 ☑ Create saved event database schema
 ☑ Build event identification form
 ☑ Build revenue assumptions section
-□ Build food and supply cost section
+☑ Build food and supply cost section
 □ Build labor cost section
 □ Build travel and operating cost section
 □ Build event fee and miscellaneous cost section

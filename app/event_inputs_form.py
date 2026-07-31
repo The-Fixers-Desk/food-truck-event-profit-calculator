@@ -25,6 +25,7 @@ FOOD_COST_FIELDS = (
     "food_cost_percentage",
     "manual_food_cost_total",
 )
+LABOR_FIELDS = ("owner_labor_pay",)
 WEATHER_REDUCTIONS = {
     "favorable": Decimal("0"),
     "minor_concern": Decimal("5"),
@@ -40,24 +41,48 @@ PROTECTION_FACTORS = {
 }
 
 
-def blank_event_inputs_form() -> dict[str, str]:
+def blank_event_inputs_form() -> dict:
     values = {
         name: ""
-        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS, *FOOD_COST_FIELDS)
+        for name in (
+            *IDENTITY_FIELDS,
+            *REVENUE_FIELDS,
+            *FOOD_COST_FIELDS,
+            *LABOR_FIELDS,
+        )
     }
     values["revenue_method"] = "attendance"
     values["food_cost_method_choice"] = "average_per_order"
+    values["employee_labor"] = []
     return values
 
 
 def validate_event_inputs(
     submitted: MultiDict,
-) -> tuple[EventIdentity | None, dict[str, str], dict[str, str]]:
+) -> tuple[EventIdentity | None, dict, dict[str, str]]:
     """Validate the currently implemented portions of Event Inputs."""
     values = {
         name: submitted.get(name, "").strip()
-        for name in (*IDENTITY_FIELDS, *REVENUE_FIELDS, *FOOD_COST_FIELDS)
+        for name in (
+            *IDENTITY_FIELDS,
+            *REVENUE_FIELDS,
+            *FOOD_COST_FIELDS,
+            *LABOR_FIELDS,
+        )
     }
+    rates = submitted.getlist("employee_labor_rate")
+    hours = submitted.getlist("employee_labor_hours")
+    values["employee_labor"] = [
+        {
+            "hourly_rate": (
+                rates[index].strip() if index < len(rates) else ""
+            ),
+            "total_hours_paid": (
+                hours[index].strip() if index < len(hours) else ""
+            ),
+        }
+        for index in range(max(len(rates), len(hours)))
+    ]
     errors: dict[str, str] = {}
 
     for name, label in (
@@ -116,6 +141,7 @@ def validate_event_inputs(
         values["expected_sales_amount"] = ""
 
     _validate_food_cost(values, errors)
+    _validate_labor(values, errors)
 
     if errors:
         return None, values, errors
@@ -127,6 +153,52 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def _validate_labor(
+    values: dict,
+    errors: dict,
+) -> None:
+    labor_errors = []
+    for entry in values["employee_labor"]:
+        entry_errors = {}
+        _positive_money(
+            entry,
+            entry_errors,
+            "hourly_rate",
+            "Hourly labor rate",
+        )
+        _positive_decimal(
+            entry,
+            entry_errors,
+            "total_hours_paid",
+            "Combined total hours paid",
+        )
+        labor_errors.append(entry_errors)
+    if any(labor_errors):
+        errors["employee_labor"] = labor_errors
+
+    if values["owner_labor_pay"]:
+        _money(
+            values,
+            errors,
+            "owner_labor_pay",
+            "Owner labor pay for this event",
+        )
+
+
+def _positive_money(values, errors, name, label) -> Decimal | None:
+    value = _money(values, errors, name, label)
+    if value is not None and value <= 0:
+        errors[name] = f"{label} must be greater than zero."
+    return value
+
+
+def _positive_decimal(values, errors, name, label) -> Decimal | None:
+    value = _decimal(values, errors, name, label)
+    if value is not None and value <= 0:
+        errors[name] = f"{label} must be greater than zero."
+    return value
 
 
 def _validate_food_cost(

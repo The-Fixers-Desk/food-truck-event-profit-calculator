@@ -272,10 +272,99 @@
       </div>
     </fieldset>
 
+    <fieldset class="input-section">
+      <legend>Labor costs</legend>
+      <p class="form-hint">
+        Combined hours include all employees paid at the same rate, including
+        setup and cleanup when applicable.
+      </p>
+
+      <div id="event-employee-labor-entries">
+        {% for entry in form_values.employee_labor %}
+          {% set labor_errors = errors.get("employee_labor", []) %}
+          {% set entry_errors = labor_errors[loop.index0]
+             if labor_errors|length > loop.index0 else {} %}
+          <div class="labor-entry">
+            <div class="form-field">
+              <label class="form-label">Hourly labor rate ($)</label>
+              <input class="form-input" name="employee_labor_rate"
+                type="number" step="0.01" value="{{ entry.hourly_rate }}"
+                required
+                {% if entry_errors.get("hourly_rate") %}
+                  aria-invalid="true"
+                {% endif %} />
+              {% if entry_errors.get("hourly_rate") %}
+                <p class="field-error">{{ entry_errors.hourly_rate }}</p>
+              {% endif %}
+            </div>
+            <div class="form-field">
+              <label class="form-label">
+                Combined total hours paid at that rate
+              </label>
+              <input class="form-input" name="employee_labor_hours"
+                type="number" step="any"
+                value="{{ entry.total_hours_paid }}" required
+                {% if entry_errors.get("total_hours_paid") %}
+                  aria-invalid="true"
+                {% endif %} />
+              {% if entry_errors.get("total_hours_paid") %}
+                <p class="field-error">
+                  {{ entry_errors.total_hours_paid }}
+                </p>
+              {% endif %}
+            </div>
+            <button class="remove-event-labor button-secondary" type="button">
+              Remove
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="button-secondary" id="add-event-labor" type="button">
+        Add employee labor
+      </button>
+
+      <div class="form-field owner-labor-pay">
+        <label class="form-label" for="owner_labor_pay">
+          Owner labor pay for this event ($)
+        </label>
+        <input class="form-input" id="owner_labor_pay"
+          name="owner_labor_pay" type="number" step="0.01"
+          value="{{ form_values.owner_labor_pay }}"
+          {% if errors.get("owner_labor_pay") %}
+            aria-invalid="true"
+          {% endif %} />
+        <p class="form-hint">
+          Optional flat amount you plan to pay yourself for working this event.
+        </p>
+        {% if errors.get("owner_labor_pay") %}
+          <p class="field-error">{{ errors.owner_labor_pay }}</p>
+        {% endif %}
+      </div>
+    </fieldset>
+
     <div class="form-actions">
       <button class="button" type="submit">Continue</button>
     </div>
   </form>
 </section>
+<template id="event-employee-labor-template">
+  <div class="labor-entry">
+    <div class="form-field">
+      <label class="form-label">Hourly labor rate ($)</label>
+      <input class="form-input" name="employee_labor_rate" type="number"
+        step="0.01" required />
+    </div>
+    <div class="form-field">
+      <label class="form-label">
+        Combined total hours paid at that rate
+      </label>
+      <input class="form-input" name="employee_labor_hours" type="number"
+        step="any" required />
+    </div>
+    <button class="remove-event-labor button-secondary" type="button">
+      Remove
+    </button>
+  </div>
+</template>
 <script src="{{ url_for('static', filename='js/event_inputs.js') }}"></script>
 {% endblock %}
