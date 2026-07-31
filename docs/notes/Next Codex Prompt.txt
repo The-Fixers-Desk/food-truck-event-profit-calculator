@@ -1,3 +1,82 @@
 Next Codex Prompt
 
 -----------------------------------------------------------
+
+Implement the milestone:
+
+Build food and supply cost section.
+
+Use Event_Analysis_Structure_v0.1.md, the current Event Analysis domain models,
+and the existing Event Inputs form as the source of truth.
+
+Add a customer-facing section titled:
+
+“Food and packaging costs”
+
+Ask:
+
+“How do you want to estimate food and packaging costs for this event?”
+
+Add a dropdown with:
+
+- Average cost per order
+- Percentage of sales
+- Total for this event
+
+Behavior:
+
+- Average cost per order is selected by default.
+- Do not show a value field until the customer clicks “Use this method.”
+- The Use this method button must not submit the full Event Inputs form.
+
+After confirming a method, show only its matching field:
+
+- Average food and packaging cost per order ($)
+- Food and packaging cost percentage (%)
+- Total food and packaging cost for this event ($)
+
+Switching methods:
+
+- The method changes only after clicking Use this method.
+- Hide and clear the previous method’s value.
+- Show only the newly confirmed method’s field.
+- Preserve the confirmed method and entered value when unrelated validation
+  fails.
+
+Validation:
+
+- A confirmed method and matching value are required.
+- Money values cannot be negative.
+- Percentage values must be between 0 and 100.
+- Values may contain no more than two decimal places.
+- Hidden or unselected values must not be submitted or used.
+- Preserve entered values when validation fails.
+
+Scope:
+
+- Do not copy values from Business Defaults yet.
+- Do not calculate food or packaging costs yet.
+- Do not save Events or Event Scenarios yet.
+- Do not build labor, travel, event-fee, miscellaneous-cost, or results behavior.
+- Do not add dependencies or unrelated changes.
+- Do not commit.
+
+Add tests for:
+
+- All three method choices
+- Initial hidden state
+- Confirming and switching methods
+- Clearing the previous method’s value
+- Validation and preserved input
+- No event or scenario records being saved
+
+Afterward:
+
+1. Run focused tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the visible behavior in plain language.
+5. Explain how to manually test all three methods.
+6. Report the test results.
+
+Keep the response concise.

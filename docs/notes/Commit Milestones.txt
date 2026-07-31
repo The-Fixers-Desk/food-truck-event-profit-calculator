@@ -24,10 +24,12 @@ DEFAULTS
 
 EVENT CALCULATOR — INPUTS
 
+Total Milestones- 13
+
 ☑ Define event analysis data model
 ☑ Update business defaults food and packaging cost method
-□ Create saved event database schema
-□ Build event identification form
+☑ Create saved event database schema
+☑ Build event identification form
 □ Build revenue assumptions section
 □ Build food and supply cost section
 □ Build labor cost section

@@ -2,9 +2,11 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from app.business_defaults_form import defaults_to_form, validate_defaults_form
 from app.database import load_business_defaults, save_business_defaults
-from app.event_identification_form import (
-    blank_event_identification_form,
-    validate_event_identification,
+from app.event_inputs_form import (
+    blank_event_inputs_form,
+    protection_reductions,
+    validate_event_inputs,
+    weather_allows_protection,
 )
 
 main = Blueprint("main", __name__)
@@ -15,15 +17,17 @@ def calculator():
     """Display the Event Inputs screen."""
     errors = {}
     if request.method == "POST":
-        _, form_values, errors = validate_event_identification(request.form)
+        _, form_values, errors = validate_event_inputs(request.form)
     else:
-        form_values = blank_event_identification_form()
+        form_values = blank_event_inputs_form()
 
     return render_template(
         "calculator.html",
         active_page="calculator",
         form_values=form_values,
         errors=errors,
+        protection_reductions=protection_reductions(form_values),
+        show_event_protection=weather_allows_protection(form_values),
     )
 
 

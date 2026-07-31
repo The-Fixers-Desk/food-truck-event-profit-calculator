@@ -2,11 +2,14 @@ Next GitHub Commit Message
 
 ----------------------------------------------------------------------------------------------------------
 
-Update business defaults food cost method
+Build revenue assumptions section
 
-- Replace the fixed food-cost percentage with a selectable estimation method
-- Add average cost per order, percentage of sales, and typical total per event
-- Add the two-step dropdown and Use this method interaction
-- Show and save only the confirmed method’s matching value
-- Preserve existing saved percentage defaults
-- Update validation, persistence, schema compatibility, documentation, and tests
+- Add attendance, competing-vendor, buyer-percentage, and average-sale inputs
+- Add weather choices with visible attendance reductions
+- Show event-protection choices only after weather is selected
+- Display the final attendance reduction for each protection option
+- Add custom weather-reduction support
+- Use attendance-based expected sales by default
+- Add an optional custom expected-sales override
+- Add About estimates information
+- Preserve entered values and add validation tests

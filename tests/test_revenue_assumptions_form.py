@@ -1,0 +1,213 @@
+import re
+
+import pytest
+
+
+def valid_event_inputs() -> dict[str, str]:
+    return {
+        "event_name": "Summer Festival",
+        "event_date": "2026-08-15",
+        "start_time": "11:00",
+        "location": "Town Square",
+        "estimated_attendance": "1000",
+        "competing_food_vendors": "5",
+        "expected_buyer_percentage": "10",
+        "average_order_sale_amount": "15.00",
+        "weather_outlook": "moderate_adverse",
+        "custom_weather_reduction": "",
+        "event_protection": "fully_outdoors",
+        "revenue_method": "attendance",
+        "expected_sales_amount": "",
+    }
+
+
+def opening_tag(response_data: bytes, element_id: str) -> bytes:
+    match = re.search(
+        rb"<[^>]+id=\"" + element_id.encode() + rb"\"[^>]*>",
+        response_data,
+        re.DOTALL,
+    )
+    assert match is not None
+    return match.group()
+
+
+def test_revenue_assumptions_fields_and_preview_are_present(client):
+    response = client.get("/")
+    page = response.data.decode()
+
+    assert "Revenue Assumptions" in page
+    assert "Estimated attendance" in page
+    assert "Number of competing food vendors" in page
+    assert "Expected percentage of attendees who buy from you" in page
+    assert "Average order sale amount ($)" in page
+    assert "Estimated sales preview" in page
+    assert "Enter a custom expected sales amount" in page
+
+
+def test_about_estimates_is_collapsed_and_can_be_toggled(client):
+    response = client.get("/")
+
+    assert b"About estimates" in response.data
+    assert b"<details" in response.data
+    assert b"<details open" not in response.data
+
+
+def test_weather_choices_show_selected_reductions(client):
+    page = client.get("/").data.decode()
+
+    assert "Favorable / normal — 0%" in page
+    assert "Minor concern — 5%" in page
+    assert "Moderate adverse weather — 15%" in page
+    assert "Significant adverse weather — 30%" in page
+    assert "Severe disruption risk — 50%" in page
+    assert ">Custom<" not in page
+    assert "Custom" in page
+
+
+def test_event_protection_is_hidden_until_weather_is_valid(client):
+    response = client.get("/")
+
+    assert b"hidden" in opening_tag(response.data, "custom-weather-field")
+    assert b"hidden" in opening_tag(response.data, "event-protection-field")
+
+    form_data = valid_event_inputs()
+    form_data["weather_outlook"] = ""
+    response = client.post("/", data=form_data)
+    assert b"Choose the weather outlook." in response.data
+    assert b"hidden" in opening_tag(
+        response.data, "event-protection-field"
+    )
+
+
+def test_effective_reductions_are_displayed_for_selected_weather(client):
+    form_data = valid_event_inputs()
+    form_data["location"] = ""
+
+    page = client.post("/", data=form_data).data.decode()
+
+    assert "Fully indoors — <span" in page
+    assert 'data-protection="fully_indoors">2.25</span>%' in page
+    assert (
+        'data-protection="covered_reliable_seating">7.5</span>%'
+        in page
+    )
+    assert 'data-protection="partially_covered">11.25</span>%' in page
+    assert 'data-protection="fully_outdoors">15</span>%' in page
+    assert "applies 15%" not in page
+
+
+def test_custom_weather_requires_valid_reduction_before_protection(client):
+    form_data = valid_event_inputs()
+    form_data["weather_outlook"] = "custom"
+    form_data["custom_weather_reduction"] = ""
+
+    response = client.post("/", data=form_data)
+
+    assert b"Custom weather reduction is required." in response.data
+    assert b"hidden" not in opening_tag(
+        response.data, "custom-weather-field"
+    )
+    assert b"hidden" in opening_tag(
+        response.data, "event-protection-field"
+    )
+
+
+def test_custom_weather_displays_effective_reductions_and_preserves_value(
+    client,
+):
+    form_data = valid_event_inputs()
+    form_data["location"] = ""
+    form_data["weather_outlook"] = "custom"
+    form_data["custom_weather_reduction"] = "20"
+    form_data["event_protection"] = "fully_indoors"
+
+    response = client.post("/", data=form_data)
+    page = response.data.decode()
+
+    assert 'value="20"' in page
+    assert b"hidden" not in opening_tag(
+        response.data, "event-protection-field"
+    )
+    assert 'data-protection="fully_indoors">3</span>%' in page
+    assert 'data-protection="fully_outdoors">20</span>%' in page
+
+
+def test_event_protection_is_required_after_weather_selection(client):
+    form_data = valid_event_inputs()
+    form_data["event_protection"] = ""
+
+    response = client.post("/", data=form_data)
+
+    assert b"Choose the event protection." in response.data
+
+
+def test_custom_expected_sales_is_required_and_preserved_when_active(client):
+    form_data = valid_event_inputs()
+    form_data["revenue_method"] = "manual_sales"
+    form_data["expected_sales_amount"] = ""
+    response = client.post("/", data=form_data)
+    assert b"Expected sales amount is required." in response.data
+
+    form_data["location"] = ""
+    form_data["expected_sales_amount"] = "5000"
+    response = client.post("/", data=form_data)
+    assert b'value="manual_sales"' in response.data
+    assert b'value="5000"' in response.data
+    assert b"hidden" not in opening_tag(response.data, "custom-sales-field")
+
+
+def test_calculated_estimate_state_clears_hidden_custom_sales(client):
+    form_data = valid_event_inputs()
+    form_data["location"] = ""
+    form_data["revenue_method"] = "attendance"
+    form_data["expected_sales_amount"] = "9999"
+
+    response = client.post("/", data=form_data)
+
+    assert b'value="attendance"' in response.data
+    assert b'value="9999"' not in response.data
+    assert b"hidden" in opening_tag(response.data, "custom-sales-field")
+    assert b"Use the calculated estimate" in response.data
+
+
+@pytest.mark.parametrize(
+    ("field_name", "invalid_value", "expected_error"),
+    (
+        (
+            "estimated_attendance",
+            "-1",
+            b"Estimated attendance cannot be negative.",
+        ),
+        (
+            "estimated_attendance",
+            "1.5",
+            b"Estimated attendance must be a whole number.",
+        ),
+        (
+            "competing_food_vendors",
+            "-1",
+            b"Number of competing food vendors cannot be negative.",
+        ),
+        (
+            "expected_buyer_percentage",
+            "101",
+            b"Expected buyer percentage must be between 0 and 100.",
+        ),
+        (
+            "average_order_sale_amount",
+            "-1",
+            b"Average order sale amount cannot be negative.",
+        ),
+    ),
+)
+def test_revenue_validation_preserves_input(
+    client, field_name, invalid_value, expected_error
+):
+    form_data = valid_event_inputs()
+    form_data[field_name] = invalid_value
+
+    response = client.post("/", data=form_data)
+
+    assert expected_error in response.data
+    assert f'value="{invalid_value}"'.encode() in response.data
+    assert b'value="Summer Festival"' in response.data

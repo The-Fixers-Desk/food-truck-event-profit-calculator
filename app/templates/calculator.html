@@ -8,6 +8,13 @@
     <p class="page-description">
       Start by identifying the event you want to evaluate.
     </p>
+    <details class="estimate-information">
+      <summary>About estimates</summary>
+      <p>
+        Attendance, customer demand, weather, and sales are estimates.
+        Review these assumptions whenever conditions change.
+      </p>
+    </details>
   </header>
 
   <form class="form-panel" method="post" novalidate>
@@ -37,9 +44,153 @@
       </div>
     </fieldset>
 
+    <fieldset class="input-section">
+      <legend>Revenue Assumptions</legend>
+      <div class="form-grid">
+        {% for name, label, step in (
+          ("estimated_attendance", "Estimated attendance", "1"),
+          ("competing_food_vendors",
+           "Number of competing food vendors", "1"),
+          ("expected_buyer_percentage",
+           "Expected percentage of attendees who buy from you", "0.01"),
+          ("average_order_sale_amount",
+           "Average order sale amount ($)", "0.01")
+        ) %}
+          <div class="form-field">
+            <label class="form-label" for="{{ name }}">{{ label }}</label>
+            <input class="form-input" id="{{ name }}" name="{{ name }}"
+              type="number" step="{{ step }}" value="{{ form_values[name] }}"
+              required
+              {% if errors.get(name) %}
+                aria-invalid="true" aria-describedby="{{ name }}-error"
+              {% endif %} />
+            {% if errors.get(name) %}
+              <p class="field-error" id="{{ name }}-error">
+                {{ errors[name] }}
+              </p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="assumption-step">
+        <div class="form-field">
+          <label class="form-label" for="weather_outlook">
+            Weather outlook
+          </label>
+          <select class="form-input" id="weather_outlook"
+            name="weather_outlook" required
+            {% if errors.get("weather_outlook") %}
+              aria-invalid="true"
+            {% endif %}>
+            <option value="">Select weather outlook</option>
+            {% for value, label in (
+              ("favorable", "Favorable / normal — 0%"),
+              ("minor_concern", "Minor concern — 5%"),
+              ("moderate_adverse", "Moderate adverse weather — 15%"),
+              ("significant_adverse",
+               "Significant adverse weather — 30%"),
+              ("severe_disruption", "Severe disruption risk — 50%"),
+              ("custom", "Custom")
+            ) %}
+              <option value="{{ value }}"
+                {% if form_values.weather_outlook == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if errors.get("weather_outlook") %}
+            <p class="field-error">{{ errors.weather_outlook }}</p>
+          {% endif %}
+        </div>
+
+        <div id="custom-weather-field"
+          class="form-field conditional-field"
+          {% if form_values.weather_outlook != "custom" %}hidden{% endif %}>
+          <label class="form-label" for="custom_weather_reduction">
+            Custom weather reduction (%)
+          </label>
+          <input class="form-input" id="custom_weather_reduction"
+            name="custom_weather_reduction" type="number" step="0.01"
+            value="{{ form_values.custom_weather_reduction }}"
+            {% if errors.get("custom_weather_reduction") %}
+              aria-invalid="true"
+            {% endif %} />
+          {% if errors.get("custom_weather_reduction") %}
+            <p class="field-error">
+              {{ errors.custom_weather_reduction }}
+            </p>
+          {% endif %}
+        </div>
+
+        <div id="event-protection-field" class="conditional-field"
+          {% if not show_event_protection %}hidden{% endif %}>
+          <fieldset class="nested-choice-section">
+            <legend>Event protection</legend>
+            <div class="choice-options">
+              {% for value, label in (
+                ("fully_indoors", "Fully indoors"),
+                ("covered_reliable_seating",
+                 "Covered with reliable seating"),
+                ("partially_covered", "Partially covered"),
+                ("fully_outdoors", "Fully outdoors")
+              ) %}
+                <label class="choice-option">
+                  <input type="radio" name="event_protection"
+                    value="{{ value }}"
+                    {% if form_values.event_protection == value %}
+                      checked
+                    {% endif %} />
+                  <span>{{ label }} — <span
+                    data-protection="{{ value }}">{{
+                      protection_reductions[value]
+                    }}</span>% attendance reduction</span>
+                </label>
+              {% endfor %}
+            </div>
+            {% if errors.get("event_protection") %}
+              <p class="field-error">{{ errors.event_protection }}</p>
+            {% endif %}
+          </fieldset>
+        </div>
+      </div>
+
+      <section class="sales-preview" aria-labelledby="sales-preview-title">
+        <h2 id="sales-preview-title">Estimated sales preview</h2>
+        <p>
+          Your attendance-based sales estimate will appear here as the Event
+          Inputs form is completed.
+        </p>
+        <input id="revenue_method" name="revenue_method" type="hidden"
+          value="{{ form_values.revenue_method }}" />
+        <button class="button-secondary" id="use-custom-sales" type="button"
+          {% if form_values.revenue_method == "manual_sales" %}hidden{% endif %}>
+          Enter a custom expected sales amount
+        </button>
+        <div id="custom-sales-field" class="form-field conditional-field"
+          {% if form_values.revenue_method != "manual_sales" %}hidden{% endif %}>
+          <label class="form-label" for="expected_sales_amount">
+            Expected sales amount ($)
+          </label>
+          <input class="form-input" id="expected_sales_amount"
+            name="expected_sales_amount" type="number" step="0.01"
+            value="{{ form_values.expected_sales_amount }}"
+            {% if errors.get("expected_sales_amount") %}
+              aria-invalid="true"
+            {% endif %} />
+          {% if errors.get("expected_sales_amount") %}
+            <p class="field-error">{{ errors.expected_sales_amount }}</p>
+          {% endif %}
+          <button class="button-secondary" id="use-calculated-sales"
+            type="button">Use the calculated estimate</button>
+        </div>
+      </section>
+    </fieldset>
+
     <div class="form-actions">
       <button class="button" type="submit">Continue</button>
     </div>
   </form>
 </section>
+<script src="{{ url_for('static', filename='js/event_inputs.js') }}"></script>
 {% endblock %}

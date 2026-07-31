@@ -82,6 +82,68 @@
   margin-top: 0;
 }
 
+.input-section + .input-section {
+  margin-top: var(--space-6);
+}
+
+.estimate-information {
+  max-width: 680px;
+  margin-top: var(--space-4);
+}
+
+.estimate-information summary {
+  color: var(--color-accent-dark);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.estimate-information p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+}
+
+.assumption-step {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.conditional-field[hidden],
+.button-secondary[hidden] {
+  display: none;
+}
+
+.nested-choice-section {
+  padding: 0;
+  border: 0;
+}
+
+.nested-choice-section legend {
+  margin-bottom: var(--space-3);
+  font-weight: 700;
+}
+
+.sales-preview {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-background);
+  border-radius: var(--radius-small);
+}
+
+.sales-preview h2 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+}
+
+.sales-preview p {
+  color: var(--color-text-muted);
+}
+
+.sales-preview .form-field {
+  max-width: 420px;
+}
+
 .choice-options {
   display: grid;
   gap: var(--space-3);
