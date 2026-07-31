@@ -1,0 +1,569 @@
+Implement the milestone:
+
+Package the Windows application.
+
+The desktop application shell, centralized data-directory system, database
+migrations, backup and restore safeguards, offline interface, and complete
+customer workflows already exist.
+
+Create a reproducible 64-bit Windows application bundle and installer.
+
+Packaging target
+
+Support:
+
+- Windows 10 x64
+- Windows 11 x64
+
+Do not build:
+
+- 32-bit Windows packages
+- ARM64 packages
+- Microsoft Store or MSIX packages
+- macOS packages
+
+Use a 64-bit Windows Python environment for the production build.
+
+Application identity
+
+Use:
+
+Product name:
+Food Truck Event Profit Calculator
+
+Publisher:
+The Fixer’s Desk
+
+Executable name:
+FoodTruckEventProfitCalculator.exe
+
+Installer filename pattern:
+FoodTruckEventProfitCalculator-Setup-{version}-x64.exe
+
+Define the application version in one centralized source of truth.
+
+The desktop shell, executable metadata, installer metadata, application
+display, and generated filenames must use that same version.
+
+If the project already has an established version source, reuse it rather than
+creating a conflicting system.
+
+Use a permanent, checked-in Inno Setup AppId that remains unchanged across
+future releases and upgrades.
+
+Do not generate a different AppId for every build.
+
+Application icon
+
+Use one checked-in Windows .ico asset consistently for:
+
+- Packaged executable
+- Desktop window where supported
+- Installer
+- Start Menu shortcut
+- Desktop shortcut
+- Add/Remove Programs entry
+
+Prefer an existing approved product icon when one exists.
+
+If no final icon exists, add and use a clearly documented temporary local icon
+suitable for development packaging. Do not download an icon or use copyrighted
+third-party artwork.
+
+Keep replacement of the temporary icon straightforward before V1 release.
+
+PyInstaller bundle
+
+Use PyInstaller to create a windowed one-folder bundle.
+
+Create and check in a clear PyInstaller spec file.
+
+Requirements:
+
+- Use onedir rather than onefile.
+- Suppress the console window in the customer build.
+- Use the existing production desktop entrypoint.
+- Bundle all required Python packages.
+- Bundle Flask templates.
+- Bundle static CSS and JavaScript.
+- Bundle local loading and startup-error assets.
+- Bundle documentation required at runtime.
+- Bundle the Windows application icon.
+- Include pywebview’s required Windows components.
+- Exclude unrelated GUI frameworks and development packages.
+- Do not bundle tests, development databases, source-control files, caches,
+  local virtual environments, or customer data.
+- Do not include the repository’s data/app.db.
+- Do not include backups, recovery snapshots, logs, or local test artifacts.
+- Ensure no absolute development-machine paths remain in the package.
+
+Resolve bundled read-only resources correctly in both:
+
+- Normal source execution
+- PyInstaller frozen execution
+
+Use PyInstaller’s supported frozen-runtime behavior rather than relying on the
+current working directory.
+
+The packaged application must launch by double-clicking the executable without
+requiring:
+
+- Python
+- pip
+- A virtual environment
+- VS Code
+- A terminal
+- Internet access
+
+Windows customer-data location
+
+Configure packaged Windows execution to use:
+
+%LOCALAPPDATA%\The Fixer's Desk\Food Truck Event Profit Calculator
+
+Resolve all mutable files beneath that directory through the existing
+centralized application-data path system.
+
+Include:
+
+- Live SQLite database
+- Logs
+- Automatic recovery snapshots
+- Backup and restore staging
+- Pywebview storage or browser-profile data
+- Single-instance lock
+- Shell temporary files
+
+Requirements:
+
+- Create required directories on first launch.
+- Do not place mutable files in the installer directory.
+- Do not write beside the executable.
+- Do not write beneath templates, static files, or bundled resources.
+- Preserve the existing configurable development-data path outside packaged
+  Windows execution.
+- Preserve the ability of automated tests to use isolated temporary roots.
+
+Do not move or delete the development data/app.db during packaging or testing.
+
+WebView2 Runtime
+
+Use pywebview’s Windows Edge Chromium renderer.
+
+The Windows installer must operate without internet access.
+
+Bundle the official x64 Microsoft Edge WebView2 Evergreen Standalone Installer
+as an installer prerequisite.
+
+During installation:
+
+- Detect whether a valid WebView2 Runtime is already installed.
+- Check supported per-machine and per-user installation locations or use an
+  appropriate supported detection method.
+- Do not reinstall the Runtime when a valid installation exists.
+- When missing, run the bundled x64 Evergreen Standalone Installer silently.
+- Verify the prerequisite installation succeeded before completing the
+  application installation.
+- Show a clear installer error if the Runtime cannot be installed.
+- Do not launch the application when the prerequisite failed.
+
+Do not:
+
+- Download WebView2 during installation
+- Depend on an internet bootstrapper
+- Bundle a Fixed Version WebView2 directory into the application
+- Fall back to the deprecated MSHTML renderer
+
+Keep the Microsoft prerequisite installer outside the installed application
+directory after setup completes unless it is genuinely needed there.
+
+Do not commit a downloaded Microsoft installer binary if repository policy
+excludes third-party binaries. In that case:
+
+- Provide a documented expected local build path.
+- Add an acquisition/checksum-verification build step.
+- Fail the installer build clearly when the prerequisite file is absent.
+- Never silently download an unverified executable.
+
+Inno Setup installer
+
+Use Inno Setup to create a per-user x64 installer.
+
+Configure:
+
+- Stable AppId
+- AppName
+- AppVersion
+- AppPublisher
+- Version metadata
+- x64-compatible architecture
+- PrivilegesRequired=lowest
+- Per-user installation
+- Normal Windows uninstall registration
+- Modern compression
+- Installer icon
+- Uninstaller icon where supported
+
+Default installation directory:
+
+%LOCALAPPDATA%\Programs\The Fixer's Desk\Food Truck Event Profit Calculator
+
+Use the appropriate Inno Setup constants rather than hardcoding the current
+Windows username or profile path.
+
+Install the complete PyInstaller one-folder output beneath the application
+installation directory.
+
+Shortcuts
+
+Create:
+
+1. Start Menu shortcut
+   - Always created
+   - Name:
+     Food Truck Event Profit Calculator
+
+2. Desktop shortcut
+   - Presented as an installer task
+   - Selected by default
+   - Customer may deselect it
+
+Both shortcuts must:
+
+- Launch the packaged executable directly
+- Use the product icon
+- Use the installation directory as the working directory where needed
+- Contain no Python, terminal, or development-machine paths
+
+Do not create:
+
+- Startup-folder shortcuts
+- Browser shortcuts
+- URL shortcuts
+- Multiple duplicate Start Menu entries
+
+Installation behavior
+
+Support:
+
+- Clean first installation
+- Installation over an existing older package
+- Repair-style reinstall of the same version where practical
+- Launch after successful interactive installation
+- Silent installation without forced application launch
+
+When installing over an existing version:
+
+- Reuse the stable application identity and installation location.
+- Replace installed application files safely.
+- Preserve customer data.
+- Preserve backups and recovery snapshots.
+- Preserve existing database schema and allow application startup to perform
+  established migrations.
+- Do not create duplicate Add/Remove Programs entries.
+- Do not create duplicate shortcuts.
+
+Do not implement automatic update discovery or downloading.
+
+Running-application handling
+
+Use the desktop shell’s established single-instance identity and an appropriate
+installer application mutex or running-process safeguard.
+
+When installation or uninstallation is attempted while the application is
+running:
+
+- Ask the customer to close it or close it safely through supported installer
+  behavior.
+- Do not terminate it during an active database write without coordination.
+- Do not replace files while the running process still uses them.
+- Do not corrupt or delete customer data.
+
+Uninstallation behavior
+
+Uninstallation should remove:
+
+- Installed application files
+- Start Menu shortcut
+- Desktop shortcut created by the installer
+- Installer-owned registry information
+- Uninstaller files
+
+Uninstallation must preserve:
+
+- Customer database
+- Business Defaults
+- Events
+- Scenarios
+- Customer-created backups
+- Automatic recovery snapshots
+- Logs
+- Other data beneath the customer-data directory
+
+Do not offer a destructive “remove all data” checkbox in this milestone.
+
+Where practical, show or document that customer data remains available for
+reinstallation.
+
+Reinstalling after uninstall must reconnect to the preserved data and open the
+appropriate Welcome or Dashboard state.
+
+Executable and installer metadata
+
+Add appropriate Windows version metadata, including:
+
+- Product name
+- File description
+- Publisher or company name
+- Product version
+- File version
+- Copyright
+- Original executable filename
+
+Do not claim:
+
+- Microsoft certification
+- Digital signature
+- Trademark ownership not held by the project
+- A final V1 release when the current version is still prerelease
+
+Signing readiness
+
+Create clearly documented optional signing hooks for:
+
+- The packaged executable
+- The installer
+
+Accept signing configuration from the build environment.
+
+Do not:
+
+- Generate a fake certificate
+- Commit private keys
+- Commit certificate passwords
+- Require signing for ordinary developer builds
+- Mark unsigned artifacts as signed
+
+A signed build should fail clearly when signing is explicitly requested but
+the required certificate configuration is unavailable.
+
+Build automation
+
+Add a reproducible PowerShell build script or equivalent Windows build
+orchestration.
+
+The build should:
+
+1. Verify it is running on supported Windows x64.
+2. Verify the correct Python environment.
+3. Verify required build tools and versions.
+4. Run the focused packaging tests.
+5. Run the complete automated test suite unless explicitly skipped for a
+   documented developer-only reason.
+6. Clean prior build output.
+7. Build the PyInstaller one-folder application.
+8. Validate the bundle contents.
+9. Smoke-test the packaged executable.
+10. Apply optional executable signing.
+11. Compile the Inno Setup installer.
+12. Apply optional installer signing.
+13. Validate generated artifact names and metadata.
+14. Produce checksums for distributable artifacts.
+15. Place final outputs in a clear release-artifacts directory.
+
+Do not automatically install missing build tools or modify the developer’s
+system configuration.
+
+Fail with clear instructions when:
+
+- PyInstaller is missing
+- Inno Setup Compiler is missing
+- The icon is missing
+- The WebView2 offline prerequisite is missing
+- Required runtime files are absent
+- Tests fail
+- Packaging fails
+- Explicitly requested signing fails
+
+Pin or record the packaging-tool versions used for reproducibility.
+
+Build cleanliness
+
+Before packaging:
+
+- Remove stale PyInstaller build and dist output.
+- Remove stale installer output.
+- Do not delete customer or development databases.
+- Do not remove repository documentation or source files.
+
+After packaging, inspect the bundle and installer inputs to ensure they contain
+no:
+
+- SQLite customer database
+- .ftbackup files
+- Recovery snapshots
+- Logs
+- Test data
+- pytest caches
+- Git metadata
+- Environment files
+- Secrets
+- Developer usernames or absolute paths
+- Unneeded GUI frameworks
+
+Packaged executable verification
+
+Test the frozen executable directly before creating the installer.
+
+Verify:
+
+- It launches without a console window.
+- It opens one native application window.
+- It starts the local server automatically.
+- It uses only 127.0.0.1.
+- It creates customer data in LocalAppData.
+- It does not write to the bundle directory.
+- It creates or opens the database correctly.
+- It completes onboarding on a clean data root.
+- It opens existing customer data correctly.
+- Live calculations work.
+- Scenario saving works.
+- Backup creation works.
+- Restore validation works.
+- The second application launch is rejected safely.
+- Closing the window stops the local server.
+- It operates with external network access blocked.
+
+Installer verification
+
+Verify using clean, isolated Windows test environments where practical:
+
+Clean installation:
+
+- Installer runs without administrator elevation.
+- WebView2 is detected or installed from the bundled offline prerequisite.
+- Application files are installed in the correct per-user location.
+- Start Menu shortcut is created.
+- Desktop shortcut follows the chosen installer option.
+- Add/Remove Programs entry is correct.
+- Application launches successfully.
+- First-use behavior works.
+
+Existing-data installation:
+
+- Existing LocalAppData customer records remain intact.
+- Dashboard, Events, Scenarios, and Defaults load correctly.
+
+Upgrade:
+
+- Installing a newer package over an older package produces one installed
+  product entry.
+- Application files update.
+- Customer data remains unchanged.
+- Required database migrations run safely on launch.
+- Shortcuts remain valid.
+
+Same-version reinstall:
+
+- Application remains launchable.
+- Customer data remains intact.
+- Duplicate shortcuts or uninstall entries are not created.
+
+Uninstall:
+
+- Application files and installer-owned shortcuts are removed.
+- Customer data remains intact.
+- Uninstall succeeds without internet access.
+- Reinstallation finds and uses the preserved customer data.
+
+Failure states:
+
+- Missing WebView2 prerequisite file prevents the installer build.
+- Failed WebView2 installation prevents application launch.
+- A running application is handled safely.
+- A damaged customer database enters the established recovery state.
+- Installer failure does not remove existing customer data.
+
+Testing
+
+Add focused automated tests where packaging behavior can be tested without a
+full Windows installer environment, including:
+
+- Frozen-resource resolution
+- Packaged Windows data-root selection
+- Product and version metadata values
+- Exclusion of customer-data files
+- Stable application and installer identifiers
+- Build-script validation
+- Artifact naming
+- Shortcut definitions
+- Per-user installation configuration
+- Data-preserving uninstall configuration
+- WebView2 detection logic
+- Missing-prerequisite failure
+- Optional-signing configuration
+- Bundle-content auditing
+- Build imports creating no desktop side effects
+
+Use manual or scripted Windows acceptance checks for behavior that cannot be
+reliably tested inside pytest.
+
+Do not weaken tests merely because code is frozen.
+
+Documentation
+
+Add concise developer documentation explaining:
+
+- Supported Windows versions and architecture
+- Required packaging tools
+- How to obtain and verify the WebView2 offline installer
+- How to provide the Windows icon
+- How to create a clean development package
+- How to create a signing-enabled package
+- Artifact locations
+- Installer behavior
+- Install and customer-data paths
+- Upgrade behavior
+- Uninstall data-preservation behavior
+- Clean Windows acceptance-testing procedure
+- Known unsigned-development-build behavior
+
+Scope
+
+Do not implement:
+
+- macOS packaging
+- ARM64 Windows packaging
+- 32-bit Windows packaging
+- Microsoft Store distribution
+- MSIX
+- Automatic updates
+- License-key systems
+- Cloud services
+- Telemetry
+- Crash-report uploading
+- Destructive data removal during uninstall
+- Final V1 publication
+
+Do not change business functionality, calculations, persistence rules, or
+customer workflows.
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused packaging, frozen-runtime, data-path, and metadata tests.
+2. Run the full automated test suite.
+3. Run git diff --check.
+4. Build the PyInstaller Windows bundle when the required Windows tools are
+   available.
+5. Build the Inno Setup installer when the required prerequisite files and
+   compiler are available.
+6. Report the exact generated artifact paths and SHA-256 checksums.
+7. Summarize clean install, upgrade, uninstall, and data-preservation behavior.
+8. List every manual Windows acceptance check completed.
+9. Clearly report any packaging tool, prerequisite, signing certificate, or
+   clean test environment that was unavailable.
+
+Keep the response concise.

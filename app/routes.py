@@ -258,6 +258,9 @@ def calculator():
                     create_event_with_initial_scenario(identity, scenario)
                 )
             except sqlite3.Error:
+                current_app.logger.exception(
+                    "Event and initial Scenario persistence failed."
+                )
                 save_error = (
                     "The event could not be saved. Please try again."
                 )

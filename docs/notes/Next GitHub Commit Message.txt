@@ -2,6 +2,33 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
+Repair mixed event_scenarios schema with a Version 2 migration
+
+- Add Version 2 migration to rebuild event_scenarios with the approved schema
+- Remove obsolete legacy demand-model columns
+- Preserve compatible Scenario data, relationships, IDs, timestamps, and indexes
+- Strengthen schema verification to detect incompatible legacy schemas
+- Add persistence exception logging while keeping customer messages friendly
+- Add migration, rollback, compatibility, and persistence regression tests
+- Preserve atomic Event and Scenario creation behavior
+
+---------------------------------------------------------------------------------
+
+Improve Event Inputs guidance, contextual warnings, sales controls, input
+  organization, and customer-facing number formatting
+
+- Improve weather guidance and accessible help
+- Add earlier contextual warnings during Event Inputs
+- Remove Event Inputs result previews
+- Move custom expected sales control to the Event Analysis workspace
+- Reorganize Event Inputs into causal input groups
+- Standardize customer-facing whole-number formatting
+- Round expected buyers down and break-even customers up
+- Preserve existing calculations, persistence, and business formulas
+- Add and update regression tests
+
+---------------------------------------------------------------------------------
+
 Complete V1 UI and UX design and polish
 
 - Define the V1 visual direction, design tokens, and reusable components

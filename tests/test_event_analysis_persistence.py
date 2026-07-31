@@ -65,7 +65,7 @@ def test_valid_submission_persists_complete_original_estimate(
 
 
 def test_initial_save_rolls_back_if_a_child_write_fails(
-    client, database_path, monkeypatch
+    client, database_path, monkeypatch, caplog
 ):
     def fail_children(*args):
         raise sqlite3.IntegrityError("child failure")
@@ -85,6 +85,17 @@ def test_initial_save_rolls_back_if_a_child_write_fails(
         assert database.execute(
             "SELECT COUNT(*) FROM event_scenarios"
         ).fetchone()[0] == 0
+    records = [
+        record
+        for record in caplog.records
+        if "Event and initial Scenario persistence failed."
+        in record.getMessage()
+    ]
+    assert len(records) == 1
+    assert records[0].exc_info[0] is sqlite3.IntegrityError
+    logged = caplog.text
+    assert "Summer Festival" not in logged
+    assert "Town Square" not in logged
 
 
 def test_separate_valid_submissions_create_separate_events(

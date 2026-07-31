@@ -1,0 +1,624 @@
+Implement the milestone:
+
+Add complete automated end-to-end workflow tests.
+
+The full V1 application workflows, desktop shell, Windows packaging,
+macOS packaging, calculations, persistence, migrations, backup and restore,
+responsive design, and accessibility behavior already exist.
+
+Add automated browser-level and desktop-lifecycle tests proving that the
+customer’s critical workflows operate correctly when the complete application
+is assembled.
+
+Testing technology
+
+Use the official Playwright pytest plugin for browser end-to-end tests.
+
+Add only the narrowly required development and testing dependencies.
+
+Use:
+
+- Chromium for the complete end-to-end suite
+- Firefox and WebKit for a smaller critical-workflow smoke suite
+
+Document the Playwright browser-installation command required after installing
+Python dependencies.
+
+Do not require every developer test run to execute the full suite in all three
+browser engines.
+
+Do not introduce Selenium, Cypress, or a second browser-automation framework.
+
+Test architecture
+
+Create a clearly separated end-to-end test area, such as:
+
+tests/e2e/
+
+Keep end-to-end tests distinct from:
+
+- Unit tests
+- Domain tests
+- Repository tests
+- Route tests
+- Packaging tests
+- Manual platform-acceptance checks
+
+Provide reusable pytest fixtures for:
+
+- Isolated temporary application-data directories
+- Real temporary SQLite databases
+- Database migration and startup
+- Real Flask servers bound to 127.0.0.1
+- Operating-system-selected available ports
+- Browser base URLs
+- Clean browser contexts
+- Download directories
+- Restarting the application against the same temporary customer data
+- Starting with deliberately prepared saved data when a workflow genuinely
+  requires it
+- Cleaning all server threads, files, and processes after tests
+
+Every browser test must use an isolated application-data root unless a
+specific restart test deliberately reuses its own temporary root.
+
+Never read, modify, copy over, migrate, back up, or restore the real:
+
+data/app.db
+
+Do not use customer or developer backup files as fixtures.
+
+Real-system boundary
+
+Browser end-to-end tests must exercise:
+
+- Real Flask routes
+- Real templates
+- Real CSS and JavaScript
+- Real form validation
+- Real calculation logic
+- Real SQLite persistence
+- Real database migrations
+- Real backup generation
+- Real restore validation
+- Real session behavior
+- Real navigation safeguards
+
+Do not mock:
+
+- Calculation results
+- Database repositories
+- Save behavior
+- Scenario loading
+- Comparison calculations
+- Backup contents
+- Restore replacement
+- Setup-completion detection
+
+Mock only genuinely external or native boundaries where unavoidable, such as:
+
+- The pywebview native-window adapter in headless lifecycle tests
+- Operating-system file dialogs not used by the browser interface
+- Platform signing or installer behavior, which is outside this milestone
+
+Customer-oriented locators
+
+Prefer Playwright locators based on:
+
+- Accessible role
+- Visible label
+- Accessible name
+- Visible text where appropriate
+
+Use test IDs only when no stable customer-visible or semantic locator exists.
+
+Do not rely on:
+
+- XPath
+- Deep CSS selectors
+- Element position
+- Generated framework classes
+- Database identifiers exposed only for tests
+- Exact incidental whitespace
+- Exact timestamps unless time is explicitly controlled
+
+The tests should reinforce the accessibility work rather than bypass it.
+
+Waiting and reliability
+
+Do not use arbitrary sleep calls.
+
+Use:
+
+- Playwright’s normal actionability waiting
+- Auto-retrying assertions
+- Explicit waiting for meaningful customer-visible states
+- Expected downloads
+- Relevant route or calculation responses where necessary
+- Application-provided status regions
+
+For live Event Analysis:
+
+- Wait for the updating state when useful.
+- Wait for the completed analysis status or updated displayed value.
+- Ensure an older response does not replace a newer edit.
+- Do not depend on a hardcoded debounce duration.
+
+Configure sensible test-level timeouts without hiding genuine hangs behind
+excessively long global timeouts.
+
+Test-data strategy
+
+Create concise builders or helpers for entering predictable customer data.
+
+Use realistic but clearly fictional values.
+
+Maintain at least:
+
+1. One standard profitable Event
+2. One weaker alternate Scenario
+3. One loss-producing Scenario
+4. One Event suitable for comparison across Events
+5. Business Defaults containing employee labor and a profit target
+6. A Scenario containing multiple labor rows and miscellaneous costs
+
+Avoid scattering large duplicated field-entry blocks across every test.
+
+Do not build an elaborate page-object framework.
+
+Use small focused helpers for repeated customer actions, such as:
+
+- Complete first-time Defaults
+- Enter a standard Event
+- Wait for live analysis completion
+- Save as a new Scenario
+- Open Saved Events
+- Select Scenarios for comparison
+- Download a backup
+- Upload and confirm a restore
+
+Helpers must still operate through the visible UI.
+
+Complete customer-journey test
+
+Add one complete browser journey that begins with a fresh application-data
+directory and proves the following sequence:
+
+1. Launch the fresh application.
+2. Verify the Welcome screen appears.
+3. Review the four-step introduction.
+4. Select Get started.
+5. Enter and save complete Business Defaults.
+6. Verify navigation to Dashboard.
+7. Start a new Event analysis.
+8. Verify applicable Defaults are prefilled.
+9. Enter the complete Event-specific information.
+10. Submit Event Inputs.
+11. Verify:
+    - The Event is automatically saved
+    - The Original estimate Scenario is created
+    - The interactive workspace opens
+    - Initial results are displayed
+12. Change multiple workspace assumptions, including:
+    - Attendance
+    - Weather or event protection
+    - Percentage expected to buy food
+    - Competing food vendors
+    - One revenue or cost assumption
+    - Employee labor
+13. Verify dependent revenue, cost, profit, margin, break-even, target, and
+    warning output updates without a Calculate button.
+14. Save the adjusted state as a new named Scenario.
+15. Modify it again and overwrite the active Scenario with explicit
+    confirmation.
+16. Open Saved Events.
+17. Verify the Event and both Scenarios appear.
+18. Open each Scenario and verify its saved assumptions and recalculated
+    results differ as expected.
+19. Compare the two Scenarios.
+20. Change the comparison baseline.
+21. Enable Show differences only.
+22. Open one Scenario from comparison.
+23. Download a customer backup.
+24. Make a visible persisted change after the backup, such as renaming a
+    Scenario or creating another Scenario.
+25. Restore the downloaded backup through the customer interface.
+26. Confirm complete replacement.
+27. Verify the post-backup change is absent.
+28. Verify the backed-up Defaults, Event, Scenarios, and ordered child rows
+    remain.
+29. Restart the Flask application using the same temporary data root.
+30. Verify launch opens Dashboard and all restored data remains usable.
+
+This journey must not inspect or manipulate the database directly to prove
+customer-visible outcomes.
+
+Focused onboarding and Defaults workflow
+
+Add browser tests covering:
+
+- Fresh launch opening Welcome
+- Get started opening Defaults
+- Invalid Defaults remaining on the form
+- Error summary and field errors appearing
+- Entered values remaining intact
+- Successful setup opening Dashboard
+- Restart after setup opening Dashboard
+- Existing Defaults preventing repeat onboarding
+- Updating Defaults without altering saved Event assumptions
+- Analyze new event using the latest Defaults
+
+Focused Event Inputs and workspace workflow
+
+Add browser tests covering:
+
+- Complete Event Inputs submission
+- Automatic Event and Original estimate persistence
+- Invalid submission creating no visible saved Event
+- Defaults indicators and event-specific override indicators
+- Shared food-demand indicator
+- Live recalculation after meaningful changes
+- Adding and removing labor rows
+- Adding and removing miscellaneous-cost rows
+- Custom expected-sales behavior
+- Invalid live edits preserving the latest valid results
+- Correcting the invalid field updating results
+- Reset changes restoring the active saved baseline
+- Start new analysis opening a clean form
+- Dirty-workspace navigation confirmation
+- Canceling navigation preserving current edits
+- Confirming navigation leaving the saved Scenario unchanged
+
+Focused Scenario version workflow
+
+Add browser tests covering:
+
+- Original estimate being created automatically
+- Save being disabled when the workspace is clean
+- Save as new Scenario being selected by default
+- Blank Scenario-name validation
+- Duplicate-name validation
+- Case-insensitive duplicate detection
+- Save as new preserving the original Scenario
+- New Scenario becoming active
+- Overwrite requiring explicit confirmation
+- Overwrite changing only the active Scenario
+- Reset baseline updating after a successful save
+- Failed save preserving workspace values and results
+
+Focused Saved Events workflow
+
+Add browser tests covering:
+
+- Empty Saved Events state
+- Events grouped with their Scenarios
+- Opening a saved Scenario
+- Loaded workspace beginning clean
+- Renaming an Event
+- Renaming a Scenario
+- Duplicate Scenario-name rejection
+- Deleting a non-final Scenario
+- Blocking individual deletion of the final Scenario
+- Deleting an Event and all its Scenarios after confirmation
+- Restart persistence for renames and deletions
+- Missing saved records producing friendly behavior
+
+Focused comparison workflow
+
+Add browser tests covering:
+
+- Insufficient selection
+- Comparing two Scenarios from one Event
+- Comparing Scenarios from different Events
+- Selecting three and four Scenarios
+- Preventing selection beyond four
+- Initial baseline assignment
+- Changing the baseline
+- Financial-result differences
+- Percentage-point differences
+- Assumption differences
+- Target and warning differences
+- Tie labels where fixture data creates ties
+- Show differences only
+- Opening every compared Scenario in the existing workspace
+- Comparison creating no visible duplicate records
+
+Focused backup and restore workflow
+
+Add browser tests covering:
+
+- Downloading a valid .ftbackup file
+- The downloaded filename and extension
+- Restoring that backup after changing current data
+- Complete replacement rather than merging
+- Setup destination after restoring data with Defaults
+- Welcome destination after restoring a valid backup without Defaults, if such
+  a supported backup state exists
+- Invalid archive rejection
+- Checksum-mismatch rejection
+- Newer unsupported backup rejection
+- Canceling restore
+- Restore confirmation wording
+- Current data remaining after restore validation failure
+- Pre-restore recovery snapshot behavior where customer-visible or safely
+  verifiable through the isolated test data root
+- Restored data persisting after application restart
+
+It is acceptable for narrowly technical backup-archive preparation in invalid
+backup tests to use dedicated test helpers, but the actual upload, confirmation,
+error, and successful restore must occur through the customer interface.
+
+Application restart
+
+Provide a reusable application restart fixture or helper that:
+
+- Stops the current test Flask server cleanly
+- Waits for its thread to terminate
+- Preserves the test’s isolated application-data directory
+- Starts a new application instance against that same directory
+- Uses a new available loopback port if needed
+- Opens a fresh browser context
+- Does not retain stale cookies or temporary in-memory application state unless
+  the specific test deliberately covers session behavior
+
+Verify restart persistence for:
+
+- Setup completion
+- Defaults
+- Events
+- Scenarios
+- Scenario names
+- Ordered labor rows
+- Ordered miscellaneous-cost rows
+- Renames
+- Deletions
+- Restored backup data
+- Migration version
+
+Desktop-shell closure journey
+
+Add a separate automated shell-lifecycle test using the real desktop shell
+orchestrator with an injected headless test window adapter.
+
+Do not require a graphical display.
+
+The journey must:
+
+1. Use an isolated application-data root.
+2. Acquire the real single-instance lock.
+3. Initialize and migrate a real temporary database.
+4. Start the real loopback Werkzeug server.
+5. Complete the readiness check.
+6. Record that the headless window adapter received the application URL.
+7. Trigger the same application-close callback used by pywebview.
+8. Verify the server stops accepting connections.
+9. Verify the server thread terminates.
+10. Verify shell temporary files are cleaned where expected.
+11. Verify the instance lock is released.
+12. Start a second shell lifecycle successfully against the same data root.
+13. Close it successfully again.
+
+Also cover:
+
+- Closing during the loading phase
+- Repeated close signals
+- Startup failure after acquiring the lock
+- Startup failure after starting the server
+- Cleanup after failure
+- The database remaining valid after controlled shutdown
+
+Do not claim this proves native window behavior on Windows or macOS.
+
+Actual packaged-window closure remains a platform acceptance test.
+
+Offline browser journey
+
+Run at least one representative complete browser workflow while rejecting all
+non-loopback network requests.
+
+Allow:
+
+- The application’s own 127.0.0.1 origin
+
+Fail the test if the application attempts to require:
+
+- Remote scripts
+- Remote styles
+- Remote fonts
+- Remote images
+- Remote APIs
+- Telemetry
+- Authentication
+
+Do not block the browser’s internal implementation traffic in a way unrelated
+to the application.
+
+Cross-browser smoke suite
+
+Mark a small critical smoke suite for Chromium, Firefox, and WebKit.
+
+Include at least:
+
+- Fresh onboarding and Defaults save
+- Creating one Event
+- Opening the Event Analysis workspace
+- One live recalculation
+- Saving a new Scenario
+- Opening Saved Events
+- Comparing two Scenarios
+
+Run the complete browser suite in Chromium.
+
+Do not require the entire full suite to run in all three engines for every
+ordinary development run.
+
+Diagnostics
+
+Configure useful failure artifacts.
+
+On failed browser tests, retain:
+
+- A screenshot
+- A Playwright trace
+- Relevant browser console errors
+- Relevant failed application requests
+- Server log location for the isolated test run
+
+Do not include customer or real developer data.
+
+Do not retain screenshots or traces for every successful test unless
+explicitly requested.
+
+Store generated test artifacts under an ignored test-results directory.
+
+Assertions
+
+Assert customer-visible behavior and persisted behavior through the UI.
+
+Prefer assertions such as:
+
+- Current heading
+- Status text
+- Field values
+- Visible financial result
+- Visible Scenario name
+- Saved Events grouping
+- Comparison difference
+- Success or validation message
+- Correct route or workflow destination
+
+Do not over-specify:
+
+- Exact CSS classes
+- Exact pixel positions
+- Entire page HTML
+- Incidental whitespace
+- Current wall-clock timestamps
+- Generated internal IDs
+
+Use numeric assertions carefully.
+
+When the displayed value is rounded for customers:
+
+- Assert the documented displayed value.
+- Rely on existing unit tests for exact internal Decimal precision.
+
+Test-suite commands
+
+Add clear pytest markers, such as:
+
+- e2e
+- e2e_smoke
+- desktop_lifecycle
+
+Provide documented commands for:
+
+- Chromium full E2E suite
+- Cross-browser smoke suite
+- Desktop lifecycle suite
+- Complete existing test suite
+- Headed debugging
+- Retaining and opening failure traces
+
+Ensure ordinary unit tests do not automatically download browsers or open
+windows.
+
+Continuous-integration readiness
+
+Make the tests suitable for later CI use.
+
+- Keep browser installation explicit.
+- Support headless execution.
+- Use deterministic isolated directories.
+- Avoid developer-machine paths.
+- Avoid dependence on existing customer data.
+- Avoid requiring internet access after required Playwright browsers have been
+  installed.
+- Return nonzero status on failures.
+- Keep failure artifacts in predictable locations.
+
+Do not add a new hosted CI service or workflow unless the repository already
+has an established CI configuration that should naturally be extended.
+
+Regression safety
+
+Do not change production behavior merely to make tests pass.
+
+Small testability improvements are allowed when they:
+
+- Use dependency injection
+- Expose clean lifecycle boundaries
+- Permit isolated data roots
+- Permit deterministic clocks where genuinely needed
+- Preserve identical production behavior
+
+Do not add publicly accessible test-only routes.
+
+Do not weaken:
+
+- Validation
+- Route protection
+- Transactions
+- Restore verification
+- Dirty-workspace protection
+- Single-instance protection
+- Navigation safeguards
+- Calculation rules
+
+Scope
+
+Do not implement:
+
+- Windows installer acceptance automation
+- macOS DMG acceptance automation
+- Native UI automation against packaged applications
+- Code signing tests requiring real certificates
+- Notarization tests requiring Apple credentials
+- Automatic release publication
+- New customer functionality
+- New calculations
+- New workflow behavior
+- Visual screenshot-regression testing
+- Performance load testing
+
+Those platform-specific installation and packaged-application checks belong to
+the next V1 acceptance-testing milestone.
+
+Documentation
+
+Add concise developer documentation covering:
+
+- Required test dependencies
+- Installing Playwright browser binaries
+- E2E test architecture
+- Test-data isolation
+- Running Chromium tests
+- Running cross-browser smoke tests
+- Running headed tests
+- Inspecting traces and screenshots
+- Desktop-shell lifecycle testing
+- Restart testing
+- Offline testing
+- Why real customer data must never be used
+- What remains for Windows and macOS acceptance testing
+
+Afterward:
+
+1. Install only the required Playwright browser binaries when the environment
+   permits it.
+2. Run the focused Chromium E2E suite.
+3. Run the cross-browser smoke suite when the browsers are available.
+4. Run the desktop lifecycle suite.
+5. Run the complete automated test suite.
+6. Run git diff --check.
+7. Summarize the automated customer journeys added.
+8. Report every command and its exact result.
+9. List all retained failure artifacts if anything failed.
+10. Clearly report any unavailable browser binary, graphical capability, or
+    environment limitation.
+
+Do not make unrelated changes.
+Do not commit.
+
+Keep the response concise.
+

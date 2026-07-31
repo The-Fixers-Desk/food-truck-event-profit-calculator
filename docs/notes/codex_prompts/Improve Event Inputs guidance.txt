@@ -1,0 +1,467 @@
+Implement the corrective milestone:
+
+Improve Event Inputs guidance, contextual warnings, sales controls, input
+organization, and customer-facing number formatting.
+
+The Event and Scenario save failure has been investigated and resolved
+separately. Do not broaden this task into another persistence investigation.
+
+The calculation engine, shared-demand model, structured warnings, Event Inputs
+form, interactive Event Analysis workspace, and Scenario persistence already
+exist.
+
+Make the following customer-experience corrections without changing established
+business formulas.
+
+Weather percentage explanation
+
+The current Weather outlook choices display values such as:
+
+“Minor concern — 5%”
+
+Keep the percentage visible, but clearly explain what it means.
+
+Directly beneath Weather outlook, add concise help text:
+
+“The percentage is the estimated reduction in event attendance caused by the
+selected weather.”
+
+Directly beneath Event protection, add concise help text:
+
+“The percentage shown is the final estimated attendance reduction after
+accounting for how protected the event is.”
+
+Add a small keyboard-accessible question-mark information control beside the
+Weather outlook label.
+
+The control must have an accessible name such as:
+
+“What do the weather percentages mean?”
+
+When activated, display a compact disclosure, popover, or dialog explaining:
+
+- The Weather outlook percentage is the base estimated attendance reduction.
+- Event protection reduces or preserves that weather effect.
+- The percentage displayed beside each protection option is the resulting
+  final attendance reduction.
+- These are planning estimates, not guaranteed attendance outcomes.
+
+Include one concise example:
+
+- Minor concern creates a 5% base reduction.
+- Partially covered applies 75% of that weather effect.
+- The final estimated attendance reduction is 3.75%.
+
+Do not add a dependency merely to implement the information control.
+
+Customer-facing whole-number rules
+
+Preserve exact Decimal values internally for calculations.
+
+Change customer-facing formatting so:
+
+Expected buyers per vendor:
+- Always round down to the lower whole number.
+- Use Decimal floor behavior.
+- Because this value is nonnegative, examples include:
+  - 125.125 displays as 125
+  - 125.999 displays as 125
+  - 125.000 displays as 125
+
+Break-even customers:
+- Always round upward to the minimum whole customer required.
+- Use Decimal ceiling behavior.
+- Examples:
+  - 82.000 displays as 82
+  - 82.0001 displays as 83
+  - 82.63784476351351351351351351 displays as 83
+
+Apply these rules anywhere these customer-facing figures appear, including:
+
+- Event Inputs warnings
+- Event Analysis workspace
+- Saved Scenario review
+- Scenario comparison
+- Warning messages
+- Summary cards
+- Review text
+
+Never expose raw repeating or long Decimal customer counts to the customer.
+
+If the interface currently displays an “Exact break-even customers” value,
+remove that raw customer-facing value or replace it with:
+
+“Break-even customers”
+
+using the rounded-up whole number.
+
+The engine may retain the exact value for calculations, comparisons, and tests.
+
+When comparison differences use break-even customer counts, keep the visible
+values understandable and consistent with the displayed whole-customer rule.
+
+Remove Event Inputs result previews
+
+Remove the current Event Inputs panels or sections titled or functioning as:
+
+- Early demand estimate
+- Estimated sales preview
+
+The Event Inputs workflow must not display a miniature results report before
+the customer reaches the Event Analysis workspace.
+
+Do not show these result values on Event Inputs:
+
+- Weather-adjusted attendance
+- Total expected food buyers
+- Total vendor count
+- Expected buyers per vendor
+- Expected orders
+- Expected sales
+- Total costs
+- Profit
+- Margin
+- Break-even results
+
+Contextual warning messages are still required and are handled below.
+
+Move custom expected sales to the workspace
+
+Remove the custom expected-sales option and amount from Event Inputs entirely.
+
+A newly submitted Event must begin from the calculator’s normal
+attendance-based sales estimate.
+
+For the automatically created Original estimate Scenario:
+
+- Custom expected sales must be inactive.
+- The calculated sales method must be used.
+
+Keep custom expected sales in the interactive Event Analysis workspace.
+
+In the workspace:
+
+- Present it as a secondary Scenario-adjustment control.
+- Use a checkbox, switch, or similarly compact control labeled:
+  “Use a custom expected sales amount”
+- Keep the control off by default for a newly opened calculated Scenario.
+- Reveal the custom amount field only when the control is enabled.
+- When disabled, the custom value must not affect calculations.
+- Preserve the existing factual warning that custom revenue is being combined
+  with demand-based order costs.
+- Preserve existing saved Scenarios that already use custom expected sales.
+- Do not remove custom-sales fields from the domain model or database schema.
+
+Reorganize Event Inputs around causal warning groups
+
+Reorder the existing Event Inputs controls so assumptions that work together
+and can trigger the same warning are kept together.
+
+Do not implement the final guided stepper or complete visual-polish milestone
+yet. Correct the current functional form structure.
+
+Use this organization:
+
+1. Event information
+   - Event name
+   - Event date
+   - Start time
+   - Location
+
+2. Demand and sales potential
+   - Estimated attendance
+   - Weather outlook
+   - Event protection
+   - Custom weather reduction when applicable
+   - Percentage of attendees expected to buy food
+   - Other competing food vendors
+   - Average order sale amount
+
+3. Food and transaction costs
+   - Food and packaging method
+   - Matching food and packaging value
+   - Percentage of sales paid by card
+   - Card-processing percentage
+   - Fixed card-processing fee per card transaction
+   - Organizer commission or revenue share
+
+4. Labor
+   - Employee labor entries
+   - Owner labor pay
+
+5. Fixed event costs and fees
+   - Travel
+   - Parking
+   - Permit
+   - Generator or utility cost
+   - Vendor or booking fee
+   - Named additional costs
+
+6. Profit target
+   - Profit-target type
+   - Matching profit amount or margin
+
+Keep conditional fields visually and programmatically associated with the
+choice that activates them.
+
+Preserve all existing values, validation, repeatable-row ordering, default
+indicators, and form-submission behavior.
+
+Calculated warnings during Event Inputs
+
+Event Inputs must provide warnings at the earliest point where enough valid
+information exists to calculate them.
+
+Do not wait until the customer finishes all remaining fields when the app can
+already identify a material concern.
+
+Warnings are not full results.
+
+Warnings must:
+
+- Use a visible caution triangle.
+- Include a short headline.
+- Include one concise explanation.
+- Appear directly above the input group related to the warning.
+- Use wording such as:
+  “Based on your current entries and saved business defaults…”
+- Update or disappear when related assumptions change.
+- Never block the customer from continuing or submitting.
+- Never be presented as validation errors.
+- Never expose long raw Decimal values.
+
+Use the current valid form state for warning calculations.
+
+Where applicable:
+
+- Use saved Business Defaults already copied into the form.
+- Use the customer’s current overrides instead of the original Defaults.
+- Treat a blank optional cost field according to the form’s established
+  meaning of no entered cost.
+- Do not silently invent a value for a missing required field.
+- Do not display a warning until all inputs required for that particular
+  warning are valid.
+
+As later cost assumptions are entered or changed, recalculate and update the
+warnings.
+
+Warning placement
+
+Demand and sales potential group:
+
+Display relevant warnings here, including:
+
+- Even-split expected buyers are below the current break-even customer
+  requirement.
+- The current break-even requirement exceeds all attendees expected to buy
+  food.
+
+Use the customer-facing whole-number rules:
+
+- Expected buyers round down.
+- Break-even customers round up.
+
+Example style:
+
+“⚠ Demand may not cover current costs. Based on your current entries and saved
+business defaults, the expected buyers for your business are below the number
+required to break even.”
+
+A warning may include the rounded counts when doing so materially improves
+clarity, but do not display a table or general result summary.
+
+Food and transaction cost group:
+
+Update warning calculations when food costs, payment fees, or organizer
+commission change.
+
+Do not invent arbitrary warnings such as:
+
+- Food cost is too high
+- Card use is too high
+- Commission is excessive
+
+Only show warnings supported by the existing calculation and warning rules.
+
+Labor group:
+
+Update current profitability and break-even warnings immediately after employee
+labor or owner labor pay changes.
+
+Fixed event costs and fees group:
+
+Update current profitability and break-even warnings immediately after travel,
+fees, permits, utilities, or named additional costs change.
+
+Profit target group:
+
+When enough valid information exists, show factual target warnings such as:
+
+“⚠ Current assumptions do not meet your minimum profit target.”
+
+Do not reveal the complete profit result here.
+
+A target warning remains nonblocking.
+
+Existing structured-warning rules
+
+Reuse the existing Python calculation engine and structured-warning system.
+
+Do not duplicate calculation formulas or warning conditions in JavaScript.
+
+Use an existing preview endpoint or adapt it into a warnings-only endpoint.
+
+The Event Inputs browser response should contain only the structured warning
+information needed for contextual display, not a complete customer-facing
+result preview.
+
+Use a short debounce.
+
+Prevent older requests from replacing newer warning states.
+
+When related fields become invalid or incomplete:
+
+- Preserve the customer’s entries.
+- Hide or mark stale calculated warnings from that group.
+- Continue showing normal validation only where appropriate.
+- Do not show warnings based on obsolete values.
+
+Warning preview requests must:
+
+- Create no Event records.
+- Create no Scenario records.
+- Modify no Business Defaults.
+- Perform no persistence writes.
+
+Warning semantics
+
+Map warnings to stable causal groups rather than placing everything in one
+generic banner.
+
+At minimum:
+
+- Shared-demand and break-even-demand warnings → Demand and sales potential
+- Margin-unavailable or revenue-method warnings → Revenue controls in the
+  workspace
+- Profit-target warning → Profit target
+- General estimated-loss or exactly-at-break-even warning → Profit target or
+  final Event Inputs status area, without exposing the full result
+
+Avoid showing the same warning in several places simultaneously.
+
+Preserve deterministic warning ordering.
+
+Event submission and workspace behavior
+
+The final Event Inputs submission must continue to:
+
+- Validate the complete Event.
+- Create the Event and Original estimate Scenario through the established
+  transaction.
+- Use calculated expected sales.
+- Open the interactive Event Analysis workspace.
+- Display full financial results only after reaching that workspace.
+
+The workspace must continue supporting:
+
+- Live recalculation
+- Custom expected sales
+- Scenario saving
+- Scenario overwriting
+- Contextual warnings
+- Reset behavior
+
+Do not change the fixed business formulas, shared-demand formula, persistence
+rules, Scenario naming, or save transaction behavior.
+
+Testing
+
+Add or update focused tests covering:
+
+Weather guidance:
+- Weather outlook help text
+- Event protection help text
+- Accessible information-control name
+- Detailed weather explanation
+- The 5% and partially covered 3.75% example
+- Keyboard-accessible open and close behavior where practical
+
+Whole-number formatting:
+- 125.125 expected buyers displaying as 125
+- 125.999 expected buyers displaying as 125
+- Whole expected buyers remaining unchanged
+- Fractional break-even customers always rounding up
+- Whole break-even customers remaining unchanged
+- No customer-facing raw repeating customer values
+- Consistent formatting in workspace, warnings, saved work, and comparison
+
+Removed Event Inputs content:
+- Early demand estimate no longer appearing
+- Estimated sales preview no longer appearing
+- No customer-facing result table on Event Inputs
+- Custom expected-sales control absent from Event Inputs
+
+Workspace custom sales:
+- Custom expected-sales control remains available in the workspace
+- It is inactive by default for Original estimate
+- Enabling it reveals the amount field
+- Disabling it restores calculated revenue behavior
+- Existing saved custom-sales Scenarios remain loadable
+- Custom-sales warning remains factual and contextual
+
+Input organization:
+- Demand and weather controls appearing together
+- Average order value included with demand and sales potential
+- Food and transaction costs grouped together
+- Labor grouped together
+- Fixed event costs grouped together
+- Profit target grouped separately
+- Reorganization preserving all entered values and repeatable rows
+
+Early warnings:
+- No warning before its required inputs are valid
+- Demand warning appearing as soon as sufficient information exists
+- Warnings using saved Defaults and current overrides
+- Warning counts using floor and ceiling display rules
+- Warning updating after weather changes
+- Warning updating after competitor changes
+- Warning updating after food-cost changes
+- Warning updating after labor changes
+- Warning updating after event-cost changes
+- Warning updating after profit-target changes
+- Warning disappearing when corrected
+- Warnings remaining nonblocking
+- No result-preview panel being recreated
+- Warning requests creating no Event or Scenario records
+- Business Defaults remaining unchanged
+- Older preview responses not replacing newer warnings
+
+Regression:
+- Complete valid Event submission still saving successfully
+- Original estimate using calculated sales
+- Complete Event Analysis results remaining correct
+- Existing calculations retaining exact Decimal behavior internally
+- Existing saved Scenarios and comparison remaining functional
+
+Do not add dependencies.
+Do not make unrelated visual-polish changes.
+Do not implement the final Event Inputs stepper in this task.
+Do not modify or reset data/app.db.
+Do not commit.
+
+Afterward:
+
+1. Run focused Event Inputs, warning, formatting, workspace, and route tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize each customer-visible correction.
+5. Explain how to manually test:
+   - Weather explanations
+   - Whole-number formatting
+   - Removal of both previews
+   - Early warning timing
+   - Warning updates after later cost inputs
+   - Workspace custom expected sales
+6. Report the exact test results.
+
+Keep the response concise.

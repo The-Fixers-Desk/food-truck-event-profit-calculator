@@ -1,0 +1,607 @@
+Implement the milestone:
+
+Complete V1 UI and UX design and polish.
+
+The complete V1 workflows, calculations, validation, persistence, onboarding,
+backup and restore behavior, and customer-facing screens already exist.
+
+Create a cohesive modern visual system and redesign long workflows so customers
+can operate the application with very little page scrolling.
+
+The Event Inputs form currently renders as one very long page. Replace that
+experience with a guided, compact step-by-step workflow.
+
+Primary experience goal
+
+The application should feel like a polished modern desktop tool rather than a
+long web form.
+
+Prioritize:
+
+- Minimal page-level scrolling
+- Progressive disclosure
+- Compact but comfortable information density
+- Persistent primary actions
+- Clear progress and current location
+- Fast movement between related sections
+- Results remaining visible while assumptions are adjusted
+- Efficient use of desktop-window space
+
+Avoid:
+
+- Very long vertically stacked forms
+- Large amounts of unused space inside cards
+- A wall of unrelated accordions
+- Requiring customers to scroll to the bottom to find primary actions
+- Hiding important information behind unclear controls
+- Excessive nested scrolling
+- Tiny or crowded controls
+- Decorative complexity that does not improve use
+
+Do not change established product behavior.
+
+Visual direction
+
+Use a calm, capable, modern business-tool aesthetic.
+
+The application should feel:
+
+- Professional
+- Trustworthy
+- Practical
+- Approachable to independent food-business owners
+- Polished enough to feel like a commercial desktop product
+- Information-rich without feeling cluttered
+
+Use:
+
+- A warm off-white application background
+- White or subtly contrasted working surfaces
+- Deep charcoal or navy text
+- Muted secondary text
+- A restrained copper or amber accent
+- Green only for successful and positive financial states
+- Red only for losses, destructive actions, and errors
+- Amber for warnings
+
+Use system fonts only.
+
+Avoid:
+
+- Cartoon food-truck imagery
+- Decorative illustrations
+- Gradients
+- Glass effects
+- Excessive shadows
+- Bright startup-style palettes
+- Unnecessary animations
+- External fonts or remote assets
+
+Color must never be the only communication of meaning.
+
+Reusable design system
+
+Create centralized reusable tokens and components for:
+
+- Application shell and navigation
+- Page headers
+- Section navigation
+- Steppers and progress indicators
+- Tabs or segmented controls
+- Cards and compact panels
+- Form fields and field groups
+- Help text
+- Required and optional indicators
+- Estimate, From defaults, and Changed for this event badges
+- Validation messages
+- Error summaries
+- Primary, secondary, and destructive buttons
+- Sticky action bars
+- Metric cards
+- Financial-result summaries
+- Status badges
+- Success, information, warning, and critical messages
+- Empty states
+- Dialogs
+- Loading and updating states
+- Saved Event and Scenario groups
+- Comparison structures
+- Responsive layouts
+
+Do not maintain multiple unrelated visual implementations of equivalent
+controls.
+
+Event Inputs guided workflow
+
+Replace the single long Event Inputs page with a six-stage guided stepper.
+
+Stages:
+
+1. Event details
+2. Demand and weather
+3. Revenue and food costs
+4. Labor
+5. Event costs and fees
+6. Profit target and review
+
+Stage 1 — Event details
+
+Include:
+
+- Event name
+- Event date
+- Start time
+- Location
+
+Stage 2 — Demand and weather
+
+Include:
+
+- Estimated attendance
+- Percentage of attendees expected to buy food
+- Other competing food vendors
+- Weather outlook
+- Custom weather reduction when applicable
+- Event protection
+- Early demand estimate
+
+Keep the early demand estimate visible within this stage and update it through
+the existing preview behavior.
+
+Stage 3 — Revenue and food costs
+
+Include:
+
+- Average order sale amount
+- Attendance-based expected-sales preview
+- Custom expected-sales option and amount
+- Food and packaging cost method
+- Matching food and packaging value
+
+Preserve the existing method-confirmation and conditional-field behavior.
+
+Stage 4 — Labor
+
+Include:
+
+- Ordered employee labor entries
+- Add employee labor
+- Remove employee labor
+- Owner labor pay
+
+Use a compact row treatment that makes rate and combined paid hours easy to
+scan.
+
+Stage 5 — Event costs and fees
+
+Include:
+
+- Travel cost
+- Parking cost
+- Permit cost
+- Generator or utility cost
+- Sales paid by card percentage
+- Card-processing percentage
+- Fixed card-processing fee per card transaction
+- Vendor or booking fee
+- Organizer commission or revenue share
+- Ordered named additional costs
+- Add and remove additional-cost actions
+
+Use clear visual subgroups without turning the stage into another enormous
+page.
+
+Stage 6 — Profit target and review
+
+Include:
+
+- Profit-target type
+- Matching profit amount or margin
+- A concise review of every prior stage
+- Edit action for each prior stage
+- Final primary action labeled:
+  “Analyze event”
+
+The review should summarize values rather than reproducing the complete form.
+
+Stepper behavior
+
+For desktop-width layouts:
+
+- Use a persistent left-side progress rail or similarly modern vertical step
+  indicator.
+- Clearly identify:
+  - Current stage
+  - Completed stages
+  - Stages containing validation errors
+- Display only the active stage’s editable controls.
+- Use compact two-column field layouts where fields naturally pair.
+- Keep the active stage within approximately one ordinary desktop viewport
+  where practical.
+- Do not introduce large empty gaps simply to force a fixed height.
+
+For narrow layouts:
+
+- Replace the side rail with a compact top progress indicator.
+- Preserve the same stage order and meaning.
+- Stack controls cleanly.
+- Do not create page-wide horizontal scrolling.
+
+Navigation:
+
+- Add Back and Continue actions.
+- Keep Back and Continue visible in a sticky stage action bar where practical.
+- Do not require scrolling to the bottom of a tall stage to navigate.
+- Allow customers to return to any completed stage through the progress
+  indicator.
+- Preserve all entered values and repeatable rows while moving among stages.
+- Do not reset values when moving backward.
+- Do not save an Event or Scenario merely because the customer changed stages.
+
+Validation:
+
+- Prevent advancing past a stage containing invalid required values.
+- Focus the first invalid field.
+- Show field-level errors and a concise stage-level error indication.
+- Reuse existing validation rules and helpers.
+- Do not create a conflicting second set of business-validation rules in
+  JavaScript.
+- Use an existing or focused validation endpoint when server validation is
+  needed.
+- Hidden stages must not interfere with current-stage browser validation.
+- On final server-side validation failure:
+  - Preserve every value and ordered row
+  - Open the first stage containing an error
+  - Mark every affected stage in the progress indicator
+  - Keep errors associated with their original controls
+
+The final Analyze event action must continue using the established submission,
+automatic initial saving, and workspace-opening behavior.
+
+Do not create a draft Event or Scenario during the stepper process.
+
+Low-scroll application design
+
+Apply the low-scroll principle throughout the application, not only Event
+Inputs.
+
+This does not mean eliminating all scrolling. It means avoiding unnecessary
+page-length workflows and keeping the customer’s current task and primary
+actions close at hand.
+
+Welcome
+
+- Keep the four-step introduction compact enough to understand at a glance.
+- Make Get started immediately visible.
+- Avoid marketing-style vertical sections.
+
+Dashboard
+
+- Keep the primary actions and essential status visible within one ordinary
+  desktop view where practical.
+- Use compact action and metric cards.
+- Avoid large decorative cards or unnecessary explanatory text.
+
+Business Defaults
+
+The Defaults screen is also long. Organize it using compact section navigation
+or a guided structure rather than one uninterrupted page.
+
+Recommended sections:
+
+- Business and sales
+- Food and payment costs
+- Labor and event costs
+- Profit target
+
+Requirements:
+
+- Keep Save changes visible through a sticky action area.
+- Preserve all existing fields, conditional behavior, validation, and
+  persistence.
+- Make switching sections fast.
+- Clearly show which sections contain validation errors.
+- Do not require customers to scroll through every section to update one value.
+
+Interactive Event Analysis workspace
+
+Treat this as the flagship screen.
+
+Use a compact control-panel experience.
+
+Recommended wide-screen structure:
+
+- Event and active Scenario header
+- Persistent key-results summary
+- Adjustable-assumption section navigation
+- Active assumption panel
+- Detailed results and warnings
+
+The customer should be able to switch among assumption groups without
+scrolling through every field.
+
+Assumption groups may include:
+
+- Demand and weather
+- Revenue
+- Food and payment costs
+- Labor
+- Event costs and fees
+- Profit target
+
+Requirements:
+
+- Show only one primary assumption group at a time or otherwise use progressive
+  disclosure that substantially reduces scrolling.
+- Keep key financial results visible while assumptions are changed.
+- Keep assumptions and results equally important.
+- Preserve automatic recalculation.
+- Do not add a Calculate button.
+- Keep Reset changes and Save actions visible.
+- Keep invalid-field and updating states clear.
+- Do not duplicate calculation formulas in the browser.
+
+On narrow screens:
+
+- Keep the key-results summary near the top.
+- Use compact section selection.
+- Stack the active controls and detailed results.
+- Preserve logical source and keyboard order.
+
+Saved Events
+
+- Use compact Event group headers.
+- Collapse or progressively disclose Scenario lists when useful.
+- Keep Open analysis visually primary.
+- Keep Rename and Delete available without creating overly tall rows.
+- Preserve all existing management behavior.
+- Make empty states concise.
+
+Comparison
+
+- Keep Scenario identity and baseline information persistent.
+- Use compact aligned rows.
+- Keep Show differences only and baseline controls easy to reach.
+- Use localized scrolling only when preserving aligned comparison data truly
+  requires it.
+- Do not create page-wide two-dimensional scrolling.
+- Preserve every existing comparison rule and highlight.
+
+Data Safety
+
+- Keep Download backup and Restore backup immediately understandable.
+- Avoid excessive vertical explanation.
+- Use concise expandable details where longer safety explanations are needed.
+- Preserve all confirmation and recovery safeguards.
+
+Dialogs and destructive flows
+
+- Keep dialogs compact and focused.
+- Do not place long forms inside small dialogs.
+- Keep the primary and cancel actions visible.
+- Make destructive actions clearly distinct.
+- Preserve existing confirmation requirements.
+
+Sticky actions
+
+Use sticky action areas where they materially reduce scrolling, including:
+
+- Event Inputs stage navigation
+- Business Defaults save action
+- Event Analysis Save and Reset actions
+- Comparison controls where appropriate
+
+Sticky elements must:
+
+- Remain within their screen or panel
+- Not obscure focused controls
+- Not cover validation messages
+- Not consume excessive vertical space
+- Degrade safely on narrow windows
+
+Information density
+
+Reduce excess vertical length by:
+
+- Tightening oversized section padding
+- Pairing related fields in columns
+- Using concise help text
+- Moving lengthy explanations into accessible details or information controls
+- Using compact badges
+- Avoiding repeated headings and instructions
+- Showing only fields relevant to the active choice
+- Summarizing completed sections instead of repeating them
+
+Do not make controls or text uncomfortably small.
+
+Visual polish by screen
+
+Polish:
+
+- Shared shell and navigation
+- Welcome
+- Dashboard
+- Business Defaults
+- Event Inputs stepper
+- Event Analysis workspace
+- Scenario Save flow
+- Saved Events
+- Comparison selection and comparison results
+- Data Safety
+- Recovery screen
+- Not-found and application-error screens
+- Success, validation, warning, updating, and empty states
+
+Wording audit
+
+Use consistent plain-language terminology:
+
+- Business Defaults
+- Event
+- Scenario
+- Event Analysis
+- Expected food buyers
+- Other competing food vendors
+- Expected buyers for your business
+- Expected sales
+- Total event cost
+- Owner labor pay
+- Business profit
+- Profit margin
+- Break-even sales
+- Break-even customers
+- Save as new scenario
+- Overwrite current scenario
+
+Use sentence case.
+
+Avoid unexplained accounting or technical jargon.
+
+Do not change business meaning while improving wording.
+
+Responsive behavior
+
+Support the expected desktop application window and widths down to
+approximately 320 CSS pixels.
+
+Requirements:
+
+- No accidental page-wide horizontal scrolling
+- Forms collapse cleanly
+- Buttons wrap
+- Long Event and Scenario names wrap safely
+- Sticky elements do not obscure content
+- Dialogs remain usable
+- Comparison remains understandable
+- Repeatable rows remain editable
+- No fixed-height layouts that trap content
+- Avoid unnecessary nested scrolling
+
+Accessibility foundation
+
+The complete accessibility milestone follows this work, but this milestone
+must preserve and improve:
+
+- Semantic controls
+- Visible labels
+- Heading structure
+- Keyboard-operable step navigation
+- Logical source order
+- Visible focus states
+- Error associations
+- Status text
+- Reduced-motion preferences
+
+Do not knowingly introduce inaccessible custom controls.
+
+Use native HTML controls and vanilla JavaScript.
+
+Do not add a UI framework or new dependency.
+
+Regression boundaries
+
+Do not change:
+
+- Calculations
+- Demand formulas
+- Break-even rules
+- Warning conditions
+- Validation rules
+- Persistence behavior
+- Scenario save behavior
+- Comparison rules
+- Setup detection
+- Navigation safeguards
+- Dirty-workspace protection
+- Backup or restore behavior
+- Migration behavior
+
+Do not create a second Event Inputs workflow.
+
+Refactor the existing templates and browser behavior into the guided experience.
+
+Testing
+
+Add or update focused tests covering:
+
+- Six Event Inputs stages appearing in the correct order
+- Only the active stage being exposed as active
+- Back and Continue navigation
+- Values surviving forward and backward movement
+- Repeatable rows surviving stage changes
+- Current-stage validation
+- Preventing invalid advancement
+- First invalid field focus behavior where practical
+- Error indicators on affected stages
+- Final review summaries
+- Edit links returning to the correct stage
+- Final Analyze event using the established submission workflow
+- Invalid final submission returning to the correct stage
+- No Event or Scenario creation before final submission
+- Sticky action structures
+- Defaults section navigation
+- Workspace assumption-group navigation
+- Key results remaining present in the workspace
+- Existing customer workflows remaining functional
+- Narrow-layout structure where practical to assert
+- No changes to established calculations or persistence behavior
+
+Update existing template assertions only where structure or visible wording
+legitimately changed.
+
+Do not add screenshot-regression dependencies.
+
+Manual review checklist
+
+Add a concise developer checklist covering:
+
+- Event Inputs at a normal desktop window size
+- Every Event Inputs stage
+- Back and Continue behavior
+- Errors in each stage
+- Review and Edit behavior
+- Repeatable labor and additional-cost rows
+- Final Event submission
+- Defaults section navigation
+- Workspace assumption navigation
+- Workspace live recalculation
+- Saved Events with many Scenarios
+- Two-, three-, and four-Scenario comparison
+- Data Safety
+- Wide and narrow windows
+- Long names and validation messages
+- Keyboard movement through the stepper
+- Sticky controls not obscuring content
+
+Scope
+
+Do not implement:
+
+- New business functionality
+- New calculations
+- New persistence behavior
+- Autosaved Event drafts
+- Dark mode
+- Charts
+- Decorative animation
+- New dependencies
+- Windows or macOS packaging changes
+- Complete accessibility certification
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused template, route, form, and interaction tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the new Event Inputs workflow.
+5. Summarize how scrolling was reduced across the application.
+6. Explain how to manually test every Event Inputs stage.
+7. List every screen manually reviewed.
+8. Report any state that could not be exercised.
+9. Report the test results.
+
+Keep the response concise.
+

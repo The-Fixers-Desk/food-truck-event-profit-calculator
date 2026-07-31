@@ -5,6 +5,14 @@ Business Defaults and their ordered labor rows, Events, Event Scenarios, and
 ordered scenario labor and additional-cost rows. Money uses cents,
 percentages use basis points, and paid time uses minutes.
 
+Version 2 removes the obsolete required Event Scenario demand columns
+`competing_food_vendors` and `expected_buyer_basis_points`. Mixed Version 1
+tables are reconstructed only when every existing Scenario already has valid
+revised demand values. Legacy-only demand is not reinterpreted; startup stops
+in recovery mode with the original database unchanged. Version 1 databases
+that already match the current schema are validated and stamped Version 2
+without reconstruction.
+
 Applied versions are stored once in `schema_migrations`. Startup reads this
 ledger from SQLite, applies every missing migration in order, verifies it, and
 records it last in the same transaction. Never edit a released migration.

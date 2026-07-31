@@ -1,0 +1,454 @@
+Implement the milestone:
+
+Build the desktop application shell.
+
+The complete Flask application, centralized application-data directory,
+database migrations, backup and recovery safeguards, responsive UI, and
+accessibility behavior already exist.
+
+Build a cross-platform desktop shell that starts the local application
+automatically in a dedicated native window and shuts it down safely.
+
+Desktop technology
+
+Use pywebview for the dedicated desktop window.
+
+Add pywebview as the narrowly required desktop-shell dependency.
+
+Do not:
+
+- Replace Flask
+- Rebuild templates in another UI framework
+- Introduce Electron, Tauri, React, or another application architecture
+- Package Windows or macOS installers yet
+
+Keep the existing browser-based development and automated-test workflows
+available without requiring pywebview to open a window.
+
+Desktop entrypoint
+
+Create a clear production desktop entrypoint separate from the normal Flask
+development entrypoint.
+
+The desktop entrypoint must coordinate:
+
+1. Single-instance protection
+2. Application-data directory initialization
+3. Database validation and migration
+4. Local-server startup
+5. Readiness checking
+6. Native-window creation
+7. Safe shutdown
+8. Instance-lock release
+
+Keep orchestration separate from Flask routes and business logic.
+
+Local server
+
+Start the existing Flask application through a controllable Werkzeug server,
+such as an appropriate make_server-based implementation.
+
+Requirements:
+
+- Bind only to 127.0.0.1.
+- Do not bind to 0.0.0.0 or expose the application to the local network.
+- Allow the operating system to assign an available port.
+- Do not assume a fixed port is free.
+- Run the server in a managed background thread.
+- Disable the Flask debug server and reloader.
+- Make server startup failure observable to the shell.
+- Provide or reuse a lightweight local readiness check.
+- Do not expose sensitive application or database information through the
+  readiness response.
+
+The desktop window must not display the main application until the server is
+ready.
+
+Single-instance protection
+
+Implement a cross-platform single-instance guard using an operating-system
+file lock or equivalent standard-library behavior.
+
+Support:
+
+- Windows locking behavior
+- macOS locking behavior
+- Development environments used by the test suite
+
+The lock file must live beneath the centralized application-data directory.
+
+When another application instance already holds the lock:
+
+- Do not start another server.
+- Do not open another application window.
+- Show a brief customer-facing message stating that the application is already
+  open.
+- Exit normally.
+- Do not delete or override the active instance’s lock.
+
+A stale file without an active operating-system lock must not permanently
+prevent startup.
+
+Release the lock after normal shutdown and after handled startup failure.
+
+Do not implement foreground activation of the existing window in this
+milestone.
+
+Startup sequence
+
+Use this order:
+
+1. Resolve and prepare the configured application-data directory.
+2. Acquire the single-instance lock.
+3. Initialize logging without exposing customer content.
+4. Validate the live database and apply required migrations and recovery
+   safeguards through the existing systems.
+5. Start the loopback server.
+6. Confirm server readiness.
+7. Open or update the native application window with the application URL.
+
+Do not allow routes or repositories to operate before database startup has
+completed successfully.
+
+Loading experience
+
+Display a friendly native-window loading state while startup work completes.
+
+Use simple local HTML and CSS bundled with the application.
+
+Display:
+
+- Product name
+- A concise message such as “Starting your event calculator…”
+- A nonessential loading indicator that respects reduced-motion preferences
+
+Do not use:
+
+- Remote assets
+- External fonts
+- Marketing content
+- Raw startup logs
+- Database paths
+- Technical stack information
+
+Once the server is ready, navigate the same window to the application’s local
+URL rather than opening a second window.
+
+Application window
+
+Use the product name:
+
+Food Truck Event Profit Calculator
+
+Requirements:
+
+- Display the product name in the native window title.
+- Open one primary application window.
+- Use a sensible initial desktop size.
+- Define a minimum usable size consistent with the responsive interface.
+- Allow resizing.
+- Do not display browser tabs, an address bar, browser bookmarks, or the local
+  URL.
+- Do not open the customer’s ordinary browser during normal startup.
+- Preserve normal keyboard navigation and accessibility inside the webview.
+- Do not intercept ordinary application shortcuts unnecessarily.
+
+Final Windows and macOS icons and package metadata belong to later packaging
+milestones. Use a bundled placeholder only if pywebview requires one.
+
+Navigation safety
+
+The primary webview is intended only for the local application.
+
+- Allow navigation within the application’s generated 127.0.0.1 origin.
+- Reject or safely handle attempts to navigate the primary window to unrelated
+  remote origins.
+- Do not allow a remote page to replace the application in the primary window.
+- Do not weaken Flask request validation or existing route safeguards.
+- Do not expose local filesystem navigation.
+
+If the application later contains a deliberate external help link, it may open
+in the operating system’s normal browser rather than replacing the app window.
+Do not add new external links in this milestone.
+
+Safe shutdown
+
+Closing the primary native window must trigger an orderly shutdown.
+
+Perform:
+
+1. Mark the shell as shutting down.
+2. Stop accepting new application requests where practical.
+3. Shut down the Werkzeug server through its supported shutdown method.
+4. Join the server thread with a reasonable timeout.
+5. Clean shell-owned temporary files.
+6. Release the single-instance lock.
+7. Exit normally.
+
+Requirements:
+
+- Do not use os._exit for ordinary shutdown.
+- Do not leave the local server running after the window closes.
+- Do not leave the instance lock actively held.
+- Do not interrupt an active database transaction deliberately.
+- Make repeated shutdown calls harmless.
+- Handle window-close and startup-failure cleanup through the same reliable
+  lifecycle abstraction where practical.
+
+If shutdown exceeds the reasonable timeout:
+
+- Log the technical issue.
+- Continue a controlled exit without exposing a traceback to the customer.
+
+Startup failure behavior
+
+Handle failures occurring during:
+
+- Application-data initialization
+- Instance-lock acquisition
+- Database validation
+- Migration
+- Recovery-snapshot creation
+- Server creation
+- Server-thread startup
+- Readiness checking
+- Native-window creation
+
+When startup cannot continue:
+
+- Do not open a broken normal application screen.
+- Shut down any partially started server.
+- Release the instance lock.
+- Preserve the customer database.
+- Preserve existing recovery behavior.
+- Show a friendly local error screen or native message.
+
+The customer-facing message should:
+
+- State that the application could not start.
+- Explain that saved data was not intentionally deleted.
+- Suggest closing and reopening the application.
+- Direct the customer to the established troubleshooting information when it
+  exists.
+
+Do not display:
+
+- Raw tracebacks
+- SQL statements
+- Absolute filesystem paths
+- Port numbers
+- Internal exception text
+
+Log technical details using the existing logging system.
+
+Damaged-database recovery
+
+Preserve the established damaged-database startup behavior.
+
+When the database cannot be opened safely:
+
+- Do not silently overwrite or recreate it.
+- Make the existing recovery or Restore backup workflow available where
+  practical inside the desktop shell.
+- Do not start unrestricted normal application routes.
+- Keep the damaged database and automatic recovery snapshots intact.
+
+Application-data separation
+
+Use the existing centralized application-data directory abstraction.
+
+The desktop shell must resolve through it:
+
+- Live database
+- Logs
+- Single-instance lock
+- Recovery snapshots
+- Backup and restore staging
+- Shell-owned temporary files
+
+Do not place mutable customer data beside:
+
+- Python source files
+- Templates
+- Static assets
+- The future executable
+- Future installed application resources
+
+Preserve compatibility with the current development data location.
+
+The Windows and macOS packaging milestones will configure the final
+platform-specific application-data roots.
+
+Offline operation
+
+The desktop application must remain usable with no internet connection.
+
+Audit the shell and customer interface for runtime dependencies on:
+
+- Remote scripts
+- Remote stylesheets
+- External fonts
+- Remote images
+- Online APIs
+- Telemetry
+- Authentication services
+- CDN-hosted assets
+
+Move any required customer-facing assets into local static resources.
+
+Do not add telemetry or remote update checking.
+
+Add an automated or controlled integration test that prevents or rejects
+external network access while exercising representative application routes.
+
+Do not mistake the internal 127.0.0.1 server connection for external network
+access.
+
+Development workflow
+
+Preserve these capabilities:
+
+- Running Flask normally during development
+- Running route and domain tests without opening a native window
+- Providing isolated application-data roots in tests
+- Starting the desktop shell explicitly for manual testing
+- Importing shell modules without automatically starting the application
+
+Do not create side effects at module import time.
+
+Organize code into testable units for:
+
+- Instance locking
+- Server lifecycle
+- Readiness checking
+- Window configuration
+- Navigation restrictions
+- Startup coordination
+- Shutdown coordination
+
+Testing
+
+Add focused automated tests covering:
+
+Server lifecycle:
+- Binding only to 127.0.0.1
+- Selecting an available port
+- Starting the server before application navigation
+- Readiness success
+- Readiness timeout
+- Server startup failure
+- Safe server shutdown
+- Repeated shutdown calls
+- Server thread cleanup
+
+Single instance:
+- First instance acquiring the lock
+- Second instance being rejected
+- A stale unlocked file not blocking startup
+- Lock release after normal shutdown
+- Lock release after startup failure
+- Isolated locks under separate test data roots
+
+Startup:
+- Correct startup-order coordination
+- Database initialization before server availability
+- Migration failure preventing normal startup
+- Recovery-state startup behavior
+- Partial-startup cleanup
+- Friendly customer-facing failure behavior
+- Technical failure logging without customer data
+
+Window behavior:
+- Correct product title
+- Loading content being local
+- Navigation to the application only after readiness
+- One primary window being created
+- Sensible initial and minimum dimensions
+- Remote primary-window navigation being rejected
+- Closing the window triggering shutdown
+
+Data separation:
+- Shell files resolving beneath the configured data root
+- No mutable writes to application-code directories
+- Development-data compatibility
+- Safe temporary-file cleanup
+
+Offline operation:
+- No required remote assets
+- Representative workflows functioning with external network access blocked
+- Internal loopback requests remaining functional
+
+Regression:
+- Existing browser development entrypoint still working
+- Existing route, calculation, persistence, backup, and recovery tests remaining
+  functional
+- Importing desktop-shell modules creating no server or window side effects
+
+Use mocks or dependency injection for native-window behavior in automated tests.
+Do not require a graphical display for the full test suite.
+
+Manual testing
+
+Add concise developer instructions for manually verifying:
+
+- First desktop launch
+- Existing-data launch
+- Loading state
+- Dashboard navigation
+- Event Analysis live recalculation
+- Backup download and restore flow
+- Attempting a second launch
+- Closing the window during ordinary use
+- Startup database failure
+- Offline startup and normal operation
+- Window resizing at supported sizes
+
+Documentation
+
+Add concise developer documentation explaining:
+
+- Desktop entrypoint
+- Startup sequence
+- Server lifecycle
+- Single-instance guard
+- Safe shutdown
+- Loading and startup-error behavior
+- Localhost-only security
+- Offline requirements
+- Application-data directory configuration
+- How packaging milestones should invoke the shell
+
+Scope
+
+Do not implement:
+
+- Windows packaging
+- Windows installer behavior
+- macOS packaging
+- macOS disk-image behavior
+- Final icons or signing
+- Automatic application updates
+- Foreground activation of an existing instance
+- System tray behavior
+- Background operation after the window closes
+- New business features
+- New calculations
+- New persistence behavior
+- Final platform-specific data directories
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused shell, lifecycle, startup, data-path, and offline tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the desktop launch and shutdown behavior in plain language.
+5. Explain how single-instance protection works.
+6. Explain how to launch the desktop shell manually.
+7. List the manual checks completed.
+8. Report the test results.
+
+Keep the response concise.
+

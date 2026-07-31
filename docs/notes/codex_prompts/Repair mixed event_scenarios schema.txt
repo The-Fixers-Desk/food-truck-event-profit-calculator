@@ -1,0 +1,361 @@
+Implement the corrective milestone:
+
+Repair mixed event_scenarios schema with a Version 2 migration.
+
+A focused diagnostic investigation has already identified the exact failure.
+
+Current behavior
+
+A complete valid Event Inputs submission fails against an existing development
+database with:
+
+sqlite3.IntegrityError:
+NOT NULL constraint failed: event_scenarios.competing_food_vendors
+
+The same submission succeeds against a freshly created database.
+
+Root cause
+
+The existing Version 1 event_scenarios table contains both the legacy demand
+model and the revised demand model.
+
+Legacy required columns:
+
+- competing_food_vendors INTEGER NOT NULL
+- expected_buyer_basis_points INTEGER NOT NULL
+
+Current revised columns:
+
+- other_competing_food_vendors
+- expected_food_buyer_basis_points
+
+Current persistence correctly writes only the revised columns.
+
+SQLite rejects the insert because the obsolete legacy columns remain NOT NULL
+and receive no values.
+
+The existing Version 1 schema verifier checks that required current columns are
+present, but it permits these incompatible unexpected required columns and
+therefore incorrectly accepts the mixed schema as compatible.
+
+The development database currently contains:
+
+- Events: 0
+- Scenarios: 0
+- Employee labor rows: 0
+- Additional-cost rows: 0
+
+Its integrity and foreign-key checks pass.
+
+Required fix
+
+Add a Version 2 database migration that safely reconstructs event_scenarios
+using the approved current schema and removes the obsolete legacy columns.
+
+Do not work around the issue by writing placeholder values into obsolete
+columns.
+
+Do not modify the demand formulas or reinterpret old fields silently.
+
+Migration compatibility policy
+
+Use this explicit policy:
+
+1. Databases with no existing Scenario rows:
+   - Migrate automatically.
+
+2. Existing Scenario rows that already contain complete and valid revised
+   demand values:
+   - Preserve those revised values.
+   - Preserve the rest of the row.
+   - Remove the obsolete legacy columns.
+
+3. Existing Scenario rows that contain only legacy demand values, or whose
+   revised demand values are missing or invalid:
+   - Do not guess or reinterpret their meaning.
+   - Abort the migration safely.
+   - Roll back all migration work.
+   - Preserve the original database unchanged.
+   - Raise or report a clear compatibility error suitable for the established
+     startup or recovery behavior.
+
+The legacy expected_buyer_basis_points field represented a different business
+meaning from expected_food_buyer_basis_points and must not be converted
+automatically.
+
+Version 2 migration
+
+Implement a numbered Version 2 migration using the established migration
+framework.
+
+The migration must:
+
+- Run once.
+- Run after Version 1.
+- Use the existing transaction and migration-ledger behavior.
+- Reconstruct event_scenarios with the exact approved current schema.
+- Remove:
+  - competing_food_vendors
+  - expected_buyer_basis_points
+- Preserve all approved current columns.
+- Preserve Scenario IDs.
+- Preserve Event foreign-key relationships.
+- Preserve timestamps.
+- Preserve Scenario names and ordering behavior.
+- Preserve custom expected-sales state and value.
+- Preserve demand, weather, revenue, cost, labor, fee, and profit-target values.
+- Preserve indexes and constraints required by the current application.
+- Preserve child relationships to employee labor and additional-cost rows.
+- Preserve migration-ledger integrity.
+- Run foreign-key and integrity validation after reconstruction.
+
+Use the project’s established safe SQLite table-reconstruction pattern.
+
+Do not leave a temporary or prior table after success.
+
+Choose temporary table names defensively so a failed or interrupted prior
+development attempt cannot cause the same:
+
+“there is already another table or index with this name”
+
+failure seen in earlier schema work.
+
+If a migration-owned temporary table already exists unexpectedly:
+
+- Treat it as a migration failure unless the migration framework has an
+  established safe recovery rule.
+- Do not drop arbitrary tables silently.
+- Preserve the original live table.
+
+Schema verification
+
+Strengthen schema verification so a table is not considered compatible merely
+because all required current columns exist.
+
+For event_scenarios, verification must reject incompatible unexpected required
+columns, including:
+
+- competing_food_vendors
+- expected_buyer_basis_points
+
+The verifier should distinguish between:
+
+- Harmless unexpected nullable or explicitly tolerated columns, if the system
+  supports them
+- Incompatible unexpected NOT NULL columns without safe defaults
+- Known obsolete columns that require migration
+
+Do not make schema verification so broad that future harmless SQLite metadata
+or approved extension behavior becomes impossible.
+
+Keep the rule explicit and testable.
+
+Fresh database behavior
+
+Fresh databases must continue to be created directly with the current approved
+schema through the migration system.
+
+A fresh database should end at Version 2 and must never contain the obsolete
+legacy demand columns.
+
+Existing current-schema databases
+
+Support safe adoption or upgrade of existing databases that already have the
+current event_scenarios schema but are recorded as Version 1.
+
+If the established migration system encounters a Version 1 database whose
+event_scenarios table already matches the Version 2 target schema:
+
+- Do not rebuild it unnecessarily.
+- Validate it.
+- Record Version 2 through the established idempotent migration behavior.
+
+Only do this if it is consistent with the current migration framework’s rules.
+
+Persistence logging
+
+The calculator route currently catches sqlite3.Error during Event and initial
+Scenario creation, displays a friendly customer message, and does not log the
+technical exception.
+
+Keep the customer-facing message friendly and unchanged or equivalently plain.
+
+Add technical logging for the caught persistence exception.
+
+Requirements:
+
+- Log the exception type, message, and stack trace through the established
+  logging system.
+- Include enough operation context to identify that Event and initial Scenario
+  persistence failed.
+- Do not log submitted customer field values.
+- Do not log Event names, locations, assumptions, or other customer content.
+- Do not expose SQL statements, paths, or exception details to the customer.
+
+Transaction safety
+
+Preserve the existing atomic create behavior.
+
+A failed Scenario insert must continue rolling back:
+
+- The Event
+- The Scenario
+- Employee labor rows
+- Additional-cost rows
+
+No partial Event should remain.
+
+Do not change repository transaction boundaries except where required for the
+migration itself.
+
+Migration recovery snapshot
+
+The backup and recovery system already creates a validated pre-migration
+recovery snapshot before real pending migrations.
+
+Ensure Version 2 uses that established behavior.
+
+Do not create a duplicate migration-specific backup system.
+
+Failure behavior
+
+If Version 2 migration fails:
+
+- Roll back the migration transaction completely.
+- Do not advance the migration ledger.
+- Preserve the original database.
+- Preserve IDs and relationships.
+- Leave the application in the established safe startup or recovery state.
+- Log the technical cause without customer content.
+
+If the compatibility policy rejects legacy-only Scenario rows:
+
+- Explain clearly in the technical error that automatic migration was refused
+  because the old and new demand meanings are not equivalent.
+- Do not delete or modify those rows.
+
+Testing
+
+Add focused automated tests covering:
+
+Reproduction:
+- Construct a Version 1 mixed schema containing both legacy and revised demand
+  columns.
+- Confirm that the current insert shape would fail before migration with the
+  expected NOT NULL constraint.
+
+Migration success:
+- Version 2 runs against an empty mixed Version 1 database.
+- Obsolete columns are removed.
+- Current revised columns remain.
+- Migration ledger advances to Version 2.
+- Integrity check passes.
+- Foreign-key check passes.
+- A complete Event and Original estimate Scenario then save successfully.
+
+Current demand persistence:
+- other_competing_food_vendors persists correctly.
+- expected_food_buyer_basis_points persists correctly.
+- Values use the established scaled-integer basis-point representation.
+
+Child rows:
+- Ordered employee labor rows persist after migration.
+- Ordered additional-cost rows persist after migration.
+- Existing child relationships remain valid.
+
+Compatible existing rows:
+- Existing rows with valid revised demand values are preserved.
+- IDs are unchanged.
+- Event relationships are unchanged.
+- Scenario names are unchanged.
+- Timestamps are unchanged.
+- Custom expected-sales state is unchanged.
+- Other financial and assumption values are unchanged.
+
+Legacy-only rows:
+- A row containing only meaningful legacy demand values causes migration to
+  abort.
+- No reinterpretation occurs.
+- The migration ledger remains at Version 1.
+- The original table and rows remain unchanged.
+- Integrity and foreign-key state remain valid.
+
+Rollback:
+- Inject failure during table reconstruction or data copy.
+- Confirm the original table remains intact.
+- Confirm no partial target table replaces it.
+- Confirm no migration-ledger advancement occurs.
+- Confirm temporary migration artifacts are handled according to the safe
+  policy.
+
+Verification:
+- Mixed legacy/revised Version 1 schema is rejected as incompatible before or
+  during migration.
+- Known obsolete required columns are detected.
+- Current Version 2 schema passes.
+- Fresh databases contain no obsolete columns.
+
+Idempotence:
+- Restart after successful migration performs no duplicate migration work.
+- Version 2 does not rerun.
+- Existing data remains unchanged.
+
+Persistence regression:
+- Complete valid Event submission succeeds after migration.
+- Original estimate Scenario is created.
+- Revised demand values persist.
+- Employee labor and additional costs persist in order.
+- The Event Analysis workspace can load the saved Scenario.
+
+Logging:
+- A simulated sqlite3 persistence exception is logged.
+- The customer still receives the friendly message.
+- Logs do not contain Event names, locations, or submitted assumptions.
+
+Full regression:
+- Fresh database creation works.
+- Existing current-schema database startup works.
+- Existing calculations and demand formulas remain unchanged.
+- Backup, restore, recovery, and migration tests remain functional.
+
+Development database safety
+
+Do not modify, reset, replace, or delete:
+
+data/app.db
+
+Use isolated temporary databases and fixtures for automated tests.
+
+Do not manually migrate the developer’s real database as part of this Codex
+run.
+
+After implementation, explain the exact normal startup command the developer
+should use to let the application apply Version 2 to their local database.
+
+Scope
+
+Do not:
+
+- Change Event Inputs UI
+- Implement contextual-warning corrections
+- Change calculations
+- Change shared-demand formulas
+- Change Scenario naming
+- Change customer data meanings
+- Add unrelated migrations
+- Add dependencies
+- Commit
+
+Afterward:
+
+1. Run focused migration, schema-verification, persistence, and logging tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the Version 2 migration behavior.
+5. Explain the compatibility policy for existing Scenario rows.
+6. Explain how schema verification now detects this mixed state.
+7. Explain how to apply the migration to the local development database through
+   normal startup.
+8. Report the exact test results.
+
+Keep the response concise.

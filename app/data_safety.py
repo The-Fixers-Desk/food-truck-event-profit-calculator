@@ -107,15 +107,24 @@ def _snapshot_database(
             raise
         from app.migrations import (
             _is_known_pre_v1_defaults_schema,
+            _recorded_migrations,
             _user_tables,
+            _verify_ledger,
+            _verify_version_2_source,
         )
 
         connection = sqlite3.connect(destination)
         try:
-            if not _is_known_pre_v1_defaults_schema(
-                connection, _user_tables(connection)
-            ):
-                raise
+            tables = _user_tables(connection)
+            if _is_known_pre_v1_defaults_schema(connection, tables):
+                return
+            if "schema_migrations" in tables:
+                _verify_ledger(connection)
+                recorded = _recorded_migrations(connection)
+                if recorded and recorded[-1][0] == 1:
+                    _verify_version_2_source(connection)
+                    return
+            raise
         finally:
             connection.close()
 

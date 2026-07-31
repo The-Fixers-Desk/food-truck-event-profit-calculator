@@ -60,7 +60,7 @@ def test_backup_archive_manifest_checksum_and_complete_snapshot(tmp_path):
     manifest, database_bytes = archive_parts(payload)
 
     assert manifest["backup_format_version"] == BACKUP_FORMAT_VERSION
-    assert manifest["database_schema_version"] == 1
+    assert manifest["database_schema_version"] == 2
     assert manifest["database_filename"] == "database.sqlite"
     assert manifest["database_sha256"] == sha256(database_bytes).hexdigest()
     snapshot = tmp_path / "snapshot.sqlite"
@@ -118,6 +118,11 @@ def test_restore_completely_replaces_data_and_clears_session(tmp_path):
     changed["business_name"] = "Replace Me"
     client = target.test_client()
     client.post("/defaults", data=changed)
+    recovery_before = len(list(
+        target.config["DATA_PATHS"].automatic_recovery.glob(
+            "recovery-*.ftbackup"
+        )
+    ))
     with client.session_transaction() as session:
         session["active_event_id"] = 999
         session["temporary_navigation"] = "stale"
@@ -145,7 +150,7 @@ def test_restore_completely_replaces_data_and_clears_session(tmp_path):
             "recovery-*.ftbackup"
         )
     )
-    assert len(recovery) == 1
+    assert len(recovery) == recovery_before + 1
 
 
 def test_restore_aborts_when_recovery_snapshot_fails(
@@ -355,8 +360,8 @@ def test_unversioned_supported_backup_is_migrated_only_in_staging(tmp_path):
 
     database = sqlite3.connect(restored)
     assert database.execute(
-        "SELECT version FROM schema_migrations"
-    ).fetchall() == [(1,)]
+        "SELECT version FROM schema_migrations ORDER BY version"
+    ).fetchall() == [(1,), (2,)]
     assert database.execute(
         "SELECT business_name FROM business_defaults"
     ).fetchone()[0] == "Roadside Kitchen"
@@ -366,14 +371,16 @@ def test_unversioned_supported_backup_is_migrated_only_in_staging(tmp_path):
 def test_already_current_startup_creates_no_recovery_snapshot(tmp_path):
     root = tmp_path / "data"
     isolated_app(root)
+    before = list((root / "automatic-recovery").iterdir())
     isolated_app(root)
 
-    assert list((root / "automatic-recovery").iterdir()) == []
+    assert list((root / "automatic-recovery").iterdir()) == before
 
 
 def test_automatic_recovery_retains_only_five_managed_files(tmp_path):
     app = isolated_app(tmp_path / "data")
     paths = app.config["DATA_PATHS"]
+    before = len(list(paths.automatic_recovery.glob("recovery-*.ftbackup")))
     unrelated = paths.automatic_recovery / "keep.txt"
     unrelated.write_text("keep", encoding="utf-8")
     with app.app_context():
@@ -415,46 +422,49 @@ def test_recovery_cleanup_failure_does_not_invalidate_snapshot(
 def test_pending_migration_creates_recovery_snapshot_first(tmp_path):
     app = isolated_app(tmp_path / "data")
     paths = app.config["DATA_PATHS"]
+    before = len(list(paths.automatic_recovery.glob("recovery-*.ftbackup")))
 
-    def apply_v2(connection):
-        connection.execute("CREATE TABLE migration_v2_test (id INTEGER)")
+    def apply_v3(connection):
+        connection.execute("CREATE TABLE migration_v3_test (id INTEGER)")
 
-    migration_v2 = Migration(
-        2,
+    migration_v3 = Migration(
+        3,
         "test_future",
-        apply_v2,
+        apply_v3,
         lambda connection: connection.execute(
-            "SELECT * FROM migration_v2_test"
+            "SELECT * FROM migration_v3_test"
         ).fetchall(),
     )
     with app.app_context():
         migrate_database(
             get_database(),
-            migrations=(*MIGRATIONS, migration_v2),
-            latest_version=2,
+            migrations=(*MIGRATIONS, migration_v3),
+            latest_version=3,
             before_migrations=lambda connection: (
                 create_automatic_recovery_snapshot(
                     connection, paths, "pre-migration"
                 )
             ),
         )
-    assert len(list(paths.automatic_recovery.glob("recovery-*.ftbackup"))) == 1
+    assert len(list(
+        paths.automatic_recovery.glob("recovery-*.ftbackup")
+    )) == before + 1
 
 
 def test_failed_pre_migration_snapshot_aborts_migration(tmp_path):
     app = isolated_app(tmp_path / "data")
 
-    def apply_v2(connection):
+    def apply_v3(connection):
         connection.execute("CREATE TABLE should_not_exist (id INTEGER)")
 
-    migration_v2 = Migration(
-        2, "test_future", apply_v2, lambda connection: None
+    migration_v3 = Migration(
+        3, "test_future", apply_v3, lambda connection: None
     )
     with app.app_context(), pytest.raises(OSError):
         migrate_database(
             get_database(),
-            migrations=(*MIGRATIONS, migration_v2),
-            latest_version=2,
+            migrations=(*MIGRATIONS, migration_v3),
+            latest_version=3,
             before_migrations=lambda connection: (_ for _ in ()).throw(
                 OSError("injected snapshot failure")
             ),
@@ -464,8 +474,8 @@ def test_failed_pre_migration_snapshot_aborts_migration(tmp_path):
         "SELECT 1 FROM sqlite_master WHERE name='should_not_exist'"
     ).fetchone() is None
     assert database.execute(
-        "SELECT version FROM schema_migrations"
-    ).fetchall() == [(1,)]
+        "SELECT version FROM schema_migrations ORDER BY version"
+    ).fetchall() == [(1,), (2,)]
     database.close()
 
 

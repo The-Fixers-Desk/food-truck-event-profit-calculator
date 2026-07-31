@@ -127,11 +127,14 @@ def snapshot(database):
     }
 
 
-def test_fresh_database_reaches_complete_version_1(database_path):
+def test_fresh_database_reaches_complete_version_2(database_path):
     app = create_app({"DATABASE": database_path, "TESTING": True})
     with app.app_context():
         database = connect(database_path)
-        assert ledger_rows(database)[0][:2] == (1, "version_1_baseline")
+        assert [row[:2] for row in ledger_rows(database)] == [
+            (1, "version_1_baseline"),
+            (2, "remove_obsolete_event_demand_columns"),
+        ]
         tables = {
             row[0]
             for row in database.execute(
@@ -147,6 +150,14 @@ def test_fresh_database_reaches_complete_version_1(database_path):
             "event_scenario_employee_labor_entries",
             "event_scenario_additional_costs",
         } <= tables
+        columns = {
+            row[1]
+            for row in database.execute(
+                "PRAGMA table_info(event_scenarios)"
+            )
+        }
+        assert "competing_food_vendors" not in columns
+        assert "expected_buyer_basis_points" not in columns
 
 
 def test_current_restart_does_not_rewrite_migration(database_path):
@@ -184,7 +195,10 @@ def test_compatible_unversioned_database_is_adopted_without_data_changes(
     create_app({"DATABASE": database_path, "TESTING": True})
     database = connect(database_path)
 
-    assert ledger_rows(database)[0][:2] == (1, "version_1_baseline")
+    assert [row[:2] for row in ledger_rows(database)] == [
+        (1, "version_1_baseline"),
+        (2, "remove_obsolete_event_demand_columns"),
+    ]
     assert snapshot(database) == before
 
 
@@ -257,7 +271,7 @@ def test_future_version_is_rejected_without_changes(database_path):
     database.execute(
         """
         INSERT INTO schema_migrations (version, name)
-        VALUES (2, 'future_release')
+        VALUES (3, 'future_release')
         """
     )
     database.commit()

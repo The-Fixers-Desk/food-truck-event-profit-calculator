@@ -6,7 +6,7 @@ import sqlite3
 from typing import Callable, Iterable
 
 
-LATEST_SUPPORTED_SCHEMA_VERSION = 1
+LATEST_SUPPORTED_SCHEMA_VERSION = 2
 SCHEMA_DIRECTORY = Path(__file__).resolve().parent / "schema"
 
 
@@ -242,7 +242,57 @@ def _upgrade_known_pre_v1_defaults(
     connection.execute(f'DROP TABLE "{defaults_temp}"')
 
 
-def verify_version_1(connection: sqlite3.Connection) -> None:
+OBSOLETE_EVENT_SCENARIO_COLUMNS = {
+    "competing_food_vendors",
+    "expected_buyer_basis_points",
+}
+
+
+def _verify_columns(
+    connection: sqlite3.Connection,
+    *,
+    allow_obsolete_demand_columns: bool = False,
+) -> None:
+    """Verify required columns and reject incompatible extra columns."""
+    for table, expected in EXPECTED_COLUMNS.items():
+        rows = connection.execute(f'PRAGMA table_info("{table}")').fetchall()
+        actual = {row[1]: (row[2] or "").upper() for row in rows}
+        missing_columns = set(expected) - set(actual)
+        wrong_types = {
+            name
+            for name, column_type in expected.items()
+            if name in actual and actual[name] != column_type
+        }
+        incompatible_extras = {
+            row[1]
+            for row in rows
+            if row[1] not in expected
+            and (
+                (
+                    row[1] in OBSOLETE_EVENT_SCENARIO_COLUMNS
+                    and not allow_obsolete_demand_columns
+                )
+                or (
+                    row[1] not in OBSOLETE_EVENT_SCENARIO_COLUMNS
+                    and row[3] == 1
+                    and row[4] is None
+                )
+            )
+        }
+        if missing_columns or wrong_types or incompatible_extras:
+            raise DatabaseMigrationError(
+                f"Incompatible columns in {table}: "
+                f"missing={sorted(missing_columns)}, "
+                f"wrong_types={sorted(wrong_types)}, "
+                f"incompatible_extras={sorted(incompatible_extras)}"
+            )
+
+
+def verify_version_1(
+    connection: sqlite3.Connection,
+    *,
+    allow_obsolete_demand_columns: bool = False,
+) -> None:
     """Verify that the complete established Version 1 schema is compatible."""
     tables = {
         row[0]
@@ -262,23 +312,10 @@ def verify_version_1(connection: sqlite3.Connection) -> None:
             f"missing={sorted(missing)}, unexpected={sorted(unexpected)}"
         )
 
-    for table, expected in EXPECTED_COLUMNS.items():
-        actual = {
-            row[1]: (row[2] or "").upper()
-            for row in connection.execute(f'PRAGMA table_info("{table}")')
-        }
-        missing_columns = set(expected) - set(actual)
-        wrong_types = {
-            name
-            for name, column_type in expected.items()
-            if name in actual and actual[name] != column_type
-        }
-        if missing_columns or wrong_types:
-            raise DatabaseMigrationError(
-                f"Incompatible columns in {table}: "
-                f"missing={sorted(missing_columns)}, "
-                f"wrong_types={sorted(wrong_types)}"
-            )
+    _verify_columns(
+        connection,
+        allow_obsolete_demand_columns=allow_obsolete_demand_columns,
+    )
 
     indexes = {
         row[0]
@@ -306,8 +343,193 @@ def verify_version_1(connection: sqlite3.Connection) -> None:
         raise DatabaseMigrationError("SQLite foreign-key check failed.")
 
 
+def _sql_statements(path: Path) -> list[str]:
+    statements = []
+    statement = ""
+    for line in path.read_text(encoding="utf-8").splitlines(keepends=True):
+        statement += line
+        if sqlite3.complete_statement(statement):
+            if statement.strip():
+                statements.append(statement.strip())
+            statement = ""
+    if statement.strip():
+        raise DatabaseMigrationError(f"Incomplete SQL statement in {path.name}.")
+    return statements
+
+
+def _event_schema_statement(prefix: str) -> str:
+    return next(
+        statement
+        for statement in _sql_statements(
+            SCHEMA_DIRECTORY / "event_analysis.sql"
+        )
+        if statement.startswith(prefix)
+    )
+
+
+def _event_scenario_columns(connection: sqlite3.Connection) -> set[str]:
+    return {
+        row[1]
+        for row in connection.execute("PRAGMA table_info(event_scenarios)")
+    }
+
+
+def _verify_version_2_source(connection: sqlite3.Connection) -> None:
+    verify_version_1(
+        connection,
+        allow_obsolete_demand_columns=True,
+    )
+    columns = _event_scenario_columns(connection)
+    if not (columns & OBSOLETE_EVENT_SCENARIO_COLUMNS):
+        return
+    invalid = connection.execute(
+        """
+        SELECT COUNT(*) FROM event_scenarios
+        WHERE other_competing_food_vendors IS NULL
+           OR other_competing_food_vendors < 0
+           OR expected_food_buyer_basis_points IS NULL
+           OR expected_food_buyer_basis_points NOT BETWEEN 0 AND 10000
+        """
+    ).fetchone()[0]
+    if invalid:
+        raise DatabaseMigrationError(
+            "Automatic migration refused: legacy and revised demand meanings "
+            "are not equivalent, and one or more Scenarios lack complete "
+            "valid revised demand values."
+        )
+
+
+def _apply_version_2(connection: sqlite3.Connection) -> None:
+    """Remove obsolete demand columns without reinterpreting their values."""
+    _verify_version_2_source(connection)
+    columns = _event_scenario_columns(connection)
+    if not (columns & OBSOLETE_EVENT_SCENARIO_COLUMNS):
+        return
+
+    names = {
+        "event_scenarios": "event_scenarios_migration_v2_target",
+        "event_scenario_employee_labor_entries": (
+            "event_scenario_employee_labor_entries_migration_v2_target"
+        ),
+        "event_scenario_additional_costs": (
+            "event_scenario_additional_costs_migration_v2_target"
+        ),
+    }
+    for temporary_name in names.values():
+        if connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+            (temporary_name,),
+        ).fetchone():
+            raise DatabaseMigrationError(
+                f"Unexpected migration temporary table: {temporary_name}"
+            )
+
+    parent_sql = _event_schema_statement(
+        "CREATE TABLE IF NOT EXISTS event_scenarios"
+    ).replace(
+        "CREATE TABLE IF NOT EXISTS event_scenarios",
+        f'CREATE TABLE "{names["event_scenarios"]}"',
+        1,
+    )
+    labor_sql = _event_schema_statement(
+        "CREATE TABLE IF NOT EXISTS event_scenario_employee_labor_entries"
+    ).replace(
+        "CREATE TABLE IF NOT EXISTS event_scenario_employee_labor_entries",
+        f'CREATE TABLE "{names["event_scenario_employee_labor_entries"]}"',
+        1,
+    ).replace(
+        "REFERENCES event_scenarios(id)",
+        f'REFERENCES "{names["event_scenarios"]}"(id)',
+    )
+    costs_sql = _event_schema_statement(
+        "CREATE TABLE IF NOT EXISTS event_scenario_additional_costs"
+    ).replace(
+        "CREATE TABLE IF NOT EXISTS event_scenario_additional_costs",
+        f'CREATE TABLE "{names["event_scenario_additional_costs"]}"',
+        1,
+    ).replace(
+        "REFERENCES event_scenarios(id)",
+        f'REFERENCES "{names["event_scenarios"]}"(id)',
+    )
+    connection.execute(parent_sql)
+    connection.execute(labor_sql)
+    connection.execute(costs_sql)
+
+    scenario_columns = tuple(EXPECTED_COLUMNS["event_scenarios"])
+    column_list = ", ".join(f'"{name}"' for name in scenario_columns)
+    connection.execute(
+        f'INSERT INTO "{names["event_scenarios"]}" ({column_list}) '
+        f'SELECT {column_list} FROM event_scenarios'
+    )
+    for table in (
+        "event_scenario_employee_labor_entries",
+        "event_scenario_additional_costs",
+    ):
+        child_columns = tuple(EXPECTED_COLUMNS[table])
+        child_list = ", ".join(f'"{name}"' for name in child_columns)
+        connection.execute(
+            f'INSERT INTO "{names[table]}" ({child_list}) '
+            f'SELECT {child_list} FROM "{table}"'
+        )
+        if connection.execute(
+            f'SELECT COUNT(*) FROM "{names[table]}"'
+        ).fetchone()[0] != connection.execute(
+            f'SELECT COUNT(*) FROM "{table}"'
+        ).fetchone()[0]:
+            raise DatabaseMigrationError(
+                f"Version 2 row-count verification failed for {table}."
+            )
+    if connection.execute(
+        f'SELECT COUNT(*) FROM "{names["event_scenarios"]}"'
+    ).fetchone()[0] != connection.execute(
+        "SELECT COUNT(*) FROM event_scenarios"
+    ).fetchone()[0]:
+        raise DatabaseMigrationError(
+            "Version 2 Scenario row-count verification failed."
+        )
+
+    connection.execute("DROP TABLE event_scenario_employee_labor_entries")
+    connection.execute("DROP TABLE event_scenario_additional_costs")
+    connection.execute("DROP TABLE event_scenarios")
+    connection.execute(
+        f'ALTER TABLE "{names["event_scenarios"]}" RENAME TO event_scenarios'
+    )
+    connection.execute(
+        f'ALTER TABLE "{names["event_scenario_employee_labor_entries"]}" '
+        "RENAME TO event_scenario_employee_labor_entries"
+    )
+    connection.execute(
+        f'ALTER TABLE "{names["event_scenario_additional_costs"]}" '
+        "RENAME TO event_scenario_additional_costs"
+    )
+    connection.execute(
+        _event_schema_statement("CREATE INDEX IF NOT EXISTS")
+    )
+    connection.execute(
+        _event_schema_statement("CREATE UNIQUE INDEX IF NOT EXISTS")
+    )
+
+
+def verify_version_2(connection: sqlite3.Connection) -> None:
+    verify_version_1(connection)
+    obsolete = (
+        _event_scenario_columns(connection)
+        & OBSOLETE_EVENT_SCENARIO_COLUMNS
+    )
+    if obsolete:
+        raise DatabaseMigrationError(
+            f"Obsolete Event Scenario columns remain: {sorted(obsolete)}"
+        )
+
+
 MIGRATIONS = (
     Migration(1, "version_1_baseline", _apply_version_1, verify_version_1),
+    Migration(
+        2,
+        "remove_obsolete_event_demand_columns",
+        _apply_version_2,
+        verify_version_2,
+    ),
 )
 
 
@@ -434,39 +656,41 @@ def migrate_database(
                 ) from error
             if logger:
                 logger.info("Adopted compatible unversioned database as Version 1.")
-            return
-        migration = registry[0]
-        if logger:
-            logger.info("Detected empty database at schema version 0.")
-            logger.info(
-                "Beginning database migration %s: %s.",
-                migration.version,
-                migration.name,
-            )
-        try:
-            connection.execute("BEGIN IMMEDIATE")
-            _create_ledger(connection)
-            migration.apply(connection)
-            migration.verify(connection)
-            connection.execute(
-                "INSERT INTO schema_migrations (version, name) VALUES (?, ?)",
-                (migration.version, migration.name),
-            )
-            connection.commit()
-        except Exception as error:
-            connection.rollback()
+            current_version = 1
+        else:
+            migration = registry[0]
             if logger:
-                logger.error("Database migration 1 failed: %s", error)
-            raise DatabaseMigrationError(
-                "Database migration 1 failed."
-            ) from error
-        if logger:
-            logger.info(
-                "Completed database migration %s: %s.",
-                migration.version,
-                migration.name,
-            )
-        current_version = 1
+                logger.info("Detected empty database at schema version 0.")
+                logger.info(
+                    "Beginning database migration %s: %s.",
+                    migration.version,
+                    migration.name,
+                )
+            try:
+                connection.execute("BEGIN IMMEDIATE")
+                _create_ledger(connection)
+                migration.apply(connection)
+                migration.verify(connection)
+                connection.execute(
+                    "INSERT INTO schema_migrations (version, name) "
+                    "VALUES (?, ?)",
+                    (migration.version, migration.name),
+                )
+                connection.commit()
+            except Exception as error:
+                connection.rollback()
+                if logger:
+                    logger.error("Database migration 1 failed: %s", error)
+                raise DatabaseMigrationError(
+                    "Database migration 1 failed."
+                ) from error
+            if logger:
+                logger.info(
+                    "Completed database migration %s: %s.",
+                    migration.version,
+                    migration.name,
+                )
+            current_version = 1
     else:
         _verify_ledger(connection)
         recorded = _recorded_migrations(connection)
