@@ -73,6 +73,13 @@
     {% if save_error %}
       <p class="field-error" role="alert">{{ save_error }}</p>
     {% endif %}
+    {% if errors %}
+      <section class="error-summary" id="event-error-summary" role="alert"
+        aria-labelledby="event-error-summary-title" tabindex="-1">
+        <h2 id="event-error-summary-title">Correct the highlighted fields</h2>
+        <p>Your entries are preserved. Review the fields marked with errors.</p>
+      </section>
+    {% endif %}
     {% for name in (
       "average_order_sale_amount", "food_cost_method",
       "average_food_cost_per_order", "food_cost_percentage",
@@ -902,6 +909,7 @@
             {% for warning in analysis.warnings %}
               <li data-warning-code="{{ warning.code }}"
                 data-severity="{{ warning.severity }}">
+                <span class="visually-hidden">{{ warning.severity|capitalize }}: </span>
                 {{ warning.message }}
               </li>
             {% else %}
@@ -914,9 +922,13 @@
       </aside>
     </div>
     <dialog id="save-analysis-dialog" class="save-analysis-dialog"
-      aria-labelledby="save-analysis-title">
+      aria-labelledby="save-analysis-title"
+      aria-describedby="save-analysis-description">
       <form method="dialog">
         <h2 id="save-analysis-title">Save scenario</h2>
+        <p id="save-analysis-description">
+          Save these assumptions as a new Scenario or overwrite the active Scenario.
+        </p>
         <div class="choice-options">
           <label class="choice-option">
             <input type="radio" name="save_mode" value="new" checked />

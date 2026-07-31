@@ -296,10 +296,33 @@ const employeeLaborTemplate = document.querySelector(
   "#event-employee-labor-template",
 );
 const addEmployeeLabor = document.querySelector("#add-event-labor");
+const repeatableStatus = document.createElement("p");
+repeatableStatus.className = "visually-hidden";
+repeatableStatus.setAttribute("role", "status");
+employeeLaborEntries.before(repeatableStatus);
+
+function updateEventLaborNames() {
+  employeeLaborEntries.querySelectorAll(".labor-entry").forEach(
+    (entry, index) => {
+      entry.setAttribute("role", "group");
+      entry.setAttribute("aria-label", `Employee labor entry ${index + 1}`);
+      entry.querySelector(".remove-event-labor").setAttribute(
+        "aria-label", `Remove employee labor entry ${index + 1}`,
+      );
+    },
+  );
+}
 
 function connectEventLaborRemove(button) {
   button.addEventListener("click", () => {
-    button.closest(".labor-entry").remove();
+    const entry = button.closest(".labor-entry");
+    const nextFocus = entry.nextElementSibling?.querySelector("input")
+      ?? entry.previousElementSibling?.querySelector("input")
+      ?? addEmployeeLabor;
+    entry.remove();
+    updateEventLaborNames();
+    repeatableStatus.textContent = "Employee labor entry removed.";
+    nextFocus.focus();
     scheduleWorkspaceCalculation();
   });
 }
@@ -328,11 +351,15 @@ employeeLaborEntries
 employeeLaborEntries
   .querySelectorAll(".labor-entry")
   .forEach(connectLaborIndicator);
+updateEventLaborNames();
 
 addEmployeeLabor.addEventListener("click", () => {
   const entry = employeeLaborTemplate.content.cloneNode(true);
   connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
   employeeLaborEntries.append(entry);
+  updateEventLaborNames();
+  employeeLaborEntries.lastElementChild.querySelector("input").focus();
+  repeatableStatus.textContent = "Employee labor entry added.";
   scheduleWorkspaceCalculation();
 });
 
@@ -405,9 +432,31 @@ const additionalCostTemplate = document.querySelector(
 );
 const addAdditionalCost = document.querySelector("#add-additional-cost");
 
+function updateAdditionalCostNames() {
+  additionalCostEntries.querySelectorAll(".additional-cost-entry").forEach(
+    (entry, index) => {
+      entry.setAttribute("role", "group");
+      entry.setAttribute("aria-label", `Additional cost ${index + 1}`);
+      const inputs = entry.querySelectorAll("input");
+      inputs[0]?.setAttribute("aria-label", `Additional cost ${index + 1} name`);
+      inputs[1]?.setAttribute("aria-label", `Additional cost ${index + 1} amount`);
+      entry.querySelector(".remove-additional-cost").setAttribute(
+        "aria-label", `Remove additional cost ${index + 1}`,
+      );
+    },
+  );
+}
+
 function connectAdditionalCostRemove(button) {
   button.addEventListener("click", () => {
-    button.closest(".additional-cost-entry").remove();
+    const entry = button.closest(".additional-cost-entry");
+    const nextFocus = entry.nextElementSibling?.querySelector("input")
+      ?? entry.previousElementSibling?.querySelector("input")
+      ?? addAdditionalCost;
+    entry.remove();
+    updateAdditionalCostNames();
+    repeatableStatus.textContent = "Additional cost removed.";
+    nextFocus.focus();
     scheduleWorkspaceCalculation();
   });
 }
@@ -415,6 +464,7 @@ function connectAdditionalCostRemove(button) {
 additionalCostEntries
   .querySelectorAll(".remove-additional-cost")
   .forEach(connectAdditionalCostRemove);
+updateAdditionalCostNames();
 
 addAdditionalCost.addEventListener("click", () => {
   const entry = additionalCostTemplate.content.cloneNode(true);
@@ -422,6 +472,9 @@ addAdditionalCost.addEventListener("click", () => {
     entry.querySelector(".remove-additional-cost"),
   );
   additionalCostEntries.append(entry);
+  updateAdditionalCostNames();
+  additionalCostEntries.lastElementChild.querySelector("input").focus();
+  repeatableStatus.textContent = "Additional cost added.";
   scheduleWorkspaceCalculation();
 });
 
@@ -466,7 +519,7 @@ function showContextualWarnings(warnings) {
         : warning.code === "estimated_loss"
           ? "Current assumptions show an estimated loss."
           : "Current assumptions are exactly at break-even.";
-    notice.textContent = `⚠ ${headline} Based on your current entries and `
+    notice.textContent = `⚠ Warning: ${headline} Based on your current entries and `
       + `saved business defaults, ${warning.message}`;
     container.append(notice);
     container.hidden = false;
@@ -615,7 +668,7 @@ function updateWorkspaceResults(result) {
     const item = document.createElement("li");
     item.dataset.warningCode = warning.code;
     item.dataset.severity = warning.severity;
-    item.textContent = warning.message;
+    item.textContent = `${warning.severity}: ${warning.message}`;
     warningList.append(item);
   });
 }
@@ -798,6 +851,7 @@ if (workspaceForm && saveAnalysisDialog) {
   const scenarioNameError = document.querySelector("#scenario-name-error");
   const overwriteError = document.querySelector("#overwrite-error");
   const saveError = document.querySelector("#save-analysis-error");
+  saveAnalysisDialog.addEventListener("close", () => openSave.focus());
 
   function clearSaveErrors() {
     [scenarioNameError, overwriteError, saveError].forEach((error) => {
@@ -1029,3 +1083,13 @@ if (sectionNavigation && formSections.length) {
   });
   showSection(activeSection);
 }
+
+document.querySelector(".error-summary")?.focus();
+document.querySelectorAll('[aria-invalid="true"]').forEach((input, index) => {
+  const error = input.closest(".form-field, fieldset")?.querySelector(".field-error");
+  if (!error) return;
+  error.id ||= `event-field-error-${index + 1}`;
+  const describedBy = new Set((input.getAttribute("aria-describedby") ?? "").split(" ").filter(Boolean));
+  describedBy.add(error.id);
+  input.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
+});

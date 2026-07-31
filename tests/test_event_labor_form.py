@@ -70,7 +70,9 @@ def test_add_and_remove_employee_labor_controls_are_client_side():
     )[0]
     assert 'type="button"' in add_button
     assert 'class="remove-event-labor button-secondary"' in template
-    assert 'button.closest(".labor-entry").remove();' in script
+    assert 'const entry = button.closest(".labor-entry");' in script
+    assert "entry.remove();" in script
+    assert "nextFocus.focus();" in script
     assert "employeeLaborEntries.append(entry);" in script
 
 

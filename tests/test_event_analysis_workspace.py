@@ -209,7 +209,9 @@ def test_live_endpoint_preserves_latest_results_contract_when_invalid(client):
     assert invalid_payload["errors"]["employee_labor"][0][
         "hourly_rate"
     ]
-    assert "Results will update" in invalid_payload["status"]
+    assert invalid_payload["status"] == (
+        "Results have not updated. Correct the highlighted fields."
+    )
 
     corrected_payload = client.post(
         "/event-analysis/calculate", data=valid

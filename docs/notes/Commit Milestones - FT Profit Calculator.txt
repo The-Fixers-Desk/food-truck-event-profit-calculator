@@ -131,7 +131,7 @@ DATABASE RELIABILITY
 
 DESIGN AND ACCESSIBILITY
 
-□ >Complete V1 UI and UX design and polish
+☑ Complete V1 UI and UX design and polish
   Define the V1 visual system and redesign long workflows to minimize
   scrolling. Convert Event Inputs into a modern guided stepper that keeps
   each stage within approximately one desktop viewport where practical.
@@ -140,7 +140,7 @@ DESIGN AND ACCESSIBILITY
   review before analysis. Polish Welcome, Dashboard, Defaults, Event Analysis,
   Saved Events, Comparison, messages, empty states, wording, and hierarchy.
 
-□ *Complete accessibility and responsive behavior
+□ >Complete accessibility and responsive behavior
   Add keyboard navigation, focus states, accessible labels and errors,
   contrast, responsive layouts, and screen-reader structure.
 

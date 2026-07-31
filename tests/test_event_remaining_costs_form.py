@@ -150,7 +150,9 @@ def test_additional_costs_start_empty_and_have_add_remove_controls(client):
     script = (
         project_root / "app" / "static" / "js" / "event_inputs.js"
     ).read_text(encoding="utf-8")
-    assert 'button.closest(".additional-cost-entry").remove();' in script
+    assert 'const entry = button.closest(".additional-cost-entry");' in script
+    assert "entry.remove();" in script
+    assert "nextFocus.focus();" in script
     assert "additionalCostEntries.append(entry);" in script
 
 

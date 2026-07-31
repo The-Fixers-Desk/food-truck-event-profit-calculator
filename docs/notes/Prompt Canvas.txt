@@ -2,35 +2,6 @@ Prompt Canvas
 
 ---------------------------------------------------------------------------------
 
-I need a prompt for Codex so that he can handle all of my corrections so far after we handle the save issue:
-
-"Minor concern -- 5%"
-
-5% what?? is what a user would think. Need to add a brief description under weather outlook that tells them what the percent means for both weather outlook and event protection. Then you can put a little question mark icon near weather outlook or something that gives a more detailed description if clicked on. 
-
---
-
-Got some crazy numbers on display: 125.125 82.63784476351351351351351351. expected buyers per vendor should be displayed as a whole number, round down.
-
---
-
-We should get rid of the preview, it doesn't add anything. The client should be able to add a custom expected sales amount in the workspace. It doesn't make much sense to put it on the calculator input page, because like, why are you using a calculator if you are leading with your own answer, you know? Anyway, I think it fits best when people are playing around with scenarios. If it should stay on the inputs page, it should just be a small checkbox as like one of the last things before hitting submit. Because if you have your own sales amount in mind, and you're still using my app, you must want to be using my app for some reason. So we will let them experience it and not influence everyone else's experience too much. 
-
---
-
-I don't want the early demand estimate either. I don't want the users shown any results before they get to the results page. If there are any warnings to give, they should show up as little caution triangles with text above the textbox or whatever they just entered data into that triggered the warning. Following?
-
---
-
-Also, Expected buyers per vendor should always round down, regardless of what it's decimal is. Break-even customers should always round up.
-
---
-
-the inputs should be organized so that the inputs that would trigger warnings can have what they would need to trigger the warning, following?
-
---
-
-no, calculated warnings should happen in event inputs window. We want to give users warnings as earlier as possible. they shouldn't keep doing inputs on something they could've known they weren't gonna do 10 fields ago.
 
 ---------------------------------------------------------------------------------
 

@@ -1,19 +1,44 @@
 const entries = document.querySelector("#labor-entries");
 const template = document.querySelector("#labor-entry-template");
 const addButton = document.querySelector("#add-labor");
+const laborStatus = document.createElement("p");
+laborStatus.className = "visually-hidden";
+laborStatus.setAttribute("role", "status");
+entries.before(laborStatus);
+
+function updateLaborNames() {
+  entries.querySelectorAll(".labor-entry").forEach((entry, index) => {
+    entry.setAttribute("role", "group");
+    entry.setAttribute("aria-label", `Default labor entry ${index + 1}`);
+    entry.querySelector(".remove-labor").setAttribute(
+      "aria-label", `Remove default labor entry ${index + 1}`,
+    );
+  });
+}
 
 function connectRemoveButton(button) {
   button.addEventListener("click", () => {
-    button.closest(".labor-entry").remove();
+    const entry = button.closest(".labor-entry");
+    const nextFocus = entry.nextElementSibling?.querySelector("input")
+      ?? entry.previousElementSibling?.querySelector("input")
+      ?? addButton;
+    entry.remove();
+    updateLaborNames();
+    laborStatus.textContent = "Default labor entry removed.";
+    nextFocus.focus();
   });
 }
 
 entries.querySelectorAll(".remove-labor").forEach(connectRemoveButton);
+updateLaborNames();
 
 addButton.addEventListener("click", () => {
   const entry = template.content.cloneNode(true);
   connectRemoveButton(entry.querySelector(".remove-labor"));
   entries.append(entry);
+  updateLaborNames();
+  entries.lastElementChild.querySelector("input").focus();
+  laborStatus.textContent = "Default labor entry added.";
 });
 
 const targetChoices = document.querySelectorAll(
@@ -91,6 +116,16 @@ confirmFoodMethod.addEventListener("click", () => {
 });
 
 showConfirmedFoodMethod();
+
+document.querySelector(".error-summary")?.focus();
+document.querySelectorAll('[aria-invalid="true"]').forEach((input, index) => {
+  const error = input.closest(".form-field, fieldset")?.querySelector(".field-error");
+  if (!error) return;
+  error.id ||= `defaults-field-error-${index + 1}`;
+  const describedBy = new Set((input.getAttribute("aria-describedby") ?? "").split(" ").filter(Boolean));
+  describedBy.add(error.id);
+  input.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
+});
 
 const defaultsNavigation = document.querySelector("[data-defaults-navigation]");
 const defaultsSections = Array.from(

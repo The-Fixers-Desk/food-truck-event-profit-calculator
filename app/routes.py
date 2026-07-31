@@ -331,8 +331,8 @@ def recalculate_event_analysis():
                 "valid": False,
                 "errors": errors,
                 "status": (
-                    "Results will update after the highlighted values "
-                    "are corrected."
+                    "Results have not updated. Correct the highlighted "
+                    "fields."
                 ),
             }
         )

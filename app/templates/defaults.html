@@ -24,6 +24,13 @@
     {% endfor %}
   </nav>
   <form class="form-panel defaults-form" method="post" novalidate>
+    {% if errors %}
+      <section class="error-summary" id="defaults-error-summary" role="alert"
+        aria-labelledby="defaults-error-summary-title" tabindex="-1">
+        <h2 id="defaults-error-summary-title">Correct the highlighted fields</h2>
+        <p>Your entries are preserved. Review the fields marked with errors.</p>
+      </section>
+    {% endif %}
     <div class="form-grid" data-defaults-section="1">
       {% macro field(name, label, required=true, hint="") %}
         <div class="form-field">

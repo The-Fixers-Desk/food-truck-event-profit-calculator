@@ -21,6 +21,31 @@ a {
   color: inherit;
 }
 
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: var(--space-3);
+  transform: translateY(-150%);
+  border-radius: var(--radius-small);
+  background: var(--color-text);
+  color: white;
+}
+
+.skip-link:focus { transform: translateY(0); }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 h1,
 p {
   margin-top: 0;

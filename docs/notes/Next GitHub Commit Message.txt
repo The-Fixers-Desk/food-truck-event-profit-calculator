@@ -2,33 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Add pre-polish functional regression and workflow tests
-
-- Add automated regression tests for core V1 workflows
-- Cover Scenario save, overwrite, reset, rename, and delete actions
-- Verify Event management, persistence after restart, and comparison behavior
-- Test live workspace recalculation and dirty-state protection
-- Verify invalid-input safety and atomic persistence
-- Add Defaults, backup/restore, and stress-case coverage
-- Preserve existing workflows while fixing any confirmed regression defects
-
----------------------------------------------------------------------------------
-
-Complete V1 UI and UX design and polish
-
-- Define the V1 visual direction, design tokens, and reusable components
-- Polish the shared application shell and navigation
-- Improve Welcome, Dashboard, Defaults, and Event Inputs
-- Polish the interactive Event Analysis workspace and live result states
-- Improve Scenario saving, Saved Events, and Comparison workflows
-- Polish Data Safety, recovery, empty, success, warning, and error states
-- Standardize customer-facing wording and terminology
-- Improve responsive layouts and visual hierarchy
-- Remove obsolete or duplicated presentation styles
-- Add focused template assertions and a manual UI review checklist
-
----------------------------------------------------------------------------------
-
 Complete accessibility and responsive behavior
 
 - Add complete keyboard navigation and visible focus states
