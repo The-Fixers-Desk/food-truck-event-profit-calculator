@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from werkzeug.datastructures import MultiDict
 
-from app.models import EventIdentity
+from app.models import BusinessDefaults, EventIdentity
 
 
 IDENTITY_FIELDS = ("event_name", "event_date", "start_time", "location")
@@ -33,9 +33,30 @@ OPERATING_COST_FIELDS = (
     "generator_utility_cost",
 )
 EVENT_FEE_FIELDS = (
+    "card_sales_percentage",
+    "card_processing_percentage",
     "vendor_booking_fee",
     "organizer_commission_percentage",
     "fixed_card_processing_fee",
+)
+PROFIT_TARGET_FIELDS = (
+    "profit_target_type",
+    "minimum_profit_amount",
+    "minimum_profit_margin",
+)
+DEFAULTED_SCALAR_FIELDS = (
+    "average_order_sale_amount",
+    "food_cost_method",
+    "average_food_cost_per_order",
+    "food_cost_percentage",
+    "manual_food_cost_total",
+    "card_sales_percentage",
+    "card_processing_percentage",
+    "owner_labor_pay",
+    "travel_cost",
+    "profit_target_type",
+    "minimum_profit_amount",
+    "minimum_profit_margin",
 )
 WEATHER_REDUCTIONS = {
     "favorable": Decimal("0"),
@@ -52,7 +73,9 @@ PROTECTION_FACTORS = {
 }
 
 
-def blank_event_inputs_form() -> dict:
+def blank_event_inputs_form(
+    defaults: BusinessDefaults | None = None,
+) -> dict:
     values = {
         name: ""
         for name in (
@@ -62,12 +85,18 @@ def blank_event_inputs_form() -> dict:
             *LABOR_FIELDS,
             *OPERATING_COST_FIELDS,
             *EVENT_FEE_FIELDS,
+            *PROFIT_TARGET_FIELDS,
         )
     }
     values["revenue_method"] = "attendance"
     values["food_cost_method_choice"] = "average_per_order"
     values["employee_labor"] = []
     values["additional_costs"] = []
+    for name in DEFAULTED_SCALAR_FIELDS:
+        values[f"baseline_{name}"] = ""
+
+    if defaults is not None:
+        _apply_business_defaults(values, defaults)
     return values
 
 
@@ -84,10 +113,17 @@ def validate_event_inputs(
             *LABOR_FIELDS,
             *OPERATING_COST_FIELDS,
             *EVENT_FEE_FIELDS,
+            *PROFIT_TARGET_FIELDS,
         )
     }
+    for name in DEFAULTED_SCALAR_FIELDS:
+        values[f"baseline_{name}"] = submitted.get(
+            f"baseline_{name}", ""
+        ).strip()
     rates = submitted.getlist("employee_labor_rate")
     hours = submitted.getlist("employee_labor_hours")
+    baseline_rates = submitted.getlist("baseline_employee_labor_rate")
+    baseline_hours = submitted.getlist("baseline_employee_labor_hours")
     values["employee_labor"] = [
         {
             "hourly_rate": (
@@ -95,6 +131,16 @@ def validate_event_inputs(
             ),
             "total_hours_paid": (
                 hours[index].strip() if index < len(hours) else ""
+            ),
+            "baseline_hourly_rate": (
+                baseline_rates[index].strip()
+                if index < len(baseline_rates)
+                else ""
+            ),
+            "baseline_total_hours_paid": (
+                baseline_hours[index].strip()
+                if index < len(baseline_hours)
+                else ""
             ),
         }
         for index in range(max(len(rates), len(hours)))
@@ -178,6 +224,7 @@ def validate_event_inputs(
     _validate_operating_costs(values, errors)
     _validate_event_fees(values, errors)
     _validate_additional_costs(values, errors)
+    _validate_profit_target(values, errors)
 
     if errors:
         return None, values, errors
@@ -191,10 +238,105 @@ def validate_event_inputs(
     return identity, values, errors
 
 
+def _apply_business_defaults(
+    values: dict,
+    defaults: BusinessDefaults,
+) -> None:
+    copied = {
+        "average_order_sale_amount": _format_decimal(
+            defaults.average_order_sale_amount
+        ),
+        "food_cost_method": defaults.food_cost_method,
+        "average_food_cost_per_order": _format_optional_decimal(
+            defaults.average_food_cost_per_order
+        ),
+        "food_cost_percentage": _format_optional_percentage(
+            defaults.food_cost_percentage
+        ),
+        "manual_food_cost_total": _format_optional_decimal(
+            defaults.typical_food_cost_total
+        ),
+        "card_sales_percentage": _format_percentage(
+            defaults.card_sales_percentage
+        ),
+        "card_processing_percentage": _format_percentage(
+            defaults.card_processing_percentage
+        ),
+        "owner_labor_pay": _format_optional_decimal(
+            defaults.default_owner_labor_pay
+        ),
+        "travel_cost": _format_optional_decimal(
+            defaults.default_travel_cost
+        ),
+        "profit_target_type": defaults.profit_target_type,
+        "minimum_profit_amount": _format_optional_decimal(
+            defaults.minimum_profit_amount
+        ),
+        "minimum_profit_margin": _format_optional_percentage(
+            defaults.minimum_profit_margin
+        ),
+    }
+    values.update(copied)
+    values["food_cost_method_choice"] = defaults.food_cost_method
+    values["employee_labor"] = [
+        {
+            "hourly_rate": _format_decimal(entry.hourly_rate),
+            "total_hours_paid": _format_decimal(entry.total_hours_paid),
+            "baseline_hourly_rate": _format_decimal(entry.hourly_rate),
+            "baseline_total_hours_paid": _format_decimal(
+                entry.total_hours_paid
+            ),
+        }
+        for entry in defaults.labor_entries
+    ]
+    for name, value in copied.items():
+        values[f"baseline_{name}"] = value
+
+
+def _validate_profit_target(
+    values: dict,
+    errors: dict,
+) -> None:
+    target_type = values["profit_target_type"]
+    if target_type == "profit_amount":
+        values["minimum_profit_margin"] = ""
+        _money(
+            values,
+            errors,
+            "minimum_profit_amount",
+            "Minimum profit amount",
+        )
+    elif target_type == "profit_margin":
+        values["minimum_profit_amount"] = ""
+        _percentage(
+            values,
+            errors,
+            "minimum_profit_margin",
+            "Minimum profit margin",
+        )
+    else:
+        values["profit_target_type"] = ""
+        values["minimum_profit_amount"] = ""
+        values["minimum_profit_margin"] = ""
+        errors["profit_target_type"] = "Choose how you evaluate an event."
+
+
 def _validate_event_fees(
     values: dict,
     errors: dict,
 ) -> None:
+    _percentage(
+        values,
+        errors,
+        "card_sales_percentage",
+        "Sales paid by card",
+    )
+    _percentage(
+        values,
+        errors,
+        "card_processing_percentage",
+        "Card-processing percentage",
+    )
     for name, label in (
         ("vendor_booking_fee", "Vendor or booking fee"),
         (
@@ -464,3 +606,15 @@ def _format_decimal(value: Decimal) -> str:
     if "." in formatted:
         formatted = formatted.rstrip("0").rstrip(".")
     return formatted or "0"
+
+
+def _format_percentage(value: Decimal) -> str:
+    return _format_decimal(value * Decimal("100"))
+
+
+def _format_optional_decimal(value: Decimal | None) -> str:
+    return "" if value is None else _format_decimal(value)
+
+
+def _format_optional_percentage(value: Decimal | None) -> str:
+    return "" if value is None else _format_percentage(value)

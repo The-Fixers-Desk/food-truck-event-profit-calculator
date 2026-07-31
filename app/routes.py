@@ -19,7 +19,7 @@ def calculator():
     if request.method == "POST":
         _, form_values, errors = validate_event_inputs(request.form)
     else:
-        form_values = blank_event_inputs_form()
+        form_values = blank_event_inputs_form(load_business_defaults())
 
     return render_template(
         "calculator.html",

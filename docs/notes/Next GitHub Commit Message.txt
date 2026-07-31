@@ -2,12 +2,12 @@ Next GitHub Commit Message
 
 -----------------------------------------------------------
 
-Complete remaining event cost inputs
+Finish complete Event Inputs workflow
 
-- Add travel, parking, permit, and generator or utility cost fields
-- Add vendor or booking fee and organizer commission inputs
-- Add fixed card-processing fee per card transaction
-- Add ordered, removable miscellaneous cost entries
-- Preserve entered costs and rows when validation fails
-- Validate optional money fields, percentages, and named additional costs
-- Add focused form and route tests
+- Prefill new events with saved business defaults
+- Keep event-specific changes separate from saved defaults
+- Add From defaults, Changed for this event, and Estimate indicators
+- Complete validation across the full Event Inputs form
+- Preserve all entered values and repeatable rows after errors
+- Handle missing business defaults safely
+- Add complete-form and override-protection tests

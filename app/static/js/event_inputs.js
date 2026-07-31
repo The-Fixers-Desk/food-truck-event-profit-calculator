@@ -129,6 +129,7 @@ function showConfirmedEventFoodMethod() {
     field.container.hidden = !selected;
     field.input.required = selected;
   });
+  updateFoodDefaultIndicator();
 }
 
 confirmEventFoodMethod.addEventListener("click", () => {
@@ -146,6 +147,51 @@ confirmEventFoodMethod.addEventListener("click", () => {
 
 showConfirmedEventFoodMethod();
 
+function setIndicator(indicator, unchanged) {
+  if (indicator) {
+    indicator.textContent = unchanged
+      ? "From defaults"
+      : "Changed for this event";
+  }
+}
+
+function updateTrackedInputIndicator(input) {
+  const indicator = document.querySelector(
+    `[data-indicator-for="${input.id}"]`,
+  );
+  setIndicator(indicator, input.value === input.dataset.defaultValue);
+}
+
+document.querySelectorAll("[data-indicator-for]").forEach((indicator) => {
+  const input = document.querySelector(`#${indicator.dataset.indicatorFor}`);
+  if (input) {
+    input.addEventListener("input", () => {
+      updateTrackedInputIndicator(input);
+    });
+    updateTrackedInputIndicator(input);
+  }
+});
+
+function updateFoodDefaultIndicator() {
+  const indicator = document.querySelector("#food-cost-default-indicator");
+  if (!indicator) {
+    return;
+  }
+  const tracked = [
+    confirmedEventFoodMethod,
+    ...Object.values(eventFoodCostFields).map((field) => field.input),
+  ];
+  setIndicator(
+    indicator,
+    tracked.every((input) => input.value === input.dataset.defaultValue),
+  );
+}
+
+Object.values(eventFoodCostFields).forEach((field) => {
+  field.input.addEventListener("input", updateFoodDefaultIndicator);
+});
+updateFoodDefaultIndicator();
+
 const employeeLaborEntries = document.querySelector(
   "#event-employee-labor-entries",
 );
@@ -160,15 +206,97 @@ function connectEventLaborRemove(button) {
   });
 }
 
+function connectLaborIndicator(entry) {
+  const indicator = entry.querySelector(".labor-default-indicator");
+  if (!indicator) {
+    return;
+  }
+  const inputs = entry.querySelectorAll("[data-default-value]");
+  const update = () => {
+    setIndicator(
+      indicator,
+      Array.from(inputs).every(
+        (input) => input.value === input.dataset.defaultValue,
+      ),
+    );
+  };
+  inputs.forEach((input) => input.addEventListener("input", update));
+  update();
+}
+
 employeeLaborEntries
   .querySelectorAll(".remove-event-labor")
   .forEach(connectEventLaborRemove);
+employeeLaborEntries
+  .querySelectorAll(".labor-entry")
+  .forEach(connectLaborIndicator);
 
 addEmployeeLabor.addEventListener("click", () => {
   const entry = employeeLaborTemplate.content.cloneNode(true);
   connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
   employeeLaborEntries.append(entry);
 });
+
+const profitTargetChoices = document.querySelectorAll(
+  'input[name="profit_target_type"]',
+);
+const eventProfitAmountField = document.querySelector(
+  "#event-profit-amount-field",
+);
+const eventProfitAmount = document.querySelector(
+  "#event_minimum_profit_amount",
+);
+const eventProfitMarginField = document.querySelector(
+  "#event-profit-margin-field",
+);
+const eventProfitMargin = document.querySelector(
+  "#event_minimum_profit_margin",
+);
+
+function updateProfitDefaultIndicator() {
+  const indicator = document.querySelector("#profit-target-default-indicator");
+  if (!indicator) {
+    return;
+  }
+  const selected = document.querySelector(
+    'input[name="profit_target_type"]:checked',
+  )?.value ?? "";
+  const baselineType = document.querySelector(
+    'input[name="baseline_profit_target_type"]',
+  ).value;
+  setIndicator(
+    indicator,
+    selected === baselineType
+      && eventProfitAmount.value === eventProfitAmount.dataset.defaultValue
+      && eventProfitMargin.value === eventProfitMargin.dataset.defaultValue,
+  );
+}
+
+function updateEventProfitTarget(clearUnselected = false) {
+  const selected = document.querySelector(
+    'input[name="profit_target_type"]:checked',
+  )?.value;
+  const showAmount = selected === "profit_amount";
+  const showMargin = selected === "profit_margin";
+  eventProfitAmountField.hidden = !showAmount;
+  eventProfitMarginField.hidden = !showMargin;
+  eventProfitAmount.required = showAmount;
+  eventProfitMargin.required = showMargin;
+  if (clearUnselected && !showAmount) {
+    eventProfitAmount.value = "";
+  }
+  if (clearUnselected && !showMargin) {
+    eventProfitMargin.value = "";
+  }
+  updateProfitDefaultIndicator();
+}
+
+profitTargetChoices.forEach((choice) => {
+  choice.addEventListener("change", () => updateEventProfitTarget(true));
+});
+eventProfitAmount.addEventListener("input", updateProfitDefaultIndicator);
+eventProfitMargin.addEventListener("input", updateProfitDefaultIndicator);
+updateEventProfitTarget();
 
 const additionalCostEntries = document.querySelector(
   "#event-additional-cost-entries",

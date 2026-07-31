@@ -179,6 +179,36 @@
   display: none;
 }
 
+.event-profit-field[hidden] {
+  display: none;
+}
+
+.event-only-notice {
+  margin: var(--space-3) 0 0;
+  font-weight: 700;
+}
+
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.field-indicator {
+  display: inline-flex;
+  padding: 0.1rem var(--space-2);
+  background: #eee8de;
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.labor-default-indicator {
+  grid-column: 1 / -1;
+}
+
 .section-question {
   margin-bottom: 0;
   color: var(--color-text-muted);

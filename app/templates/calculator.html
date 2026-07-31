@@ -8,6 +8,9 @@
     <p class="page-description">
       Start by identifying the event you want to evaluate.
     </p>
+    <p class="event-only-notice">
+      Changes on this screen apply only to this event.
+    </p>
     <details class="estimate-information">
       <summary>About estimates</summary>
       <p>
@@ -18,6 +21,18 @@
   </header>
 
   <form class="form-panel" method="post" novalidate>
+    {% for name in (
+      "average_order_sale_amount", "food_cost_method",
+      "average_food_cost_per_order", "food_cost_percentage",
+      "manual_food_cost_total", "card_sales_percentage",
+      "card_processing_percentage", "owner_labor_pay", "travel_cost",
+      "profit_target_type", "minimum_profit_amount",
+      "minimum_profit_margin"
+    ) %}
+      <input name="baseline_{{ name }}" type="hidden"
+        value="{{ form_values['baseline_' ~ name] }}" />
+    {% endfor %}
+
     <fieldset class="input-section">
       <legend>Event Identification</legend>
       <div class="form-grid">
@@ -57,9 +72,34 @@
            "Average order sale amount ($)", "0.01")
         ) %}
           <div class="form-field">
-            <label class="form-label" for="{{ name }}">{{ label }}</label>
+            <div class="label-row">
+              <label class="form-label" for="{{ name }}">{{ label }}</label>
+              {% if name in (
+                "estimated_attendance", "expected_buyer_percentage",
+                "average_order_sale_amount"
+              ) %}
+                <span class="field-indicator">Estimate</span>
+              {% endif %}
+              {% if name == "average_order_sale_amount"
+                    and form_values.baseline_average_order_sale_amount %}
+                <span class="field-indicator default-indicator"
+                  data-indicator-for="average_order_sale_amount">
+                  {% if form_values.average_order_sale_amount
+                        == form_values.baseline_average_order_sale_amount %}
+                    From defaults
+                  {% else %}
+                    Changed for this event
+                  {% endif %}
+                </span>
+              {% endif %}
+            </div>
             <input class="form-input" id="{{ name }}" name="{{ name }}"
               type="number" step="{{ step }}" value="{{ form_values[name] }}"
+              {% if name == "average_order_sale_amount" %}
+                data-default-value="{{
+                  form_values.baseline_average_order_sale_amount
+                }}"
+              {% endif %}
               required
               {% if errors.get(name) %}
                 aria-invalid="true" aria-describedby="{{ name }}-error"
@@ -75,9 +115,12 @@
 
       <div class="assumption-step">
         <div class="form-field">
-          <label class="form-label" for="weather_outlook">
-            Weather outlook
-          </label>
+          <div class="label-row">
+            <label class="form-label" for="weather_outlook">
+              Weather outlook
+            </label>
+            <span class="field-indicator">Estimate</span>
+          </div>
           <select class="form-input" id="weather_outlook"
             name="weather_outlook" required
             {% if errors.get("weather_outlook") %}
@@ -172,6 +215,7 @@
           <label class="form-label" for="expected_sales_amount">
             Expected sales amount ($)
           </label>
+          <span class="field-indicator">Estimate</span>
           <input class="form-input" id="expected_sales_amount"
             name="expected_sales_amount" type="number" step="0.01"
             value="{{ form_values.expected_sales_amount }}"
@@ -189,9 +233,28 @@
 
     <fieldset class="input-section">
       <legend>Food and packaging costs</legend>
-      <p class="section-question">
-        How do you want to estimate food and packaging costs for this event?
-      </p>
+      <div class="label-row">
+        <p class="section-question">
+          How do you want to estimate food and packaging costs for this event?
+        </p>
+        {% if form_values.baseline_food_cost_method %}
+          <span class="field-indicator default-indicator"
+            id="food-cost-default-indicator">
+            {% if form_values.food_cost_method
+                  == form_values.baseline_food_cost_method
+                  and form_values.average_food_cost_per_order
+                  == form_values.baseline_average_food_cost_per_order
+                  and form_values.food_cost_percentage
+                  == form_values.baseline_food_cost_percentage
+                  and form_values.manual_food_cost_total
+                  == form_values.baseline_manual_food_cost_total %}
+              From defaults
+            {% else %}
+              Changed for this event
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
       <div class="method-confirmation">
         <label class="form-label" for="event_food_cost_method_choice">
           Cost method
@@ -213,7 +276,8 @@
           type="button">Use this method</button>
       </div>
       <input id="event_food_cost_method" name="food_cost_method" type="hidden"
-        value="{{ form_values.food_cost_method }}" />
+        value="{{ form_values.food_cost_method }}"
+        data-default-value="{{ form_values.baseline_food_cost_method }}" />
       {% if errors.get("food_cost_method") %}
         <p class="field-error">{{ errors.food_cost_method }}</p>
       {% endif %}
@@ -227,6 +291,9 @@
         <input class="form-input" id="event_average_food_cost_per_order"
           name="average_food_cost_per_order" type="number" step="0.01"
           value="{{ form_values.average_food_cost_per_order }}"
+          data-default-value="{{
+            form_values.baseline_average_food_cost_per_order
+          }}"
           {% if errors.get("average_food_cost_per_order") %}
             aria-invalid="true"
           {% endif %} />
@@ -246,6 +313,7 @@
         <input class="form-input" id="event_food_cost_percentage"
           name="food_cost_percentage" type="number" step="0.01"
           value="{{ form_values.food_cost_percentage }}"
+          data-default-value="{{ form_values.baseline_food_cost_percentage }}"
           {% if errors.get("food_cost_percentage") %}
             aria-invalid="true"
           {% endif %} />
@@ -263,6 +331,9 @@
         <input class="form-input" id="event_manual_food_cost_total"
           name="manual_food_cost_total" type="number" step="0.01"
           value="{{ form_values.manual_food_cost_total }}"
+          data-default-value="{{
+            form_values.baseline_manual_food_cost_total
+          }}"
           {% if errors.get("manual_food_cost_total") %}
             aria-invalid="true"
           {% endif %} />
@@ -285,10 +356,15 @@
           {% set entry_errors = labor_errors[loop.index0]
              if labor_errors|length > loop.index0 else {} %}
           <div class="labor-entry">
+            <input name="baseline_employee_labor_rate" type="hidden"
+              value="{{ entry.baseline_hourly_rate }}" />
+            <input name="baseline_employee_labor_hours" type="hidden"
+              value="{{ entry.baseline_total_hours_paid }}" />
             <div class="form-field">
               <label class="form-label">Hourly labor rate ($)</label>
               <input class="form-input" name="employee_labor_rate"
                 type="number" step="0.01" value="{{ entry.hourly_rate }}"
+                data-default-value="{{ entry.baseline_hourly_rate }}"
                 required
                 {% if entry_errors.get("hourly_rate") %}
                   aria-invalid="true"
@@ -304,6 +380,7 @@
               <input class="form-input" name="employee_labor_hours"
                 type="number" step="any"
                 value="{{ entry.total_hours_paid }}" required
+                data-default-value="{{ entry.baseline_total_hours_paid }}"
                 {% if entry_errors.get("total_hours_paid") %}
                   aria-invalid="true"
                 {% endif %} />
@@ -316,6 +393,17 @@
             <button class="remove-event-labor button-secondary" type="button">
               Remove
             </button>
+            {% if entry.baseline_hourly_rate %}
+              <span class="field-indicator labor-default-indicator">
+                {% if entry.hourly_rate == entry.baseline_hourly_rate
+                      and entry.total_hours_paid
+                      == entry.baseline_total_hours_paid %}
+                  From defaults
+                {% else %}
+                  Changed for this event
+                {% endif %}
+              </span>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
@@ -324,12 +412,26 @@
       </button>
 
       <div class="form-field owner-labor-pay">
-        <label class="form-label" for="owner_labor_pay">
-          Owner labor pay for this event ($)
-        </label>
+        <div class="label-row">
+          <label class="form-label" for="owner_labor_pay">
+            Owner labor pay for this event ($)
+          </label>
+          {% if form_values.baseline_owner_labor_pay %}
+            <span class="field-indicator default-indicator"
+              data-indicator-for="owner_labor_pay">
+              {% if form_values.owner_labor_pay
+                    == form_values.baseline_owner_labor_pay %}
+                From defaults
+              {% else %}
+                Changed for this event
+              {% endif %}
+            </span>
+          {% endif %}
+        </div>
         <input class="form-input" id="owner_labor_pay"
           name="owner_labor_pay" type="number" step="0.01"
           value="{{ form_values.owner_labor_pay }}"
+          data-default-value="{{ form_values.baseline_owner_labor_pay }}"
           {% if errors.get("owner_labor_pay") %}
             aria-invalid="true"
           {% endif %} />
@@ -356,9 +458,26 @@
           ("generator_utility_cost", "Generator or utility cost ($)")
         ) %}
           <div class="form-field">
-            <label class="form-label" for="{{ name }}">{{ label }}</label>
+            <div class="label-row">
+              <label class="form-label" for="{{ name }}">{{ label }}</label>
+              {% if name == "travel_cost"
+                    and form_values.baseline_travel_cost %}
+                <span class="field-indicator default-indicator"
+                  data-indicator-for="travel_cost">
+                  {% if form_values.travel_cost
+                        == form_values.baseline_travel_cost %}
+                    From defaults
+                  {% else %}
+                    Changed for this event
+                  {% endif %}
+                </span>
+              {% endif %}
+            </div>
             <input class="form-input" id="{{ name }}" name="{{ name }}"
               type="number" step="0.01" value="{{ form_values[name] }}"
+              {% if name == "travel_cost" %}
+                data-default-value="{{ form_values.baseline_travel_cost }}"
+              {% endif %}
               {% if errors.get(name) %}
                 aria-invalid="true" aria-describedby="{{ name }}-error"
               {% endif %} />
@@ -375,6 +494,35 @@
     <fieldset class="input-section">
       <legend>Event and payment fees</legend>
       <div class="form-grid">
+        {% for name, label in (
+          ("card_sales_percentage", "Sales paid by card (%)"),
+          ("card_processing_percentage", "Card-processing percentage (%)")
+        ) %}
+          <div class="form-field">
+            <div class="label-row">
+              <label class="form-label" for="{{ name }}">{{ label }}</label>
+              {% if form_values['baseline_' ~ name] %}
+                <span class="field-indicator default-indicator"
+                  data-indicator-for="{{ name }}">
+                  {% if form_values[name]
+                        == form_values['baseline_' ~ name] %}
+                    From defaults
+                  {% else %}
+                    Changed for this event
+                  {% endif %}
+                </span>
+              {% endif %}
+            </div>
+            <input class="form-input" id="{{ name }}" name="{{ name }}"
+              type="number" step="0.01" value="{{ form_values[name] }}"
+              data-default-value="{{ form_values['baseline_' ~ name] }}"
+              required
+              {% if errors.get(name) %}aria-invalid="true"{% endif %} />
+            {% if errors.get(name) %}
+              <p class="field-error">{{ errors[name] }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
         <div class="form-field">
           <label class="form-label" for="vendor_booking_fee">
             Vendor or booking fee ($)
@@ -429,6 +577,85 @@
     </fieldset>
 
     <fieldset class="input-section">
+      <legend>Profit target</legend>
+      <div class="label-row">
+        <p class="section-question">
+          How do you decide whether this event is worth accepting?
+        </p>
+        {% if form_values.baseline_profit_target_type %}
+          <span class="field-indicator default-indicator"
+            id="profit-target-default-indicator">
+            {% if form_values.profit_target_type
+                  == form_values.baseline_profit_target_type
+                  and form_values.minimum_profit_amount
+                  == form_values.baseline_minimum_profit_amount
+                  and form_values.minimum_profit_margin
+                  == form_values.baseline_minimum_profit_margin %}
+              From defaults
+            {% else %}
+              Changed for this event
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
+      <div class="choice-options">
+        <label class="choice-option">
+          <input type="radio" name="profit_target_type"
+            value="profit_amount"
+            {% if form_values.profit_target_type == "profit_amount" %}
+              checked
+            {% endif %} />
+          Minimum profit amount
+        </label>
+        <label class="choice-option">
+          <input type="radio" name="profit_target_type"
+            value="profit_margin"
+            {% if form_values.profit_target_type == "profit_margin" %}
+              checked
+            {% endif %} />
+          Minimum profit margin
+        </label>
+      </div>
+      {% if errors.get("profit_target_type") %}
+        <p class="field-error">{{ errors.profit_target_type }}</p>
+      {% endif %}
+      <div id="event-profit-amount-field"
+        class="form-field target-field event-profit-field"
+        {% if form_values.profit_target_type != "profit_amount" %}hidden{% endif %}>
+        <label class="form-label" for="event_minimum_profit_amount">
+          Minimum profit amount ($)
+        </label>
+        <input class="form-input" id="event_minimum_profit_amount"
+          name="minimum_profit_amount" type="number" step="0.01"
+          value="{{ form_values.minimum_profit_amount }}"
+          data-default-value="{{ form_values.baseline_minimum_profit_amount }}"
+          {% if errors.get("minimum_profit_amount") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("minimum_profit_amount") %}
+          <p class="field-error">{{ errors.minimum_profit_amount }}</p>
+        {% endif %}
+      </div>
+      <div id="event-profit-margin-field"
+        class="form-field target-field event-profit-field"
+        {% if form_values.profit_target_type != "profit_margin" %}hidden{% endif %}>
+        <label class="form-label" for="event_minimum_profit_margin">
+          Minimum profit margin (%)
+        </label>
+        <input class="form-input" id="event_minimum_profit_margin"
+          name="minimum_profit_margin" type="number" step="0.01"
+          value="{{ form_values.minimum_profit_margin }}"
+          data-default-value="{{ form_values.baseline_minimum_profit_margin }}"
+          {% if errors.get("minimum_profit_margin") %}
+            aria-invalid="true"
+          {% endif %} />
+        {% if errors.get("minimum_profit_margin") %}
+          <p class="field-error">{{ errors.minimum_profit_margin }}</p>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="input-section">
       <legend>Additional costs</legend>
       <div id="event-additional-cost-entries">
         {% for cost in form_values.additional_costs %}
@@ -473,6 +700,8 @@
 </section>
 <template id="event-employee-labor-template">
   <div class="labor-entry">
+    <input name="baseline_employee_labor_rate" type="hidden" value="" />
+    <input name="baseline_employee_labor_hours" type="hidden" value="" />
     <div class="form-field">
       <label class="form-label">Hourly labor rate ($)</label>
       <input class="form-input" name="employee_labor_rate" type="number"
