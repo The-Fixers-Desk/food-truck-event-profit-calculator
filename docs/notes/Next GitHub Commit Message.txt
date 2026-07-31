@@ -2,18 +2,15 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Improve Event Inputs guidance, contextual warnings, sales controls, input
-  organization, and customer-facing number formatting
+Add pre-polish functional regression and workflow tests
 
-- Improve weather guidance and accessible help
-- Add earlier contextual warnings during Event Inputs
-- Remove Event Inputs result previews
-- Move custom expected sales control to the Event Analysis workspace
-- Reorganize Event Inputs into causal input groups
-- Standardize customer-facing whole-number formatting
-- Round expected buyers down and break-even customers up
-- Preserve existing calculations, persistence, and business formulas
-- Add and update regression tests
+- Add automated regression tests for core V1 workflows
+- Cover Scenario save, overwrite, reset, rename, and delete actions
+- Verify Event management, persistence after restart, and comparison behavior
+- Test live workspace recalculation and dirty-state protection
+- Verify invalid-input safety and atomic persistence
+- Add Defaults, backup/restore, and stress-case coverage
+- Preserve existing workflows while fixing any confirmed regression defects
 
 ---------------------------------------------------------------------------------
 

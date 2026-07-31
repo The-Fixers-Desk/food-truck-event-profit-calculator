@@ -110,7 +110,7 @@ DATABASE RELIABILITY
   strengthen schema verification, and log persistence failures without exposing
   technical errors to customers.
 
-□ >Improve Event Inputs guidance, contextual warnings, sales controls, input
+☑ Improve Event Inputs guidance, contextual warnings, sales controls, input
   organization, and customer-facing number formatting
   Explain weather and event-protection percentages, remove Event Inputs demand
   and sales previews, move custom expected sales into the interactive
@@ -120,8 +120,14 @@ DATABASE RELIABILITY
   display break-even customers by always rounding up.
 
 
-// DO FULL USE TEST HERE //
+// DID FULL USE TEST HERE //
 
+□ >Add pre-polish functional regression and workflow tests
+  Automate the core V1 workflows that should be verified before visual polish,
+  including Scenario actions, persistence after restart, comparison behavior,
+  invalid-input safety, live recalculation, backup and restore, Defaults and
+  overrides, dirty-navigation protection, and stress cases with long names and
+  repeatable rows.
 
 DESIGN AND ACCESSIBILITY
 

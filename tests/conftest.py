@@ -6,6 +6,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from app import create_app
+from app.database import close_database
 
 
 @pytest.fixture()
@@ -19,6 +20,7 @@ def app(database_path: Path) -> Generator[Flask, None, None]:
     """Create a fresh Flask application for each test."""
     application = create_app(
         {
+            "DATA_ROOT": database_path.parent,
             "DATABASE": database_path,
             "ENFORCE_SETUP": False,
             "SECRET_KEY": "test",
@@ -34,3 +36,24 @@ def app(database_path: Path) -> Generator[Flask, None, None]:
 def client(app: Flask) -> FlaskClient:
     """Create a test client for making requests to the application."""
     return app.test_client()
+
+
+@pytest.fixture()
+def restart_application(database_path: Path):
+    """Create a clean app instance against the current isolated database."""
+    def restart(current: Flask | None = None) -> Flask:
+        if current is not None:
+            with current.app_context():
+                close_database()
+        return create_app(
+            {
+                "DATA_ROOT": database_path.parent,
+                "DATABASE": database_path,
+                "ENFORCE_SETUP": False,
+                "SECRET_KEY": "restart-test",
+                "TESTING": True,
+                "PROPAGATE_EXCEPTIONS": False,
+            }
+        )
+
+    return restart

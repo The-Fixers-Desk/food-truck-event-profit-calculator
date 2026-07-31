@@ -1,0 +1,416 @@
+Implement the milestone:
+
+Add pre-polish functional regression and workflow tests.
+
+The core V1 application is now functionally complete enough for manual use.
+
+Manual testing has already confirmed:
+
+- Three materially different Events can be created.
+- Loss, profitable-but-below-target, and target-met outcomes work.
+- Contextual Event Inputs warnings appear.
+- Event Analysis calculations work.
+- Saved Events and Scenario comparison work.
+- Backup creation and restore work.
+- No obvious happy-path functional defect has been found.
+
+Before beginning the dedicated V1 UI and UX polish milestone, add automated
+coverage for the remaining functional acceptance surface so the developer does
+not have to manually repeat every workflow.
+
+This milestone is for tests and narrowly required testability corrections.
+
+Do not redesign the interface.
+Do not begin visual polish.
+Do not add new product functionality.
+
+Testing approach
+
+Use the project’s existing pytest infrastructure.
+
+Prefer the highest practical level for each workflow:
+
+- Domain or calculation tests for exact business rules
+- Repository and migration tests for persistence
+- Flask route or integration tests for complete server behavior
+- Existing browser-interaction testing patterns where JavaScript behavior must
+  be exercised
+
+If the project already has Playwright or another established browser test
+framework, use it.
+
+Do not introduce a second browser automation framework.
+
+If complete browser automation is not yet established, cover as much as
+possible through route, integration, JavaScript unit, or controlled DOM tests,
+and clearly document which final browser-level checks remain for the later
+complete end-to-end testing milestone.
+
+Test-data isolation
+
+Every test must use an isolated temporary application-data root and database.
+
+Never modify, migrate, restore over, copy over, or delete:
+
+data/app.db
+
+Do not use the developer’s current Events, Scenarios, backups, or other
+customer-like records as fixtures.
+
+Use realistic but fictional builders or fixtures for:
+
+- A profitable Event below its target
+- A loss-producing Event
+- A target-meeting Event
+- Multiple Scenarios under the same Event
+- Scenarios across multiple Events
+- Multiple labor rows
+- Multiple additional-cost rows
+- Long valid Event and Scenario names
+
+Scenario save and version actions
+
+Add automated tests covering:
+
+- An Original estimate Scenario is created automatically after valid Event
+  submission.
+- Save as new Scenario is the default save action.
+- Saving as new creates a distinct Scenario.
+- The original Scenario remains unchanged.
+- The new Scenario becomes the active Scenario.
+- Blank Scenario names are rejected.
+- Duplicate Scenario names are rejected.
+- Duplicate-name checks are case-insensitive.
+- Overwriting requires explicit confirmation through the established workflow.
+- Overwrite changes only the active Scenario.
+- Overwrite does not create a duplicate Scenario.
+- Reset changes restores the active saved Scenario baseline.
+- Save is disabled or unavailable when the workspace has no unsaved changes,
+  according to current behavior.
+- A failed save preserves the current workspace values and calculated results.
+- Existing saved custom-sales Scenarios remain loadable.
+
+Scenario and Event management
+
+Add automated tests covering:
+
+- Renaming an Event.
+- Renaming a Scenario.
+- Rename persistence after restart.
+- Duplicate Scenario-name rejection during rename.
+- Deleting a non-final Scenario.
+- Preventing individual deletion of the final remaining Scenario.
+- Deleting an Event after confirmation.
+- Event deletion removes its related Scenarios and ordered child records.
+- Deleting one Event does not affect other Events.
+- Missing or already-deleted records produce friendly behavior rather than a
+  raw exception.
+
+Restart persistence
+
+Add a reusable restart test helper that:
+
+1. Starts the application against an isolated data root.
+2. Creates and modifies records through normal application paths.
+3. Stops the application or closes the database cleanly.
+4. Creates a new application instance against the same isolated data root.
+5. Verifies persisted state.
+
+Cover persistence after restart for:
+
+- Business Defaults
+- Events
+- Scenarios
+- Scenario names
+- Active assumptions
+- Custom expected-sales state
+- Employee labor rows and their order
+- Additional-cost rows and their order
+- Event and Scenario renames
+- Scenario deletions
+- Event deletions
+- Restored backup data
+- Current schema version
+
+Comparison workflow
+
+Add automated tests covering:
+
+- Comparing two Scenarios under one Event.
+- Comparing Scenarios from different Events.
+- Selecting three Scenarios.
+- Selecting four Scenarios.
+- Preventing selection beyond the supported maximum.
+- Insufficient selection producing the established guidance.
+- The first selected Scenario becoming the initial baseline.
+- Changing the comparison baseline.
+- Financial differences recalculating relative to the selected baseline.
+- Percentage-point differences displaying correctly.
+- Break-even customer differences using customer-facing whole-number values.
+- Target and warning differences displaying correctly.
+- Tie labels displaying when values tie.
+- Show differences only hiding unchanged rows.
+- Turning Show differences only off restoring the full comparison.
+- Opening each compared Scenario in the existing Event Analysis workspace.
+- Comparison creating no new Events or Scenarios.
+
+Live Event Analysis behavior
+
+Add tests for the interactive workspace covering:
+
+- A valid assumption edit causes recalculation.
+- Revenue, costs, business profit, margin, break-even, target status, and
+  warnings update together.
+- No Calculate button is required.
+- Multiple rapid changes retain the newest result.
+- An older response cannot replace a newer calculation.
+- An invalid edit preserves the latest valid calculated results.
+- Correcting the invalid edit resumes recalculation.
+- Adding an employee labor row updates results.
+- Removing an employee labor row updates results.
+- Adding an additional-cost row updates results.
+- Removing an additional-cost row updates results.
+- Enabling custom expected sales reveals and uses the custom amount.
+- Disabling custom expected sales restores calculated expected sales.
+- The custom expected-sales warning remains factual and contextual.
+- Reset changes restores every assumption and dependent result to the active
+  saved baseline.
+
+If rapid-response protection currently requires browser-level testing and the
+project has no established browser framework, isolate the request-versioning or
+response-order logic into a testable unit without changing customer behavior.
+
+Dirty-workspace navigation protection
+
+Add tests covering:
+
+- Editing a saved Scenario makes the workspace dirty.
+- Attempting protected navigation invokes the established confirmation flow.
+- Canceling navigation preserves the current workspace and unsaved edits.
+- Confirming navigation leaves the active saved Scenario unchanged.
+- A clean workspace navigates without unnecessary confirmation.
+- A successful save or reset clears the dirty state.
+
+Invalid Event Inputs and atomicity
+
+Add tests covering:
+
+- Missing required Event information.
+- Invalid attendance.
+- Invalid percentage expected to buy food.
+- Invalid competing-vendor count.
+- Invalid average order amount.
+- Invalid food-cost configuration.
+- Invalid labor rows.
+- Invalid payment percentages.
+- Invalid profit target.
+- Invalid additional-cost rows.
+
+For invalid Event submission, verify:
+
+- No Event is created.
+- No Scenario is created.
+- No labor rows are created.
+- No additional-cost rows are created.
+- Entered values are preserved where current route behavior supports it.
+- Errors are associated with the correct controls.
+- The customer receives useful validation wording.
+- No raw exception is exposed.
+
+Also verify that an injected persistence failure during Event and Original
+estimate creation rolls back the entire transaction.
+
+Defaults and Event overrides
+
+Add tests covering:
+
+- New Events begin with the latest Business Defaults.
+- Updating Business Defaults affects later new Events.
+- Updating Business Defaults does not alter already saved Event or Scenario
+  assumptions.
+- Event-specific overrides persist independently.
+- A value copied unchanged from Defaults retains the established From defaults
+  state.
+- A changed Event value receives the established Changed for this event state.
+- Returning an override to the current default restores the correct indicator,
+  according to established behavior.
+- Employee labor Defaults copy into new Event Inputs in the correct order.
+- Existing Event labor rows do not change when Defaults are edited.
+
+Backup and restore
+
+Add automated tests covering:
+
+- Downloading or generating a valid backup through the established workflow.
+- A visible persisted change made after the backup.
+- Restoring the backup removes the post-backup change.
+- Restore performs complete replacement rather than merging.
+- Defaults, Events, Scenarios, labor rows, and additional costs are restored.
+- Restored row order is preserved.
+- Restored data persists after restart.
+- An invalid archive is rejected.
+- A checksum mismatch is rejected.
+- A newer unsupported backup version is rejected.
+- Canceling restore leaves current data unchanged.
+- Failed restore validation leaves current data unchanged.
+- A pre-restore recovery snapshot is created through the established safeguard.
+- Backup and restore operations never touch data outside the isolated test root.
+
+Long-content and repeatable-row stress cases
+
+Add functional tests using:
+
+- A long but valid Event name.
+- A long but valid location.
+- A long but valid Scenario name.
+- Several employee labor rows.
+- Several additional-cost rows.
+- Long additional-cost names.
+
+Verify:
+
+- Values save without truncation beyond established validation limits.
+- Records reload correctly.
+- Comparison remains structurally valid.
+- Ordered child rows remain ordered.
+- No server exception occurs.
+- Generated backup and restore preserve the values.
+
+Do not turn this into visual screenshot testing.
+
+Customer-facing calculation states
+
+Using deterministic test fixtures, verify all three main outcome states:
+
+1. Estimated loss
+2. Positive business profit below the selected target
+3. Selected profit target met
+
+For each state, verify:
+
+- Expected warning or target status
+- Correct business profit sign
+- Correct profit margin sign or value
+- Correct break-even values
+- Correct comparison labels
+- No raw Decimal strings appear in customer-facing output
+
+Preserve exact Decimal assertions in lower-level calculation tests.
+
+Logging and friendly failure behavior
+
+Where routes catch persistence, backup, restore, or calculation exceptions:
+
+- Verify technical exceptions are logged.
+- Verify customer-facing messages remain friendly.
+- Verify submitted customer content is not written to logs.
+- Do not broaden logging changes beyond what the tests reveal is missing.
+
+Test organization
+
+Keep tests grouped by workflow and responsibility.
+
+Suggested organization may include:
+
+- test_scenario_actions.py
+- test_saved_event_management.py
+- test_restart_persistence.py
+- test_comparison_workflow.py
+- test_workspace_interactions.py
+- test_event_input_failures.py
+- test_defaults_overrides.py
+- test_backup_restore_workflow.py
+- test_functional_stress.py
+
+Reuse existing naming and structure when the repository already has preferred
+test modules.
+
+Avoid one enormous test that makes failures difficult to diagnose.
+
+A small complete happy-path integration test may be added in addition to the
+focused tests.
+
+Regression boundaries
+
+Do not change:
+
+- Financial formulas
+- Shared-demand rules
+- Weather rules
+- Warning conditions
+- Break-even rules
+- Profit-target rules
+- Scenario save semantics
+- Comparison semantics
+- Backup format
+- Restore replacement behavior
+- Migration behavior
+- Customer-facing workflows
+
+Small production-code changes are allowed only when needed to:
+
+- Inject isolated data roots
+- Expose clean lifecycle boundaries
+- Make asynchronous response-order behavior testable
+- Remove import-time side effects
+- Add missing technical logging
+- Fix a confirmed defect revealed by these tests
+
+Do not add a visual workaround solely for a test.
+
+If a test uncovers a real functional defect:
+
+1. Reproduce it.
+2. Add the regression test.
+3. Fix the smallest underlying cause.
+4. Record the defect and fix in the final summary.
+
+Do not begin the complete Playwright end-to-end milestone here unless Playwright
+is already installed and used by the project.
+
+This milestone should strengthen the pre-polish functional safety net without
+duplicating the later exhaustive end-to-end and platform-acceptance milestones.
+
+Documentation
+
+Add a concise functional-test checklist or developer note explaining:
+
+- What this pre-polish suite covers
+- How data isolation works
+- The command for running the focused suite
+- Which behaviors still require later browser E2E testing
+- Which behaviors still require packaged Windows and macOS acceptance testing
+- That real development and customer databases must never be used
+
+Scope
+
+Do not implement:
+
+- UI or UX polish
+- The Event Inputs guided stepper
+- Accessibility redesign
+- Responsive redesign
+- Windows packaging
+- macOS packaging
+- Complete cross-browser E2E automation unless already established
+- Native desktop UI automation
+- New customer features
+- New calculations
+
+Do not modify or reset data/app.db.
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run the focused pre-polish functional regression suite.
+2. Run all affected repository, route, calculation, backup, restore, migration,
+   and JavaScript tests.
+3. Run the full test suite.
+4. Run git diff --check.
+5. Summarize the automated workflows added.
+6. List any confirmed functional defects found and fixed.
+7. Clearly identify any checks deferred to the later full E2E milestone.
+8. Report every command and its exact result.
+
+Keep the response concise.

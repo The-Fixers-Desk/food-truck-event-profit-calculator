@@ -12,3 +12,4 @@ Give me the commit message I will use when this is done.
 
 ---------------------------------------------------------------------------------
 
+Make a milestone list entry, and a Codex prompt for INSERT
