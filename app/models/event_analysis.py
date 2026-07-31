@@ -83,14 +83,14 @@ class RevenueAssumptions:
     def __post_init__(self) -> None:
         if self.method not in REVENUE_METHODS:
             raise ValueError("Revenue method is invalid.")
-        _require_selected_value(
-            selected=self.method,
-            expected="attendance",
-            selected_value=self.average_order_sale_amount,
-            unselected_value=self.expected_sales_amount,
-        )
-        if self.average_order_sale_amount is not None:
-            _require_nonnegative_money(self.average_order_sale_amount)
+        if self.average_order_sale_amount is None:
+            raise ValueError("Revenue assumptions require an average order.")
+        _require_nonnegative_money(self.average_order_sale_amount)
+        if self.method == "manual_sales":
+            if self.expected_sales_amount is None:
+                raise ValueError("Manual revenue requires expected sales.")
+        elif self.expected_sales_amount is not None:
+            raise ValueError("Attendance revenue cannot have manual sales.")
         if self.expected_sales_amount is not None:
             _require_nonnegative_money(self.expected_sales_amount)
 

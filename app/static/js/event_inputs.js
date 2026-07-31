@@ -427,7 +427,7 @@ addAdditionalCost.addEventListener("click", () => {
 
 const workspaceForm = document.querySelector("[data-workspace='true']");
 const workspaceStatus = document.querySelector("#analysis-update-status");
-const workspaceBaseline = workspaceForm
+let workspaceBaseline = workspaceForm
   ? new FormData(workspaceForm)
   : null;
 let workspaceTimer;
@@ -586,6 +586,25 @@ function scheduleWorkspaceCalculation() {
   }
   clearTimeout(workspaceTimer);
   workspaceTimer = setTimeout(recalculateWorkspace, 300);
+  updateWorkspaceDirtyState();
+}
+
+function workspaceSignature(formData) {
+  return JSON.stringify(
+    Array.from(formData.entries()).filter(
+      ([name]) => !["active_event_id", "active_scenario_id"].includes(name),
+    ),
+  );
+}
+
+function updateWorkspaceDirtyState() {
+  if (!workspaceForm) {
+    return;
+  }
+  const dirty = workspaceSignature(new FormData(workspaceForm))
+    !== workspaceSignature(workspaceBaseline);
+  workspaceForm.dataset.dirty = String(dirty);
+  document.querySelector("#open-save-analysis").disabled = !dirty;
 }
 
 function restoreWorkspaceBaseline() {
@@ -644,6 +663,7 @@ function restoreWorkspaceBaseline() {
   updateEventProfitTarget();
   clearWorkspaceErrors();
   scheduleWorkspaceCalculation();
+  updateWorkspaceDirtyState();
 }
 
 if (workspaceForm) {
@@ -655,5 +675,126 @@ if (workspaceForm) {
   document.querySelector("#reset-analysis").addEventListener(
     "click",
     restoreWorkspaceBaseline,
+  );
+  updateWorkspaceDirtyState();
+}
+
+const saveAnalysisDialog = document.querySelector("#save-analysis-dialog");
+
+if (workspaceForm && saveAnalysisDialog) {
+  const openSave = document.querySelector("#open-save-analysis");
+  const saveModes = saveAnalysisDialog.querySelectorAll(
+    'input[name="save_mode"]',
+  );
+  const newNameField = document.querySelector("#new-scenario-name-field");
+  const newNameInput = document.querySelector("#new_scenario_name");
+  const overwriteField = document.querySelector(
+    "#overwrite-confirmation-field",
+  );
+  const overwriteConfirmation = document.querySelector(
+    "#overwrite_confirmed",
+  );
+  const scenarioNameError = document.querySelector("#scenario-name-error");
+  const overwriteError = document.querySelector("#overwrite-error");
+  const saveError = document.querySelector("#save-analysis-error");
+
+  function clearSaveErrors() {
+    [scenarioNameError, overwriteError, saveError].forEach((error) => {
+      error.hidden = true;
+      error.textContent = "";
+    });
+  }
+
+  function selectedSaveMode() {
+    return saveAnalysisDialog.querySelector(
+      'input[name="save_mode"]:checked',
+    ).value;
+  }
+
+  function updateSaveMode() {
+    const saveAsNew = selectedSaveMode() === "new";
+    newNameField.hidden = !saveAsNew;
+    overwriteField.hidden = saveAsNew;
+    newNameInput.required = saveAsNew;
+    if (saveAsNew) {
+      overwriteConfirmation.checked = false;
+    }
+    clearSaveErrors();
+  }
+
+  openSave.addEventListener("click", () => {
+    saveAnalysisDialog.querySelector(
+      'input[name="save_mode"][value="new"]',
+    ).checked = true;
+    newNameInput.value = "";
+    overwriteConfirmation.checked = false;
+    updateSaveMode();
+    saveAnalysisDialog.showModal();
+    newNameInput.focus();
+  });
+
+  saveModes.forEach((mode) => {
+    mode.addEventListener("change", updateSaveMode);
+  });
+
+  document.querySelector("#cancel-save-analysis").addEventListener(
+    "click",
+    () => saveAnalysisDialog.close(),
+  );
+
+  document.querySelector("#confirm-save-analysis").addEventListener(
+    "click",
+    async () => {
+      clearSaveErrors();
+      const formData = new FormData(workspaceForm);
+      const mode = selectedSaveMode();
+      formData.set("save_mode", mode);
+      formData.set("scenario_name", newNameInput.value);
+      formData.set(
+        "overwrite_confirmed",
+        String(overwriteConfirmation.checked),
+      );
+      try {
+        const response = await fetch(workspaceForm.dataset.saveUrl, {
+          method: "POST",
+          body: formData,
+        });
+        const payload = await response.json();
+        if (!payload.saved) {
+          if (payload.errors) {
+            showWorkspaceErrors(payload.errors);
+          }
+          if (payload.scenario_name_error) {
+            scenarioNameError.textContent = payload.scenario_name_error;
+            scenarioNameError.hidden = false;
+          }
+          if (payload.overwrite_error) {
+            overwriteError.textContent = payload.overwrite_error;
+            overwriteError.hidden = false;
+          }
+          if (payload.save_error || payload.message) {
+            saveError.textContent = payload.save_error ?? payload.message;
+            saveError.hidden = false;
+          }
+          return;
+        }
+        document.querySelector("#active_scenario_id").value =
+          payload.active_scenario_id;
+        document.querySelector("#active-scenario-name").textContent =
+          payload.active_scenario_name;
+        document.querySelector("#overwrite-scenario-name").textContent =
+          payload.active_scenario_name;
+        updateWorkspaceResults(payload.result);
+        workspaceBaseline = new FormData(workspaceForm);
+        updateWorkspaceDirtyState();
+        workspaceStatus.dataset.state = "valid";
+        workspaceStatus.textContent = payload.message;
+        saveAnalysisDialog.close();
+      } catch {
+        saveError.textContent =
+          "The scenario could not be saved. Your changes are preserved.";
+        saveError.hidden = false;
+      }
+    },
   );
 }

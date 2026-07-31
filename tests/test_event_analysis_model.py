@@ -94,7 +94,9 @@ def test_event_requires_at_least_one_scenario():
             "attendance", average_order_sale_amount=Decimal("15")
         ),
         RevenueAssumptions(
-            "manual_sales", expected_sales_amount=Decimal("5000")
+            "manual_sales",
+            average_order_sale_amount=Decimal("15"),
+            expected_sales_amount=Decimal("5000"),
         ),
     ],
 )
@@ -185,10 +187,6 @@ def test_weather_rejects_invalid_or_contradictory_states(weather):
         {
             "method": "manual_sales",
             "average_order_sale_amount": Decimal("15"),
-            "expected_sales_amount": Decimal("5000"),
-        },
-        {
-            "method": "manual_sales",
             "expected_sales_amount": Decimal("-1"),
         },
     ],

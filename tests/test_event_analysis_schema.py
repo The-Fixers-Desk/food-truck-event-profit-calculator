@@ -126,6 +126,7 @@ def test_saved_event_tables_and_important_columns_exist(connection):
         "event_id",
         "other_competing_food_vendors",
         "expected_food_buyer_basis_points",
+        "manual_average_order_sale_amount_cents",
         "revenue_method",
         "food_cost_method",
         "owner_labor_pay_cents",

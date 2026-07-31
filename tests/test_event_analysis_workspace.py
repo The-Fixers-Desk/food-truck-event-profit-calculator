@@ -49,9 +49,20 @@ def test_workspace_contains_all_adjustable_groups_and_actions(client):
         "Add another cost",
         "Reset changes",
         "Start new analysis",
+        "Save as new scenario",
+        "Overwrite current scenario",
     ):
         assert text in page
     assert ">Continue<" not in page
+    assert 'id="open-save-analysis"' in page
+    save_tag = page.split('id="open-save-analysis"', 1)[1].split(
+        ">", 1
+    )[0]
+    assert "disabled" in save_tag
+    new_mode = page.split('name="save_mode" value="new"', 1)[1].split(
+        ">", 1
+    )[0]
+    assert "checked" in new_mode
 
 
 def test_initial_workspace_displays_complete_calculation(client):
@@ -63,7 +74,7 @@ def test_initial_workspace_displays_complete_calculation(client):
     assert "$2260.0625" in page
     assert "$2739.9375" in page
     assert "54.79875%" in page
-    assert "Not calculable" in page
+    assert "136.9734848484848484848484848" in page
     assert "custom_sales_assumption" in page
 
 
@@ -209,7 +220,7 @@ def test_live_endpoint_preserves_latest_results_contract_when_invalid(client):
     assert "errors" not in corrected_payload
 
 
-def test_live_calculations_create_no_records_or_default_changes(
+def test_live_calculations_create_no_additional_records_or_default_changes(
     client, database_path
 ):
     client.post("/defaults", data=saved_defaults_data())
@@ -226,10 +237,10 @@ def test_live_calculations_create_no_records_or_default_changes(
     with sqlite3.connect(database_path) as database:
         assert database.execute(
             "SELECT COUNT(*) FROM events"
-        ).fetchone()[0] == 0
+        ).fetchone()[0] == 1
         assert database.execute(
             "SELECT COUNT(*) FROM event_scenarios"
-        ).fetchone()[0] == 0
+        ).fetchone()[0] == 1
         assert database.execute(
             "SELECT * FROM business_defaults"
         ).fetchone() == defaults_before
@@ -256,6 +267,9 @@ def test_workspace_client_behavior_is_debounced_accessible_and_responsive(
     assert "AbortController" in script
     assert "requestNumber !== workspaceRequestNumber" in script
     assert "restoreWorkspaceBaseline" in script
+    assert "workspaceSignature" in script
+    assert "updateWorkspaceDirtyState" in script
+    assert "workspaceBaseline = new FormData(workspaceForm)" in script
     assert "position: sticky" in styles
     assert "@media (max-width: 800px)" in styles
     assert "order: -1" in styles

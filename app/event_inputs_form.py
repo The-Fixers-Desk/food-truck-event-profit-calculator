@@ -88,6 +88,11 @@ PROTECTION_FACTORS = {
     "partially_covered": Decimal("0.75"),
     "fully_outdoors": Decimal("1"),
 }
+OPERATING_COST_NAMES = {
+    "parking_cost": "__parking_cost__",
+    "permit_cost": "__permit_cost__",
+    "generator_utility_cost": "__generator_utility_cost__",
+}
 
 
 def blank_event_inputs_form(
@@ -267,7 +272,7 @@ def validate_and_calculate_event_analysis(
     identity, values, errors = validate_event_inputs(submitted)
     if errors:
         return identity, values, errors, None
-    result = calculate_event_scenario(_scenario_from_form_values(values))
+    result = calculate_event_scenario(scenario_from_form_values(values))
     return identity, values, errors, result
 
 
@@ -368,6 +373,108 @@ def calculation_result_data(result: EventCalculationResult) -> dict:
     }
 
 
+def event_scenario_to_form(
+    identity: EventIdentity,
+    scenario: EventScenario,
+) -> dict:
+    """Convert a persisted Scenario back to complete workspace form values."""
+    values = blank_event_inputs_form()
+    values.update(
+        {
+            "event_name": identity.event_name,
+            "event_date": identity.event_date.isoformat(),
+            "start_time": identity.start_time.strftime("%H:%M"),
+            "location": identity.location,
+            "estimated_attendance": str(
+                scenario.demand.estimated_attendance
+            ),
+            "other_competing_food_vendors": str(
+                scenario.demand.other_competing_food_vendors
+            ),
+            "expected_food_buyer_percentage": _format_percentage(
+                scenario.demand.expected_food_buyer_percentage
+            ),
+            "weather_outlook": scenario.weather.weather_outlook,
+            "custom_weather_reduction": _format_optional_percentage(
+                scenario.weather.custom_weather_reduction
+            ),
+            "event_protection": scenario.weather.event_protection,
+            "revenue_method": scenario.revenue.method,
+            "average_order_sale_amount": _format_decimal(
+                scenario.revenue.average_order_sale_amount
+            ),
+            "expected_sales_amount": _format_optional_decimal(
+                scenario.revenue.expected_sales_amount
+            ),
+            "food_cost_method_choice": scenario.food_cost.method,
+            "food_cost_method": scenario.food_cost.method,
+            "average_food_cost_per_order": _format_optional_decimal(
+                scenario.food_cost.average_cost_per_order
+            ),
+            "food_cost_percentage": _format_optional_percentage(
+                scenario.food_cost.sales_percentage
+            ),
+            "manual_food_cost_total": _format_optional_decimal(
+                scenario.food_cost.manual_event_total
+            ),
+            "card_sales_percentage": _format_percentage(
+                scenario.fees.card_sales_percentage
+            ),
+            "card_processing_percentage": _format_percentage(
+                scenario.fees.card_processing_percentage
+            ),
+            "fixed_card_processing_fee": _format_optional_decimal(
+                scenario.fees.fixed_card_processing_fee
+            ),
+            "vendor_booking_fee": _format_decimal(
+                scenario.fees.vendor_or_booking_fee
+            ),
+            "organizer_commission_percentage": (
+                _format_optional_percentage(
+                    scenario.fees.organizer_commission_percentage
+                )
+            ),
+            "owner_labor_pay": _format_optional_decimal(
+                scenario.owner_labor_pay
+            ),
+            "travel_cost": _format_optional_decimal(scenario.travel_cost),
+            "profit_target_type": scenario.profit_target.target_type,
+            "minimum_profit_amount": _format_optional_decimal(
+                scenario.profit_target.minimum_profit_amount
+            ),
+            "minimum_profit_margin": _format_optional_percentage(
+                scenario.profit_target.minimum_profit_margin
+            ),
+        }
+    )
+    values["employee_labor"] = [
+        {
+            "hourly_rate": _format_decimal(entry.hourly_rate),
+            "total_hours_paid": _format_decimal(entry.total_hours_paid),
+            "baseline_hourly_rate": "",
+            "baseline_total_hours_paid": "",
+        }
+        for entry in scenario.employee_labor
+    ]
+    internal_to_field = {
+        internal_name: field
+        for field, internal_name in OPERATING_COST_NAMES.items()
+    }
+    values["additional_costs"] = []
+    for cost in scenario.additional_costs:
+        field = internal_to_field.get(cost.name)
+        if field is not None:
+            values[field] = _format_decimal(cost.amount)
+        else:
+            values["additional_costs"].append(
+                {
+                    "name": cost.name,
+                    "amount": _format_decimal(cost.amount),
+                }
+            )
+    return values
+
+
 def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
     """Validate current demand inputs and calculate a read-only preview."""
     values = {
@@ -445,7 +552,7 @@ def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
         full_errors.pop(name, None)
     if not full_errors:
         calculation = calculate_event_scenario(
-            _scenario_from_form_values(full_values)
+            scenario_from_form_values(full_values)
         )
         if calculation.exact_break_even_customers is not None:
             difference = (
@@ -472,10 +579,16 @@ def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
     return preview, {}
 
 
-def _scenario_from_form_values(values: dict) -> EventScenario:
+def scenario_from_form_values(
+    values: dict,
+    scenario_name: str = "Current analysis",
+) -> EventScenario:
     revenue = (
         RevenueAssumptions(
             "manual_sales",
+            average_order_sale_amount=Decimal(
+                values["average_order_sale_amount"]
+            ),
             expected_sales_amount=Decimal(values["expected_sales_amount"]),
         )
         if values["revenue_method"] == "manual_sales"
@@ -529,16 +642,12 @@ def _scenario_from_form_values(values: dict) -> EventScenario:
         for cost in values["additional_costs"]
     ]
     additional_costs.extend(
-        AdditionalEventCost(label, Decimal(values[field]))
-        for field, label in (
-            ("parking_cost", "Parking"),
-            ("permit_cost", "Permit"),
-            ("generator_utility_cost", "Generator or utility cost"),
-        )
+        AdditionalEventCost(internal_name, Decimal(values[field]))
+        for field, internal_name in OPERATING_COST_NAMES.items()
         if values[field]
     )
     return EventScenario(
-        scenario_name="Demand preview",
+        scenario_name=scenario_name,
         demand=DemandAssumptions(
             int(values["estimated_attendance"]),
             int(values["other_competing_food_vendors"]),

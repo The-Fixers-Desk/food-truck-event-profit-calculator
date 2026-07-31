@@ -1,3 +1,5 @@
+import sqlite3
+
 from flask import (
     Blueprint,
     flash,
@@ -9,12 +11,23 @@ from flask import (
 )
 
 from app.business_defaults_form import defaults_to_form, validate_defaults_form
-from app.database import load_business_defaults, save_business_defaults
+from app.calculations import calculate_event_scenario
+from app.database import (
+    ScenarioNameConflict,
+    create_event_scenario,
+    create_event_with_initial_scenario,
+    load_business_defaults,
+    load_event_scenario,
+    overwrite_event_scenario,
+    save_business_defaults,
+)
 from app.event_inputs_form import (
     blank_event_inputs_form,
     calculation_result_data,
     calculate_demand_preview,
+    event_scenario_to_form,
     protection_reductions,
+    scenario_from_form_values,
     validate_and_calculate_event_analysis,
     weather_allows_protection,
 )
@@ -29,13 +42,36 @@ def calculator():
     workspace = False
     identity = None
     analysis = None
+    active_event_id = None
+    active_scenario_id = None
+    active_scenario_name = None
+    save_error = None
     if request.method == "POST":
         identity, form_values, errors, result = (
             validate_and_calculate_event_analysis(request.form)
         )
         if result is not None:
-            workspace = True
-            analysis = calculation_result_data(result)
+            try:
+                scenario = scenario_from_form_values(
+                    form_values, "Original estimate"
+                )
+                active_event_id, active_scenario_id = (
+                    create_event_with_initial_scenario(identity, scenario)
+                )
+            except sqlite3.Error:
+                save_error = (
+                    "The event could not be saved. Please try again."
+                )
+            else:
+                workspace = True
+                _, identity, scenario = load_event_scenario(
+                    active_scenario_id
+                )
+                form_values = event_scenario_to_form(identity, scenario)
+                active_scenario_name = scenario.scenario_name
+                analysis = calculation_result_data(
+                    calculate_event_scenario(scenario)
+                )
     else:
         form_values = blank_event_inputs_form(load_business_defaults())
 
@@ -49,6 +85,10 @@ def calculator():
         workspace=workspace,
         event_identity=identity,
         analysis=analysis,
+        active_event_id=active_event_id,
+        active_scenario_id=active_scenario_id,
+        active_scenario_name=active_scenario_name,
+        save_error=save_error,
     )
 
 
@@ -83,6 +123,98 @@ def recalculate_event_analysis():
             "valid": True,
             "result": calculation_result_data(result),
             "status": "Analysis updated.",
+        }
+    )
+
+
+@main.post("/event-analysis/save")
+def save_event_analysis():
+    """Save current valid assumptions as a sibling or overwrite the active one."""
+    _, values, errors, result = validate_and_calculate_event_analysis(
+        request.form
+    )
+    if errors:
+        return jsonify(
+            {
+                "saved": False,
+                "errors": errors,
+                "message": "Correct the highlighted values before saving.",
+            }
+        )
+    try:
+        event_id = int(request.form.get("active_event_id", ""))
+        scenario_id = int(request.form.get("active_scenario_id", ""))
+    except ValueError:
+        return jsonify(
+            {
+                "saved": False,
+                "save_error": "The active scenario could not be identified.",
+            }
+        ), 400
+
+    mode = request.form.get("save_mode", "new")
+    try:
+        stored_event_id, _, stored = load_event_scenario(scenario_id)
+        if stored_event_id != event_id:
+            raise ValueError("The active scenario does not match.")
+        if mode == "new":
+            name = request.form.get("scenario_name", "").strip()
+            if not name:
+                return jsonify(
+                    {
+                        "saved": False,
+                        "scenario_name_error": "Scenario name is required.",
+                    }
+                )
+            scenario = scenario_from_form_values(values, name)
+            new_scenario_id = create_event_scenario(event_id, scenario)
+            scenario_id = new_scenario_id
+            active_name = name
+            message = f'Scenario "{name}" saved.'
+        elif mode == "overwrite":
+            if request.form.get("overwrite_confirmed") != "true":
+                return jsonify(
+                    {
+                        "saved": False,
+                        "overwrite_error": (
+                            "Confirm that you want to overwrite the "
+                            "current scenario."
+                        ),
+                    }
+                )
+            scenario = scenario_from_form_values(
+                values, stored.scenario_name
+            )
+            overwrite_event_scenario(scenario_id, scenario)
+            active_name = stored.scenario_name
+            message = f'Scenario "{active_name}" overwritten.'
+        else:
+            return jsonify(
+                {"saved": False, "save_error": "Choose a save option."}
+            )
+    except ScenarioNameConflict as error:
+        return jsonify(
+            {
+                "saved": False,
+                "scenario_name_error": str(error),
+            }
+        )
+    except (sqlite3.Error, ValueError):
+        return jsonify(
+            {
+                "saved": False,
+                "save_error": "The scenario could not be saved.",
+            }
+        )
+
+    return jsonify(
+        {
+            "saved": True,
+            "active_event_id": event_id,
+            "active_scenario_id": scenario_id,
+            "active_scenario_name": active_name,
+            "result": calculation_result_data(result),
+            "message": message,
         }
     )
 

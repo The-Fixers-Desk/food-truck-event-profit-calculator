@@ -61,6 +61,11 @@ CREATE TABLE IF NOT EXISTS event_scenarios (
             expected_sales_amount_cents IS NULL
             OR expected_sales_amount_cents >= 0
         ),
+    manual_average_order_sale_amount_cents INTEGER
+        CHECK (
+            manual_average_order_sale_amount_cents IS NULL
+            OR manual_average_order_sale_amount_cents >= 0
+        ),
 
     food_cost_method TEXT NOT NULL
         CHECK (
@@ -142,6 +147,16 @@ CREATE TABLE IF NOT EXISTS event_scenarios (
     CHECK (
         (
             revenue_method = 'attendance'
+            AND manual_average_order_sale_amount_cents IS NULL
+        )
+        OR (
+            revenue_method = 'manual_sales'
+            AND manual_average_order_sale_amount_cents IS NOT NULL
+        )
+    ),
+    CHECK (
+        (
+            revenue_method = 'attendance'
             AND average_order_sale_amount_cents IS NOT NULL
             AND expected_sales_amount_cents IS NULL
         )
@@ -187,6 +202,9 @@ CREATE TABLE IF NOT EXISTS event_scenarios (
 
 CREATE INDEX IF NOT EXISTS event_scenarios_event_id_index
     ON event_scenarios(event_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS event_scenario_name_unique
+    ON event_scenarios(event_id, lower(trim(scenario_name)));
 
 CREATE TABLE IF NOT EXISTS event_scenario_employee_labor_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

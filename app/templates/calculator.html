@@ -12,6 +12,10 @@
         <div><dt>Start time</dt><dd>{{ event_identity.start_time.strftime("%H:%M") }}</dd></div>
         <div><dt>Location</dt><dd>{{ event_identity.location }}</dd></div>
       </dl>
+      <p class="active-scenario">
+        Active scenario:
+        <strong id="active-scenario-name">{{ active_scenario_name }}</strong>
+      </p>
     {% endif %}
     <p class="page-description">
       {% if workspace %}
@@ -43,7 +47,17 @@
     {% if workspace %}
       data-workspace="true"
       data-calculation-url="{{ url_for('main.recalculate_event_analysis') }}"
+      data-save-url="{{ url_for('main.save_event_analysis') }}"
     {% endif %}>
+    {% if workspace %}
+      <input id="active_event_id" name="active_event_id" type="hidden"
+        value="{{ active_event_id }}" />
+      <input id="active_scenario_id" name="active_scenario_id" type="hidden"
+        value="{{ active_scenario_id }}" />
+    {% endif %}
+    {% if save_error %}
+      <p class="field-error" role="alert">{{ save_error }}</p>
+    {% endif %}
     {% for name in (
       "average_order_sale_amount", "food_cost_method",
       "average_food_cost_per_order", "food_cost_percentage",
@@ -752,6 +766,8 @@
 
     <div class="form-actions">
       {% if workspace %}
+        <button class="button" id="open-save-analysis"
+          type="button" disabled>Save</button>
         <button class="button-secondary" id="reset-analysis"
           type="button">Reset changes</button>
         <a class="button" href="{{ url_for('main.calculator') }}">
@@ -882,6 +898,50 @@
         </section>
       </aside>
     </div>
+    <dialog id="save-analysis-dialog" class="save-analysis-dialog"
+      aria-labelledby="save-analysis-title">
+      <form method="dialog">
+        <h2 id="save-analysis-title">Save scenario</h2>
+        <div class="choice-options">
+          <label class="choice-option">
+            <input type="radio" name="save_mode" value="new" checked />
+            Save as new scenario
+          </label>
+          <label class="choice-option">
+            <input type="radio" name="save_mode" value="overwrite" />
+            Overwrite current scenario
+          </label>
+        </div>
+        <div id="new-scenario-name-field" class="form-field">
+          <label class="form-label" for="new_scenario_name">
+            Scenario name
+          </label>
+          <input class="form-input" id="new_scenario_name" type="text" />
+          <p id="scenario-name-error" class="field-error" hidden></p>
+        </div>
+        <div id="overwrite-confirmation-field" class="form-field" hidden>
+          <p>
+            This will replace
+            <strong id="overwrite-scenario-name">{{
+              active_scenario_name
+            }}</strong>.
+          </p>
+          <label class="choice-option">
+            <input id="overwrite_confirmed" type="checkbox" />
+            I understand and want to overwrite this scenario.
+          </label>
+          <p id="overwrite-error" class="field-error" hidden></p>
+        </div>
+        <p id="save-analysis-error" class="field-error" role="alert"
+          hidden></p>
+        <div class="form-actions">
+          <button class="button" id="confirm-save-analysis"
+            type="button">Save</button>
+          <button class="button-secondary" id="cancel-save-analysis"
+            type="button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
   {% endif %}
 </section>
 <template id="event-employee-labor-template">

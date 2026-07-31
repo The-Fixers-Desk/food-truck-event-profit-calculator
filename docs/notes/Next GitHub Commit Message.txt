@@ -2,22 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build interactive Event Analysis workspace
-
-- Open the workspace after a valid Event Inputs submission
-- Display event identity as read-only context
-- Place adjustable assumptions and financial results side by side
-- Support live changes across demand, revenue, costs, labor, fees, and targets
-- Recalculate through the existing Python calculation engine
-- Update break-even values, profit-target status, and warnings automatically
-- Preserve the latest valid results during invalid edits
-- Add accessible updating and validation states
-- Add Reset changes and Start new analysis actions
-- Keep Events, Scenarios, and Business Defaults unchanged
-- Add focused workspace, route, calculation, and interaction tests
-
----------------------------------------------------------------------------------
-
 Add automatic initial saving and scenario version actions
 
 - Save each valid Event Inputs submission as a new Event
@@ -60,4 +44,36 @@ Build complete event comparison workflow
 - Open any compared Scenario in the interactive workspace
 - Add responsive, accessible comparison and error states
 - Add comparison, route, persistence, and workspace tests
+
+---------------------------------------------------------------------------------
+
+Build Dashboard and first-use application flow
+
+- Add the first-launch Welcome screen and four-step workflow
+- Detect setup completion from saved Business Defaults
+- Guide first-time users from Welcome to Defaults to Dashboard
+- Open Dashboard directly on later launches
+- Add Dashboard shortcuts for new analyses, saved events, comparison, and defaults
+- Add useful event and comparison empty states
+- Protect setup-required routes from direct access
+- Preserve dirty-workspace navigation warnings
+- Keep onboarding state consistent across application restarts
+- Add onboarding, Dashboard, navigation, and route tests
+
+---------------------------------------------------------------------------------
+
+Add database versioning and safe migrations
+
+- Establish the current application schema as Version 1
+- Add a persistent schema migration ledger
+- Create fresh databases through the migration system
+- Safely adopt compatible existing unversioned databases
+- Apply future migrations once and in numerical order
+- Roll back failed migrations without partial schema changes
+- Reject damaged or newer unsupported databases safely
+- Protect existing customer records, identifiers, and relationships
+- Add migration logging and developer documentation
+- Add migration, startup, rollback, and data-preservation tests
+
+---------------------------------------------------------------------------------
 

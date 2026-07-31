@@ -1,4 +1,14 @@
 Prompt Canvas
 
------------------------------------------------------------
+---------------------------------------------------------------------------------
 
+Awesome. Next milestone is: Complete V1 UI and UX design and polish
+  Define the visual direction and reusable components, then polish Welcome,
+  Dashboard, Defaults, Event Inputs, Results, Saved Events, Comparison,
+  messages, empty states, wording, and visual hierarchy.
+
+Anything we need to do before we make a prompt for Codex?
+
+---------------------------------------------------------------------------------
+
+Give me the commit message I will use when this is done.

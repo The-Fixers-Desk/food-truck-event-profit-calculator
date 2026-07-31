@@ -138,7 +138,7 @@ def test_event_inputs_page_does_not_crash_without_defaults(client):
     assert b'name="profit_target_type"' in response.data
 
 
-def test_complete_valid_form_covers_every_section_without_saving(
+def test_complete_valid_form_covers_every_section_and_saves_initial_scenario(
     client, database_path
 ):
     form_data = complete_event_inputs()
@@ -157,10 +157,10 @@ def test_complete_valid_form_covers_every_section_without_saving(
     with sqlite3.connect(database_path) as database:
         assert database.execute(
             "SELECT COUNT(*) FROM events"
-        ).fetchone()[0] == 0
+        ).fetchone()[0] == 1
         assert database.execute(
             "SELECT COUNT(*) FROM event_scenarios"
-        ).fetchone()[0] == 0
+        ).fetchone()[0] == 1
 
 
 def test_event_overrides_survive_errors_and_do_not_modify_defaults(

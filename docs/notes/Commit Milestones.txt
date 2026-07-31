@@ -61,12 +61,12 @@ CALCULATION AND RESULTS
   order-based calculations, add early demand indicators and factual
   break-even comparisons, and update affected models, validation, and tests.
 
-□ >Build the interactive Event Analysis workspace
+☑ Build the interactive Event Analysis workspace
   Create the primary post-input experience with financial results and
   adjustable scenario assumptions sharing the screen. Recalculate every
   dependent result and warning automatically as assumptions change.
 
-□ *Add automatic initial saving and scenario version actions
+□ >Add automatic initial saving and scenario version actions
   Automatically save each valid Event Inputs submission as a new Event with
   an “Original estimate” Scenario before opening the workspace. From the
   workspace, provide one Save action that defaults to saving adjustments as
@@ -80,7 +80,7 @@ SAVED WORK AND COMPARISON
   the interactive Event Analysis workspace, rename, delete, and verify
   persistence after restart.
 
-□ Build the complete event comparison workflow
+□ *Build the complete event comparison workflow
   Select scenarios, compare their financial results and assumptions,
   highlight meaningful differences, and open either scenario in the
   interactive workspace.
@@ -88,7 +88,7 @@ SAVED WORK AND COMPARISON
 
 DASHBOARD AND ONBOARDING
 
-□ Build the Dashboard and first-use application flow
+□ *Build the Dashboard and first-use application flow
   Add the Welcome screen, four-step introduction, setup detection,
   Welcome → Defaults → Dashboard flow, normal Dashboard launches,
   shortcuts, empty states, navigation safeguards, and session state.
@@ -96,13 +96,16 @@ DASHBOARD AND ONBOARDING
 
 DATABASE RELIABILITY
 
-□ Add database versioning and safe migrations
+□ *Add database versioning and safe migrations
   Track schema versions, run migrations once, support upgrades safely,
   and protect existing customer data.
 
 □ Add backup, restore, and recovery safeguards
   Build backup and restore, test interrupted writes and recovery, and
   verify customer data stays separate from installed application files.
+
+
+// DO FULL USE TEST HERE //
 
 
 DESIGN AND ACCESSIBILITY

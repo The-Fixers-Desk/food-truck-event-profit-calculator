@@ -176,7 +176,9 @@ def test_zero_other_vendors_gives_business_the_full_food_demand():
 
 def test_custom_sales_overrides_sales_but_not_expected_orders():
     custom_revenue = RevenueAssumptions(
-        "manual_sales", expected_sales_amount=Decimal("2500")
+        "manual_sales",
+        average_order_sale_amount=Decimal("10"),
+        expected_sales_amount=Decimal("2500"),
     )
 
     result = calculate_event_scenario(
@@ -411,7 +413,9 @@ def test_manual_example_two_custom_sales_owner_only():
     example = replace(
         scenario(),
         revenue=RevenueAssumptions(
-            "manual_sales", expected_sales_amount=Decimal("2000")
+            "manual_sales",
+            average_order_sale_amount=Decimal("10"),
+            expected_sales_amount=Decimal("2000"),
         ),
         food_cost=FoodCostAssumptions(
             "average_per_order",
@@ -443,15 +447,17 @@ def test_manual_example_two_custom_sales_owner_only():
     assert result.business_profit == Decimal("1375")
     assert result.profit_margin == Decimal("0.6875")
     assert result.break_even_sales == Decimal("625")
-    assert result.exact_break_even_customers is None
-    assert result.minimum_whole_break_even_customers is None
+    assert result.exact_break_even_customers == Decimal("62.500000")
+    assert result.minimum_whole_break_even_customers == 63
 
 
 def test_manual_example_three_negative_profit():
     example = replace(
         scenario(),
         revenue=RevenueAssumptions(
-            "manual_sales", expected_sales_amount=Decimal("500")
+            "manual_sales",
+            average_order_sale_amount=Decimal("10"),
+            expected_sales_amount=Decimal("500"),
         ),
         food_cost=FoodCostAssumptions(
             "manual_event_total",
@@ -735,7 +741,9 @@ def test_custom_expected_sales_warning_documents_order_assumption():
     example = replace(
         scenario(),
         revenue=RevenueAssumptions(
-            "manual_sales", expected_sales_amount=Decimal("2000")
+            "manual_sales",
+            average_order_sale_amount=Decimal("10"),
+            expected_sales_amount=Decimal("2000"),
         ),
     )
 
