@@ -26,6 +26,12 @@ FOOD_COST_FIELDS = (
     "manual_food_cost_total",
 )
 LABOR_FIELDS = ("owner_labor_pay",)
+OPERATING_COST_FIELDS = (
+    "travel_cost",
+    "parking_cost",
+    "permit_cost",
+    "generator_utility_cost",
+)
 WEATHER_REDUCTIONS = {
     "favorable": Decimal("0"),
     "minor_concern": Decimal("5"),
@@ -49,6 +55,7 @@ def blank_event_inputs_form() -> dict:
             *REVENUE_FIELDS,
             *FOOD_COST_FIELDS,
             *LABOR_FIELDS,
+            *OPERATING_COST_FIELDS,
         )
     }
     values["revenue_method"] = "attendance"
@@ -68,6 +75,7 @@ def validate_event_inputs(
             *REVENUE_FIELDS,
             *FOOD_COST_FIELDS,
             *LABOR_FIELDS,
+            *OPERATING_COST_FIELDS,
         )
     }
     rates = submitted.getlist("employee_labor_rate")
@@ -142,6 +150,7 @@ def validate_event_inputs(
 
     _validate_food_cost(values, errors)
     _validate_labor(values, errors)
+    _validate_operating_costs(values, errors)
 
     if errors:
         return None, values, errors
@@ -153,6 +162,20 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def _validate_operating_costs(
+    values: dict,
+    errors: dict,
+) -> None:
+    for name, label in (
+        ("travel_cost", "Travel cost"),
+        ("parking_cost", "Parking cost"),
+        ("permit_cost", "Permit cost"),
+        ("generator_utility_cost", "Generator or utility cost"),
+    ):
+        if values[name]:
+            _money(values, errors, name, label)
 
 
 def _validate_labor(

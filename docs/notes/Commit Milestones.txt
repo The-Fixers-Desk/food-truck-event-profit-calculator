@@ -24,8 +24,6 @@ DEFAULTS
 
 EVENT CALCULATOR — INPUTS
 
-Total Milestones- 13
-
 ☑ Define event analysis data model
 ☑ Update business defaults food and packaging cost method
 ☑ Create saved event database schema
@@ -33,196 +31,110 @@ Total Milestones- 13
 ☑ Build revenue assumptions section
 ☑ Build food and supply cost section
 □ Build labor cost section
-□ Build travel and operating cost section
-□ Build event fee and miscellaneous cost section
-□ Apply saved business defaults to new event analyses
-□ Allow event-specific overrides without changing saved defaults
-□ Add calculator input validation
-□ Add clear estimated-input indicators
+  Current task; leave unchanged.
+
+□ Complete remaining event cost inputs
+  Includes travel, parking, permits, utilities, vendor or booking fees,
+  organizer commission, fixed processing fees, and named miscellaneous costs.
+
+□ Finish the complete Event Inputs workflow
+  Apply saved defaults, allow independent event overrides, finish all input
+  validation, add estimated-input indicators, and verify the complete form.
 
 
-CALCULATION ENGINE
+CALCULATION AND RESULTS
 
-□ Define calculation rules and terminology
-□ Implement estimated revenue calculation
-□ Implement variable cost calculations
-□ Implement fixed cost calculations
-□ Implement total event cost calculation
-□ Implement estimated profit calculation
-□ Implement profit margin calculation
-□ Implement break-even sales calculation
-□ Implement break-even customer calculation
-□ Identify primary profitability constraints
-□ Add factual warnings for risky assumptions
-□ Add calculation engine unit tests
-□ Verify calculations against manual examples
+□ Implement the core calculation engine
+  Define terminology and calculate revenue, variable costs, fixed costs,
+  total costs, owner pay, business profit, and profit margin. Include unit
+  tests and manual examples.
 
+□ Implement break-even analysis, constraints, and warnings
+  Calculate break-even sales and customers, identify profitability limits,
+  and add factual assumption and risk warnings with tests.
 
-EVENT CALCULATOR — RESULTS
-
-□ Build event results summary
-□ Display revenue, costs, profit, and margin
-□ Display break-even requirements
-□ Display profitability constraints and warnings
-□ Distinguish estimated results from known values
-□ Update results when event inputs change
-□ Add reset and start-new-analysis actions
-□ Verify complete event analysis workflow
+□ Build the complete Event Results workflow
+  Display all results, distinguish estimates, allow useful live assumption
+  changes, add reset and new-analysis actions, and verify the full
+  input-to-results flow.
 
 
-SAVED EVENTS
+SAVED WORK AND COMPARISON
 
-□ Save completed event analyses
-□ Preserve the assumptions used for each saved event
-□ Load a saved event for review
-□ Edit and resave an existing event analysis
-□ Duplicate a saved event as a new scenario
-□ Delete a saved event with confirmation
-□ Add saved-event success and error states
-□ Verify saved event persistence after application restart
+□ Build saved event and scenario management
+  Save complete analyses, preserve assumptions, load, edit, duplicate,
+  delete, show success and error states, and verify restart persistence.
+
+□ Build the complete event comparison workflow
+  List and select scenarios, compare financial results, highlight meaningful
+  differences, handle empty states, and open scenarios for review.
 
 
-COMPARISON
+DASHBOARD AND ONBOARDING
 
-□ Build saved event list
-□ Add event selection for comparison
-□ Build event comparison view
-□ Compare revenue, cost, profit, margin, and break-even results
-□ Highlight meaningful differences between selected events
-□ Display empty and insufficient-data states
-□ Open a compared event for detailed review
-□ Verify complete comparison workflow
-
-DASHBOARD
-
-□ Define dashboard actions and information
-□ Build dashboard screen
-□ Add new event shortcut
-□ Add saved events shortcut
-□ Add event comparison shortcut
-□ Add business defaults shortcut
-□ Display useful empty states for unavailable actions
-□ Open Dashboard after first-time setup is complete
-
-FIRST-USE AND APPLICATION STATE
-
-□ Detect whether initial setup is complete
-□ Build first-launch welcome screen
-□ Introduce the four-step application workflow
-□ Guide the user from Welcome to Defaults
-□ Guide the user from completed Defaults to Dashboard
-□ Open Dashboard on future launches
-□ Skip onboarding after initial setup is complete
-□ Add navigation safeguards for incomplete setup
-□ Preserve expected application state between sessions
-
-UI AND UX POLISH
-□ Define the V1 visual direction
-□ Create reusable colors, typography, spacing, buttons, inputs, and cards
-□ Polish the Defaults screen
-□ Polish the Event Calculator input experience
-□ Polish the Event Results screen
-□ Polish Saved Events and Comparison screens
-□ Design empty, loading, success, warning, and error states
-□ Improve field wording, help text, and screen organization
-□ Add helpful visual emphasis and hierarchy
-□ Verify consistent styling across the application
-□ Complete a full user-experience walkthrough
+□ Build the Dashboard and first-use application flow
+  Add the Welcome screen, four-step introduction, setup detection,
+  Welcome → Defaults → Dashboard flow, normal Dashboard launches,
+  shortcuts, empty states, navigation safeguards, and session state.
 
 
 DATABASE RELIABILITY
 
-☑ Add database initialization
-□ Add database version tracking
-□ Add safe database migrations
-☑ Protect database writes with transactions
-□ Add database backup capability
-□ Add database restore capability
-□ Verify recovery from interrupted saves
-□ Verify customer data remains separate from application files
+□ Add database versioning and safe migrations
+  Track schema versions, run migrations once, support upgrades safely,
+  and protect existing customer data.
+
+□ Add backup, restore, and recovery safeguards
+  Build backup and restore, test interrupted writes and recovery, and
+  verify customer data stays separate from installed application files.
 
 
-DESKTOP APPLICATION EXPERIENCE
+DESIGN AND ACCESSIBILITY
 
-□ Create dedicated desktop application window
-□ Start the local server automatically on launch
-□ Hide browser tabs, address bars, and local addresses
-□ Display the product name and application icon
-□ Prevent multiple conflicting application instances
-□ Shut down local services safely when the application closes
-□ Add a friendly startup loading state
-□ Add a friendly application error screen
-□ Verify offline operation
+□ Complete V1 UI and UX design and polish
+  Define the visual direction and reusable components, then polish Welcome,
+  Dashboard, Defaults, Event Inputs, Results, Saved Events, Comparison,
+  messages, empty states, wording, and visual hierarchy.
 
-
-WINDOWS PACKAGING
-
-□ Create Windows application package
-□ Bundle Python and all required dependencies
-□ Add Windows application icon and metadata
-□ Create Windows installer
-□ Create Start menu and desktop launch options
-□ Store Windows customer data in the proper system location
-□ Verify install, launch, update, and uninstall behavior on Windows
+□ Complete accessibility and responsive behavior
+  Add keyboard navigation, focus states, accessible labels and errors,
+  contrast, responsive layouts, and screen-reader structure.
 
 
-MACOS PACKAGING
+DESKTOP APPLICATION AND PACKAGING
 
-□ Create macOS application package
-□ Bundle Python and all required dependencies
-□ Add macOS application icon and metadata
-□ Create macOS installer or disk image
-□ Store macOS customer data in the proper system location
-□ Verify install, launch, update, and uninstall behavior on macOS
+□ Build the desktop application shell
+  Add the dedicated window, automatic local-server startup, safe shutdown,
+  single-instance protection, product identity, loading and error screens,
+  and verified offline use.
 
+□ Package the Windows application
+  Bundle dependencies, add metadata and icons, create the installer and
+  shortcuts, use the correct data location, and verify installation behavior.
 
-ACCESSIBILITY AND RESPONSIVENESS
-
-□ Add complete keyboard navigation
-□ Add visible focus states
-□ Add accessible labels and validation messages
-□ Verify readable contrast and text sizing
-□ Verify layouts at supported window sizes
-□ Verify screen reader structure
-□ Complete application accessibility review
+□ Package the macOS application
+  Bundle dependencies, add metadata and icons, create the installer or disk
+  image, use the correct data location, and verify installation behavior.
 
 
 QUALITY ASSURANCE
 
-☑ Add route and integration tests
-☑ Add database persistence tests
-□ Add end-to-end workflow tests
-□ Test first-time setup
-□ Test defaults and override behavior
-□ Test event creation, saving, editing, and deletion
-□ Test comparison behavior
-□ Test backup and restore
-□ Test application closure during normal operations
-□ Complete Windows acceptance testing
-□ Complete macOS acceptance testing
-□ Fix V1 acceptance testing defects
+□ Add complete automated end-to-end workflow tests
+  Cover onboarding, defaults and overrides, event analysis, saved scenarios,
+  comparison, backup and restore, and application closure.
+
+□ Complete platform acceptance testing and fix V1 defects
+  Perform Windows and macOS acceptance testing and resolve all confirmed
+  release-blocking defects.
 
 
-DOCUMENTATION
+DOCUMENTATION AND RELEASE
 
-□ Finalize Product Decision Record for V1
-□ Create Architecture Decision Record
-□ Create calculation methodology documentation
-□ Create customer installation guide
-□ Create customer usage guide
-□ Create backup and restore instructions
-□ Create troubleshooting guide
-□ Update repository README
-□ Add release notes and version history
+□ Finalize the complete V1 documentation set
+  Finalize the PDR, ADR, calculation methodology, installation guide,
+  usage guide, backup instructions, troubleshooting guide, README,
+  release notes, and version history.
 
-
-RELEASE
-
-□ Complete V1 product review
-□ Complete V1 UI and UX review
-□ Freeze V1 calculation rules
-□ Prepare V1 release candidates
-□ Verify clean installation on Windows
-□ Verify clean installation on macOS
-□ Tag version 1.0.0
-□ Publish Food Truck Event Profit Calculator V1
+□ Prepare and publish Food Truck Event Profit Calculator V1
+  Complete product and UI reviews, freeze calculation rules, prepare release
+  candidates, verify clean installations, tag version 1.0.0, and publish.

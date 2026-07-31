@@ -342,6 +342,36 @@
       </div>
     </fieldset>
 
+    <fieldset class="input-section">
+      <legend>Travel and operating costs</legend>
+      <p class="form-hint">
+        Enter any flat event costs you expect. Leave a field blank when no
+        amount has been entered.
+      </p>
+      <div class="form-grid">
+        {% for name, label in (
+          ("travel_cost", "Travel cost ($)"),
+          ("parking_cost", "Parking cost ($)"),
+          ("permit_cost", "Permit cost ($)"),
+          ("generator_utility_cost", "Generator or utility cost ($)")
+        ) %}
+          <div class="form-field">
+            <label class="form-label" for="{{ name }}">{{ label }}</label>
+            <input class="form-input" id="{{ name }}" name="{{ name }}"
+              type="number" step="0.01" value="{{ form_values[name] }}"
+              {% if errors.get(name) %}
+                aria-invalid="true" aria-describedby="{{ name }}-error"
+              {% endif %} />
+            {% if errors.get(name) %}
+              <p class="field-error" id="{{ name }}-error">
+                {{ errors[name] }}
+              </p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+
     <div class="form-actions">
       <button class="button" type="submit">Continue</button>
     </div>
