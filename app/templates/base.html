@@ -18,48 +18,60 @@
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="app-shell">
-      <header class="app-header">
-        <div class="app-header__content">
-          <a class="wordmark" href="{{ url_for('main.home') }}">
-            Food Truck Event Profit Calculator
-          </a>
-        </div>
-      </header>
-
-      <nav class="app-navigation" aria-label="Primary navigation">
-        <div class="app-navigation__content">
-          {% if business_defaults_setup_complete %}
+      <aside class="app-sidebar">
+        <a class="product-identity" href="{{ url_for('main.home') }}">
+          <span class="product-identity__desk">The Fixer&rsquo;s Desk</span>
+          <span class="product-identity__name">Food Truck Event Profit Calculator</span>
+        </a>
+        <nav class="app-navigation" aria-label="Primary navigation">
+          {% if recovery_mode %}
+            <a class="nav-link nav-link--active"
+              href="{{ url_for('main.data_safety') }}" aria-current="page">
+              <span class="nav-marker" aria-hidden="true"></span>Data safety
+            </a>
+          {% elif business_defaults_setup_complete %}
             <a data-discard-navigation
               class="nav-link {% if active_page == 'dashboard' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.dashboard') }}" {% if active_page == 'dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
+              href="{{ url_for('main.dashboard') }}" {% if active_page == 'dashboard' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Dashboard</a>
             <a data-discard-navigation
               class="nav-link {% if active_page == 'calculator' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.calculator') }}" {% if active_page == 'calculator' %}aria-current="page"{% endif %}>Analyze new event</a>
+              href="{{ url_for('main.calculator') }}" {% if active_page == 'calculator' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>New analysis</a>
             <a data-discard-navigation
               class="nav-link {% if active_page == 'saved_events' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.saved_events') }}" {% if active_page == 'saved_events' %}aria-current="page"{% endif %}>Saved events</a>
-            <a data-discard-navigation class="nav-link"
-              href="{{ url_for('main.saved_events') }}#comparison-selection-form">
-              Compare scenarios
-            </a>
+              href="{{ url_for('main.saved_events') }}" {% if active_page == 'saved_events' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Saved events</a>
             <a data-discard-navigation
               class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.defaults') }}" {% if active_page == 'defaults' %}aria-current="page"{% endif %}>Business defaults</a>
+              href="{{ url_for('main.defaults') }}" {% if active_page == 'defaults' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Business defaults</a>
             <a data-discard-navigation
               class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}>Data safety</a>
+              href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Data safety</a>
           {% else %}
             <a class="nav-link {% if active_page == 'welcome' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.welcome') }}" {% if active_page == 'welcome' %}aria-current="page"{% endif %}>Welcome</a>
+              href="{{ url_for('main.welcome') }}" {% if active_page == 'welcome' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Welcome</a>
             <a class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.defaults') }}" {% if active_page == 'defaults' %}aria-current="page"{% endif %}>Business defaults</a>
+              href="{{ url_for('main.defaults') }}" {% if active_page == 'defaults' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Business defaults</a>
             <a class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
-              href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}>Data safety</a>
+              href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}><span class="nav-marker" aria-hidden="true"></span>Data safety</a>
           {% endif %}
-        </div>
-      </nav>
-
-      <main class="app-main" id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+        </nav>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-context-bar">
+          <span class="app-context-bar__label">
+            {% block context_label %}
+            {% if active_page == 'calculator' %}Event Analysis
+            {% elif active_page == 'saved_events' %}Saved work
+            {% elif active_page == 'defaults' %}Configuration
+            {% elif active_page == 'data_safety' %}Data management
+            {% elif active_page == 'dashboard' %}Workspace
+            {% else %}Getting started{% endif %}
+            {% endblock %}
+          </span>
+          <div class="app-context-bar__actions">{% block context_actions %}{% endblock %}</div>
+        </header>
+        <main class="app-main app-main--{{ active_page|default('standard') }}"
+          id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+      </div>
     </div>
   </body>
 </html>

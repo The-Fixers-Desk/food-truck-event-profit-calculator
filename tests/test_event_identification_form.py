@@ -111,4 +111,4 @@ def test_navigation_reaches_event_inputs(client):
 
     assert b'href="/"' in response.data
     assert b'href="/events/new"' in response.data
-    assert b"Analyze new event" in response.data
+    assert b"New analysis" in response.data

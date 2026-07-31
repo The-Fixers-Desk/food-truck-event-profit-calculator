@@ -21,7 +21,7 @@ def test_pages_have_skip_target_title_landmarks_and_one_h1(
     page = client.get(path).data.decode()
 
     assert '<a class="skip-link" href="#main-content">' in page
-    assert '<main class="app-main" id="main-content" tabindex="-1">' in page
+    assert 'id="main-content" tabindex="-1">' in page
     assert '<nav class="app-navigation" aria-label="Primary navigation">' in page
     assert f"<title>\n      {title}" in page
     assert page.count("<h1") == 1

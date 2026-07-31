@@ -1,0 +1,569 @@
+Implement the milestone:
+
+Redesign application layout and navigation.
+
+The V1 design system now exists.
+
+Transform the application from a collection of individually styled pages into a
+cohesive desktop application shell.
+
+Use the established V1 design tokens and reusable components.
+
+Do not redesign complete screen workflows yet.
+
+This milestone should establish the shared layout, navigation, information
+architecture, content-width rules, persistent actions, and responsive shell
+that every later screen redesign will inherit.
+
+Do not change business logic, calculations, validation, persistence, routes, or
+workflow semantics.
+
+Primary objective
+
+The application should feel like one professional desktop product rather than a
+series of web pages.
+
+The quality bar is comparable in clarity, restraint, information hierarchy, and
+workspace efficiency to modern applications such as:
+
+- Notion
+- ChatGPT
+- Linear
+- Stripe Dashboard
+- Zillow
+
+Do not copy those products.
+
+Use them only as a quality reference for:
+
+- persistent application chrome
+- content hierarchy
+- information density
+- navigation clarity
+- task-focused layouts
+- restrained use of cards
+- effective use of desktop space
+
+Application shell
+
+Create one persistent desktop application shell with:
+
+1. A persistent left navigation rail or sidebar
+2. A compact top context bar inside the main workspace
+3. One consistent main content region
+4. Optional screen-owned sticky action regions
+5. Subtle product identity
+
+The shell must be shared across all normal application screens rather than
+duplicated per page.
+
+Global navigation
+
+The left navigation should include only the major application destinations:
+
+- Dashboard
+- New analysis
+- Saved events
+- Business defaults
+- Data safety
+
+Use the established current routes.
+
+Do not create new destinations merely for layout purposes.
+
+Do not place local workflow sections in the global navigation.
+
+Examples of local workflow navigation that must remain screen-specific:
+
+- Event Inputs stages
+- Event Analysis assumption groups
+- Business Defaults sections
+- Scenario comparison controls
+
+Navigation behavior
+
+Global navigation must clearly communicate:
+
+- current destination
+- available destinations
+- disabled or restricted destinations when applicable
+- setup or recovery limitations
+
+Use:
+
+- clear text labels
+- one consistent icon family
+- restrained selected-state styling
+- semantic navigation markup
+- keyboard-operable links and controls
+
+Do not rely on icons alone.
+
+Do not use a large website-style header or top navigation bar as the primary
+desktop navigation.
+
+Product identity
+
+Include restrained application identity inside the shell:
+
+The Fixer’s Desk
+
+Food Truck Event Profit Calculator
+
+The identity should be subtle and compact.
+
+Do not let branding consume substantial workspace height.
+
+Top context bar
+
+Create a compact top context bar for screen-level context.
+
+It may include, where applicable:
+
+- page title
+- breadcrumb or parent context
+- active Event identity
+- active Scenario identity
+- unsaved-change status
+- primary screen actions
+- secondary overflow actions
+
+Do not display irrelevant context on screens that do not need it.
+
+The top context bar should not become a second global navigation system.
+
+Primary action hierarchy
+
+Every screen should have one visually dominant primary action.
+
+Use these intended priorities as guidance:
+
+Dashboard:
+- Analyze new event
+
+Event Inputs:
+- Continue
+- Final stage: Analyze event
+
+Event Analysis:
+- Save
+
+Saved Events:
+- Open analysis
+
+Scenario Comparison:
+- Open analysis or the established main comparison action
+
+Business Defaults:
+- Save changes
+
+Data Safety:
+- Download backup
+
+Secondary actions should be visually quieter.
+
+Destructive actions should be clearly distinct but not visually dominant until
+the customer intentionally enters a destructive flow.
+
+Do not allow several same-weight primary buttons to compete on one screen.
+
+Content-width system
+
+Use task-specific content widths rather than one universal centered card.
+
+Recommended patterns:
+
+Dashboard and saved-content lists:
+- broad workspace width
+
+Forms:
+- moderate readable working width
+- optional supporting side region where it improves clarity
+
+Event Analysis:
+- wide or near-full workspace width
+
+Scenario Comparison:
+- wide or near-full workspace width
+
+Dialogs:
+- narrow and focused
+
+Empty states:
+- compact and task-oriented
+
+Use the available desktop window efficiently.
+
+Avoid:
+
+- excessive empty side margins
+- tiny centered content inside a large desktop window
+- unnecessary full-width text blocks
+- page-wide cards used only as visual wrappers
+
+Page structure
+
+Create reusable page-layout primitives for:
+
+- standard workspace page
+- wide data workspace
+- focused form workspace
+- list or management workspace
+- empty-state workspace
+- recovery or error workspace
+
+Each page should have a predictable structure such as:
+
+- context bar
+- optional supporting description
+- main working area
+- optional sticky action area
+
+Avoid repeating the page title in multiple places.
+
+Avoid redundant headings that restate the same context.
+
+Cards and boundaries
+
+Reduce unnecessary card usage throughout the shared layout.
+
+Use a card only when the boundary communicates a meaningful:
+
+- selectable object
+- summary
+- status
+- grouping
+- elevated task
+- independent panel
+
+Do not:
+
+- wrap the entire page in a card
+- place every section inside a bordered container
+- nest cards without a clear semantic reason
+- use shadows merely to create separation
+
+Prefer:
+
+- whitespace
+- alignment
+- typography
+- section headings
+- dividers
+- background changes
+- consistent spacing
+
+Visual rhythm
+
+Apply the design system’s spacing and typography consistently.
+
+Improve:
+
+- page rhythm
+- section spacing
+- alignment
+- heading hierarchy
+- action placement
+- density
+- scanability
+
+The shell should feel calm and deliberate.
+
+Do not add large decorative whitespace that forces unnecessary scrolling.
+
+Persistent actions
+
+Create reusable screen-owned sticky action patterns where they materially
+reduce scrolling.
+
+Potential uses include:
+
+- Business Defaults save action
+- Event Inputs stage actions
+- Event Analysis save and reset actions
+- Scenario Comparison controls
+
+This milestone should establish the pattern and shared structure.
+
+Do not fully redesign those workflows yet.
+
+Sticky actions must:
+
+- remain within the relevant workspace or panel
+- not obscure content
+- not hide focused fields
+- not cover validation messages
+- adapt safely on narrow windows
+- preserve keyboard and screen-reader order
+
+Information architecture
+
+Audit the shared shell and page hierarchy for unnecessary duplication.
+
+Ensure:
+
+- Dashboard is the normal home after setup
+- New analysis is a direct task entry
+- Saved events is the management destination
+- Business defaults is configuration
+- Data safety is backup, restore, and recovery support
+
+Do not add unrelated settings or administrative screens.
+
+Setup and restricted states
+
+Preserve established route and state safeguards.
+
+The shell must correctly handle:
+
+- first-use onboarding
+- setup incomplete
+- setup complete
+- damaged-database recovery
+- restore-only or restricted recovery state
+- missing records
+- not-found state
+- application error state
+
+Do not expose normal navigation destinations when the established recovery
+rules prohibit them.
+
+Dirty-workspace behavior
+
+Preserve all established unsaved-change protection.
+
+The shell and navigation must not bypass:
+
+- dirty Event Analysis confirmation
+- dialog cancellation behavior
+- active Scenario identity
+- current saved baseline
+- navigation safeguards
+
+Global navigation should trigger the same established protection as existing
+screen navigation.
+
+Do not silently discard edits.
+
+Responsive behavior
+
+Design desktop first, while preserving supported narrow widths.
+
+At narrower widths:
+
+- collapse the full sidebar into a compact navigation rail or menu
+- retain access to every global destination
+- keep labels available when needed for clarity
+- preserve current-destination indication
+- keep top context and primary actions understandable
+- prevent page-wide horizontal scrolling
+- prevent navigation from covering content
+- preserve logical source order
+- preserve keyboard order aligned with visual order
+
+Do not build an unrelated second mobile navigation architecture.
+
+The responsive shell must remain one coherent system.
+
+Do not implement manual sidebar collapse as a new customer feature unless the
+existing architecture already supports it cleanly and it materially improves
+the result.
+
+Accessibility
+
+Use semantic structure for:
+
+- application navigation
+- current-page indication
+- header or context region
+- main content
+- screen-owned actions
+
+Ensure:
+
+- skip link reaches the main workspace
+- navigation is keyboard operable
+- visible focus remains clear
+- selected state is not communicated by color alone
+- icons have meaningful accessible labels where required
+- decorative icons are hidden from assistive technology
+- content order remains logical
+- sticky areas do not trap focus
+
+Preserve or improve the existing accessibility foundation.
+
+No functionality changes
+
+Do not change:
+
+- route URLs
+- setup decisions
+- calculations
+- warnings
+- validation
+- persistence
+- database migrations
+- Event and Scenario behavior
+- comparison rules
+- backup or restore behavior
+- session behavior
+- browser history behavior
+- dirty-workspace rules
+
+Small template or JavaScript refactors are allowed only when necessary to
+support the shared shell or navigation structure.
+
+CSS and template architecture
+
+Refactor the shared templates so the application shell is maintained in one
+clear place.
+
+Use:
+
+- the established design tokens
+- reusable shell classes
+- reusable page-layout classes
+- reusable navigation components
+- reusable context-bar components
+- reusable sticky-action components
+
+Avoid:
+
+- duplicated sidebar markup
+- duplicated page chrome
+- per-screen navigation styling
+- large blocks of inline style
+- screen-specific shell overrides
+
+Do not introduce a frontend framework or dependency.
+
+Use the existing Flask, Jinja, CSS, and vanilla JavaScript architecture.
+
+Screen coverage
+
+Apply the new shared shell and page-layout structure to all current application
+screens, including:
+
+- Welcome or onboarding where appropriate
+- Dashboard
+- Business Defaults
+- Event Inputs
+- Event Analysis
+- Saved Events
+- Scenario Comparison
+- Data Safety
+- Recovery
+- Not found
+- Application error
+
+Do not fully redesign each screen’s internal workflow yet.
+
+This milestone should improve shared structure and placement while preserving
+the current internal controls until their dedicated redesign milestones.
+
+Testing
+
+Add or update focused tests covering:
+
+Shared shell:
+- normal application pages use the shared shell
+- product identity appears correctly
+- one primary global navigation landmark exists
+- main content landmark exists
+- skip link targets the main workspace
+- duplicate shell structures are not rendered
+
+Global navigation:
+- all intended destinations are present
+- current destination is identified
+- route URLs remain unchanged
+- local workflow sections do not appear as global destinations
+- restricted recovery states hide or disable prohibited destinations
+- setup protections remain intact
+
+Context bar:
+- correct page context appears
+- Event and Scenario identity appear where applicable
+- irrelevant context is absent
+- primary action regions remain screen-specific
+
+Dirty workspace:
+- global navigation invokes existing dirty-state protection
+- cancel preserves edits
+- confirm leaves the saved Scenario unchanged
+- clean workspaces navigate normally
+
+Responsive structure:
+- sidebar collapse structure exists
+- compact navigation preserves all destinations
+- source order remains logical
+- no duplicate mobile-only destination set is created
+- primary actions remain available at narrow widths
+
+Regression:
+- Dashboard launches normally
+- onboarding still routes correctly
+- Event Inputs submission still works
+- Event Analysis still recalculates and saves
+- Saved Events still opens records
+- comparison still works
+- Defaults still saves
+- backup and restore still work
+- recovery behavior remains intact
+- existing accessibility tests still pass
+
+Manual review checklist
+
+Add a concise manual review checklist for:
+
+- fresh onboarding
+- normal Dashboard launch
+- every global navigation destination
+- current-page indication
+- Event and Scenario context
+- dirty-workspace navigation
+- recovery-state navigation
+- common desktop window sizes
+- narrow window navigation
+- sticky action positioning
+- keyboard navigation through the shell
+- long Event and Scenario names
+- no unnecessary page-wide cards
+- no excessive empty margins
+
+Scope
+
+Do not implement:
+
+- the full Event Inputs stepper redesign
+- the full Business Defaults redesign
+- the full Event Analysis redesign
+- the full Dashboard or Saved Events redesign
+- final typography micro-polish
+- new workflows
+- new calculations
+- new routes
+- dark mode
+- charts
+- animations beyond restrained existing transitions
+- manual sidebar customization
+- new dependencies
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused shell, navigation, template, route, dirty-state, and responsive
+   tests.
+2. Run all affected accessibility tests.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Summarize the new application shell and navigation structure.
+6. Explain the global versus local navigation model.
+7. List the reusable page-layout and action patterns introduced.
+8. List every screen updated to use the shared shell.
+9. Report any screen state that could not be exercised.
+10. Report the exact test results.
+
+Keep the response concise.

@@ -1,0 +1,462 @@
+Implement the milestone:
+
+Redesign forms and input workflows.
+
+The V1 design system and application shell now exist.
+
+Redesign Business Defaults and Event Inputs for speed, clarity, low cognitive
+load, and efficient desktop use.
+
+Apply the established V1 design system and shared application shell.
+
+Do not redesign the Event Analysis workspace.
+
+Do not change business logic, calculations, persistence, validation rules,
+database behavior, routes, or workflow semantics.
+
+Primary objective
+
+Transform long forms into guided desktop workflows that:
+
+- minimize scrolling
+- reduce cognitive load
+- preserve rapid data entry
+- surface validation and warnings at the correct time
+- keep users oriented
+- feel comparable in quality to professional desktop applications
+
+Business Defaults workflow
+
+Convert Business Defaults into a guided workflow consisting of:
+
+1. Business and sales
+2. Food and payment costs
+3. Labor and event costs
+4. Profit target
+5. Review and save
+
+The user should be able to:
+
+- move forward
+- move backward
+- revisit completed sections
+- preserve entered values
+- save only after successful review
+
+Do not persist partial Defaults while navigating.
+
+Only Save changes should update the database.
+
+Event Inputs workflow
+
+Convert Event Inputs into the agreed guided workflow:
+
+1. Event details
+2. Demand and weather
+3. Revenue and food costs
+4. Labor
+5. Event costs and fees
+6. Profit target and review
+
+The workflow should support:
+
+- Back
+- Continue
+- stage indicators
+- review before analysis
+
+Only Analyze event should:
+
+- perform final validation
+- create the Event
+- create the Original estimate Scenario
+- open the Event Analysis workspace
+
+Changing stages must never create records.
+
+Stepper behavior
+
+Create a reusable guided-workflow component.
+
+Requirements:
+
+- numbered stages
+- current stage clearly highlighted
+- completed stages indicated
+- invalid stages indicated
+- keyboard accessible
+- responsive
+- reusable for future products
+
+Desktop layouts may use a side stepper.
+
+Narrow layouts may move the stepper horizontally above content.
+
+Both presentations must represent the same logical workflow.
+
+Viewport optimization
+
+Design every normal stage to fit within approximately one desktop viewport
+whenever practical.
+
+Use:
+
+- paired fields
+- compact repeatable rows
+- grouped related inputs
+- concise helper text
+- progressive disclosure
+
+Avoid:
+
+- excessive scrolling
+- huge empty areas
+- large decorative spacing
+- unnecessary page breaks
+
+Do not force artificial heights or internal scrolling merely to reach the
+viewport goal.
+
+Rapid data entry
+
+The guided workflow must remain efficient.
+
+Support:
+
+- logical Tab order
+- keyboard-first entry
+- Enter where appropriate
+- adding multiple labor rows quickly
+- adding multiple additional-cost rows quickly
+- returning to previous stages without data loss
+
+The workflow should reduce thinking, not increase it.
+
+Grouping
+
+Group fields by how users naturally think about an event.
+
+Examples:
+
+Event details
+
+- event name
+- location
+- date
+- time
+
+Demand and weather
+
+- attendance
+- competing vendors
+- percentage buying food
+- weather
+- event protection
+
+Revenue and food
+
+- average order
+- food cost method
+- food cost
+- payment assumptions
+
+Labor
+
+- owner
+- employees
+
+Costs and fees
+
+- travel
+- parking
+- permits
+- utilities
+- vendor fees
+- organizer commission
+- additional costs
+
+Profit target
+
+- selected target
+- review
+
+Do not separate fields that naturally influence each other.
+
+Validation
+
+Validation answers:
+
+"Can this value be accepted?"
+
+Validation may prevent moving forward when required information is missing or
+invalid.
+
+Validation should remain:
+
+- inline
+- immediate where appropriate
+- consistent with the design system
+- attached to the relevant control
+
+Warnings
+
+Warnings answer:
+
+"This event is beginning to look financially risky."
+
+Warnings must:
+
+- remain non-blocking
+- appear as soon as sufficient valid information exists
+- remain attached to the causal section
+- update live
+- disappear when no longer applicable
+
+Continue using the established warning logic.
+
+Do not introduce result previews.
+
+Review stage
+
+Create concise review stages rather than another giant form.
+
+Each section should summarize only key information.
+
+Provide Edit actions for each section.
+
+Do not duplicate the complete form.
+
+Review should make it easy to verify assumptions before analysis.
+
+Help content
+
+Keep inline help concise.
+
+Long explanations should use:
+
+- expandable help
+- tooltip
+- information popover
+
+Do not clutter the normal workflow.
+
+Preserve current contextual explanations including:
+
+- weather percentages
+- event protection percentages
+- warning explanations
+
+Error recovery
+
+If final submission fails:
+
+- preserve every entered value
+- preserve repeatable row order
+- preserve stage completion
+- open the first invalid stage
+- identify all stages containing errors
+- focus the first invalid control
+- keep inline validation beside the relevant control
+
+Do not discard work.
+
+Accessibility
+
+Ensure:
+
+- correct heading hierarchy
+- logical source order
+- keyboard navigation
+- visible focus
+- semantic stepper markup
+- semantic progress
+- accessible validation
+- accessible warning messaging
+
+Avoid CSS reordering that changes keyboard order.
+
+Responsive behavior
+
+Desktop:
+
+- side stepper
+- broad working area
+- sticky stage actions where appropriate
+
+Narrow layouts:
+
+- horizontal progress
+- preserved workflow
+- preserved navigation
+- preserved validation
+
+Avoid creating a second workflow for small layouts.
+
+Design system
+
+Use the existing:
+
+- typography
+- spacing
+- cards
+- alerts
+- badges
+- inputs
+- buttons
+- sticky actions
+- color system
+
+Do not invent screen-specific styling.
+
+Reusable components
+
+Create reusable workflow primitives including:
+
+- stepper
+- review section
+- section summary
+- grouped form layout
+- repeatable-row layout
+- sticky workflow actions
+- validation summary
+- stage completion indicator
+
+Future products should be able to reuse these components.
+
+Regression requirements
+
+Do not change:
+
+- calculations
+- formulas
+- warning rules
+- validation rules
+- persistence
+- database schema
+- migrations
+- backup
+- restore
+- Event Analysis behavior
+- comparison behavior
+
+Small template or JavaScript refactors are allowed only where required to
+support the new workflow components.
+
+Testing
+
+Add or update automated tests covering:
+
+Business Defaults
+
+- complete guided workflow
+- stage navigation
+- save only at completion
+- preserved values
+- validation
+- review
+- successful persistence
+
+Event Inputs
+
+- complete guided workflow
+- stage navigation
+- preserved values
+- review
+- successful Event creation
+- successful Original estimate Scenario creation
+- no persistence before Analyze event
+
+Validation
+
+- invalid fields remain on correct stage
+- stage indicators reflect errors
+- first invalid field receives focus
+- values remain intact
+
+Warnings
+
+- appear on the correct stage
+- remain contextual
+- disappear when corrected
+- remain non-blocking
+
+Repeatable rows
+
+- labor rows
+- additional-cost rows
+
+Verify:
+
+- adding
+- removing
+- ordering
+- preservation between stages
+
+Responsive
+
+- desktop workflow
+- narrow workflow
+- preserved navigation
+- preserved accessibility
+
+Regression
+
+Verify:
+
+- calculations unchanged
+- Event Analysis unchanged
+- Saved Events unchanged
+- comparison unchanged
+- backup unchanged
+- restore unchanged
+
+Manual review checklist
+
+Add a concise checklist covering:
+
+- keyboard-only completion
+- desktop completion
+- narrow layout completion
+- invalid submission
+- warning appearance
+- rapid data entry
+- review experience
+- long names
+- multiple labor rows
+- multiple additional-cost rows
+- preserved values
+- Analyze event
+- Save Defaults
+
+Scope
+
+Do not implement:
+
+- Event Analysis redesign
+- Dashboard redesign
+- Saved Events redesign
+- Comparison redesign
+- animation polish
+- microinteraction polish
+- dark mode
+- charts
+- new calculations
+- new workflows
+- new dependencies
+
+Do not make unrelated changes.
+Do not commit.
+
+Afterward:
+
+1. Run focused workflow, validation, warning, responsive, accessibility, and
+   regression tests.
+2. Run the full automated test suite.
+3. Run git diff --check.
+4. Summarize the new guided workflow components.
+5. Explain how scrolling and cognitive load were reduced.
+6. List the reusable form primitives introduced.
+7. Report any workflow limitation that could not be addressed.
+8. Report the exact test results.
+
+Keep the response concise.

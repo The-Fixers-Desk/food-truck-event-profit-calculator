@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %} | Food Truck Event Profit Calculator{% endblock %}
+{% block context_label %}
+  {% if workspace %}
+    {{ event_identity.event_name }} · {{ active_scenario_name }}
+  {% else %}
+    New analysis
+  {% endif %}
+{% endblock %}
 {% block content %}
 <section class="page{% if workspace %} analysis-workspace-page{% endif %}">
   <header class="page-header">

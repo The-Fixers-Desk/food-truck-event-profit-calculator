@@ -2,15 +2,32 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Establish the V1 design system foundation
+Redesign application layout and navigation
 
-- Create the reusable V1 design system for the application
-- Standardize typography, spacing, colors, elevation, borders, and radii
-- Add reusable buttons, inputs, cards, tables, alerts, badges, dialogs, and layout components
-- Refactor styling into shared design primitives and reusable CSS architecture
-- Improve accessibility, interaction states, and desktop-first responsiveness
-- Document the design system for future UI redesign milestones
-- Preserve all existing functionality, workflows, and business logic
+- Add a persistent desktop application shell with shared navigation
+- Introduce a compact context bar and consistent main workspace structure
+- Separate global destinations from screen-specific workflow navigation
+- Standardize task-specific content widths and page-layout patterns
+- Improve primary-action hierarchy, spacing, and visual rhythm
+- Reduce unnecessary cards, empty margins, and page-level scrolling
+- Add responsive navigation behavior for narrow application windows
+- Preserve setup, recovery, dirty-state, routing, and accessibility safeguards
+- Apply the shared shell across all current application screens
+- Add shell, navigation, responsive, and regression test coverage
+
+---------------------------------------------------------------------------------
+
+Redesign Business Defaults and Event Inputs workflows
+
+- Convert Business Defaults and Event Inputs into guided multi-stage workflows
+- Add reusable stepper, review, and workflow navigation components
+- Reduce scrolling through compact layouts and progressive disclosure
+- Improve field grouping, inline guidance, validation, and contextual warnings
+- Preserve rapid keyboard-friendly data entry and repeatable row editing
+- Add concise review stages before saving or analyzing
+- Improve error recovery, stage indicators, and accessibility
+- Reuse the shared V1 design system throughout both workflows
+- Add regression, responsive, accessibility, and workflow test coverage
 
 ---------------------------------------------------------------------------------
 

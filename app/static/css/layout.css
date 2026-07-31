@@ -1,34 +1,59 @@
 .app-shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 100vh;
 }
 
-.app-header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+.app-workspace {
+  min-width: 0;
 }
 
-.app-header__content,
-.app-navigation__content,
+.app-context-bar {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  border-bottom: var(--divider-default);
+  background: rgb(255 255 255 / 96%);
+}
+
+.app-context-bar__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.app-context-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .app-main {
-  width: min(calc(100% - 2rem), var(--content-width));
+  width: min(calc(100% - 2.5rem), var(--content-width));
   margin-inline: auto;
-}
-
-.app-header__content {
-  padding-block: var(--space-3);
-}
-
-.wordmark {
-  color: var(--color-text);
-  font-family: var(--font-heading);
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.app-main {
   padding-block: var(--space-5);
 }
+
+.app-main--calculator,
+.app-main--saved_events {
+  --content-width: 1440px;
+}
+
+.app-main--defaults {
+  --content-width: 1040px;
+}
+
+.workspace-page { max-width: 1100px; }
+.workspace-page--wide { max-width: none; }
+.workspace-page--form { max-width: 960px; }
+.workspace-page--list { max-width: 1200px; }
+.workspace-page--empty, .workspace-page--recovery { max-width: 720px; }
 
 .page {
   max-width: 1100px;
@@ -117,8 +142,11 @@
 }
 
 @media (max-width: 600px) {
-  .app-header__content,
-  .app-navigation__content,
   .app-main { width: min(calc(100% - 1rem), var(--content-width)); }
   .workflow-steps, .dashboard-actions { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 800px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); }
+  .app-context-bar { position: static; padding-inline: var(--space-3); }
 }
