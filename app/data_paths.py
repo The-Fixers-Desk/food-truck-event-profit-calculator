@@ -29,10 +29,20 @@ class ApplicationDataPaths:
     def staging(self) -> Path:
         return self.root / "staging"
 
+    @property
+    def logs(self) -> Path:
+        return self.root / "logs"
+
+    @property
+    def shell_temporary(self) -> Path:
+        return self.root / "shell-temp"
+
     def ensure_directories(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
         self.automatic_recovery.mkdir(exist_ok=True)
         self.staging.mkdir(exist_ok=True)
+        self.logs.mkdir(exist_ok=True)
+        self.shell_temporary.mkdir(exist_ok=True)
 
     def safe_child(self, directory: Path, filename: str) -> Path:
         if Path(filename).name != filename or filename in {"", ".", ".."}:

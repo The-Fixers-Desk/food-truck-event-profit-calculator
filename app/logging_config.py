@@ -7,7 +7,8 @@ from flask import Flask
 
 def configure_logging(app: Flask) -> None:
     """Configure local rotating application logs."""
-    log_directory = Path(app.instance_path) / "logs"
+    paths = app.config.get("DATA_PATHS")
+    log_directory = paths.logs if paths is not None else Path(app.instance_path) / "logs"
     log_directory.mkdir(parents=True, exist_ok=True)
 
     log_file = log_directory / "application.log"

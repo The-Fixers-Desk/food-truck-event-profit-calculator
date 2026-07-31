@@ -2,22 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Complete accessibility and responsive behavior
-
-- Add complete keyboard navigation and visible focus states
-- Improve semantic page structure, landmarks, headings, and page titles
-- Add accessible labels, help-text relationships, and error summaries
-- Add dialog focus management and accessible confirmation behavior
-- Improve live calculation, save, comparison, and recovery announcements
-- Make repeatable labor and cost rows accessible and keyboard-friendly
-- Improve screen-reader structure for Saved Events and Scenario comparison
-- Strengthen contrast and non-color status communication
-- Support responsive layouts down to narrow application widths
-- Verify zoom, long-content, dialog, table, and workspace behavior
-- Add accessibility assertions, developer guidance, and a manual review checklist
-
----------------------------------------------------------------------------------
-
 Build desktop application shell
 
 - Add a dedicated pywebview desktop window

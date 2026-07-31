@@ -140,14 +140,14 @@ DESIGN AND ACCESSIBILITY
   review before analysis. Polish Welcome, Dashboard, Defaults, Event Analysis,
   Saved Events, Comparison, messages, empty states, wording, and hierarchy.
 
-□ >Complete accessibility and responsive behavior
+☑ Complete accessibility and responsive behavior
   Add keyboard navigation, focus states, accessible labels and errors,
   contrast, responsive layouts, and screen-reader structure.
 
 
 DESKTOP APPLICATION AND PACKAGING
 
-□ *Build the desktop application shell
+□ >Build the desktop application shell
   Add the dedicated window, automatic local-server startup, safe shutdown,
   single-instance protection, product identity, loading and error screens,
   and verified offline use.

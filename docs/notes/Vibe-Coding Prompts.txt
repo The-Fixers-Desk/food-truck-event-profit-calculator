@@ -8,11 +8,11 @@ Anything we need to do before we make a prompt for Codex?
 
 ---------------------------------------------------------------------------------
 
-Give me the commit message I will use when this is done.
+I agree with everything. Make the prompt for Codex.
 
 ---------------------------------------------------------------------------------
 
-I agree with everything. Make the prompt for Codex.
+Give me the commit message I will use when this is done. Summary and description for GitHub Windows.
 
 ---------------------------------------------------------------------------------
 
