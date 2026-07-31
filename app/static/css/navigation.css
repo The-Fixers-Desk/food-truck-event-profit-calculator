@@ -20,15 +20,16 @@
 }
 
 .product-identity__desk {
-  color: var(--color-primary-hover);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
 }
 
 .product-identity__name {
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
-  line-height: 1.35;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  line-height: 1.3;
 }
 
 .app-navigation {
@@ -55,25 +56,22 @@
   color: var(--color-text);
 }
 
-.nav-marker {
-  width: .5rem;
-  height: .5rem;
+.nav-icon {
+  width: 1.1rem;
+  height: 1.1rem;
   flex: 0 0 auto;
-  border: 1px solid currentColor;
-  border-radius: 50%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .nav-link--active {
-  border-color: var(--color-border);
-  background: var(--color-surface);
+  border-color: transparent;
+  background: var(--color-selected);
   color: var(--color-text);
-  box-shadow: var(--shadow-1);
-}
-
-.nav-link--active .nav-marker {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-selected);
+  box-shadow: inset 3px 0 var(--color-primary);
 }
 
 @media (max-width: 800px) {
@@ -91,6 +89,6 @@
   .product-identity__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-navigation { display: flex; gap: var(--space-1); overflow-x: auto; }
   .nav-link { flex: 0 0 auto; min-height: 2.5rem; }
-  .nav-marker { display: none; }
+  .nav-icon { display: none; }
   .nav-link--active { box-shadow: inset 0 -3px var(--color-primary); }
 }

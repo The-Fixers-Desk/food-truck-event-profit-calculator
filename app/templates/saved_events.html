@@ -3,225 +3,148 @@
 {% block content %}
 <section class="page saved-events-page workspace-page--list">
   <header class="page-header">
-    <p class="page-eyebrow">Saved Analyses</p>
-    <h1>Saved Events</h1>
-    <p class="page-description">
-      Open and manage saved event scenarios.
-    </p>
+    <p class="page-eyebrow">Saved work</p>
+    <h1>Saved events</h1>
+    <p class="page-description">Open an analysis, compare scenarios, or manage saved work.</p>
   </header>
 
   {% if events %}
-  <div class="management-toolbar" role="search">
-    <div class="form-field management-search">
-      <label class="form-label" for="saved-work-search">Search saved work</label>
-      <input class="form-input" id="saved-work-search" type="search"
-        placeholder="Event or Scenario name" autocomplete="off" />
+    <div class="management-toolbar" role="search">
+      <div class="form-field management-search">
+        <label class="form-label" for="saved-work-search">Search</label>
+        <input class="form-input" id="saved-work-search" type="search"
+          placeholder="Event or scenario" autocomplete="off" />
+      </div>
+      <div class="form-field management-sort">
+        <label class="form-label" for="saved-work-sort">Sort by</label>
+        <select class="form-input" id="saved-work-sort">
+          <option value="modified">Recently modified</option>
+          <option value="event-date">Event date</option>
+          <option value="name">Event name</option>
+        </select>
+      </div>
+      <button class="button-tertiary" id="clear-saved-work-search"
+        type="button" hidden>Clear search</button>
+      <p id="saved-work-filter-status" class="visually-hidden" aria-live="polite"></p>
     </div>
-    <div class="form-field management-sort">
-      <label class="form-label" for="saved-work-sort">Sort Events</label>
-      <select class="form-input" id="saved-work-sort">
-        <option value="modified">Recently modified</option>
-        <option value="event-date">Event date</option>
-        <option value="name">Event name</option>
-      </select>
-    </div>
-    <button class="button-tertiary" id="clear-saved-work-search"
-      type="button" hidden>Clear search</button>
-    <p id="saved-work-filter-status" class="visually-hidden"
-      aria-live="polite"></p>
-  </div>
   {% endif %}
 
   {% if events or comparison_error %}
-  <form class="selected-count-bar" id="comparison-selection-form" method="post"
-    action="{{ url_for('main.comparison') }}">
-    <button class="button" id="compare-selected" type="submit" disabled>
-      Compare selected
-    </button>
-    <p id="comparison-selection-status" aria-live="polite">
-      Select two to four Scenarios.
-    </p>
-    {% if comparison_error %}
-      <p class="field-error" role="alert">{{ comparison_error }}</p>
-    {% endif %}
-  </form>
+    <form class="selected-count-bar" id="comparison-selection-form" method="post"
+      action="{{ url_for('main.comparison') }}">
+      <p id="comparison-selection-status" aria-live="polite">Select two to four scenarios.</p>
+      <button class="button" id="compare-selected" type="submit" disabled>
+        Compare selected
+      </button>
+      {% if comparison_error %}<p class="field-error" role="alert">{{ comparison_error }}</p>{% endif %}
+    </form>
   {% endif %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-      <p class="flash-message flash-message--{{ category }}" role="status">
-        {{ message }}
-      </p>
+      <p class="flash-message flash-message--{{ category }}" role="status">{{ message }}</p>
     {% endfor %}
   {% endwith %}
 
   {% if not events %}
-    <div class="empty-state saved-events-empty">
-      <h2 class="empty-state__title">No saved Events</h2>
-      <p>Analyze an event to create your first saved Scenario.</p>
-      <a class="button" href="{{ url_for('main.calculator') }}">
-        Analyze new event
-      </a>
-    </div>
+    <section class="empty-state saved-events-empty">
+      <h2 class="empty-state__title">No saved events</h2>
+      <p>Analyze an event to save your first scenario.</p>
+      <a class="button" href="{{ url_for('main.calculator') }}">Analyze new event</a>
+    </section>
   {% endif %}
 
-  <div class="empty-state no-results-state" id="saved-work-no-results" hidden>
+  <section class="empty-state no-results-state" id="saved-work-no-results" hidden>
     <h2 class="empty-state__title">No matching saved work</h2>
-    <p>Try another Event or Scenario name.</p>
+    <p>Try another event or scenario name.</p>
     <button class="button" id="clear-saved-work-no-results" type="button">Clear search</button>
-  </div>
+  </section>
 
-  <div class="saved-event-list management-list" id="saved-event-list">
+  <div class="saved-event-list" id="saved-event-list">
     {% for event in events %}
       <article class="saved-event event-library-row" data-event-id="{{ event.id }}"
-        data-event-name="{{ event.event_name }}"
-        data-event-date="{{ event.event_date }}"
+        data-event-name="{{ event.event_name }}" data-event-date="{{ event.event_date }}"
         data-modified="{{ event.last_modified }}">
         <header class="saved-event__header">
           <div>
             <h2>{{ event.event_name }}</h2>
-            <p>
-              {{ event.event_date }} at {{ event.start_time }}
-              · {{ event.location }}
-            </p>
-            <p>
-              {{ event.scenario_count }} saved
-              Scenario{% if event.scenario_count != 1 %}s{% endif %}
-              · Last modified
-              <time datetime="{{ event.last_modified }}">{{ event.last_modified[:10] }}</time>
-            </p>
+            <p>{{ event.event_date }} · {{ event.location }}</p>
           </div>
-          <a class="button" href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=event.scenarios[0].id) }}">Open analysis</a>
+          <span class="management-metadata">{{ event.scenario_count }} scenario{% if event.scenario_count != 1 %}s{% endif %}</span>
         </header>
-
-        <details class="management-action"
-          {% if event_errors.get(event.id) %}open{% endif %}>
-          <summary>Rename Event</summary>
-          <form method="post"
-            action="{{ url_for('main.rename_saved_event',
-                               event_id=event.id) }}">
-            <label class="form-label" for="event-name-{{ event.id }}">
-              Event name
-            </label>
-            <input class="form-input" id="event-name-{{ event.id }}"
-              name="event_name" type="text"
-              value="{{ event_values.get(event.id, event.event_name) }}"
-              required />
-            {% if event_errors.get(event.id) %}
-              <p class="field-error">{{ event_errors[event.id] }}</p>
-            {% endif %}
-            <button class="button-secondary" type="submit">Rename Event</button>
-          </form>
-        </details>
-
-        <details class="management-action danger-action"
-          {% if event_errors.get(event.id) %}open{% endif %}>
-          <summary>Delete Event</summary>
-          <form method="post"
-            action="{{ url_for('main.delete_saved_event',
-                               event_id=event.id) }}">
-            <p>
-              Delete “{{ event.event_name }}” and all
-              {{ event.scenario_count }} saved Scenarios.
-            </p>
-            <label class="choice-option">
-              <input type="checkbox" name="confirmed" value="yes" />
-              I understand this Event and its Scenarios will be deleted.
-            </label>
-            {% if event_errors.get(event.id) %}
-              <p class="field-error">{{ event_errors[event.id] }}</p>
-            {% endif %}
-            <button class="button-secondary" type="submit">Delete Event</button>
-          </form>
-        </details>
 
         <div class="saved-scenario-list">
           {% for scenario in event.scenarios %}
             <section class="saved-scenario scenario-row selection-row"
-              data-scenario-id="{{ scenario.id }}"
-              data-scenario-name="{{ scenario.scenario_name }}">
+              data-scenario-id="{{ scenario.id }}" data-scenario-name="{{ scenario.scenario_name }}">
               <label class="comparison-selection">
-                <input type="checkbox" name="scenario_id"
-                  value="{{ scenario.id }}"
+                <input type="checkbox" name="scenario_id" value="{{ scenario.id }}"
                   form="comparison-selection-form"
-                  {% if scenario.id|string in selected_scenarios %}
-                    checked
-                  {% endif %} />
-                Select {{ event.event_name }} — {{ scenario.scenario_name }}
-                for comparison
+                  {% if scenario.id|string in selected_scenarios %}checked{% endif %} />
+                <span class="visually-hidden">Select {{ event.event_name }} — {{ scenario.scenario_name }} for comparison</span>
               </label>
-              <div>
-                <h3>{{ scenario.scenario_name }}</h3>
-                <p class="management-metadata">
-                  {{ event.event_name }} · Modified
-                  <time datetime="{{ scenario.updated_at }}">{{ scenario.updated_at[:10] }}</time>
-                </p>
-              </div>
-              <a class="button-secondary"
-                href="{{ url_for('main.open_saved_scenario',
-                                 event_id=event.id,
-                                 scenario_id=scenario.id) }}">
-                Open analysis
+              <a class="scenario-row__open"
+                aria-label="Open {{ event.event_name }}, {{ scenario.scenario_name }} analysis"
+                href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">
+                <strong>{{ scenario.scenario_name }}</strong>
+                <span>Modified <time datetime="{{ scenario.updated_at }}">{{ scenario.updated_at[:10] }}</time></span>
               </a>
-
-              <details class="management-action"
+              <details class="scenario-actions management-action"
                 {% if scenario_errors.get(scenario.id) %}open{% endif %}>
-                <summary>Rename</summary>
-                <form method="post"
-                  action="{{ url_for('main.rename_saved_scenario',
-                                     event_id=event.id,
-                                     scenario_id=scenario.id) }}">
-                  <label class="form-label"
-                    for="scenario-name-{{ scenario.id }}">
-                    Scenario name
-                  </label>
-                  <input class="form-input"
-                    id="scenario-name-{{ scenario.id }}"
-                    name="scenario_name" type="text"
-                    value="{{ scenario_values.get(
-                      scenario.id, scenario.scenario_name
-                    ) }}" required />
-                  {% if scenario_errors.get(scenario.id) %}
-                    <p class="field-error">
-                      {{ scenario_errors[scenario.id] }}
-                    </p>
-                  {% endif %}
-                  <button class="button-secondary" type="submit">
-                    Rename
-                  </button>
-                </form>
-              </details>
-
-              <details class="management-action danger-action"
-                {% if scenario_errors.get(scenario.id) %}open{% endif %}>
-                <summary>Delete</summary>
-                <form method="post"
-                  action="{{ url_for('main.delete_saved_scenario',
-                                     event_id=event.id,
-                                     scenario_id=scenario.id) }}">
-                  <p>Delete “{{ scenario.scenario_name }}”?</p>
-                  <label class="choice-option">
-                    <input type="checkbox" name="confirmed" value="yes" />
-                    Confirm Scenario deletion.
-                  </label>
-                  {% if scenario_errors.get(scenario.id) %}
-                    <p class="field-error">
-                      {{ scenario_errors[scenario.id] }}
-                    </p>
-                  {% endif %}
-                  <button class="button-secondary" type="submit">
-                    Delete
-                  </button>
-                </form>
+                <summary>More</summary>
+                <div class="management-overflow-actions">
+                  <details class="management-action" {% if scenario_errors.get(scenario.id) %}open{% endif %}>
+                    <summary>Rename</summary>
+                    <form method="post" action="{{ url_for('main.rename_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">
+                      <label class="form-label" for="scenario-name-{{ scenario.id }}">Scenario name</label>
+                      <input class="form-input" id="scenario-name-{{ scenario.id }}" name="scenario_name" type="text"
+                        value="{{ scenario_values.get(scenario.id, scenario.scenario_name) }}" required />
+                      {% if scenario_errors.get(scenario.id) %}<p class="field-error">{{ scenario_errors[scenario.id] }}</p>{% endif %}
+                      <button class="button-secondary" type="submit">Rename</button>
+                    </form>
+                  </details>
+                  <details class="management-action danger-action" {% if scenario_errors.get(scenario.id) %}open{% endif %}>
+                    <summary>Delete</summary>
+                    <form method="post" action="{{ url_for('main.delete_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">
+                      <p>Delete “{{ scenario.scenario_name }}”?</p>
+                      <label class="choice-option"><input type="checkbox" name="confirmed" value="yes" />Confirm scenario deletion.</label>
+                      {% if scenario_errors.get(scenario.id) %}<p class="field-error">{{ scenario_errors[scenario.id] }}</p>{% endif %}
+                      <button class="button-secondary" type="submit">Delete</button>
+                    </form>
+                  </details>
+                </div>
               </details>
             </section>
           {% endfor %}
         </div>
+
+        <details class="event-actions management-action" {% if event_errors.get(event.id) %}open{% endif %}>
+          <summary>Manage event</summary>
+          <div class="management-overflow-actions">
+            <details class="management-action" {% if event_errors.get(event.id) %}open{% endif %}>
+              <summary>Rename event</summary>
+              <form method="post" action="{{ url_for('main.rename_saved_event', event_id=event.id) }}">
+                <label class="form-label" for="event-name-{{ event.id }}">Event name</label>
+                <input class="form-input" id="event-name-{{ event.id }}" name="event_name" type="text"
+                  value="{{ event_values.get(event.id, event.event_name) }}" required />
+                {% if event_errors.get(event.id) %}<p class="field-error">{{ event_errors[event.id] }}</p>{% endif %}
+                <button class="button-secondary" type="submit">Rename event</button>
+              </form>
+            </details>
+            <details class="management-action danger-action" {% if event_errors.get(event.id) %}open{% endif %}>
+              <summary>Delete event</summary>
+              <form method="post" action="{{ url_for('main.delete_saved_event', event_id=event.id) }}">
+                <p>Delete “{{ event.event_name }}” and all {{ event.scenario_count }} saved scenarios.</p>
+                <label class="choice-option"><input type="checkbox" name="confirmed" value="yes" />I understand this event and its scenarios will be deleted.</label>
+                {% if event_errors.get(event.id) %}<p class="field-error">{{ event_errors[event.id] }}</p>{% endif %}
+                <button class="button-secondary" type="submit">Delete event</button>
+              </form>
+            </details>
+          </div>
+        </details>
       </article>
     {% endfor %}
   </div>
-  <script src="{{
-    url_for('static', filename='js/saved_events.js')
-  }}"></script>
+  <script src="{{ url_for('static', filename='js/saved_events.js') }}"></script>
 </section>
 {% endblock %}

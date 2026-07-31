@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Lucide icons, ISC licensed: https://lucide.dev -->
+  <symbol id="dashboard" viewBox="0 0 24 24">
+    <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+  </symbol>
+  <symbol id="new-analysis" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>
+  </symbol>
+  <symbol id="saved-events" viewBox="0 0 24 24">
+    <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+  </symbol>
+  <symbol id="defaults" viewBox="0 0 24 24">
+    <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>
+  </symbol>
+  <symbol id="data-safety" viewBox="0 0 24 24">
+    <path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/>
+  </symbol>
+  <symbol id="welcome" viewBox="0 0 24 24">
+    <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8 19 13M17.8 6.2 19 5M3 21l9-9M12.2 6.2 11 5"/><path d="m5 3 4 4"/>
+  </symbol>
+</svg>

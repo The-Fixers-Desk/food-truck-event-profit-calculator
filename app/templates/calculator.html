@@ -76,10 +76,9 @@
 <section class="page{% if workspace %} analysis-workspace-page{% endif %}">
   <header class="page-header">
     <p class="page-eyebrow">Event Analysis</p>
-    <h1>{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %}</h1>
+    <h1>{% if workspace %}{{ event_identity.event_name }}{% else %}Event Inputs{% endif %}</h1>
     {% if workspace %}
       <dl class="event-context" aria-label="Event identity">
-        <div><dt>Event</dt><dd>{{ event_identity.event_name }}</dd></div>
         <div><dt>Date</dt><dd>{{ event_identity.event_date }}</dd></div>
         <div><dt>Start time</dt><dd>{{ event_identity.start_time.strftime("%H:%M") }}</dd></div>
         <div><dt>Location</dt><dd>{{ event_identity.location }}</dd></div>
@@ -122,20 +121,19 @@
           <div class="scenario-action-bar__actions">
             <button class="button" id="open-save-analysis"
               type="button" disabled>Save</button>
-            <button class="button-secondary" id="open-save-as-new"
-              type="button" disabled>Save as new</button>
             <button class="button-secondary" id="reset-analysis"
               type="button">Reset changes</button>
-            <a class="button-secondary" href="{{ url_for('main.saved_events') }}">
-              Rename
-            </a>
-            <a class="button-secondary"
-              href="{{ url_for('main.saved_events') }}#comparison-selection-form">
-              Compare
-            </a>
-            <a class="button-secondary" href="{{ url_for('main.calculator') }}">
-              Start new analysis
-            </a>
+            <details class="scenario-more-actions">
+              <summary>More actions</summary>
+              <div>
+                <button class="button-secondary" id="open-save-as-new"
+                  type="button" disabled>Save as new</button>
+                <a class="button-tertiary" href="{{ url_for('main.saved_events') }}">Rename</a>
+                <a class="button-tertiary"
+                  href="{{ url_for('main.saved_events') }}#comparison-selection-form">Compare</a>
+                <a class="button-tertiary" href="{{ url_for('main.calculator') }}">Start new analysis</a>
+              </div>
+            </details>
           </div>
         </section>
   {% endif %}

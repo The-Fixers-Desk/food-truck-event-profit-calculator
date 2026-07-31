@@ -353,6 +353,28 @@
   background: rgb(255 255 255 / 97%);
   box-shadow: var(--shadow-1);
 }
+.scenario-more-actions { position: relative; }
+.scenario-more-actions > summary {
+  min-height: var(--control-height);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-bold);
+  list-style-position: inside;
+}
+.scenario-more-actions > div {
+  position: absolute;
+  z-index: 8;
+  right: 0;
+  display: grid;
+  min-width: 13rem;
+  padding: var(--space-2);
+  border: var(--divider-default);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-2);
+}
+.scenario-more-actions > div > * { justify-content: flex-start; }
 
 .scenario-action-bar__identity {
   display: flex;
@@ -970,4 +992,54 @@
   .remove-labor {
     margin-top: 0;
   }
+}
+
+/* Editorial form hierarchy: stages orient; the active fields do the work. */
+.guided-workflow .form-panel {
+  border-color: var(--color-divider);
+  box-shadow: none;
+}
+.input-section {
+  padding: var(--space-3) 0;
+  border: 0;
+}
+.input-section + .input-section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: var(--divider-default);
+}
+.workflow-stepper button {
+  border-color: transparent;
+  background: transparent;
+}
+.workflow-stepper button.is-active {
+  border-color: transparent;
+  background: var(--color-selected);
+  box-shadow: inset 3px 0 var(--color-primary);
+}
+.analysis-workspace-page > .page-header {
+  margin-bottom: var(--space-5);
+}
+.analysis-workspace-page .event-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-block: var(--space-3);
+}
+.analysis-workspace-page .event-context div { display: flex; gap: var(--space-2); }
+.analysis-workspace-page .event-context dt { color: var(--color-text-muted); }
+.analysis-workspace-page .event-context dd { margin: 0; }
+.scenario-action-bar {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  box-shadow: none;
+  padding-inline: 0;
+}
+.decision-summary, .warning-panel { border-color: var(--color-divider); }
+.decision-summary__profit strong { overflow-wrap: normal; }
+
+@media (max-width: 800px) {
+  .analysis-workspace-page .event-context { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scenario-action-bar__actions .button-secondary { min-height: 2.5rem; padding: var(--space-2) var(--space-3); }
+  .scenario-more-actions > div { position: static; }
 }

@@ -5,30 +5,30 @@ from tests.test_complete_event_inputs_workflow import (
 from tests.test_saved_events_management import save_sibling
 
 
-def test_welcome_is_compact_four_step_orientation(client):
+def test_welcome_is_compact_three_step_orientation(client):
     page = client.get("/welcome").data.decode()
 
     assert 'class="page onboarding-page workspace-page--empty"' in page
-    assert page.count('class="concise-onboarding-step"') == 4
+    assert page.count('class="concise-onboarding-step"') == 3
     assert 'aria-label="Getting started steps"' in page
     assert "Get started" in page
 
 
-def test_dashboard_has_primary_launch_empty_state_and_shortcuts(client):
+def test_dashboard_has_one_primary_launch_and_no_destination_shortcuts(client):
     client.post("/defaults", data=saved_defaults_data())
     page = client.get("/dashboard").data.decode()
 
     assert 'class="button button--large dashboard-primary-action"' in page
     assert "Analyze new event" in page
     assert "No recent work yet" in page
-    assert "Start your first analysis" in page
-    for shortcut in ("Saved Events", "Business Defaults", "Data Safety"):
-        assert shortcut in page
+    assert page.count("Analyze new event") == 1
+    assert "dashboard-shortcuts" not in page
+    assert "Useful shortcuts" not in page
     for fake_metric in ("Growth", "Average profit", "Success rate", "Trend"):
         assert fake_metric not in page
 
 
-def test_dashboard_renders_recent_work_with_continue_action(client, database_path):
+def test_dashboard_renders_accessible_whole_row_recent_work(client, database_path):
     client.post("/defaults", data=saved_defaults_data())
     client.post("/events/new", data=complete_event_inputs())
     save_sibling(client, database_path, "Rain plan")
@@ -38,7 +38,9 @@ def test_dashboard_renders_recent_work_with_continue_action(client, database_pat
     assert "Continue where you left off" in page
     assert "Summer Festival" in page
     assert "Rain plan" in page
-    assert "Continue analysis" in page
+    assert 'class="recent-work-row recent-work-row--primary"' in page
+    assert 'aria-label="Open Summer Festival, Rain plan analysis"' in page
+    assert "Continue analysis" not in page
 
 
 def test_saved_library_has_accessible_search_sort_and_no_results(client):
@@ -82,9 +84,10 @@ def test_saved_rows_expose_event_scenario_identity_and_primary_actions(
     assert 'data-event-name="Summer Festival"' in page
     assert 'data-event-date="2026-08-15"' in page
     assert 'data-scenario-name="Rain plan"' in page
-    assert page.count("Open analysis") == 3
-    assert "Rename Event" in page
-    assert "Delete Event" in page
+    assert page.count('class="scenario-row__open"') == 2
+    assert page.count('aria-label="Open Summer Festival,') == 2
+    assert "Rename event" in page
+    assert "Delete event" in page
 
 
 def test_comparison_has_sticky_controls_identity_and_local_scrollers(

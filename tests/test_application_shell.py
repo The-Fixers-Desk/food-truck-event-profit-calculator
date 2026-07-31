@@ -44,7 +44,7 @@ def test_global_navigation_contains_only_major_destinations(client):
         assert local_label not in navigation
 
 
-def test_current_destination_uses_text_border_marker_and_aria(client):
+def test_current_destination_uses_icon_restrained_state_and_aria(client):
     page = configured_shell(client)
     navigation = page.split('aria-label="Primary navigation"', 1)[1].split(
         "</nav>", 1
@@ -52,7 +52,9 @@ def test_current_destination_uses_text_border_marker_and_aria(client):
 
     assert 'nav-link nav-link--active' in navigation
     assert 'aria-current="page"' in navigation
-    assert 'class="nav-marker" aria-hidden="true"' in navigation
+    assert 'class="nav-icon" aria-hidden="true"' in navigation
+    assert "/static/icons/navigation.svg#dashboard" in navigation
+    assert 'class="nav-marker"' not in navigation
 
 
 def test_setup_incomplete_shell_hides_setup_dependent_destinations(client, app):
@@ -69,11 +71,9 @@ def test_setup_incomplete_shell_hides_setup_dependent_destinations(client, app):
     assert "Saved events" not in navigation
 
 
-def test_event_and_scenario_identity_appear_in_context_bar(client):
+def test_event_and_scenario_identity_appear_in_analysis_header(client):
     page = client.post("/events/new", data=complete_event_inputs()).data.decode()
-    context = page.split('class="app-context-bar"', 1)[1].split(
-        "</header>", 1
-    )[0]
+    context = page.split('class="page-header"', 1)[1].split("</header>", 1)[0]
 
     assert "Summer Festival" in context
     assert "Original estimate" in context
@@ -115,12 +115,11 @@ def test_recovery_shell_exposes_only_data_safety(client, app):
     assert "Business defaults" not in navigation
 
 
-def test_shared_page_width_and_sticky_context_primitives(client):
+def test_shared_page_width_primitives_without_generic_context_bar(client):
     css = client.get("/static/css/layout.css").data.decode()
 
     for primitive in (
         ".app-workspace",
-        ".app-context-bar",
         ".app-main--calculator",
         ".workspace-page--wide",
         ".workspace-page--form",
@@ -128,4 +127,6 @@ def test_shared_page_width_and_sticky_context_primitives(client):
         ".workspace-page--recovery",
     ):
         assert primitive in css
-    assert "position: sticky" in css
+    assert ".app-context-bar" not in css
+    page = configured_shell(client)
+    assert "Workspace" not in page

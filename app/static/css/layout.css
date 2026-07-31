@@ -8,32 +8,6 @@
   min-width: 0;
 }
 
-.app-context-bar {
-  position: sticky;
-  z-index: 10;
-  top: 0;
-  display: flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-5);
-  border-bottom: var(--divider-default);
-  background: rgb(255 255 255 / 96%);
-}
-
-.app-context-bar__label {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-}
-
-.app-context-bar__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 .app-main {
   width: min(calc(100% - 2.5rem), var(--content-width));
   margin-inline: auto;
@@ -114,5 +88,4 @@
 
 @media (max-width: 800px) {
   .app-shell { grid-template-columns: minmax(0, 1fr); }
-  .app-context-bar { position: static; padding-inline: var(--space-3); }
 }

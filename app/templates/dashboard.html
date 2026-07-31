@@ -2,69 +2,56 @@
 {% block title %}Dashboard | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
 <section class="page dashboard-page workspace-page--wide">
-  <header class="page-header">
-    <p class="page-eyebrow">Dashboard</p>
-    <h1>Plan your next event</h1>
+  <header class="page-header dashboard-intro">
+    <p class="page-eyebrow">Next event</p>
+    <h1>Is your next event worth it?</h1>
     <p class="page-description">
-      Business defaults are available. Start a new analysis or manage saved work.
+      Test the demand, costs, and conditions before you commit.
     </p>
+    <a class="button button--large dashboard-primary-action"
+      href="{{ url_for('main.calculator') }}">Analyze new event</a>
   </header>
 
-  <a class="button button--large dashboard-primary-action"
-    href="{{ url_for('main.calculator') }}">Analyze new event</a>
-  <p class="dashboard-summary type-supporting">
-    <strong>{{ event_count }}</strong> saved Event{% if event_count != 1 %}s{% endif %}
-    · <strong>{{ scenario_count }}</strong> saved Scenario{% if scenario_count != 1 %}s{% endif %}
-  </p>
-
   {% if event_count == 0 %}
-    <div class="empty-state dashboard-prompt">
-      <h2 class="empty-state__title">No recent work yet</h2>
-      <p>Use your saved defaults to start your first event analysis.</p>
-      <a class="button" href="{{ url_for('main.calculator') }}">
-        Start your first analysis
-      </a>
-    </div>
+    <section class="empty-state dashboard-prompt"
+      aria-labelledby="empty-dashboard-title">
+      <h2 class="empty-state__title" id="empty-dashboard-title">
+        No recent work yet
+      </h2>
+      <p>Your saved defaults are ready when you start an analysis.</p>
+    </section>
   {% else %}
     <section class="dashboard-recent" aria-labelledby="recent-work-title">
       <div class="section-heading-row">
         <div>
           <h2 id="recent-work-title">Continue where you left off</h2>
-          <p>{{ event_count }} saved Event{% if event_count != 1 %}s{% endif %} · {{ scenario_count }} Scenario{% if scenario_count != 1 %}s{% endif %}</p>
+          <p>Most recently updated analyses</p>
         </div>
-        <a class="button-tertiary" href="{{ url_for('main.saved_events') }}">View all saved events</a>
+        <a class="button-tertiary" href="{{ url_for('main.saved_events') }}">
+          View all saved events
+        </a>
       </div>
-      <div class="management-list">
+      <div class="dashboard-recent-list">
         {% for event in recent_events %}
           {% set scenario = event.scenarios[0] %}
-          <article class="recent-work-row management-row">
-            <div class="management-row__identity">
+          <a class="recent-work-row{% if loop.first %} recent-work-row--primary{% endif %}"
+            aria-label="Open {{ event.event_name }}, {{ scenario.scenario_name }} analysis"
+            href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">
+            <div class="recent-work-row__identity">
               <h3>{{ event.event_name }}</h3>
-              <p>{{ scenario.scenario_name }} · {{ event.event_date }} · {{ event.location }}</p>
+              <p>
+                <strong>{{ scenario.scenario_name }}</strong>
+                <span>{{ event.event_date }} · {{ event.location }}</span>
+              </p>
             </div>
-            <span class="status-badge">{{ event.scenario_count }} Scenario{% if event.scenario_count != 1 %}s{% endif %}</span>
-            <a class="button-secondary" href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">Continue analysis</a>
-          </article>
+            <span class="recent-work-row__meta">
+              {{ event.scenario_count }} scenario{% if event.scenario_count != 1 %}s{% endif %}
+            </span>
+            <span class="recent-work-row__affordance" aria-hidden="true">Open</span>
+          </a>
         {% endfor %}
       </div>
     </section>
   {% endif %}
-
-  <nav class="dashboard-shortcuts compact-task-panels" aria-label="Useful shortcuts">
-    <a class="task-panel" href="{{ url_for('main.saved_events') }}"><strong>Saved Events</strong><span>Open and manage previous work</span></a>
-    <a class="task-panel" href="{{ url_for('main.defaults') }}"><strong>Business Defaults</strong><span>Update your starting assumptions</span></a>
-    <a class="task-panel" href="{{ url_for('main.data_safety') }}"><strong>Data Safety</strong><span>Download or restore a backup</span></a>
-    {% if scenario_count >= 2 %}
-      <a class="task-panel"
-        href="{{ url_for('main.saved_events') }}#comparison-selection-form">
-        <strong>Compare Scenarios</strong><span>Review saved options side by side</span>
-      </a>
-    {% else %}
-      <div class="task-panel task-panel--disabled">
-        <strong>Compare scenarios</strong>
-        <span>At least two saved Scenarios are required.</span>
-      </div>
-    {% endif %}
-  </nav>
 </section>
 {% endblock %}

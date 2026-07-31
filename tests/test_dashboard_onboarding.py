@@ -48,10 +48,9 @@ def test_fresh_launch_welcome_and_get_started_create_no_records(database_path):
 
     page = client.get("/").data.decode()
 
-    assert "Set business defaults" in page
+    assert "Save your usual costs" in page
     assert "Describe an event" in page
-    assert "Review the analysis" in page
-    assert "Compare options" in page
+    assert "Decide with the numbers" in page
     assert "Get started" in page
     assert "/defaults?setup=1" in page
     assert client.get("/defaults?setup=1").status_code == 200
@@ -110,13 +109,10 @@ def test_existing_setup_skips_welcome_and_dashboard_has_empty_states(
 
     dashboard = client.get("/dashboard").data.decode()
 
-    assert "Business defaults are available" in dashboard
-    assert "<strong>0</strong> saved Events" in dashboard
-    assert "<strong>0</strong> saved Scenarios" in dashboard
+    assert "Your saved defaults are ready" in dashboard
     assert "No recent work yet" in dashboard
-    assert "At least two saved Scenarios are required." in dashboard
     assert "/events/new" in dashboard
-    assert "/saved-events" in dashboard
+    assert "dashboard-shortcuts" not in dashboard
     assert "/defaults" in dashboard
     assert client.get("/welcome").status_code == 302
 
@@ -157,7 +153,7 @@ def test_setup_protected_routes_ignore_stale_session(database_path):
         assert response.headers["Location"].endswith("/welcome")
 
 
-def test_dashboard_counts_and_enables_comparison_with_two_scenarios(
+def test_dashboard_keeps_comparison_in_saved_events_with_two_scenarios(
     database_path,
 ):
     app = guarded_app(database_path)
@@ -166,15 +162,16 @@ def test_dashboard_counts_and_enables_comparison_with_two_scenarios(
     client.post("/events/new", data=complete_event_inputs())
 
     one_scenario = client.get("/dashboard").data.decode()
-    assert "<strong>1</strong> saved Event" in one_scenario
-    assert "<strong>1</strong> saved Scenario" in one_scenario
-    assert "At least two saved Scenarios are required." in one_scenario
+    assert "Continue where you left off" in one_scenario
+    assert 'href="/saved-events"' in one_scenario
+    assert "Compare scenarios" not in one_scenario
 
     save_sibling(client, database_path, "Rain plan")
     ready = client.get("/dashboard").data.decode()
-    assert "<strong>2</strong> saved Scenarios" in ready
-    assert "At least two saved Scenarios are required." not in ready
-    assert "/saved-events#comparison-selection-form" in ready
+    assert "Rain plan" in ready
+    assert "comparison-selection-form" not in ready
+    assert 'href="/saved-events"' in ready
+    assert 'id="comparison-selection-form"' in client.get("/saved-events").data.decode()
 
 
 def test_dashboard_repository_failure_uses_error_handler(

@@ -635,13 +635,29 @@ function displayResultValue(element, value) {
   if (value === null || value === undefined) {
     element.textContent = "Not calculable";
   } else if (element.dataset.format === "money") {
-    element.textContent = `$${value}`;
+    element.textContent = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number(value));
   } else if (element.dataset.format === "percent") {
-    element.textContent = `${value}%`;
+    element.textContent = `${new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2,
+    }).format(Number(value))}%`;
   } else {
-    element.textContent = value;
+    element.textContent = new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2,
+    }).format(Number(value));
   }
 }
+
+document.querySelectorAll("[data-result-field]").forEach((element) => {
+  const initialValue = element.textContent.trim().replace(/[$,%]/g, "");
+  if (initialValue && initialValue !== "Not calculable") {
+    displayResultValue(element, initialValue);
+  }
+});
 
 function updateWorkspaceResults(result) {
   document.querySelectorAll("[data-result-field]").forEach((element) => {

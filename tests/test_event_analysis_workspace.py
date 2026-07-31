@@ -13,7 +13,8 @@ def test_valid_event_inputs_open_workspace_with_read_only_identity(client):
     page = response.data.decode()
 
     assert response.status_code == 200
-    assert "<h1>Event Analysis</h1>" in page
+    assert "<h1>Summer Festival</h1>" in page
+    assert '<p class="page-eyebrow">Event Analysis</p>' in page
     assert "Summer Festival" in page
     assert "2026-08-15" in page
     assert "11:00" in page

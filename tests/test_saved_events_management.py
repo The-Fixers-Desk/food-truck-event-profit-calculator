@@ -42,7 +42,7 @@ def save_sibling(client, database_path, name, **changes):
 def test_saved_events_empty_state_and_navigation(client):
     page = client.get("/saved-events").data.decode()
 
-    assert "No saved Events" in page
+    assert "No saved events" in page
     assert "Analyze new event" in page
     assert "Saved events" in client.get("/events/new").data.decode()
 
@@ -56,12 +56,12 @@ def test_events_are_grouped_with_identity_and_scenarios(
     page = client.get("/saved-events").data.decode()
 
     assert "Summer Festival" in page
-    assert "2026-08-15 at 11:00" in page
+    assert "2026-08-15" in page
     assert "Town Square" in page
-    assert "2 saved Scenarios" in page
+    assert "2 scenarios" in page
     assert "Original estimate" in page
     assert "Rain plan" in page
-    assert page.count("Open analysis") == 3
+    assert page.count('class="scenario-row__open"') == 2
 
 
 def test_event_and_scenario_ordering_is_modified_first_and_deterministic(

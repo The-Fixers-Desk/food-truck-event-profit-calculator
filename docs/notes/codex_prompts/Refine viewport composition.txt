@@ -1,0 +1,500 @@
+Implement the milestone:
+
+Refine viewport composition, responsive proportions, and visual rhythm.
+
+The application has already completed:
+
+- V1 design system
+- application shell
+- navigation redesign
+- guided workflows
+- Event Analysis redesign
+- Dashboard redesign
+- management-screen redesign
+- visual polish
+- senior product-design audit and simplification
+
+The application now feels cohesive and professional.
+
+This milestone is the final composition pass.
+
+The objective is no longer redesign.
+
+The objective is to refine proportions, responsiveness, spacing, composition,
+and editorial balance until the application feels intentionally designed by a
+senior product designer.
+
+Do not introduce new functionality.
+
+Do not redesign workflows.
+
+Do not change calculations, persistence, navigation structure, warnings, or
+business logic.
+
+Instead, refine how the existing interface occupies space.
+
+Primary objective
+
+The application should feel calm, confident, intentional, and responsive.
+
+Every screen should appear balanced regardless of viewport size.
+
+The layout should feel composed rather than arranged.
+
+Use products such as:
+
+- ChatGPT
+- Notion
+- Linear
+- Stripe Dashboard
+- Zillow
+
+only as quality references for composition, restraint, responsive behavior,
+and proportional relationships.
+
+Do not imitate their interfaces.
+
+Dashboard composition
+
+The Dashboard is close to the intended result but still feels slightly
+document-like.
+
+Refine it.
+
+Improve:
+
+- hero composition
+- spacing rhythm
+- relationship between hero and recent work
+- proportional sizing
+- viewport utilization
+- responsive behavior
+- overall visual balance
+
+The Dashboard should communicate:
+
+Analyze a new event
+
+or
+
+Continue where you left off
+
+as one unified experience rather than two unrelated sections.
+
+The hero should naturally lead the eye into recent work.
+
+Viewport utilization
+
+The interface currently leaves more unused space than necessary.
+
+Improve viewport usage without making the UI feel crowded.
+
+Implement fluid layout behavior using existing technologies where appropriate,
+including concepts such as:
+
+- flexible layout containers
+- CSS Grid
+- Flexbox
+- min/max sizing
+- clamp()
+- viewport-relative spacing
+- responsive gaps
+- responsive typography
+- responsive content widths
+
+The application should expand gracefully on larger monitors while remaining
+comfortable on smaller desktop windows.
+
+Avoid rigid fixed spacing.
+
+Avoid excessive maximum-width restrictions that make large displays feel empty.
+
+Likewise, do not allow extremely wide unreadable content lines.
+
+Favor balanced readable layouts.
+
+Visual rhythm
+
+Audit vertical rhythm across every major screen.
+
+Standardize proportional spacing relationships between:
+
+- page context
+- headings
+- supporting text
+- primary actions
+- sections
+- cards
+- rows
+- tables
+- dialogs
+- forms
+- comparison layouts
+
+Spacing should feel intentional rather than individually tuned.
+
+Avoid situations where:
+
+- two sections appear disconnected
+- large empty gaps interrupt reading flow
+- content feels compressed
+- unrelated elements appear equally spaced
+
+The interface should naturally guide the eye downward.
+
+Brand hierarchy
+
+Refine application identity.
+
+Current branding remains visually underweighted.
+
+Improve:
+
+- product identity
+- company identity
+- spacing
+- proportions
+- hierarchy
+
+The sidebar identity should feel like a confident application header rather
+than incidental metadata.
+
+Do not introduce large decorative branding.
+
+Keep it restrained.
+
+Sidebar refinement
+
+Perform another refinement pass on the navigation rail.
+
+Improve:
+
+- sidebar proportions
+- spacing
+- icon alignment
+- text alignment
+- vertical rhythm
+- selected state
+- hover behavior
+- active indicators
+- overall visual confidence
+
+The selected navigation item should feel integrated into the navigation rather
+than resembling an isolated button.
+
+Avoid heavy boxes.
+
+Avoid excessive borders.
+
+Favor subtle confident emphasis.
+
+Hero refinement
+
+Refine the Dashboard hero.
+
+Audit:
+
+- heading size
+- line breaks
+- supporting copy
+- button placement
+- whitespace
+- proportional relationships
+
+The hero should immediately communicate:
+
+This is what this application helps me decide.
+
+The heading should dominate naturally without overwhelming the layout.
+
+Recent-work refinement
+
+Recent work currently functions well.
+
+Refine presentation.
+
+Improve:
+
+- row density
+- hover behavior
+- typography hierarchy
+- metadata presentation
+- alignment
+- spacing
+- interaction cues
+
+Rows should feel like polished desktop application list items rather than
+database records.
+
+Maintain whole-row interaction where implemented.
+
+Improve affordance without adding visual clutter.
+
+Metadata refinement
+
+Continue reducing visual noise.
+
+Audit:
+
+- scenario counts
+- locations
+- dates
+- timestamps
+- status labels
+- secondary information
+
+Ensure metadata supports identification rather than competing with primary
+content.
+
+Do not expose unnecessary information simply because it exists.
+
+Responsive composition
+
+Audit every major screen at multiple desktop widths.
+
+Verify:
+
+- small laptop widths
+- medium desktop widths
+- large desktop widths
+- ultra-wide monitors
+
+Ensure layouts adapt proportionally rather than merely stretching.
+
+Components should:
+
+- grow
+- shrink
+- redistribute space
+- preserve hierarchy
+
+Avoid:
+
+large fixed empty margins
+
+or
+
+overstretched layouts.
+
+Content should always feel intentionally placed.
+
+Content regions
+
+Review all content containers.
+
+Audit:
+
+- maximum widths
+- minimum widths
+- alignment
+- margins
+- padding
+
+Use width intentionally.
+
+Some regions should remain narrow for readability.
+
+Others should grow to make better use of available space.
+
+Avoid one universal content width.
+
+Whitespace
+
+Whitespace should become an active design tool.
+
+Do not simply increase spacing.
+
+Instead use whitespace to:
+
+- emphasize priorities
+- separate ideas
+- create rhythm
+- improve readability
+- improve focus
+
+Every major page should feel visually balanced even before reading any text.
+
+Typography refinement
+
+Perform one final typography audit.
+
+Review:
+
+- heading hierarchy
+- paragraph widths
+- supporting text
+- metadata
+- labels
+- badges
+- navigation
+- tables
+
+Look for inconsistent visual weight.
+
+Strengthen hierarchy without increasing visual noise.
+
+Animation
+
+Review motion.
+
+Ensure:
+
+- transitions feel consistent
+- hover animations feel intentional
+- page transitions remain subtle
+- interaction timing feels unified
+
+Avoid decorative animation.
+
+Motion should communicate state.
+
+Component proportions
+
+Review component sizing.
+
+Audit:
+
+- buttons
+- badges
+- chips
+- cards
+- inputs
+- dialogs
+- navigation items
+- tables
+
+Ensure proportions remain visually consistent.
+
+Avoid components that feel oversized or undersized relative to neighboring
+elements.
+
+Cross-screen consistency
+
+Open every primary screen.
+
+Verify consistent relationships between:
+
+- page titles
+- actions
+- navigation
+- section spacing
+- cards
+- lists
+- dialogs
+- forms
+
+The application should feel like one coherent product.
+
+Not a collection of individually polished pages.
+
+Accessibility
+
+Maintain or improve:
+
+- keyboard navigation
+- focus visibility
+- reduced motion
+- contrast
+- target size
+- semantic structure
+
+Do not reduce accessibility while refining composition.
+
+Testing
+
+Add or update tests verifying:
+
+Dashboard:
+
+- responsive composition remains intact
+- hero remains primary
+- recent work remains accessible
+- sidebar remains functional
+
+Responsive behavior:
+
+- layouts adapt across desktop widths
+- no unexpected overflow
+- no clipped content
+- no unnecessary whitespace extremes
+
+Sidebar:
+
+- navigation remains complete
+- selected state remains accessible
+- branding remains visible
+
+Accessibility:
+
+- focus remains visible
+- keyboard navigation remains unchanged
+- semantic structure preserved
+
+Regression:
+
+- all workflows remain functional
+- calculations unchanged
+- persistence unchanged
+- navigation unchanged
+- warnings unchanged
+
+Manual design review
+
+Perform a final senior design review of every primary screen.
+
+Specifically inspect:
+
+- proportion
+- balance
+- composition
+- whitespace
+- viewport usage
+- visual rhythm
+- hierarchy
+- typography
+- branding
+- responsive behavior
+- perceived polish
+
+List every refinement made.
+
+Explain why each refinement improves the overall composition.
+
+Regression boundaries
+
+Do not modify:
+
+- calculations
+- formulas
+- business logic
+- persistence
+- migrations
+- warnings
+- routes
+- workflow order
+- existing capabilities
+
+No new features.
+
+No backend refactors.
+
+No dependency changes.
+
+No framework migration.
+
+Do not commit.
+
+After completion:
+
+1. Run all targeted UI tests.
+2. Run responsive and accessibility tests.
+3. Run the complete automated test suite.
+4. Run git diff --check.
+5. Summarize every compositional refinement.
+6. List every responsive improvement.
+7. Explain how viewport utilization improved.
+8. Explain how visual rhythm was strengthened.
+9. Identify any screen that still falls below production quality.
+10. Report every command executed and its exact result.
+
+Keep the response concise.

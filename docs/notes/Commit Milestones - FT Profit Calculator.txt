@@ -188,13 +188,20 @@ hover behavior, focus states, visual hierarchy, microinteractions, wording, and
 consistency. Remove remaining visual friction and achieve a polished,
 production-quality experience.
 
-□ >Perform a senior product-design audit and simplify the full application
+☑ Perform a senior product-design audit and simplify the full application
   Recompose each screen around one dominant task, remove redundant navigation
   and duplicated actions, reduce visible boundaries, strengthen information
   hierarchy, and substantially simplify layouts while preserving every existing
   capability. Replace conservative “styled HTML” composition with a focused,
   restrained desktop experience comparable in clarity and finish to ChatGPT,
   Notion, Linear, Stripe, and Zillow.
+
+□ >Refine viewport composition, responsive proportions, and visual rhythm
+  Perform a final composition pass across the application to improve
+  proportional relationships, responsive layout behavior, whitespace, branding,
+  viewport utilization, and editorial balance. Refine the remaining 10–15% of
+  the visual experience so every screen feels intentionally composed rather
+  than simply well styled.
 
 
 DESKTOP APPLICATION AND PACKAGING

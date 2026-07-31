@@ -2,17 +2,17 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Complete V1 visual polish and interaction refinement
+Perform senior product-design audit and simplify the application
 
-- Perform a complete visual and interaction audit across the application
-- Refine typography, spacing, alignment, and visual hierarchy for consistency
-- Standardize loading, saving, success, warning, error, hover, focus, and disabled states
-- Improve motion, transitions, microinteractions, and feedback while preserving responsiveness
-- Polish wording, icons, dialogs, empty states, tables, cards, and management views
-- Remove remaining visual inconsistencies and design-system duplication
-- Improve accessibility, long-content handling, and responsive behavior
-- Preserve all existing functionality, workflows, calculations, and persistence
-- Add visual, interaction, accessibility, and regression test coverage
+- Recompose each screen around one dominant task and primary action
+- Simplify the Dashboard and remove shortcuts that duplicate global navigation
+- Refine application chrome, sidebar hierarchy, icons, branding, and context areas
+- Reduce unnecessary cards, borders, repeated metadata, and competing actions
+- Replace repeated buttons with clearer whole-row, text, and overflow actions where appropriate
+- Strengthen hierarchy across Event Analysis, Saved Events, comparison, and Data Safety
+- Improve composition, whitespace, progressive disclosure, and responsive prioritization
+- Preserve access to every existing capability, workflow, calculation, and safeguard
+- Add accessibility, responsive, senior-design audit, and regression test coverage
 
 ---------------------------------------------------------------------------------
 
