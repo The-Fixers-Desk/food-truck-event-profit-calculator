@@ -8,12 +8,22 @@ from app.models import BusinessDefaults, LaborDefault
 
 
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema" / "business_defaults.sql"
+EVENT_ANALYSIS_SCHEMA_PATH = (
+    Path(__file__).resolve().parent / "schema" / "event_analysis.sql"
+)
 
 
 def apply_business_defaults_schema(connection: sqlite3.Connection) -> None:
     """Create the business-defaults tables on a database connection."""
     connection.execute("PRAGMA foreign_keys = ON")
     schema = SCHEMA_PATH.read_text(encoding="utf-8")
+    connection.executescript(schema)
+
+
+def apply_event_analysis_schema(connection: sqlite3.Connection) -> None:
+    """Create saved-event tables without changing existing defaults tables."""
+    connection.execute("PRAGMA foreign_keys = ON")
+    schema = EVENT_ANALYSIS_SCHEMA_PATH.read_text(encoding="utf-8")
     connection.executescript(schema)
 
 
@@ -59,6 +69,7 @@ def initialize_database() -> None:
         )
         database.commit()
     apply_business_defaults_schema(database)
+    apply_event_analysis_schema(database)
 
 
 def load_business_defaults() -> BusinessDefaults | None:
