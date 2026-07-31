@@ -54,19 +54,19 @@ CALCULATION AND RESULTS
   customers, evaluate the selected profit target, and produce factual
   profitability and assumption warnings with focused tests.
 
-□ >Revise the demand model for shared food demand and competition
+☑ Revise the demand model for shared food demand and competition
   Replace the percentage expected to buy from this business with the
   percentage expected to buy food. Divide expected food demand among the
   user’s business and other competing food vendors, update revenue and
   order-based calculations, add early demand indicators and factual
   break-even comparisons, and update affected models, validation, and tests.
 
-□ *Build the interactive Event Analysis workspace
+□ >Build the interactive Event Analysis workspace
   Create the primary post-input experience with financial results and
   adjustable scenario assumptions sharing the screen. Recalculate every
   dependent result and warning automatically as assumptions change.
 
-□ Add automatic initial saving and scenario version actions
+□ *Add automatic initial saving and scenario version actions
   Automatically save each valid Event Inputs submission as a new Event with
   an “Original estimate” Scenario before opening the workspace. From the
   workspace, provide one Save action that defaults to saving adjustments as
@@ -75,7 +75,7 @@ CALCULATION AND RESULTS
 
 SAVED WORK AND COMPARISON
 
-□ Complete saved event and scenario management
+□ *Complete saved event and scenario management
   List saved events and their scenarios, load any scenario directly into
   the interactive Event Analysis workspace, rename, delete, and verify
   persistence after restart.

@@ -1,113 +1,591 @@
 Next Codex Prompt
 
------------------------------------------------------------
+---------------------------------------------------------------------------------
 
 Implement the milestone:
 
-Build the interactive Event Analysis workspace.
+Add automatic initial scenario saving and workspace version actions.
 
-The calculation engine, break-even analysis, factual warnings, revised shared
-food-demand model, and complete Event Inputs form are already implemented.
+The interactive Event Analysis workspace, calculation engine, break-even
+analysis, warnings, Event and Event Scenario schema, and complete validation
+already exist.
 
-Build the primary post-input experience in which financial results and
-adjustable scenario assumptions share the screen and every dependent result
-updates automatically.
+Change the workflow so every valid Event Inputs submission is saved before the
+Event Analysis workspace opens.
 
-Initial workflow
+Initial Event Inputs submission
 
-- After a valid Event Inputs submission, render the Event Analysis workspace
-  using the submitted values as the initial analysis.
-- Treat those initial values as the workspace baseline.
-- Do not create or update Event or Event Scenario database records.
-- Do not save the workspace state to Business Defaults.
-- Invalid Event Inputs submissions must continue displaying the existing input
-  form and validation errors rather than opening the workspace.
+When the customer submits a complete, valid Event Inputs form:
 
-Event identity
+- Create an Event containing the submitted event identity:
+  - Event name
+  - Event date
+  - Start time
+  - Location
 
-Display these values in the workspace header as read-only context:
+- Create the Event’s first Scenario automatically.
+- Name the first Scenario:
+  “Original estimate”
+- Save the complete submitted assumptions and ordered child entries.
+- Create the Event and first Scenario in one database transaction.
+- If any part of the save fails, create neither record.
+- Do not open the workspace unless persistence succeeds.
+- After a successful save, open the Event Analysis workspace with the newly
+  created Scenario as the active Scenario and reset baseline.
+
+Invalid Event Inputs submissions must:
+
+- Remain on the Event Inputs form
+- Display the existing validation errors
+- Preserve every submitted value and repeatable row
+- Create no Event or Scenario records
+
+Duplicate Event submissions
+
+Do not attempt to detect or merge Events based on matching names, dates, times,
+or locations.
+
+Each valid submission from the new Event Inputs workflow creates a new Event
+and its own “Original estimate” Scenario.
+
+Scenario persistence
+
+An Event stores shared event identity.
+
+An Event Scenario stores one complete set of adjustable analysis assumptions,
+including:
+
+- Attendance and weather assumptions
+- Percentage expected to buy food
+- Other competing food vendors
+- Revenue method and custom expected-sales state
+- Average order amount
+- Food and packaging method and matching value
+- Card-payment assumptions
+- Ordered employee labor entries
+- Owner labor pay
+- Travel and operating costs
+- Event and payment fees
+- Ordered named miscellaneous costs
+- Profit-target type and matching value
+
+Persist assumptions, not calculated financial results.
+
+Whenever a Scenario opens, regenerate its results through the existing Python
+calculation engine.
+
+Workspace behavior
+
+The workspace always represents an active saved Scenario.
+
+Allow the customer to change assumptions freely without automatically modifying
+the active saved Scenario.
+
+Track whether the current workspace assumptions differ from the active saved
+baseline.
+
+- Changes make the workspace dirty.
+- Returning every value and ordered row to the baseline clears the dirty state.
+- Reset changes restores the active Scenario’s saved assumptions and
+  recalculates the analysis.
+
+Save action
+
+Add one primary workspace button labeled:
+
+“Save”
+
+Disable it when the workspace has no unsaved changes.
+
+When clicked, open an accessible save dialog or equivalent inline flow with
+these choices:
+
+1. Save as new scenario
+2. Overwrite current scenario
+
+“Save as new scenario” must be selected by default every time the save flow
+opens.
+
+Save as new scenario
+
+When this option is selected:
+
+- Require the customer to enter a nonblank Scenario name.
+- Trim surrounding whitespace before saving.
+- Create a new Scenario under the same Event.
+- Copy the complete current workspace assumptions and ordered child entries
+  into the new Scenario.
+- Do not modify the previously active Scenario.
+- After success:
+  - Make the new Scenario the active Scenario
+  - Show its name in the workspace
+  - Treat its saved values as the new reset baseline
+  - Clear the dirty state
+  - Display a clear success state
+
+Scenario names must be unique within the same Event after trimming whitespace
+and without regard to capitalization.
+
+The same Scenario name may be used under a different Event.
+
+On a duplicate name:
+
+- Do not save
+- Preserve the entered name
+- Preserve all workspace assumptions and results
+- Show a clear validation message
+- Do not silently alter the name
+
+Overwrite current scenario
+
+When this option is selected:
+
+- Clearly identify the Scenario that will be replaced.
+- Require an explicit confirmation before writing.
+- Update only the active Scenario.
+- Preserve its Scenario identity and name.
+- Do not modify sibling Scenarios.
+- Do not modify the Event identity.
+- Do not modify Business Defaults.
+- Replace its stored assumptions and ordered child rows transactionally.
+- Update its modified timestamp.
+
+After success:
+
+- Keep the same Scenario active
+- Treat the overwritten state as the new reset baseline
+- Clear the dirty state
+- Display a clear success state
+
+Do not use “Save changes” as a separate primary action. The single Save flow
+must default to creating a new Scenario while still allowing deliberate
+overwriting.
+
+Validation and failures
+
+- Never save an invalid workspace state.
+- Reuse the existing complete form and domain validation.
+- Preserve all entered values and repeatable rows after a failed save.
+- Keep displaying the most recent valid calculation results.
+- Show customer-facing save errors without navigating away.
+- Use database transactions for every Scenario write.
+- A failed child-row write must not partially create or modify a Scenario.
+- Business Defaults must remain unchanged.
+
+Data integrity
+
+- Persist scaled integer values using the project’s established conventions.
+- Preserve employee labor and miscellaneous-cost row order.
+- Maintain Event-to-Scenario foreign-key relationships.
+- Reuse existing repositories and persistence patterns where practical.
+- Do not delete, reset, or manually replace data/app.db.
+- Preserve unrelated application and customer data.
+
+Scope
+
+Do not implement yet:
+
+- Saved-event or saved-scenario lists
+- Opening a Scenario from a saved-work screen
+- Scenario renaming after creation
+- Scenario deletion
+- Event deletion
+- Event identity editing
+- Scenario comparison
+- Dashboard behavior
+- Final visual polish
+
+Do not add dependencies.
+Do not make unrelated changes.
+Do not commit.
+
+Testing
+
+Add or update tests covering:
+
+- Valid Event Inputs automatically creating one Event and one Scenario
+- Automatic first Scenario name of “Original estimate”
+- Complete assumptions and ordered rows being persisted
+- Initial save occurring before the workspace opens
+- Initial transaction rollback on failure
+- Invalid Event Inputs creating no records
+- Separate submissions creating separate Events
+- Calculated results not being persisted
+- Workspace opening with the saved Scenario as its baseline
+- Dirty-state detection
+- Reset restoring the active saved Scenario
+- Save being disabled when nothing has changed
+- Save as new being selected by default
+- Blank new-Scenario name validation
+- Duplicate Scenario-name validation
+- Case-insensitive and trimmed duplicate detection
+- The same Scenario name being allowed for different Events
+- Save as new creating a sibling Scenario
+- Save as new preserving the original Scenario
+- The new Scenario becoming active after saving
+- Overwrite requiring explicit confirmation
+- Overwrite updating only the active Scenario
+- Overwrite preserving Scenario identity and name
+- Ordered child rows being replaced transactionally
+- Failed saves preserving workspace assumptions and results
+- Business Defaults remaining unchanged
+- Recalculation reproducing results from persisted assumptions
+
+Afterward:
+
+1. Run focused persistence, workspace, and route tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the customer-visible workflow.
+5. Explain how to manually test:
+   - Automatic initial saving
+   - Default Save as new behavior
+   - Overwriting the active Scenario
+   - Duplicate-name validation
+   - Reset changes
+6. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Complete saved event and scenario management.
+
+Automatic initial saving, scenario version actions, the interactive Event
+Analysis workspace, calculation engine, persistence schema, and transactional
+repositories already exist.
+
+Build the customer-facing Saved Events management workflow without duplicating
+the workspace or calculation logic.
+
+Saved Events page
+
+Add a Saved Events screen accessible through the existing application
+navigation.
+
+Group saved Scenarios beneath their parent Event.
+
+For each Event, display:
 
 - Event name
 - Event date
 - Start time
 - Location
+- Number of saved Scenarios
+- Last modified time
 
-Do not treat event identity as adjustable scenario filters in this milestone.
+For each Scenario, display:
 
-Adjustable assumptions
+- Scenario name
+- Last modified time
+- An “Open analysis” action
+- Rename action
+- Delete action
 
-Allow the customer to adjust all financial and demand assumptions without
-returning to the original Event Inputs form, including:
+Order Events by most recently modified first.
 
-Demand and revenue:
-- Estimated attendance
-- Weather outlook
-- Custom weather reduction when applicable
-- Event protection
-- Percentage of attendees expected to buy food
-- Other competing food vendors
-- Average order sale amount
-- Calculated-sales versus custom expected-sales behavior
+Order Scenarios within each Event by most recently modified first.
 
-Food and payment costs:
-- Food and packaging cost method and matching value
-- Percentage of sales paid by card
-- Card-processing percentage
-- Fixed card-processing fee per card transaction
+Use deterministic secondary ordering when timestamps are equal.
 
-Labor:
-- Zero or more employee labor entries
-- Hourly rate
-- Combined paid hours
-- Owner labor pay
-- Add and remove employee labor rows while preserving order
+Include a useful empty state when no Events have been saved.
 
-Event costs and fees:
-- Travel
-- Parking
-- Permit
-- Generator or utility cost
-- Vendor or booking fee
-- Organizer commission
-- Zero or more named miscellaneous costs
-- Add and remove miscellaneous-cost rows while preserving order
+Do not build the Dashboard in this milestone.
 
-Profit target:
-- Profit target type
-- Matching profit amount or margin value
+Opening a saved Scenario
 
-Preserve the existing conditional field behavior. Hidden or inactive values
-must not affect calculations.
+When “Open analysis” is selected:
 
-Layout
+- Load the Event identity.
+- Load the Scenario’s complete saved assumptions.
+- Preserve the order of employee labor and miscellaneous-cost entries.
+- Validate the persisted assumptions through the existing domain behavior.
+- Recalculate all results, break-even values, target evaluations, and warnings
+  through the existing Python calculation engine.
+- Open the existing interactive Event Analysis workspace.
+- Make the selected Scenario the active Scenario.
+- Use the saved assumptions as the Reset changes baseline.
+- Begin with a clean, non-dirty workspace state.
 
-Create a functional two-column desktop workspace:
+Do not create a second workspace implementation.
 
-1. Adjustable assumptions
-2. Analysis results
+Do not load or persist calculated results.
 
-Give the assumptions and results comparable visual importance.
+If an Event or Scenario does not exist, show the application’s normal
+customer-facing not-found behavior rather than crashing.
 
-Keep the results column visible while scrolling where the supported window size
-makes that practical.
+Renaming Events
 
-On narrower layouts:
+Allow the Event name to be renamed.
 
-- Place the key result summary before the assumption controls.
-- Avoid horizontal scrolling.
-- Preserve a clear reading and keyboard order.
+Rules:
 
-Do not perform the final visual-design milestone yet. Use the project’s
-existing functional and readable styling patterns.
+- Require a nonblank name after trimming surrounding whitespace.
+- Event names do not need to be unique.
+- Update only the Event name and modified timestamp.
+- Do not change its date, start time, location, Scenarios, or assumptions.
+- Preserve the entered value and show a clear validation error after failure.
 
-Results
+Do not add general Event identity editing in this milestone.
 
-Display the current calculation-engine outputs, including:
+Renaming Scenarios
 
-- Weather-adjusted attendance
-- Total expected food buyers
-- Total food vendors
-- Even-split estimated buyers for the customer
+Allow an individual Scenario to be renamed.
+
+Rules:
+
+- Require a nonblank name after trimming surrounding whitespace.
+- Scenario names must remain unique within the same Event.
+- Compare uniqueness without regard to capitalization or surrounding spaces.
+- The same name may be used under different Events.
+- Do not silently add numbers or alter duplicate names.
+- Update only the Scenario name and modified timestamp.
+- Do not change its assumptions or sibling Scenarios.
+- If the renamed Scenario is currently active in the workspace, ensure its
+  displayed active name is correct when next loaded or refreshed.
+
+Delete Scenario
+
+Add a confirmed Scenario deletion action.
+
+- Clearly identify the Scenario being deleted.
+- Delete only the selected Scenario.
+- Do not modify sibling Scenarios or the parent Event.
+- Do not allow the final remaining Scenario belonging to an Event to be
+  deleted individually.
+- When deletion is blocked, explain that the complete Event can be deleted
+  instead.
+- After successful deletion, remain on the Saved Events screen and show a
+  success state.
+
+Delete Event
+
+Add a separate confirmed Event deletion action.
+
+- Clearly identify the Event.
+- State how many saved Scenarios will also be deleted.
+- Require explicit confirmation.
+- Delete the Event and all of its Scenarios and ordered child records through
+  the established cascading relationships.
+- Perform the deletion transactionally.
+- After success, remain on the Saved Events screen and show a success state.
+
+Do not allow a failed deletion to leave partially deleted data.
+
+Unsaved-change protection
+
+Reuse the workspace’s existing dirty-state behavior.
+
+When the active workspace contains unsaved changes and the customer attempts
+to:
+
+- Navigate to Saved Events
+- Open a different saved Scenario
+- Leave through another application navigation action that would discard the
+  workspace state
+
+require confirmation before discarding the unsaved changes.
+
+If the customer cancels:
+
+- Remain in the current workspace
+- Preserve all assumptions, rows, validation state, and current results
+
+If the customer confirms:
+
+- Continue to the requested destination
+- Do not alter the active saved Scenario
+
+Do not show a discard warning when the workspace is clean.
+
+Persistence after restart
+
+Verify that after closing and recreating the application:
+
+- Saved Events remain listed
+- Scenario names and Event names remain updated
+- Deleted records remain deleted
+- Ordered child rows remain intact
+- Any remaining Scenario can be loaded into the workspace
+- Recalculated results match its saved assumptions
+
+Data integrity
+
+- Reuse the existing repositories and transaction patterns.
+- Continue using scaled integer persistence conventions.
+- Do not delete, reset, or manually replace data/app.db.
+- Preserve Business Defaults and unrelated customer data.
+- Do not add stored calculated-result columns.
+- Do not create duplicate Event or Scenario records merely by opening them.
+
+Scope
+
+Do not implement:
+
+- Scenario comparison
+- Financial comparison summaries
+- Event date, time, or location editing
+- Moving a Scenario between Events
+- Scenario reordering
+- Dashboard behavior
+- Search, filtering, or pagination
+- Backup and restore
+- Final UI and UX polish
+
+Do not add dependencies.
+Do not make unrelated changes.
+Do not commit.
+
+Testing
+
+Add or update tests covering:
+
+- Saved Events empty state
+- Events grouped with their Scenarios
+- Event and Scenario ordering
+- Complete Event identity display
+- Opening every saved Scenario in the existing workspace
+- Saved assumptions and ordered rows loading correctly
+- Results being recalculated rather than loaded from storage
+- Loaded Scenario becoming the active reset baseline
+- Loaded workspace beginning clean
+- Missing Event and Scenario handling
+- Valid and invalid Event-name changes
+- Event renaming leaving identity and Scenarios unchanged
+- Valid Scenario renaming
+- Blank Scenario-name validation
+- Duplicate, trimmed, and case-insensitive Scenario-name validation
+- Same Scenario name under different Events
+- Deleting a non-final Scenario
+- Preventing individual deletion of the final Scenario
+- Confirmed Event deletion cascading to all Scenarios and children
+- Transaction rollback after deletion failure
+- Unsaved-change confirmation when leaving a dirty workspace
+- Cancellation preserving the workspace
+- Clean navigation requiring no confirmation
+- Persistence after application restart
+- Business Defaults and unrelated data remaining unchanged
+- Opening a Scenario creating no duplicate records
+
+Afterward:
+
+1. Run focused saved-work, repository, route, and workspace tests.
+2. Run the full test suite.
+3. Run git diff --check.
+4. Summarize the customer-visible management workflow.
+5. Explain how to manually test opening, renaming, deleting, dirty-state
+   protection, and restart persistence.
+6. Report the test results.
+
+Keep the response concise.
+
+---------------------------------------------------------------------------------
+
+Implement the milestone:
+
+Build the complete event comparison workflow.
+
+Saved Event and Scenario management, the interactive Event Analysis workspace,
+scenario persistence, and the complete calculation engine already exist.
+
+Build a read-only comparison workflow for saved Scenarios. Reuse existing
+repositories, models, calculation logic, warnings, and workspace behavior.
+
+Scenario selection
+
+Allow customers to select saved Scenarios for comparison from the Saved Events
+screen.
+
+- Require at least two Scenarios.
+- Allow no more than four Scenarios.
+- Allow Scenarios from the same Event.
+- Allow Scenarios from different Events.
+- Do not allow the same Scenario to be selected more than once.
+- Identify every selection using both:
+  - Event name
+  - Scenario name
+- Add a “Compare selected” action.
+- Disable or reject comparison when fewer than two Scenarios are selected.
+- Show a clear validation message when the customer attempts to select more
+  than four.
+
+Preserve the existing Saved Events grouping and management actions.
+
+Comparison calculations
+
+For every selected Scenario:
+
+- Load the Event identity and complete saved assumptions.
+- Preserve ordered employee labor and miscellaneous-cost entries.
+- Validate the persisted assumptions through existing domain behavior.
+- Recalculate all financial results using the existing Python calculation
+  engine.
+- Include current break-even values, profit-target evaluation, and factual
+  warnings.
+
+Do not:
+
+- Read calculated results from the database
+- Persist comparison results
+- Duplicate calculation formulas in JavaScript or templates
+- Create Event or Scenario records while comparing
+
+Missing or invalid saved data should produce a customer-facing error without
+crashing the complete comparison.
+
+Baseline behavior
+
+Use the first selected Scenario as the initial comparison baseline.
+
+Clearly label it:
+
+“Baseline”
+
+Allow the customer to make any selected Scenario the baseline without leaving
+or rebuilding the comparison.
+
+Changing the baseline must update displayed differences but must not alter any
+saved data.
+
+Difference rules
+
+Compare every non-baseline Scenario with the active baseline.
+
+For money values and customer or order counts:
+
+Difference =
+compared Scenario value - baseline value
+
+For percentages, rates, and profit margin:
+
+- Display the difference in percentage points.
+- Do not describe a percentage-point difference as a relative percentage
+  increase or decrease.
+
+For categorical assumptions:
+
+- Show the baseline value and compared value.
+- Highlight the row when values differ.
+
+For unavailable results:
+
+- Display “Not available.”
+- Do not calculate or display a misleading numeric difference.
+
+Use exact calculation values for comparisons and apply customer-facing display
+rounding only when rendering.
+
+Comparison summary
+
+For each selected Scenario, display:
+
+- Event name
+- Scenario name
+- Event date and start time
+- Location
+- Expected buyers
 - Expected orders
 - Expected sales
 - Variable costs
@@ -120,100 +598,225 @@ Display the current calculation-engine outputs, including:
 - Break-even sales
 - Exact break-even customers
 - Minimum whole break-even customers
-- Profit-target evaluation
-- Structured factual warnings
+- Profit-target status
+- Current factual warnings
 
-Include a readable cost breakdown using the existing calculation-result data.
+Clearly distinguish owner labor pay from business profit.
 
-Clearly distinguish unavailable values from zero values.
+Meaningful factual highlights
 
-Live recalculation
+Across selected Scenarios, factually identify:
 
-- Do not add a Calculate or Update Analysis button.
-- Recalculate automatically after relevant assumptions change.
-- Use a short debounce so ordinary typing does not create excessive requests.
-- Send the complete current workspace assumptions to an appropriate Flask
-  calculation endpoint.
-- Validate and calculate through the existing Python form/domain/calculation
-  logic.
-- Do not reproduce business formulas in JavaScript.
-- Return structured validation and result data suitable for updating the page.
-- Ensure an older request cannot overwrite the results of a newer request.
+- Highest business profit
+- Lowest total event cost
+- Lowest minimum whole break-even customer requirement
+- Scenarios meeting their selected profit target
+- Scenarios not meeting their selected profit target
+- Warnings that appear in only some selected Scenarios
 
-Invalid live edits
+Handle ties accurately.
 
-When current workspace values are invalid:
+Do not:
 
-- Preserve every entered value and repeatable row.
-- Display field-specific errors near the affected controls.
-- Keep displaying the most recent valid results rather than replacing them
-  with blank or misleading values.
-- Show a concise status explaining that results will update after the invalid
-  values are corrected.
-- Do not create Event or Event Scenario records.
+- Declare one Scenario the winner
+- Recommend accepting or rejecting an Event
+- Create arbitrary scoring
+- Add arbitrary definitions of a good or bad result
 
-Updating state
+Assumption comparison
 
-Display a modest updating indicator while a calculation request is pending.
+Compare the saved assumptions that produced each result, including:
 
-Announce updated results and validation status accessibly without moving
-keyboard focus.
+Demand:
+- Estimated attendance
+- Weather outlook
+- Custom weather reduction
+- Event protection
+- Percentage expected to buy food
+- Other competing food vendors
+- Total vendor count
+- Even-split expected buyers
 
-Workspace actions
+Revenue:
+- Average order amount
+- Calculated or custom expected-sales method
+- Custom expected-sales amount when active
 
-Add:
+Food and payment costs:
+- Food and packaging cost method and value
+- Percentage of sales paid by card
+- Card-processing percentage
+- Fixed card-processing fee per transaction
 
-- Reset changes
-  - Restore every adjustable assumption and repeatable row to the initial
-    values used when the workspace opened.
-  - Recalculate the restored analysis.
+Labor:
+- Employee labor entries
+- Total employee labor cost
+- Owner labor pay
 
-- Start new analysis
-  - Return to a clean Event Inputs workflow.
-  - Do not alter Business Defaults.
+Event costs:
+- Travel
+- Parking
+- Permit
+- Generator or utility cost
+- Vendor or booking fee
+- Organizer commission
+- Named miscellaneous costs
 
-Do not add scenario saving, overwriting, duplication, naming, comparison, or
-database persistence yet. Those belong to later milestones.
+Profit target:
+- Target type
+- Target value
 
-Testing
+For repeatable labor and miscellaneous-cost entries:
 
-Add or update tests covering:
+- Provide a readable summary for each Scenario.
+- Preserve entry order.
+- Highlight the category when the ordered entries differ.
+- Do not attempt to infer that differently named rows represent the same cost.
 
-- A complete valid Event Inputs submission opening the workspace
-- Event identity appearing as read-only context
-- All adjustable assumption groups being available
-- Initial workspace results matching the existing calculation engine
-- Live changes to attendance and weather
-- Live changes to food-demand percentage and competing vendors
-- Live changes to average order value and custom sales
-- Live changes to all food-cost methods
-- Live changes to processing fees and organizer commission
-- Adding, removing, and editing labor rows
-- Adding, removing, and editing miscellaneous-cost rows
-- Owner labor pay and all fixed event costs
-- Profit-target changes
-- Break-even values and warnings updating with their dependencies
-- Conditional fields ignoring inactive values
-- Invalid edits preserving the latest valid results
-- Field errors clearing after correction
-- Reset restoring the complete initial baseline
-- Start-new-analysis behavior
-- Calculation requests creating no Event or Event Scenario records
-- Business Defaults remaining unchanged
-- Deterministic and accessible updating behavior
-- Responsive template structure where practical to verify
+Differences-only control
+
+Add a control labeled:
+
+“Show differences only”
+
+When active:
+
+- Hide assumption rows whose values are identical across every selected
+  Scenario.
+- Keep the principal financial-result summary visible.
+- Keep Event and Scenario identity visible.
+- Do not hide unavailable or warning information merely because it appears in
+  multiple Scenarios.
+
+Opening a Scenario
+
+Provide an “Open analysis” action for every compared Scenario.
+
+When selected:
+
+- Open the existing interactive Event Analysis workspace.
+- Load that saved Scenario as the active Scenario.
+- Use its saved assumptions as the Reset changes baseline.
+- Recalculate through the existing engine.
+- Begin with a clean workspace and no unsaved changes.
+- Do not create duplicate records.
+
+Reuse the existing unsaved-change navigation protection when comparison is
+entered from a dirty workspace.
+
+Layout and accessibility
+
+Create a functional, readable comparison layout.
+
+For wider windows:
+
+- Display selected Scenarios in aligned comparison columns.
+- Keep row labels clear.
+- Avoid losing the relationship between a value and its Scenario.
+
+For narrower windows:
+
+- Use readable stacked Scenario sections or another responsive structure.
+- Do not force the entire application page into horizontal scrolling.
+- Preserve logical keyboard and screen-reader order.
+
+Use proper table or semantic comparison structure where appropriate.
+
+Ensure:
+
+- Scenario-selection controls have accessible labels
+- Baseline changes are announced
+- Comparison validation is accessible
+- Highlights are conveyed through text, not color alone
+
+Do not perform final visual polish in this milestone.
+
+Empty and error states
+
+Support:
+
+- No saved Events
+- Only one saved Scenario
+- Fewer than two selected Scenarios
+- More than four attempted selections
+- A selected Scenario being deleted or missing before comparison loads
+- Saved assumptions that cannot be validated or calculated
+
+Provide clear next actions where possible.
+
+Persistence and data integrity
+
+- Comparison must not modify Events, Scenarios, Business Defaults, or ordered
+  child rows.
+- Do not save comparison selection sets.
+- Do not add stored calculation-result columns.
+- Do not delete, reset, or replace data/app.db.
+- Preserve unrelated customer data.
+
+Scope
+
+Do not implement:
+
+- Editing assumptions directly in comparison
+- Saving a Scenario from the comparison page
+- Automated recommendations
+- Scenario scoring
+- Charts requiring new dependencies
+- Search, filtering, or pagination
+- Dashboard behavior
+- Final UI and UX polish
 
 Do not add dependencies.
 Do not make unrelated changes.
 Do not commit.
 
+Testing
+
+Add or update tests covering:
+
+- Selecting two, three, and four Scenarios
+- Comparing Scenarios from one Event
+- Comparing Scenarios from different Events
+- Preventing duplicate selections
+- Fewer than two selection validation
+- More than four selection validation
+- First selected Scenario becoming the baseline
+- Changing the active baseline
+- Recalculating each Scenario from saved assumptions
+- Comparison creating or modifying no database records
+- Money and count differences
+- Percentage-point differences
+- Categorical assumption differences
+- Unavailable values
+- Highest-profit highlighting
+- Lowest-cost highlighting
+- Lowest-break-even highlighting
+- Accurate tie handling
+- Profit-target comparison
+- Warning differences
+- Complete assumption comparison
+- Ordered labor and miscellaneous-cost differences
+- Show differences only behavior
+- Opening each compared Scenario in the existing workspace
+- Opened workspace beginning clean
+- Missing and invalid Scenario handling
+- Empty and insufficient-data states
+- Business Defaults and saved Scenarios remaining unchanged
+- Accessible and responsive comparison structure where practical
+
 Afterward:
 
-1. Run focused workspace, route, and calculation tests.
+1. Run focused comparison, repository, route, and workspace tests.
 2. Run the full test suite.
 3. Run git diff --check.
-4. Summarize the customer-visible workflow in plain language.
-5. Explain how to manually test the workspace and live recalculation.
+4. Summarize the customer-visible comparison workflow.
+5. Explain how to manually test:
+   - Same-Event comparison
+   - Different-Event comparison
+   - Baseline changes
+   - Differences-only behavior
+   - Opening a Scenario
 6. Report the test results.
 
 Keep the response concise.
+

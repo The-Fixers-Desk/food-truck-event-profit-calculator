@@ -3,7 +3,11 @@ from decimal import Decimal, InvalidOperation
 
 from werkzeug.datastructures import MultiDict
 
-from app.calculations import calculate_event_demand, calculate_event_scenario
+from app.calculations import (
+    EventCalculationResult,
+    calculate_event_demand,
+    calculate_event_scenario,
+)
 from app.models import (
     AdditionalEventCost,
     BusinessDefaults,
@@ -249,6 +253,119 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def validate_and_calculate_event_analysis(
+    submitted: MultiDict,
+) -> tuple[
+    EventIdentity | None,
+    dict,
+    dict[str, str],
+    EventCalculationResult | None,
+]:
+    """Validate a complete event form and calculate its current analysis."""
+    identity, values, errors = validate_event_inputs(submitted)
+    if errors:
+        return identity, values, errors, None
+    result = calculate_event_scenario(_scenario_from_form_values(values))
+    return identity, values, errors, result
+
+
+def calculation_result_data(result: EventCalculationResult) -> dict:
+    """Return structured display data without changing calculation precision."""
+    target = result.profit_target_evaluation
+    return {
+        "weather_adjusted_attendance": _format_decimal(
+            result.weather_adjusted_attendance
+        ),
+        "total_expected_food_buyers": _format_decimal(
+            result.total_expected_food_buyers
+        ),
+        "total_food_vendors": str(result.total_food_vendors),
+        "estimated_business_buyers": _format_decimal(
+            result.estimated_business_buyers
+        ),
+        "expected_orders": _format_decimal(result.expected_orders),
+        "expected_sales": _format_decimal(result.expected_sales),
+        "food_and_packaging_cost": _format_decimal(
+            result.food_and_packaging_cost
+        ),
+        "percentage_card_processing_fee": _format_decimal(
+            result.percentage_card_processing_fee
+        ),
+        "fixed_card_processing_fees": _format_decimal(
+            result.fixed_card_processing_fees
+        ),
+        "organizer_commission": _format_decimal(
+            result.organizer_commission
+        ),
+        "variable_costs": _format_decimal(result.variable_costs),
+        "employee_labor_cost": _format_decimal(
+            result.employee_labor_cost
+        ),
+        "owner_labor_pay": _format_decimal(result.owner_labor_pay),
+        "travel_cost": _format_decimal(result.travel_cost),
+        "vendor_or_booking_fee": _format_decimal(
+            result.vendor_or_booking_fee
+        ),
+        "additional_event_costs": _format_decimal(
+            result.additional_event_costs
+        ),
+        "fixed_costs": _format_decimal(result.fixed_costs),
+        "total_event_cost": _format_decimal(result.total_event_cost),
+        "business_profit": _format_decimal(result.business_profit),
+        "profit_margin": (
+            None
+            if result.profit_margin is None
+            else _format_decimal(result.profit_margin * Decimal("100"))
+        ),
+        "break_even_sales": _format_decimal(result.break_even_sales),
+        "exact_break_even_customers": (
+            None
+            if result.exact_break_even_customers is None
+            else _format_decimal(result.exact_break_even_customers)
+        ),
+        "minimum_whole_break_even_customers": (
+            result.minimum_whole_break_even_customers
+        ),
+        "profitability_status": result.profitability_status,
+        "profit_target": (
+            None
+            if target is None
+            else {
+                "target_type": target.target_type,
+                "target_value": _format_decimal(
+                    target.target_value
+                    * (
+                        Decimal("100")
+                        if target.target_type == "profit_margin"
+                        else Decimal("1")
+                    )
+                ),
+                "actual_value": (
+                    None
+                    if target.actual_value is None
+                    else _format_decimal(
+                        target.actual_value
+                        * (
+                            Decimal("100")
+                            if target.target_type == "profit_margin"
+                            else Decimal("1")
+                        )
+                    )
+                ),
+                "is_met": target.is_met,
+            }
+        ),
+        "warnings": [
+            {
+                "code": warning.code,
+                "severity": warning.severity,
+                "message": warning.message,
+            }
+            for warning in result.warnings
+        ],
+    }
 
 
 def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:

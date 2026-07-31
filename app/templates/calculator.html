@@ -1,12 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Event Inputs | Food Truck Event Profit Calculator{% endblock %}
+{% block title %}{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %} | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page">
+<section class="page{% if workspace %} analysis-workspace-page{% endif %}">
   <header class="page-header">
     <p class="page-eyebrow">Event Analysis</p>
-    <h1>Event Inputs</h1>
+    <h1>{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %}</h1>
+    {% if workspace %}
+      <dl class="event-context" aria-label="Event identity">
+        <div><dt>Event</dt><dd>{{ event_identity.event_name }}</dd></div>
+        <div><dt>Date</dt><dd>{{ event_identity.event_date }}</dd></div>
+        <div><dt>Start time</dt><dd>{{ event_identity.start_time.strftime("%H:%M") }}</dd></div>
+        <div><dt>Location</dt><dd>{{ event_identity.location }}</dd></div>
+      </dl>
+    {% endif %}
     <p class="page-description">
-      Start by identifying the event you want to evaluate.
+      {% if workspace %}
+        Adjust the assumptions below to explore this event. Results update
+        automatically.
+      {% else %}
+        Start by identifying the event you want to evaluate.
+      {% endif %}
     </p>
     <p class="event-only-notice">
       Changes on this screen apply only to this event.
@@ -20,7 +33,17 @@
     </details>
   </header>
 
-  <form class="form-panel" method="post" novalidate>
+  {% if workspace %}
+    <div class="analysis-workspace">
+      <div class="workspace-assumptions">
+        <h2>Adjustable assumptions</h2>
+  {% endif %}
+  <form class="form-panel{% if workspace %} workspace-form{% endif %}"
+    method="post" novalidate
+    {% if workspace %}
+      data-workspace="true"
+      data-calculation-url="{{ url_for('main.recalculate_event_analysis') }}"
+    {% endif %}>
     {% for name in (
       "average_order_sale_amount", "food_cost_method",
       "average_food_cost_per_order", "food_cost_percentage",
@@ -33,7 +56,8 @@
         value="{{ form_values['baseline_' ~ name] }}" />
     {% endfor %}
 
-    <fieldset class="input-section">
+    <fieldset class="input-section"
+      {% if workspace %}hidden aria-hidden="true"{% endif %}>
       <legend>Event Identification</legend>
       <div class="form-grid">
         {% for name, label, type in (
@@ -727,9 +751,138 @@
     </fieldset>
 
     <div class="form-actions">
-      <button class="button" type="submit">Continue</button>
+      {% if workspace %}
+        <button class="button-secondary" id="reset-analysis"
+          type="button">Reset changes</button>
+        <a class="button" href="{{ url_for('main.calculator') }}">
+          Start new analysis
+        </a>
+      {% else %}
+        <button class="button" type="submit">Continue</button>
+      {% endif %}
     </div>
   </form>
+  {% if workspace %}
+      </div>
+      <aside class="analysis-results" aria-labelledby="analysis-results-title">
+        <h2 id="analysis-results-title">Analysis results</h2>
+        <p id="analysis-update-status" class="analysis-update-status"
+          aria-live="polite">Current analysis</p>
+
+        <section class="result-summary" aria-label="Key results">
+          {% for key, label, format in (
+            ("expected_sales", "Expected sales", "money"),
+            ("total_event_cost", "Total event cost", "money"),
+            ("business_profit", "Business profit", "money"),
+            ("profit_margin", "Profit margin", "percent")
+          ) %}
+            <div class="result-item result-item--key">
+              <span>{{ label }}</span>
+              <strong data-result-field="{{ key }}" data-format="{{ format }}">
+                {% if analysis[key] is none %}
+                  Not calculable
+                {% elif format == "money" %}
+                  ${{ analysis[key] }}
+                {% elif format == "percent" %}
+                  {{ analysis[key] }}%
+                {% else %}
+                  {{ analysis[key] }}
+                {% endif %}
+              </strong>
+            </div>
+          {% endfor %}
+        </section>
+
+        <section class="result-section">
+          <h3>Demand and revenue</h3>
+          {% for key, label in (
+            ("weather_adjusted_attendance", "Weather-adjusted attendance"),
+            ("total_expected_food_buyers", "Total expected food buyers"),
+            ("total_food_vendors", "Total food vendors"),
+            ("estimated_business_buyers", "Even-split buyers for you"),
+            ("expected_orders", "Expected orders")
+          ) %}
+            <div class="result-item">
+              <span>{{ label }}</span>
+              <strong data-result-field="{{ key }}">{{ analysis[key] }}</strong>
+            </div>
+          {% endfor %}
+        </section>
+
+        <section class="result-section">
+          <h3>Cost breakdown</h3>
+          {% for key, label in (
+            ("food_and_packaging_cost", "Food and packaging"),
+            ("percentage_card_processing_fee", "Percentage card fees"),
+            ("fixed_card_processing_fees", "Fixed card fees"),
+            ("organizer_commission", "Organizer commission"),
+            ("variable_costs", "Variable costs"),
+            ("employee_labor_cost", "Employee labor"),
+            ("owner_labor_pay", "Owner labor pay"),
+            ("travel_cost", "Travel"),
+            ("vendor_or_booking_fee", "Vendor or booking fee"),
+            ("additional_event_costs", "Other event costs"),
+            ("fixed_costs", "Fixed costs")
+          ) %}
+            <div class="result-item">
+              <span>{{ label }}</span>
+              <strong data-result-field="{{ key }}" data-format="money">
+                ${{ analysis[key] }}
+              </strong>
+            </div>
+          {% endfor %}
+        </section>
+
+        <section class="result-section">
+          <h3>Break-even and target</h3>
+          {% for key, label, format in (
+            ("break_even_sales", "Break-even sales", "money"),
+            ("exact_break_even_customers", "Exact break-even customers", ""),
+            ("minimum_whole_break_even_customers",
+             "Minimum whole break-even customers", "")
+          ) %}
+            <div class="result-item">
+              <span>{{ label }}</span>
+              <strong data-result-field="{{ key }}" data-format="{{ format }}">
+                {% if analysis[key] is none %}
+                  Not calculable
+                {% elif format == "money" %}
+                  ${{ analysis[key] }}
+                {% else %}
+                  {{ analysis[key] }}
+                {% endif %}
+              </strong>
+            </div>
+          {% endfor %}
+          <p id="profit-target-result">
+            {% if analysis.profit_target.is_met is none %}
+              Profit-target evaluation is not available.
+            {% elif analysis.profit_target.is_met %}
+              The selected profit target is met.
+            {% else %}
+              The selected profit target is not met.
+            {% endif %}
+          </p>
+        </section>
+
+        <section class="result-section" aria-labelledby="warnings-title">
+          <h3 id="warnings-title">Factual notices</h3>
+          <ul id="analysis-warnings" class="analysis-warnings">
+            {% for warning in analysis.warnings %}
+              <li data-warning-code="{{ warning.code }}"
+                data-severity="{{ warning.severity }}">
+                {{ warning.message }}
+              </li>
+            {% else %}
+              <li data-warning-code="none" data-severity="info">
+                No factual notices for the current assumptions.
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      </aside>
+    </div>
+  {% endif %}
 </section>
 <template id="event-employee-labor-template">
   <div class="labor-entry">

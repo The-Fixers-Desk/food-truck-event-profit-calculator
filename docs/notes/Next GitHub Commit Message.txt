@@ -2,20 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Revise demand model for shared food demand
-
-- Replace business-specific buyer percentage with expected food-purchase percentage
-- Calculate total expected food buyers across the event
-- Divide food demand among the customer and competing vendors
-- Use the equal-share buyer estimate for orders, revenue, and order-based costs
-- Add revised demand values to calculation results
-- Add factual break-even comparisons for shared food demand
-- Add the live Event Inputs demand indicator and preview endpoint
-- Preserve custom-sales behavior and existing business data
-- Update validation, migrations, fixtures, and automated tests
-
----------------------------------------------------------------------------------
-
 Build interactive Event Analysis workspace
 
 - Open the workspace after a valid Event Inputs submission
@@ -44,4 +30,34 @@ Add automatic initial saving and scenario version actions
 - Prevent duplicate Scenario names within the same Event
 - Protect all Event and Scenario writes with transactions
 - Add persistence, validation, versioning, and rollback tests
+
+---------------------------------------------------------------------------------
+
+Complete saved event and scenario management
+
+- Add a Saved Events screen grouped by Event and Scenario
+- Open saved Scenarios directly in the interactive analysis workspace
+- Recalculate results from persisted assumptions when loading
+- Support Event and Scenario renaming with validation
+- Support confirmed Scenario and Event deletion
+- Prevent deleting an Event’s final Scenario by itself
+- Protect unsaved workspace changes before navigation
+- Preserve ordered labor and miscellaneous-cost entries
+- Verify saved data, renames, deletions, and loading after restart
+- Add saved-work, persistence, route, and workspace tests
+
+---------------------------------------------------------------------------------
+
+Build complete event comparison workflow
+
+- Add selection for comparing two to four saved Scenarios
+- Support comparisons within one Event or across different Events
+- Recalculate every Scenario from its saved assumptions
+- Add baseline selection and factual value differences
+- Compare financial results, assumptions, targets, and warnings
+- Highlight highest profit, lowest cost, and lowest break-even requirement
+- Add Show differences only behavior
+- Open any compared Scenario in the interactive workspace
+- Add responsive, accessible comparison and error states
+- Add comparison, route, persistence, and workspace tests
 

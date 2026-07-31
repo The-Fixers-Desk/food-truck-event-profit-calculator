@@ -184,11 +184,13 @@ function updateSalesControls() {
 useCustomSales.addEventListener("click", () => {
   revenueMethod.value = "manual_sales";
   updateSalesControls();
+  scheduleWorkspaceCalculation();
 });
 
 useCalculatedSales.addEventListener("click", () => {
   revenueMethod.value = "attendance";
   updateSalesControls();
+  scheduleWorkspaceCalculation();
 });
 
 updateSalesControls();
@@ -237,6 +239,7 @@ confirmEventFoodMethod.addEventListener("click", () => {
   }
   confirmedEventFoodMethod.value = nextMethod;
   showConfirmedEventFoodMethod();
+  scheduleWorkspaceCalculation();
 });
 
 showConfirmedEventFoodMethod();
@@ -297,6 +300,7 @@ const addEmployeeLabor = document.querySelector("#add-event-labor");
 function connectEventLaborRemove(button) {
   button.addEventListener("click", () => {
     button.closest(".labor-entry").remove();
+    scheduleWorkspaceCalculation();
   });
 }
 
@@ -329,6 +333,7 @@ addEmployeeLabor.addEventListener("click", () => {
   const entry = employeeLaborTemplate.content.cloneNode(true);
   connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
   employeeLaborEntries.append(entry);
+  scheduleWorkspaceCalculation();
 });
 
 const profitTargetChoices = document.querySelectorAll(
@@ -403,6 +408,7 @@ const addAdditionalCost = document.querySelector("#add-additional-cost");
 function connectAdditionalCostRemove(button) {
   button.addEventListener("click", () => {
     button.closest(".additional-cost-entry").remove();
+    scheduleWorkspaceCalculation();
   });
 }
 
@@ -416,4 +422,238 @@ addAdditionalCost.addEventListener("click", () => {
     entry.querySelector(".remove-additional-cost"),
   );
   additionalCostEntries.append(entry);
+  scheduleWorkspaceCalculation();
 });
+
+const workspaceForm = document.querySelector("[data-workspace='true']");
+const workspaceStatus = document.querySelector("#analysis-update-status");
+const workspaceBaseline = workspaceForm
+  ? new FormData(workspaceForm)
+  : null;
+let workspaceTimer;
+let workspaceRequest;
+let workspaceRequestNumber = 0;
+
+function clearWorkspaceErrors() {
+  workspaceForm.querySelectorAll(".live-field-error").forEach(
+    (error) => error.remove(),
+  );
+  workspaceForm.querySelectorAll('[aria-invalid="true"]').forEach(
+    (input) => input.removeAttribute("aria-invalid"),
+  );
+}
+
+function showWorkspaceError(input, message) {
+  if (!input) {
+    return;
+  }
+  input.setAttribute("aria-invalid", "true");
+  const error = document.createElement("p");
+  error.className = "live-field-error";
+  error.textContent = message;
+  const container = input.closest(".form-field")
+    ?? input.closest("fieldset")
+    ?? input.parentElement;
+  container.append(error);
+}
+
+function showWorkspaceErrors(errors) {
+  clearWorkspaceErrors();
+  Object.entries(errors).forEach(([name, message]) => {
+    if (name === "employee_labor") {
+      employeeLaborEntries.querySelectorAll(".labor-entry").forEach(
+        (entry, index) => {
+          Object.entries(message[index] ?? {}).forEach(
+            ([field, rowMessage]) => {
+              const inputName = field === "hourly_rate"
+                ? "employee_labor_rate"
+                : "employee_labor_hours";
+              showWorkspaceError(
+                entry.querySelector(`[name="${inputName}"]`),
+                rowMessage,
+              );
+            },
+          );
+        },
+      );
+      return;
+    }
+    if (name === "additional_costs") {
+      additionalCostEntries
+        .querySelectorAll(".additional-cost-entry")
+        .forEach((entry, index) => {
+          Object.entries(message[index] ?? {}).forEach(
+            ([field, rowMessage]) => {
+              const inputName = field === "name"
+                ? "additional_cost_name"
+                : "additional_cost_amount";
+              showWorkspaceError(
+                entry.querySelector(`[name="${inputName}"]`),
+                rowMessage,
+              );
+            },
+          );
+        });
+      return;
+    }
+    showWorkspaceError(
+      workspaceForm.querySelector(`[name="${name}"]`),
+      message,
+    );
+  });
+}
+
+function displayResultValue(element, value) {
+  if (value === null || value === undefined) {
+    element.textContent = "Not calculable";
+  } else if (element.dataset.format === "money") {
+    element.textContent = `$${value}`;
+  } else if (element.dataset.format === "percent") {
+    element.textContent = `${value}%`;
+  } else {
+    element.textContent = value;
+  }
+}
+
+function updateWorkspaceResults(result) {
+  document.querySelectorAll("[data-result-field]").forEach((element) => {
+    displayResultValue(element, result[element.dataset.resultField]);
+  });
+  const targetResult = document.querySelector("#profit-target-result");
+  if (result.profit_target?.is_met === null) {
+    targetResult.textContent = "Profit-target evaluation is not available.";
+  } else if (result.profit_target?.is_met) {
+    targetResult.textContent = "The selected profit target is met.";
+  } else {
+    targetResult.textContent = "The selected profit target is not met.";
+  }
+  const warningList = document.querySelector("#analysis-warnings");
+  warningList.replaceChildren();
+  const warnings = result.warnings.length
+    ? result.warnings
+    : [{
+      code: "none",
+      severity: "info",
+      message: "No factual notices for the current assumptions.",
+    }];
+  warnings.forEach((warning) => {
+    const item = document.createElement("li");
+    item.dataset.warningCode = warning.code;
+    item.dataset.severity = warning.severity;
+    item.textContent = warning.message;
+    warningList.append(item);
+  });
+}
+
+async function recalculateWorkspace() {
+  const requestNumber = ++workspaceRequestNumber;
+  workspaceRequest?.abort();
+  workspaceRequest = new AbortController();
+  workspaceStatus.dataset.state = "updating";
+  workspaceStatus.textContent = "Updating analysis…";
+  try {
+    const response = await fetch(workspaceForm.dataset.calculationUrl, {
+      method: "POST",
+      body: new FormData(workspaceForm),
+      signal: workspaceRequest.signal,
+    });
+    const payload = await response.json();
+    if (requestNumber !== workspaceRequestNumber) {
+      return;
+    }
+    if (!payload.valid) {
+      showWorkspaceErrors(payload.errors);
+      workspaceStatus.dataset.state = "invalid";
+      workspaceStatus.textContent = payload.status;
+      return;
+    }
+    clearWorkspaceErrors();
+    updateWorkspaceResults(payload.result);
+    workspaceStatus.dataset.state = "valid";
+    workspaceStatus.textContent = payload.status;
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      workspaceStatus.dataset.state = "invalid";
+      workspaceStatus.textContent =
+        "Analysis could not update. Your entries have been preserved.";
+    }
+  }
+}
+
+function scheduleWorkspaceCalculation() {
+  if (!workspaceForm) {
+    return;
+  }
+  clearTimeout(workspaceTimer);
+  workspaceTimer = setTimeout(recalculateWorkspace, 300);
+}
+
+function restoreWorkspaceBaseline() {
+  const repeatableNames = new Set([
+    "employee_labor_rate",
+    "employee_labor_hours",
+    "baseline_employee_labor_rate",
+    "baseline_employee_labor_hours",
+    "additional_cost_name",
+    "additional_cost_amount",
+  ]);
+  workspaceForm.querySelectorAll("[name]").forEach((input) => {
+    if (repeatableNames.has(input.name)) {
+      return;
+    }
+    const values = workspaceBaseline.getAll(input.name);
+    if (input.type === "radio" || input.type === "checkbox") {
+      input.checked = values.includes(input.value);
+    } else {
+      input.value = values[0] ?? "";
+    }
+  });
+
+  employeeLaborEntries.replaceChildren();
+  const rates = workspaceBaseline.getAll("employee_labor_rate");
+  const hours = workspaceBaseline.getAll("employee_labor_hours");
+  rates.forEach((rate, index) => {
+    const fragment = employeeLaborTemplate.content.cloneNode(true);
+    const entry = fragment.querySelector(".labor-entry");
+    entry.querySelector('[name="employee_labor_rate"]').value = rate;
+    entry.querySelector('[name="employee_labor_hours"]').value =
+      hours[index] ?? "";
+    connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
+    connectLaborIndicator(entry);
+    employeeLaborEntries.append(fragment);
+  });
+
+  additionalCostEntries.replaceChildren();
+  const names = workspaceBaseline.getAll("additional_cost_name");
+  const amounts = workspaceBaseline.getAll("additional_cost_amount");
+  names.forEach((name, index) => {
+    const fragment = additionalCostTemplate.content.cloneNode(true);
+    const entry = fragment.querySelector(".additional-cost-entry");
+    entry.querySelector('[name="additional_cost_name"]').value = name;
+    entry.querySelector('[name="additional_cost_amount"]').value =
+      amounts[index] ?? "";
+    connectAdditionalCostRemove(
+      entry.querySelector(".remove-additional-cost"),
+    );
+    additionalCostEntries.append(fragment);
+  });
+
+  updateWeatherControls();
+  updateSalesControls();
+  showConfirmedEventFoodMethod();
+  updateEventProfitTarget();
+  clearWorkspaceErrors();
+  scheduleWorkspaceCalculation();
+}
+
+if (workspaceForm) {
+  workspaceForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+  });
+  workspaceForm.addEventListener("input", scheduleWorkspaceCalculation);
+  workspaceForm.addEventListener("change", scheduleWorkspaceCalculation);
+  document.querySelector("#reset-analysis").addEventListener(
+    "click",
+    restoreWorkspaceBaseline,
+  );
+}

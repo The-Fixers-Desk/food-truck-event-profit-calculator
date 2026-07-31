@@ -12,9 +12,10 @@ from app.business_defaults_form import defaults_to_form, validate_defaults_form
 from app.database import load_business_defaults, save_business_defaults
 from app.event_inputs_form import (
     blank_event_inputs_form,
+    calculation_result_data,
     calculate_demand_preview,
     protection_reductions,
-    validate_event_inputs,
+    validate_and_calculate_event_analysis,
     weather_allows_protection,
 )
 
@@ -25,8 +26,16 @@ main = Blueprint("main", __name__)
 def calculator():
     """Display the Event Inputs screen."""
     errors = {}
+    workspace = False
+    identity = None
+    analysis = None
     if request.method == "POST":
-        _, form_values, errors = validate_event_inputs(request.form)
+        identity, form_values, errors, result = (
+            validate_and_calculate_event_analysis(request.form)
+        )
+        if result is not None:
+            workspace = True
+            analysis = calculation_result_data(result)
     else:
         form_values = blank_event_inputs_form(load_business_defaults())
 
@@ -37,6 +46,9 @@ def calculator():
         errors=errors,
         protection_reductions=protection_reductions(form_values),
         show_event_protection=weather_allows_protection(form_values),
+        workspace=workspace,
+        event_identity=identity,
+        analysis=analysis,
     )
 
 
@@ -47,6 +59,32 @@ def demand_preview():
     if errors:
         return jsonify({"ready": False, "errors": errors})
     return jsonify({"ready": True, **preview})
+
+
+@main.post("/event-analysis/calculate")
+def recalculate_event_analysis():
+    """Validate and calculate current workspace assumptions without saving."""
+    _, _, errors, result = validate_and_calculate_event_analysis(
+        request.form
+    )
+    if errors:
+        return jsonify(
+            {
+                "valid": False,
+                "errors": errors,
+                "status": (
+                    "Results will update after the highlighted values "
+                    "are corrected."
+                ),
+            }
+        )
+    return jsonify(
+        {
+            "valid": True,
+            "result": calculation_result_data(result),
+            "status": "Analysis updated.",
+        }
+    )
 
 
 @main.route("/defaults", methods=("GET", "POST"))
