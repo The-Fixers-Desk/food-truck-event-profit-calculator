@@ -169,3 +169,29 @@ addEmployeeLabor.addEventListener("click", () => {
   connectEventLaborRemove(entry.querySelector(".remove-event-labor"));
   employeeLaborEntries.append(entry);
 });
+
+const additionalCostEntries = document.querySelector(
+  "#event-additional-cost-entries",
+);
+const additionalCostTemplate = document.querySelector(
+  "#event-additional-cost-template",
+);
+const addAdditionalCost = document.querySelector("#add-additional-cost");
+
+function connectAdditionalCostRemove(button) {
+  button.addEventListener("click", () => {
+    button.closest(".additional-cost-entry").remove();
+  });
+}
+
+additionalCostEntries
+  .querySelectorAll(".remove-additional-cost")
+  .forEach(connectAdditionalCostRemove);
+
+addAdditionalCost.addEventListener("click", () => {
+  const entry = additionalCostTemplate.content.cloneNode(true);
+  connectAdditionalCostRemove(
+    entry.querySelector(".remove-additional-cost"),
+  );
+  additionalCostEntries.append(entry);
+});

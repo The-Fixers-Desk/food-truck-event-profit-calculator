@@ -32,6 +32,11 @@ OPERATING_COST_FIELDS = (
     "permit_cost",
     "generator_utility_cost",
 )
+EVENT_FEE_FIELDS = (
+    "vendor_booking_fee",
+    "organizer_commission_percentage",
+    "fixed_card_processing_fee",
+)
 WEATHER_REDUCTIONS = {
     "favorable": Decimal("0"),
     "minor_concern": Decimal("5"),
@@ -56,11 +61,13 @@ def blank_event_inputs_form() -> dict:
             *FOOD_COST_FIELDS,
             *LABOR_FIELDS,
             *OPERATING_COST_FIELDS,
+            *EVENT_FEE_FIELDS,
         )
     }
     values["revenue_method"] = "attendance"
     values["food_cost_method_choice"] = "average_per_order"
     values["employee_labor"] = []
+    values["additional_costs"] = []
     return values
 
 
@@ -76,6 +83,7 @@ def validate_event_inputs(
             *FOOD_COST_FIELDS,
             *LABOR_FIELDS,
             *OPERATING_COST_FIELDS,
+            *EVENT_FEE_FIELDS,
         )
     }
     rates = submitted.getlist("employee_labor_rate")
@@ -90,6 +98,23 @@ def validate_event_inputs(
             ),
         }
         for index in range(max(len(rates), len(hours)))
+    ]
+    cost_names = submitted.getlist("additional_cost_name")
+    cost_amounts = submitted.getlist("additional_cost_amount")
+    values["additional_costs"] = [
+        {
+            "name": (
+                cost_names[index].strip()
+                if index < len(cost_names)
+                else ""
+            ),
+            "amount": (
+                cost_amounts[index].strip()
+                if index < len(cost_amounts)
+                else ""
+            ),
+        }
+        for index in range(max(len(cost_names), len(cost_amounts)))
     ]
     errors: dict[str, str] = {}
 
@@ -151,6 +176,8 @@ def validate_event_inputs(
     _validate_food_cost(values, errors)
     _validate_labor(values, errors)
     _validate_operating_costs(values, errors)
+    _validate_event_fees(values, errors)
+    _validate_additional_costs(values, errors)
 
     if errors:
         return None, values, errors
@@ -162,6 +189,49 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def _validate_event_fees(
+    values: dict,
+    errors: dict,
+) -> None:
+    for name, label in (
+        ("vendor_booking_fee", "Vendor or booking fee"),
+        (
+            "fixed_card_processing_fee",
+            "Fixed card-processing fee per card transaction",
+        ),
+    ):
+        if values[name]:
+            _money(values, errors, name, label)
+
+    if values["organizer_commission_percentage"]:
+        _percentage(
+            values,
+            errors,
+            "organizer_commission_percentage",
+            "Organizer commission or revenue share",
+        )
+
+
+def _validate_additional_costs(
+    values: dict,
+    errors: dict,
+) -> None:
+    cost_errors = []
+    for cost in values["additional_costs"]:
+        row_errors = {}
+        if not cost["name"]:
+            row_errors["name"] = "Cost name is required."
+        _positive_money(
+            cost,
+            row_errors,
+            "amount",
+            "Miscellaneous cost amount",
+        )
+        cost_errors.append(row_errors)
+    if any(cost_errors):
+        errors["additional_costs"] = cost_errors
 
 
 def _validate_operating_costs(

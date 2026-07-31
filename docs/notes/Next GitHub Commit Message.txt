@@ -1,14 +1,13 @@
 Next GitHub Commit Message
 
-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------
 
-Build labor cost section
+Complete remaining event cost inputs
 
-- Add the Labor costs section to Event Inputs
-- Support zero or more employee labor entries
-- Add hourly rate and combined paid-hours fields
-- Add employee labor add and remove controls
-- Add optional owner labor pay for the event
-- Keep owner pay separate from business profit
-- Preserve labor entries and values when validation fails
-- Add labor validation and automated tests
+- Add travel, parking, permit, and generator or utility cost fields
+- Add vendor or booking fee and organizer commission inputs
+- Add fixed card-processing fee per card transaction
+- Add ordered, removable miscellaneous cost entries
+- Preserve entered costs and rows when validation fails
+- Validate optional money fields, percentages, and named additional costs
+- Add focused form and route tests

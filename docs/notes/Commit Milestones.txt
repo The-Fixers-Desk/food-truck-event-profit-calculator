@@ -30,7 +30,7 @@ EVENT CALCULATOR — INPUTS
 ☑ Build event identification form
 ☑ Build revenue assumptions section
 ☑ Build food and supply cost section
-□ Build labor cost section
+☑ Build labor cost section
   Current task; leave unchanged.
 
 □ Complete remaining event cost inputs

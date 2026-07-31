@@ -196,7 +196,8 @@
   grid-column: 1 / -1;
 }
 
-.labor-entry {
+.labor-entry,
+.additional-cost-entry {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: var(--space-4);
@@ -250,6 +251,10 @@
   }
 
   .labor-entry {
+    grid-template-columns: 1fr;
+  }
+
+  .additional-cost-entry {
     grid-template-columns: 1fr;
   }
 

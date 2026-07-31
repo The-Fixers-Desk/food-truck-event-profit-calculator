@@ -372,6 +372,100 @@
       </div>
     </fieldset>
 
+    <fieldset class="input-section">
+      <legend>Event and payment fees</legend>
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label" for="vendor_booking_fee">
+            Vendor or booking fee ($)
+          </label>
+          <input class="form-input" id="vendor_booking_fee"
+            name="vendor_booking_fee" type="number" step="0.01"
+            value="{{ form_values.vendor_booking_fee }}"
+            {% if errors.get("vendor_booking_fee") %}
+              aria-invalid="true"
+            {% endif %} />
+          {% if errors.get("vendor_booking_fee") %}
+            <p class="field-error">{{ errors.vendor_booking_fee }}</p>
+          {% endif %}
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="organizer_commission_percentage">
+            Organizer commission or revenue share (%)
+          </label>
+          <input class="form-input" id="organizer_commission_percentage"
+            name="organizer_commission_percentage" type="number" step="0.01"
+            value="{{ form_values.organizer_commission_percentage }}"
+            {% if errors.get("organizer_commission_percentage") %}
+              aria-invalid="true"
+            {% endif %} />
+          <p class="form-hint">Percentage of total event sales.</p>
+          {% if errors.get("organizer_commission_percentage") %}
+            <p class="field-error">
+              {{ errors.organizer_commission_percentage }}
+            </p>
+          {% endif %}
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="fixed_card_processing_fee">
+            Fixed card-processing fee per card transaction ($)
+          </label>
+          <input class="form-input" id="fixed_card_processing_fee"
+            name="fixed_card_processing_fee" type="number" step="0.01"
+            value="{{ form_values.fixed_card_processing_fee }}"
+            {% if errors.get("fixed_card_processing_fee") %}
+              aria-invalid="true"
+            {% endif %} />
+          <p class="form-hint">
+            Charged once per card transaction, not once per event.
+          </p>
+          {% if errors.get("fixed_card_processing_fee") %}
+            <p class="field-error">
+              {{ errors.fixed_card_processing_fee }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="input-section">
+      <legend>Additional costs</legend>
+      <div id="event-additional-cost-entries">
+        {% for cost in form_values.additional_costs %}
+          {% set cost_errors = errors.get("additional_costs", []) %}
+          {% set row_errors = cost_errors[loop.index0]
+             if cost_errors|length > loop.index0 else {} %}
+          <div class="additional-cost-entry">
+            <div class="form-field">
+              <label class="form-label">Cost name</label>
+              <input class="form-input" name="additional_cost_name"
+                type="text" value="{{ cost.name }}" required
+                {% if row_errors.get("name") %}aria-invalid="true"{% endif %} />
+              {% if row_errors.get("name") %}
+                <p class="field-error">{{ row_errors.name }}</p>
+              {% endif %}
+            </div>
+            <div class="form-field">
+              <label class="form-label">Amount ($)</label>
+              <input class="form-input" name="additional_cost_amount"
+                type="number" step="0.01" value="{{ cost.amount }}" required
+                {% if row_errors.get("amount") %}
+                  aria-invalid="true"
+                {% endif %} />
+              {% if row_errors.get("amount") %}
+                <p class="field-error">{{ row_errors.amount }}</p>
+              {% endif %}
+            </div>
+            <button class="remove-additional-cost button-secondary"
+              type="button">Remove</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="button-secondary" id="add-additional-cost" type="button">
+        Add another cost
+      </button>
+    </fieldset>
+
     <div class="form-actions">
       <button class="button" type="submit">Continue</button>
     </div>
@@ -392,6 +486,23 @@
         step="any" required />
     </div>
     <button class="remove-event-labor button-secondary" type="button">
+      Remove
+    </button>
+  </div>
+</template>
+<template id="event-additional-cost-template">
+  <div class="additional-cost-entry">
+    <div class="form-field">
+      <label class="form-label">Cost name</label>
+      <input class="form-input" name="additional_cost_name" type="text"
+        required />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Amount ($)</label>
+      <input class="form-input" name="additional_cost_amount" type="number"
+        step="0.01" required />
+    </div>
+    <button class="remove-additional-cost button-secondary" type="button">
       Remove
     </button>
   </div>
