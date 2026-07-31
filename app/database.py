@@ -23,8 +23,43 @@ def apply_business_defaults_schema(connection: sqlite3.Connection) -> None:
 def apply_event_analysis_schema(connection: sqlite3.Connection) -> None:
     """Create saved-event tables without changing existing defaults tables."""
     connection.execute("PRAGMA foreign_keys = ON")
+    columns = {
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info(event_scenarios)"
+        ).fetchall()
+    }
+    if columns and "expected_food_buyer_basis_points" not in columns:
+        _upgrade_event_demand_columns(connection)
     schema = EVENT_ANALYSIS_SCHEMA_PATH.read_text(encoding="utf-8")
     connection.executescript(schema)
+
+
+def _upgrade_event_demand_columns(
+    database: sqlite3.Connection,
+) -> None:
+    """Add new demand fields without reinterpreting legacy saved demand."""
+    database.execute(
+        """
+        ALTER TABLE event_scenarios
+        ADD COLUMN other_competing_food_vendors INTEGER
+            CHECK (
+                other_competing_food_vendors IS NULL
+                OR other_competing_food_vendors >= 0
+            )
+        """
+    )
+    database.execute(
+        """
+        ALTER TABLE event_scenarios
+        ADD COLUMN expected_food_buyer_basis_points INTEGER
+            CHECK (
+                expected_food_buyer_basis_points IS NULL
+                OR expected_food_buyer_basis_points BETWEEN 0 AND 10000
+            )
+        """
+    )
+    database.commit()
 
 
 def get_database() -> sqlite3.Connection:

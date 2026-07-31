@@ -4,64 +4,216 @@ Next Codex Prompt
 
 Implement the milestone:
 
-Build travel and operating cost section.
+Build the interactive Event Analysis workspace.
 
-Use Event_Analysis_Structure_v0.1.md, the current Event Analysis domain models,
-and the existing Event Inputs form as the source of truth.
+The calculation engine, break-even analysis, factual warnings, revised shared
+food-demand model, and complete Event Inputs form are already implemented.
 
-Add a customer-facing section titled:
+Build the primary post-input experience in which financial results and
+adjustable scenario assumptions share the screen and every dependent result
+updates automatically.
 
-“Travel and operating costs”
+Initial workflow
 
-Add these optional fields:
+- After a valid Event Inputs submission, render the Event Analysis workspace
+  using the submitted values as the initial analysis.
+- Treat those initial values as the workspace baseline.
+- Do not create or update Event or Event Scenario database records.
+- Do not save the workspace state to Business Defaults.
+- Invalid Event Inputs submissions must continue displaying the existing input
+  form and validation errors rather than opening the workspace.
 
-- Travel cost ($)
-- Parking cost ($)
-- Permit cost ($)
-- Generator or utility cost ($)
+Event identity
 
-Behavior:
+Display these values in the workspace header as read-only context:
 
-- Every field is optional.
-- Travel cost is entered directly as a flat dollar amount.
-- Do not add mileage or vehicle-cost-per-mile calculations.
-- A blank field means no amount has been entered.
-- Preserve entered values when validation elsewhere fails.
+- Event name
+- Event date
+- Start time
+- Location
 
-Validation:
+Do not treat event identity as adjustable scenario filters in this milestone.
 
-- Values cannot be negative.
-- Money values may contain no more than two decimal places.
-- Invalid submissions must preserve all entered values.
-- Invalid submissions must not create Event or Event Scenario records.
+Adjustable assumptions
 
-Scope:
+Allow the customer to adjust all financial and demand assumptions without
+returning to the original Event Inputs form, including:
 
-- Do not copy values from Business Defaults yet.
-- Do not calculate total operating cost yet.
-- Do not add vendor fees, organizer commissions, fixed processing fees, or
-  miscellaneous-cost entries yet.
-- Do not save Events or Event Scenarios yet.
-- Do not build results behavior.
-- Do not add dependencies or unrelated changes.
-- Do not commit.
+Demand and revenue:
+- Estimated attendance
+- Weather outlook
+- Custom weather reduction when applicable
+- Event protection
+- Percentage of attendees expected to buy food
+- Other competing food vendors
+- Average order sale amount
+- Calculated-sales versus custom expected-sales behavior
 
-Add tests for:
+Food and payment costs:
+- Food and packaging cost method and matching value
+- Percentage of sales paid by card
+- Card-processing percentage
+- Fixed card-processing fee per card transaction
 
-- All four fields appearing
-- Every field being optional
-- Valid money entries
-- Negative and over-precision values being rejected
-- Preserving entered values after validation failure
-- No event or scenario records being saved
+Labor:
+- Zero or more employee labor entries
+- Hourly rate
+- Combined paid hours
+- Owner labor pay
+- Add and remove employee labor rows while preserving order
+
+Event costs and fees:
+- Travel
+- Parking
+- Permit
+- Generator or utility cost
+- Vendor or booking fee
+- Organizer commission
+- Zero or more named miscellaneous costs
+- Add and remove miscellaneous-cost rows while preserving order
+
+Profit target:
+- Profit target type
+- Matching profit amount or margin value
+
+Preserve the existing conditional field behavior. Hidden or inactive values
+must not affect calculations.
+
+Layout
+
+Create a functional two-column desktop workspace:
+
+1. Adjustable assumptions
+2. Analysis results
+
+Give the assumptions and results comparable visual importance.
+
+Keep the results column visible while scrolling where the supported window size
+makes that practical.
+
+On narrower layouts:
+
+- Place the key result summary before the assumption controls.
+- Avoid horizontal scrolling.
+- Preserve a clear reading and keyboard order.
+
+Do not perform the final visual-design milestone yet. Use the project’s
+existing functional and readable styling patterns.
+
+Results
+
+Display the current calculation-engine outputs, including:
+
+- Weather-adjusted attendance
+- Total expected food buyers
+- Total food vendors
+- Even-split estimated buyers for the customer
+- Expected orders
+- Expected sales
+- Variable costs
+- Fixed costs
+- Employee labor
+- Owner labor pay
+- Total event cost
+- Business profit
+- Profit margin
+- Break-even sales
+- Exact break-even customers
+- Minimum whole break-even customers
+- Profit-target evaluation
+- Structured factual warnings
+
+Include a readable cost breakdown using the existing calculation-result data.
+
+Clearly distinguish unavailable values from zero values.
+
+Live recalculation
+
+- Do not add a Calculate or Update Analysis button.
+- Recalculate automatically after relevant assumptions change.
+- Use a short debounce so ordinary typing does not create excessive requests.
+- Send the complete current workspace assumptions to an appropriate Flask
+  calculation endpoint.
+- Validate and calculate through the existing Python form/domain/calculation
+  logic.
+- Do not reproduce business formulas in JavaScript.
+- Return structured validation and result data suitable for updating the page.
+- Ensure an older request cannot overwrite the results of a newer request.
+
+Invalid live edits
+
+When current workspace values are invalid:
+
+- Preserve every entered value and repeatable row.
+- Display field-specific errors near the affected controls.
+- Keep displaying the most recent valid results rather than replacing them
+  with blank or misleading values.
+- Show a concise status explaining that results will update after the invalid
+  values are corrected.
+- Do not create Event or Event Scenario records.
+
+Updating state
+
+Display a modest updating indicator while a calculation request is pending.
+
+Announce updated results and validation status accessibly without moving
+keyboard focus.
+
+Workspace actions
+
+Add:
+
+- Reset changes
+  - Restore every adjustable assumption and repeatable row to the initial
+    values used when the workspace opened.
+  - Recalculate the restored analysis.
+
+- Start new analysis
+  - Return to a clean Event Inputs workflow.
+  - Do not alter Business Defaults.
+
+Do not add scenario saving, overwriting, duplication, naming, comparison, or
+database persistence yet. Those belong to later milestones.
+
+Testing
+
+Add or update tests covering:
+
+- A complete valid Event Inputs submission opening the workspace
+- Event identity appearing as read-only context
+- All adjustable assumption groups being available
+- Initial workspace results matching the existing calculation engine
+- Live changes to attendance and weather
+- Live changes to food-demand percentage and competing vendors
+- Live changes to average order value and custom sales
+- Live changes to all food-cost methods
+- Live changes to processing fees and organizer commission
+- Adding, removing, and editing labor rows
+- Adding, removing, and editing miscellaneous-cost rows
+- Owner labor pay and all fixed event costs
+- Profit-target changes
+- Break-even values and warnings updating with their dependencies
+- Conditional fields ignoring inactive values
+- Invalid edits preserving the latest valid results
+- Field errors clearing after correction
+- Reset restoring the complete initial baseline
+- Start-new-analysis behavior
+- Calculation requests creating no Event or Event Scenario records
+- Business Defaults remaining unchanged
+- Deterministic and accessible updating behavior
+- Responsive template structure where practical to verify
+
+Do not add dependencies.
+Do not make unrelated changes.
+Do not commit.
 
 Afterward:
 
-1. Run focused tests.
+1. Run focused workspace, route, and calculation tests.
 2. Run the full test suite.
 3. Run git diff --check.
-4. Summarize the visible behavior in plain language.
-5. Explain how to manually test the section.
+4. Summarize the customer-visible workflow in plain language.
+5. Explain how to manually test the workspace and live recalculation.
 6. Report the test results.
 
 Keep the response concise.

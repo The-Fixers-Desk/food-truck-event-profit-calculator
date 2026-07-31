@@ -75,8 +75,8 @@ Each Event Scenario also contains:
 Each Event Scenario contains:
 
 - **Estimated attendance**
-- **Number of competing food vendors**
-- **Expected percentage of attendees who buy from you**
+- **Other competing food vendors**
+- **Percentage of attendees expected to buy food**
 
 The customer-facing interface must use plain language. It must not use the term
 "capture rate."
@@ -138,14 +138,14 @@ This is the default method.
 The scenario stores:
 
 - Estimated attendance
-- Expected percentage of attendees who buy from you
+- Percentage of attendees expected to buy food
 - Average order sale amount
 
 Expected revenue is later calculated from:
 
 ```text
 Estimated attendance
-× Expected percentage of attendees who buy from you
+× Percentage of attendees expected to buy food
 × Average order sale amount
 ```
 

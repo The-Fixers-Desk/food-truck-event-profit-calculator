@@ -3,14 +3,27 @@ from decimal import Decimal, InvalidOperation
 
 from werkzeug.datastructures import MultiDict
 
-from app.models import BusinessDefaults, EventIdentity
+from app.calculations import calculate_event_demand, calculate_event_scenario
+from app.models import (
+    AdditionalEventCost,
+    BusinessDefaults,
+    DemandAssumptions,
+    EmployeeLaborEntry,
+    EventIdentity,
+    EventScenario,
+    FoodCostAssumptions,
+    PaymentAndOrganizerFees,
+    ProfitTarget,
+    RevenueAssumptions,
+    WeatherAssumptions,
+)
 
 
 IDENTITY_FIELDS = ("event_name", "event_date", "start_time", "location")
 REVENUE_FIELDS = (
     "estimated_attendance",
-    "competing_food_vendors",
-    "expected_buyer_percentage",
+    "other_competing_food_vendors",
+    "expected_food_buyer_percentage",
     "average_order_sale_amount",
     "weather_outlook",
     "custom_weather_reduction",
@@ -182,14 +195,14 @@ def validate_event_inputs(
     _whole_number(
         values,
         errors,
-        "competing_food_vendors",
-        "Number of competing food vendors",
+        "other_competing_food_vendors",
+        "Other competing food vendors",
     )
     _percentage(
         values,
         errors,
-        "expected_buyer_percentage",
-        "Expected buyer percentage",
+        "expected_food_buyer_percentage",
+        "Percentage expected to buy food",
     )
     _money(
         values,
@@ -236,6 +249,225 @@ def validate_event_inputs(
         location=values["location"],
     )
     return identity, values, errors
+
+
+def calculate_demand_preview(submitted: MultiDict) -> tuple[dict | None, dict]:
+    """Validate current demand inputs and calculate a read-only preview."""
+    values = {
+        name: submitted.get(name, "").strip()
+        for name in (
+            "estimated_attendance",
+            "other_competing_food_vendors",
+            "expected_food_buyer_percentage",
+            "weather_outlook",
+            "custom_weather_reduction",
+            "event_protection",
+        )
+    }
+    errors: dict[str, str] = {}
+    attendance = _whole_number(
+        values, errors, "estimated_attendance", "Estimated attendance"
+    )
+    other_vendors = _whole_number(
+        values,
+        errors,
+        "other_competing_food_vendors",
+        "Other competing food vendors",
+    )
+    food_buyer_percentage = _percentage(
+        values,
+        errors,
+        "expected_food_buyer_percentage",
+        "Percentage expected to buy food",
+    )
+    weather_reduction = _validate_weather(values, errors)
+    if (
+        weather_reduction is not None
+        and values["event_protection"] not in PROTECTION_FACTORS
+    ):
+        errors["event_protection"] = "Choose the event protection."
+    if errors:
+        return None, errors
+
+    result = calculate_event_demand(
+        DemandAssumptions(
+            estimated_attendance=attendance,
+            other_competing_food_vendors=other_vendors,
+            expected_food_buyer_percentage=(
+                food_buyer_percentage / Decimal("100")
+            ),
+        ),
+        WeatherAssumptions(
+            event_protection=values["event_protection"],
+            weather_outlook=values["weather_outlook"],
+            custom_weather_reduction=(
+                weather_reduction / Decimal("100")
+                if values["weather_outlook"] == "custom"
+                else None
+            ),
+        ),
+    )
+    preview = {
+        "weather_adjusted_attendance": _format_decimal(
+            result.weather_adjusted_attendance
+        ),
+        "total_expected_food_buyers": _format_decimal(
+            result.total_expected_food_buyers
+        ),
+        "total_food_vendors": result.total_food_vendors,
+        "equal_share_percentage": _format_decimal(
+            result.equal_share_percentage * Decimal("100")
+        ),
+        "estimated_business_buyers": _format_decimal(
+            result.estimated_business_buyers
+        ),
+    }
+
+    _, full_values, full_errors = validate_event_inputs(submitted)
+    for name in (*IDENTITY_FIELDS,):
+        full_errors.pop(name, None)
+    if not full_errors:
+        calculation = calculate_event_scenario(
+            _scenario_from_form_values(full_values)
+        )
+        if calculation.exact_break_even_customers is not None:
+            difference = (
+                calculation.exact_break_even_customers
+                - calculation.estimated_business_buyers
+            )
+            preview["exact_break_even_customers"] = _format_decimal(
+                calculation.exact_break_even_customers
+            )
+            if difference > 0:
+                preview["break_even_message"] = (
+                    f"The even-split estimate is "
+                    f"{_format_decimal(calculation.estimated_business_buyers)} "
+                    f"buyers, {_format_decimal(difference)} below the "
+                    f"{_format_decimal(calculation.exact_break_even_customers)} "
+                    f"break-even requirement."
+                )
+            else:
+                preview["break_even_message"] = (
+                    f"The even-split estimate meets or exceeds the "
+                    f"{_format_decimal(calculation.exact_break_even_customers)} "
+                    f"break-even customer requirement."
+                )
+    return preview, {}
+
+
+def _scenario_from_form_values(values: dict) -> EventScenario:
+    revenue = (
+        RevenueAssumptions(
+            "manual_sales",
+            expected_sales_amount=Decimal(values["expected_sales_amount"]),
+        )
+        if values["revenue_method"] == "manual_sales"
+        else RevenueAssumptions(
+            "attendance",
+            average_order_sale_amount=Decimal(
+                values["average_order_sale_amount"]
+            ),
+        )
+    )
+    food_values = {
+        "average_per_order": (
+            "average_cost_per_order",
+            "average_food_cost_per_order",
+        ),
+        "sales_percentage": (
+            "sales_percentage",
+            "food_cost_percentage",
+        ),
+        "manual_event_total": (
+            "manual_event_total",
+            "manual_food_cost_total",
+        ),
+    }
+    food_attribute, food_field = food_values[values["food_cost_method"]]
+    food_value = Decimal(values[food_field])
+    if food_attribute == "sales_percentage":
+        food_value /= Decimal("100")
+    food_cost = FoodCostAssumptions(
+        values["food_cost_method"],
+        **{food_attribute: food_value},
+    )
+    target = (
+        ProfitTarget(
+            "profit_amount",
+            minimum_profit_amount=Decimal(
+                values["minimum_profit_amount"]
+            ),
+        )
+        if values["profit_target_type"] == "profit_amount"
+        else ProfitTarget(
+            "profit_margin",
+            minimum_profit_margin=(
+                Decimal(values["minimum_profit_margin"])
+                / Decimal("100")
+            ),
+        )
+    )
+    additional_costs = [
+        AdditionalEventCost(cost["name"], Decimal(cost["amount"]))
+        for cost in values["additional_costs"]
+    ]
+    additional_costs.extend(
+        AdditionalEventCost(label, Decimal(values[field]))
+        for field, label in (
+            ("parking_cost", "Parking"),
+            ("permit_cost", "Permit"),
+            ("generator_utility_cost", "Generator or utility cost"),
+        )
+        if values[field]
+    )
+    return EventScenario(
+        scenario_name="Demand preview",
+        demand=DemandAssumptions(
+            int(values["estimated_attendance"]),
+            int(values["other_competing_food_vendors"]),
+            Decimal(values["expected_food_buyer_percentage"])
+            / Decimal("100"),
+        ),
+        weather=WeatherAssumptions(
+            values["event_protection"],
+            values["weather_outlook"],
+            (
+                Decimal(values["custom_weather_reduction"])
+                / Decimal("100")
+                if values["weather_outlook"] == "custom"
+                else None
+            ),
+        ),
+        revenue=revenue,
+        food_cost=food_cost,
+        fees=PaymentAndOrganizerFees(
+            Decimal(values["card_sales_percentage"]) / Decimal("100"),
+            Decimal(values["card_processing_percentage"]) / Decimal("100"),
+            _optional_decimal(values["vendor_booking_fee"]),
+            _optional_decimal(values["fixed_card_processing_fee"]),
+            (
+                Decimal(values["organizer_commission_percentage"])
+                / Decimal("100")
+                if values["organizer_commission_percentage"]
+                else None
+            ),
+        ),
+        employee_labor=tuple(
+            EmployeeLaborEntry(
+                Decimal(entry["hourly_rate"]),
+                Decimal(entry["total_hours_paid"]),
+            )
+            for entry in values["employee_labor"]
+        ),
+        owner_labor_pay=_optional_decimal(values["owner_labor_pay"]),
+        travel_cost=_optional_decimal(values["travel_cost"]),
+        additional_costs=tuple(additional_costs),
+        profit_target=target,
+    )
+
+
+def _optional_decimal(value: str) -> Decimal:
+    return Decimal(value) if value else Decimal("0")
 
 
 def _apply_business_defaults(

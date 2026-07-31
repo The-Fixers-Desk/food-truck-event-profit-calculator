@@ -1,9 +1,18 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from app.business_defaults_form import defaults_to_form, validate_defaults_form
 from app.database import load_business_defaults, save_business_defaults
 from app.event_inputs_form import (
     blank_event_inputs_form,
+    calculate_demand_preview,
     protection_reductions,
     validate_event_inputs,
     weather_allows_protection,
@@ -29,6 +38,15 @@ def calculator():
         protection_reductions=protection_reductions(form_values),
         show_event_protection=weather_allows_protection(form_values),
     )
+
+
+@main.post("/event-inputs/demand-preview")
+def demand_preview():
+    """Return a calculation-backed shared-demand preview without saving."""
+    preview, errors = calculate_demand_preview(request.form)
+    if errors:
+        return jsonify({"ready": False, "errors": errors})
+    return jsonify({"ready": True, **preview})
 
 
 @main.route("/defaults", methods=("GET", "POST"))

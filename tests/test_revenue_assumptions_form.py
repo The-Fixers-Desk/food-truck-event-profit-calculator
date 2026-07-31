@@ -10,8 +10,8 @@ def valid_event_inputs() -> dict[str, str]:
         "start_time": "11:00",
         "location": "Town Square",
         "estimated_attendance": "1000",
-        "competing_food_vendors": "5",
-        "expected_buyer_percentage": "10",
+        "other_competing_food_vendors": "5",
+        "expected_food_buyer_percentage": "10",
         "average_order_sale_amount": "15.00",
         "weather_outlook": "moderate_adverse",
         "custom_weather_reduction": "",
@@ -37,11 +37,17 @@ def test_revenue_assumptions_fields_and_preview_are_present(client):
 
     assert "Revenue Assumptions" in page
     assert "Estimated attendance" in page
-    assert "Number of competing food vendors" in page
-    assert "Expected percentage of attendees who buy from you" in page
+    assert "Other competing food vendors" in page
+    assert "Do not include your own business." in page
+    assert "Percentage of attendees expected to buy food" in page
     assert "Average order sale amount ($)" in page
     assert "Estimated sales preview" in page
     assert "Enter a custom expected sales amount" in page
+    assert "Early demand estimate" in page
+    assert "Total food vendors, including you" in page
+    assert "Expected buyers per vendor at an even split" in page
+    script = client.get("/static/js/event_inputs.js").data.decode()
+    assert "/event-inputs/demand-preview" in script
 
 
 def test_about_estimates_is_collapsed_and_can_be_toggled(client):
@@ -184,14 +190,24 @@ def test_calculated_estimate_state_clears_hidden_custom_sales(client):
             b"Estimated attendance must be a whole number.",
         ),
         (
-            "competing_food_vendors",
+            "other_competing_food_vendors",
             "-1",
-            b"Number of competing food vendors cannot be negative.",
+            b"Other competing food vendors cannot be negative.",
         ),
         (
-            "expected_buyer_percentage",
+            "expected_food_buyer_percentage",
             "101",
-            b"Expected buyer percentage must be between 0 and 100.",
+            b"Percentage expected to buy food must be between 0 and 100.",
+        ),
+        (
+            "expected_food_buyer_percentage",
+            "10.001",
+            b"Percentage expected to buy food can have at most 2 decimal places.",
+        ),
+        (
+            "other_competing_food_vendors",
+            "1.5",
+            b"Other competing food vendors must be a whole number.",
         ),
         (
             "average_order_sale_amount",
@@ -211,3 +227,106 @@ def test_revenue_validation_preserves_input(
     assert expected_error in response.data
     assert f'value="{invalid_value}"'.encode() in response.data
     assert b'value="Summer Festival"' in response.data
+
+
+@pytest.mark.parametrize("percentage", ("0", "100"))
+def test_food_buyer_percentage_inclusive_bounds_preview(client, percentage):
+    form_data = valid_event_inputs()
+    form_data["expected_food_buyer_percentage"] = percentage
+
+    response = client.post(
+        "/event-inputs/demand-preview", data=form_data
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ready"] is True
+
+
+def test_demand_preview_uses_weather_and_includes_customer_vendor(client):
+    response = client.post(
+        "/event-inputs/demand-preview",
+        data=valid_event_inputs(),
+    )
+
+    preview = response.get_json()
+    assert preview["ready"] is True
+    assert preview["weather_adjusted_attendance"] == "850"
+    assert preview["total_expected_food_buyers"] == "85"
+    assert preview["total_food_vendors"] == 6
+    assert preview["equal_share_percentage"].startswith(
+        "16.66666666666666666666666667"
+    )
+    assert preview["estimated_business_buyers"].startswith(
+        "14.16666666666666666666666667"
+    )
+
+
+def test_demand_preview_allows_zero_other_vendors(client):
+    form_data = valid_event_inputs()
+    form_data["other_competing_food_vendors"] = "0"
+
+    preview = client.post(
+        "/event-inputs/demand-preview", data=form_data
+    ).get_json()
+
+    assert preview["ready"] is True
+    assert preview["total_food_vendors"] == 1
+    assert preview["estimated_business_buyers"] == "85"
+
+
+def test_invalid_demand_preview_is_safe_and_does_not_save(client, app):
+    form_data = valid_event_inputs()
+    form_data["expected_food_buyer_percentage"] = ""
+
+    response = client.post(
+        "/event-inputs/demand-preview", data=form_data
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ready"] is False
+    with app.app_context():
+        from app.database import get_database
+
+        database = get_database()
+        assert database.execute(
+            "SELECT COUNT(*) FROM events"
+        ).fetchone()[0] == 0
+        assert database.execute(
+            "SELECT COUNT(*) FROM event_scenarios"
+        ).fetchone()[0] == 0
+
+
+def test_demand_preview_adds_break_even_comparison_when_costs_are_ready(
+    client,
+):
+    form_data = valid_event_inputs()
+    form_data.update(
+        {
+            "food_cost_method_choice": "sales_percentage",
+            "food_cost_method": "sales_percentage",
+            "average_food_cost_per_order": "",
+            "food_cost_percentage": "30",
+            "manual_food_cost_total": "",
+            "owner_labor_pay": "",
+            "travel_cost": "",
+            "parking_cost": "",
+            "permit_cost": "",
+            "generator_utility_cost": "",
+            "card_sales_percentage": "80",
+            "card_processing_percentage": "3",
+            "vendor_booking_fee": "",
+            "organizer_commission_percentage": "",
+            "fixed_card_processing_fee": "",
+            "profit_target_type": "profit_amount",
+            "minimum_profit_amount": "300",
+            "minimum_profit_margin": "",
+        }
+    )
+
+    preview = client.post(
+        "/event-inputs/demand-preview", data=form_data
+    ).get_json()
+
+    assert preview["ready"] is True
+    assert preview["exact_break_even_customers"].startswith("4.59")
+    assert "meets or exceeds" in preview["break_even_message"]

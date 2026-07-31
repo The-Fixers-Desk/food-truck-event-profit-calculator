@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_CEILING
 
-from app.models import EventScenario
+from app.models import DemandAssumptions, EventScenario, WeatherAssumptions
 
 
 ZERO = Decimal("0")
@@ -39,13 +39,28 @@ class CalculationWarning:
 
 
 @dataclass(frozen=True)
+class DemandCalculationResult:
+    selected_weather_reduction: Decimal
+    final_weather_reduction: Decimal
+    weather_adjusted_attendance: Decimal
+    total_expected_food_buyers: Decimal
+    total_food_vendors: int
+    equal_share_percentage: Decimal
+    estimated_business_buyers: Decimal
+    expected_orders: Decimal
+
+
+@dataclass(frozen=True)
 class EventCalculationResult:
     """Calculated scenario values before any display rounding."""
 
-    expected_customers_before_weather: Decimal
     selected_weather_reduction: Decimal
     final_weather_reduction: Decimal
-    weather_adjusted_expected_customers: Decimal
+    weather_adjusted_attendance: Decimal
+    total_expected_food_buyers: Decimal
+    total_food_vendors: int
+    equal_share_percentage: Decimal
+    estimated_business_buyers: Decimal
     expected_orders: Decimal
     expected_sales: Decimal
 
@@ -71,7 +86,6 @@ class EventCalculationResult:
     break_even_sales: Decimal
     exact_break_even_customers: Decimal | None
     minimum_whole_break_even_customers: int | None
-    weather_adjusted_attendance: Decimal
     profitability_status: str
     profit_target_evaluation: ProfitTargetEvaluation | None
     warnings: tuple[CalculationWarning, ...]
@@ -81,21 +95,11 @@ def calculate_event_scenario(
     scenario: EventScenario,
 ) -> EventCalculationResult:
     """Calculate financial outcomes for one complete event scenario."""
-    selected_weather_reduction = _selected_weather_reduction(scenario)
-    final_weather_reduction = (
-        selected_weather_reduction
-        * PROTECTION_FACTORS[scenario.weather.event_protection]
+    demand = calculate_event_demand(
+        scenario.demand,
+        scenario.weather,
     )
-
-    expected_customers_before_weather = (
-        Decimal(scenario.demand.estimated_attendance)
-        * scenario.demand.expected_buyer_percentage
-    )
-    weather_adjusted_expected_customers = (
-        expected_customers_before_weather
-        * (ONE - final_weather_reduction)
-    )
-    expected_orders = weather_adjusted_expected_customers
+    expected_orders = demand.expected_orders
 
     if scenario.revenue.method == "manual_sales":
         expected_sales = scenario.revenue.expected_sales_amount
@@ -188,10 +192,6 @@ def calculate_event_scenario(
             )
         )
 
-    weather_adjusted_attendance = (
-        Decimal(scenario.demand.estimated_attendance)
-        * (ONE - final_weather_reduction)
-    )
     profitability_status = (
         "estimated_loss"
         if business_profit < ZERO
@@ -211,17 +211,18 @@ def calculate_event_scenario(
         minimum_whole_break_even_customers=(
             minimum_whole_break_even_customers
         ),
-        weather_adjusted_attendance=weather_adjusted_attendance,
+        total_expected_food_buyers=demand.total_expected_food_buyers,
         profit_target_evaluation=profit_target_evaluation,
     )
 
     return EventCalculationResult(
-        expected_customers_before_weather=expected_customers_before_weather,
-        selected_weather_reduction=selected_weather_reduction,
-        final_weather_reduction=final_weather_reduction,
-        weather_adjusted_expected_customers=(
-            weather_adjusted_expected_customers
-        ),
+        selected_weather_reduction=demand.selected_weather_reduction,
+        final_weather_reduction=demand.final_weather_reduction,
+        weather_adjusted_attendance=demand.weather_adjusted_attendance,
+        total_expected_food_buyers=demand.total_expected_food_buyers,
+        total_food_vendors=demand.total_food_vendors,
+        equal_share_percentage=demand.equal_share_percentage,
+        estimated_business_buyers=demand.estimated_business_buyers,
         expected_orders=expected_orders,
         expected_sales=expected_sales,
         food_and_packaging_cost=food_and_packaging_cost,
@@ -245,19 +246,53 @@ def calculate_event_scenario(
         minimum_whole_break_even_customers=(
             minimum_whole_break_even_customers
         ),
-        weather_adjusted_attendance=weather_adjusted_attendance,
         profitability_status=profitability_status,
         profit_target_evaluation=profit_target_evaluation,
         warnings=warnings,
     )
 
 
+def calculate_event_demand(
+    demand: DemandAssumptions,
+    weather: WeatherAssumptions,
+) -> DemandCalculationResult:
+    """Calculate weather-adjusted shared food demand without rounding."""
+    selected_weather_reduction = _selected_weather_reduction(weather)
+    final_weather_reduction = (
+        selected_weather_reduction
+        * PROTECTION_FACTORS[weather.event_protection]
+    )
+    weather_adjusted_attendance = (
+        Decimal(demand.estimated_attendance)
+        * (ONE - final_weather_reduction)
+    )
+    total_expected_food_buyers = (
+        weather_adjusted_attendance
+        * demand.expected_food_buyer_percentage
+    )
+    total_food_vendors = demand.other_competing_food_vendors + 1
+    equal_share_percentage = ONE / Decimal(total_food_vendors)
+    estimated_business_buyers = (
+        total_expected_food_buyers / Decimal(total_food_vendors)
+    )
+    return DemandCalculationResult(
+        selected_weather_reduction=selected_weather_reduction,
+        final_weather_reduction=final_weather_reduction,
+        weather_adjusted_attendance=weather_adjusted_attendance,
+        total_expected_food_buyers=total_expected_food_buyers,
+        total_food_vendors=total_food_vendors,
+        equal_share_percentage=equal_share_percentage,
+        estimated_business_buyers=estimated_business_buyers,
+        expected_orders=estimated_business_buyers,
+    )
+
+
 def _selected_weather_reduction(
-    scenario: EventScenario,
+    weather: WeatherAssumptions,
 ) -> Decimal:
-    if scenario.weather.weather_outlook == "custom":
-        return scenario.weather.custom_weather_reduction
-    return WEATHER_REDUCTIONS[scenario.weather.weather_outlook]
+    if weather.weather_outlook == "custom":
+        return weather.custom_weather_reduction
+    return WEATHER_REDUCTIONS[weather.weather_outlook]
 
 
 def _food_cost(
@@ -317,7 +352,7 @@ def _build_warnings(
     expected_orders: Decimal,
     exact_break_even_customers: Decimal | None,
     minimum_whole_break_even_customers: int | None,
-    weather_adjusted_attendance: Decimal,
+    total_expected_food_buyers: Decimal,
     profit_target_evaluation: ProfitTargetEvaluation | None,
 ) -> tuple[CalculationWarning, ...]:
     warnings = []
@@ -352,23 +387,33 @@ def _build_warnings(
         exact_break_even_customers is not None
         and expected_orders < exact_break_even_customers
     ):
+        difference = exact_break_even_customers - expected_orders
         warnings.append(
             CalculationWarning(
-                "expected_customers_below_break_even",
+                "even_split_buyers_below_break_even",
                 "warning",
-                "Expected customers are below the break-even customer count.",
+                (
+                    f"The even-split estimate is {expected_orders} buyers, "
+                    f"below the break-even requirement of "
+                    f"{exact_break_even_customers} by {difference}."
+                ),
             )
         )
     if (
         minimum_whole_break_even_customers is not None
         and Decimal(minimum_whole_break_even_customers)
-        > weather_adjusted_attendance
+        > total_expected_food_buyers
     ):
         warnings.append(
             CalculationWarning(
-                "break_even_exceeds_available_attendance",
+                "break_even_exceeds_all_expected_food_demand",
                 "critical",
-                "Break-even customers exceed weather-adjusted attendance.",
+                (
+                    f"Break-even requires "
+                    f"{minimum_whole_break_even_customers} customers, more "
+                    f"than all {total_expected_food_buyers} expected food "
+                    f"buyers."
+                ),
             )
         )
     if profit_margin is None:
@@ -386,7 +431,7 @@ def _build_warnings(
                 "info",
                 (
                     "Custom expected sales are active; order-based costs and "
-                    "card transactions still use the attendance-based "
+                    "card transactions still use the shared-demand "
                     "expected order estimate."
                 ),
             )

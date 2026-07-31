@@ -1,14 +1,47 @@
 Next GitHub Commit Message
 
------------------------------------------------------------
+---------------------------------------------------------------------------------
 
-Extend calculation engine with break-even analysis
+Revise demand model for shared food demand
 
-- Calculate break-even sales from the scenario’s current total event cost
-- Calculate exact and minimum whole break-even customers
-- Include owner labor pay in break-even costs
-- Evaluate profit amount and profit margin targets
-- Add structured factual profitability and assumption warnings
-- Handle zero sales and unavailable break-even values safely
-- Preserve exact Decimal calculations
-- Add focused unit tests and manual examples
+- Replace business-specific buyer percentage with expected food-purchase percentage
+- Calculate total expected food buyers across the event
+- Divide food demand among the customer and competing vendors
+- Use the equal-share buyer estimate for orders, revenue, and order-based costs
+- Add revised demand values to calculation results
+- Add factual break-even comparisons for shared food demand
+- Add the live Event Inputs demand indicator and preview endpoint
+- Preserve custom-sales behavior and existing business data
+- Update validation, migrations, fixtures, and automated tests
+
+---------------------------------------------------------------------------------
+
+Build interactive Event Analysis workspace
+
+- Open the workspace after a valid Event Inputs submission
+- Display event identity as read-only context
+- Place adjustable assumptions and financial results side by side
+- Support live changes across demand, revenue, costs, labor, fees, and targets
+- Recalculate through the existing Python calculation engine
+- Update break-even values, profit-target status, and warnings automatically
+- Preserve the latest valid results during invalid edits
+- Add accessible updating and validation states
+- Add Reset changes and Start new analysis actions
+- Keep Events, Scenarios, and Business Defaults unchanged
+- Add focused workspace, route, calculation, and interaction tests
+
+---------------------------------------------------------------------------------
+
+Add automatic initial saving and scenario version actions
+
+- Save each valid Event Inputs submission as a new Event
+- Create an Original estimate Scenario before opening the workspace
+- Persist complete scenario assumptions and ordered cost rows
+- Add one Save action for workspace changes
+- Default Save to creating a new Scenario
+- Allow deliberate overwriting of the active Scenario
+- Track unsaved changes and update the reset baseline after saving
+- Prevent duplicate Scenario names within the same Event
+- Protect all Event and Scenario writes with transactions
+- Add persistence, validation, versioning, and rollback tests
+

@@ -36,8 +36,8 @@ def valid_scenario_values(event_id: int, name="Original estimate") -> dict:
         "scenario_name": name,
         "notes": None,
         "estimated_attendance": 1000,
-        "competing_food_vendors": 5,
-        "expected_buyer_basis_points": 1000,
+        "other_competing_food_vendors": 5,
+        "expected_food_buyer_basis_points": 1000,
         "event_protection": "covered_reliable_seating",
         "weather_outlook": "minor_concern",
         "custom_weather_reduction_basis_points": None,
@@ -66,7 +66,7 @@ def insert_scenario(connection, values: dict) -> int:
         """
         INSERT INTO event_scenarios (
             event_id, scenario_name, notes, estimated_attendance,
-            competing_food_vendors, expected_buyer_basis_points,
+            other_competing_food_vendors, expected_food_buyer_basis_points,
             event_protection, weather_outlook,
             custom_weather_reduction_basis_points, revenue_method,
             average_order_sale_amount_cents, expected_sales_amount_cents,
@@ -83,7 +83,7 @@ def insert_scenario(connection, values: dict) -> int:
         )
         VALUES (
             :event_id, :scenario_name, :notes, :estimated_attendance,
-            :competing_food_vendors, :expected_buyer_basis_points,
+            :other_competing_food_vendors, :expected_food_buyer_basis_points,
             :event_protection, :weather_outlook,
             :custom_weather_reduction_basis_points, :revenue_method,
             :average_order_sale_amount_cents, :expected_sales_amount_cents,
@@ -124,6 +124,8 @@ def test_saved_event_tables_and_important_columns_exist(connection):
     }
     assert {
         "event_id",
+        "other_competing_food_vendors",
+        "expected_food_buyer_basis_points",
         "revenue_method",
         "food_cost_method",
         "owner_labor_pay_cents",
@@ -226,7 +228,7 @@ def test_owner_only_scenario_allows_zero_child_rows(connection):
     "changes",
     [
         {"estimated_attendance": -1},
-        {"expected_buyer_basis_points": 10001},
+        {"expected_food_buyer_basis_points": 10001},
         {"event_protection": "unknown"},
         {"weather_outlook": "custom"},
         {
@@ -381,6 +383,43 @@ def test_event_schema_initialization_is_repeatable(connection):
     assert connection.execute(
         "SELECT COUNT(*) FROM events"
     ).fetchone()[0] == 0
+
+
+def test_legacy_demand_percentage_is_preserved_but_not_reinterpreted():
+    database = sqlite3.connect(":memory:")
+    apply_event_analysis_schema(database)
+    event_id = insert_event(database)
+    scenario_id = insert_scenario(
+        database, valid_scenario_values(event_id)
+    )
+    database.execute(
+        """
+        ALTER TABLE event_scenarios
+        RENAME COLUMN other_competing_food_vendors
+        TO competing_food_vendors
+        """
+    )
+    database.execute(
+        """
+        ALTER TABLE event_scenarios
+        RENAME COLUMN expected_food_buyer_basis_points
+        TO expected_buyer_basis_points
+        """
+    )
+
+    apply_event_analysis_schema(database)
+
+    row = database.execute(
+        """
+        SELECT competing_food_vendors, expected_buyer_basis_points,
+               other_competing_food_vendors,
+               expected_food_buyer_basis_points
+        FROM event_scenarios WHERE id = ?
+        """,
+        (scenario_id,),
+    ).fetchone()
+    assert row == (5, 1000, None, None)
+    database.close()
 
 
 def test_event_schema_does_not_change_existing_business_defaults():

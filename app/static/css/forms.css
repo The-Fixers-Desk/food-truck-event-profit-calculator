@@ -130,6 +130,39 @@
   border-radius: var(--radius-small);
 }
 
+.demand-preview {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-background);
+  border-radius: var(--radius-small);
+}
+
+.demand-preview h2 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+}
+
+.demand-preview p {
+  margin: var(--space-2) 0 0;
+}
+
+.demand-preview dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.demand-preview dt {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.demand-preview dd {
+  margin: 0;
+  font-weight: 700;
+}
+
 .sales-preview h2 {
   margin: 0 0 var(--space-2);
   font-family: var(--font-heading);

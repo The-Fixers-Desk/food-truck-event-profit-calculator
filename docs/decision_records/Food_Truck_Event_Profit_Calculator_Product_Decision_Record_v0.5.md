@@ -250,7 +250,11 @@ Event identity consists of event name, event date, start time, and location. V1 
 
 ## FTC-PDR-040
 
-The event model records the number of competing food vendors, estimated attendance, and the expected percentage of attendees who buy from the customer's truck. Customer-facing wording must not use the term 'capture rate.'
+The event model records other competing food vendors, estimated attendance, and
+the percentage of attendees expected to buy food. The competitor count excludes
+the customer's own business. Expected food buyers are divided by the total food
+vendor count, including the customer, to provide an even-split estimate.
+Customer-facing wording must not use the term 'capture rate.'
 
 ---
 

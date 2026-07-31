@@ -5,6 +5,7 @@ import pytest
 
 from app.calculations import (
     CalculationWarning,
+    calculate_event_demand,
     calculate_event_scenario,
 )
 from app.models import (
@@ -23,7 +24,7 @@ from app.models import (
 def scenario() -> EventScenario:
     return EventScenario(
         scenario_name="Original estimate",
-        demand=DemandAssumptions(1000, 5, Decimal("0.10")),
+        demand=DemandAssumptions(1000, 0, Decimal("0.10")),
         weather=WeatherAssumptions("fully_outdoors", "favorable"),
         revenue=RevenueAssumptions(
             "attendance", average_order_sale_amount=Decimal("10")
@@ -89,7 +90,10 @@ def test_every_weather_and_protection_combination(
 
     assert result.selected_weather_reduction == selected_reduction
     assert result.final_weather_reduction == selected_reduction * factor
-    assert result.weather_adjusted_expected_customers == (
+    assert result.weather_adjusted_attendance == (
+        Decimal("1000") * (Decimal("1") - selected_reduction * factor)
+    )
+    assert result.total_expected_food_buyers == (
         Decimal("100") * (Decimal("1") - selected_reduction * factor)
     )
 
@@ -97,10 +101,77 @@ def test_every_weather_and_protection_combination(
 def test_attendance_based_revenue_flow():
     result = calculate_event_scenario(scenario())
 
-    assert result.expected_customers_before_weather == Decimal("100")
-    assert result.weather_adjusted_expected_customers == Decimal("100")
+    assert result.weather_adjusted_attendance == Decimal("1000")
+    assert result.total_expected_food_buyers == Decimal("100")
+    assert result.total_food_vendors == 1
+    assert result.equal_share_percentage == Decimal("1")
+    assert result.estimated_business_buyers == Decimal("100")
     assert result.expected_orders == Decimal("100")
     assert result.expected_sales == Decimal("1000")
+
+
+def test_shared_food_demand_is_divided_across_all_vendors():
+    example = replace(
+        scenario(),
+        demand=DemandAssumptions(1000, 4, Decimal("0.60")),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.weather_adjusted_attendance == Decimal("1000")
+    assert result.total_expected_food_buyers == Decimal("600.00")
+    assert result.total_food_vendors == 5
+    assert result.equal_share_percentage == Decimal("0.2")
+    assert result.estimated_business_buyers == Decimal("120.00")
+    assert result.expected_orders == Decimal("120.00")
+    assert result.expected_sales == Decimal("1200.00")
+
+
+def test_shared_demand_orders_drive_per_order_costs_and_transactions():
+    example = replace(
+        scenario(),
+        demand=DemandAssumptions(1000, 4, Decimal("0.60")),
+        food_cost=FoodCostAssumptions(
+            "average_per_order",
+            average_cost_per_order=Decimal("4"),
+        ),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.expected_orders == Decimal("120.00")
+    assert result.food_and_packaging_cost == Decimal("480.00")
+    assert result.estimated_card_transactions == Decimal("96.0000")
+    assert result.fixed_card_processing_fees == Decimal("24.000000")
+
+
+def test_weather_adjusts_attendance_before_shared_demand():
+    demand = DemandAssumptions(800, 3, Decimal("0.50"))
+    weather = WeatherAssumptions(
+        "partially_covered", "moderate_adverse"
+    )
+
+    result = calculate_event_demand(demand, weather)
+
+    assert result.final_weather_reduction == Decimal("0.1125")
+    assert result.weather_adjusted_attendance == Decimal("710.0000")
+    assert result.total_expected_food_buyers == Decimal("355.000000")
+    assert result.total_food_vendors == 4
+    assert result.equal_share_percentage == Decimal("0.25")
+    assert result.estimated_business_buyers == Decimal("88.750000")
+    assert result.expected_orders == Decimal("88.750000")
+
+
+def test_zero_other_vendors_gives_business_the_full_food_demand():
+    result = calculate_event_demand(
+        DemandAssumptions(250, 0, Decimal("0.40")),
+        WeatherAssumptions("fully_outdoors", "favorable"),
+    )
+
+    assert result.total_food_vendors == 1
+    assert result.equal_share_percentage == Decimal("1")
+    assert result.total_expected_food_buyers == Decimal("100.00")
+    assert result.estimated_business_buyers == Decimal("100.00")
 
 
 def test_custom_sales_overrides_sales_but_not_expected_orders():
@@ -281,12 +352,10 @@ def test_decimal_calculations_are_not_intermediately_rounded():
 
     result = calculate_event_scenario(precise)
 
-    assert result.expected_customers_before_weather == Decimal("0.9999")
     assert result.final_weather_reduction == Decimal("0.0075")
-    assert (
-        result.weather_adjusted_expected_customers
-        == Decimal("0.99240075")
-    )
+    assert result.weather_adjusted_attendance == Decimal("2.9775")
+    assert result.total_expected_food_buyers == Decimal("0.99240075")
+    assert result.estimated_business_buyers == Decimal("0.99240075")
     assert result.expected_sales == (
         Decimal("0.99240075") * Decimal("12.345")
     )
@@ -312,6 +381,30 @@ def test_manual_example_one_attendance_based():
     assert result.break_even_sales == Decimal("894")
     assert result.exact_break_even_customers == Decimal("89.4")
     assert result.minimum_whole_break_even_customers == 90
+
+
+def test_manual_example_shared_food_demand_with_many_vendors():
+    """1,000 attendees, 60% food demand, and five total vendors."""
+    example = replace(
+        scenario(),
+        demand=DemandAssumptions(1000, 4, Decimal("0.60")),
+    )
+
+    result = calculate_event_scenario(example)
+
+    assert result.total_expected_food_buyers == Decimal("600.00")
+    assert result.total_food_vendors == 5
+    assert result.expected_orders == Decimal("120.00")
+    assert result.expected_sales == Decimal("1200.00")
+    assert result.variable_costs == Decimal("472.800000")
+    assert result.fixed_costs == Decimal("500")
+    assert result.total_event_cost == Decimal("972.800000")
+    assert result.business_profit == Decimal("227.200000")
+    assert result.profit_margin == (
+        Decimal("227.200000") / Decimal("1200.00")
+    )
+    assert result.exact_break_even_customers == Decimal("97.280000")
+    assert result.minimum_whole_break_even_customers == 98
 
 
 def test_manual_example_two_custom_sales_owner_only():
@@ -617,10 +710,10 @@ def test_expected_orders_below_break_even_customers_warning():
 
     assert result.expected_orders == Decimal("100")
     assert result.exact_break_even_customers == Decimal("109.4")
-    assert "expected_customers_below_break_even" in warning_codes(result)
+    assert "even_split_buyers_below_break_even" in warning_codes(result)
 
 
-def test_break_even_customers_exceed_weather_adjusted_attendance_warning():
+def test_break_even_customers_exceed_all_expected_food_demand_warning():
     example = replace(
         scenario(),
         additional_costs=(
@@ -633,7 +726,7 @@ def test_break_even_customers_exceed_weather_adjusted_attendance_warning():
     assert result.minimum_whole_break_even_customers == 1085
     assert result.weather_adjusted_attendance == Decimal("1000")
     assert (
-        "break_even_exceeds_available_attendance"
+        "break_even_exceeds_all_expected_food_demand"
         in warning_codes(result)
     )
 
@@ -654,7 +747,7 @@ def test_custom_expected_sales_warning_documents_order_assumption():
         if warning.code == "custom_sales_assumption"
     )
     assert warning.severity == "info"
-    assert "attendance-based expected order estimate" in warning.message
+    assert "shared-demand expected order estimate" in warning.message
 
 
 def test_warning_codes_messages_severity_and_order_are_stable():
@@ -679,14 +772,20 @@ def test_warning_codes_messages_severity_and_order_are_stable():
             "This scenario is below the selected profit target.",
         ),
         CalculationWarning(
-            "expected_customers_below_break_even",
+            "even_split_buyers_below_break_even",
             "warning",
-            "Expected customers are below the break-even customer count.",
+            (
+                "The even-split estimate is 100.00 buyers, below the "
+                    "break-even requirement of 1084.400000 by 984.400000."
+            ),
         ),
         CalculationWarning(
-            "break_even_exceeds_available_attendance",
+            "break_even_exceeds_all_expected_food_demand",
             "critical",
-            "Break-even customers exceed weather-adjusted attendance.",
+            (
+                "Break-even requires 1085 customers, more than all 100.00 "
+                "expected food buyers."
+            ),
         ),
     )
 

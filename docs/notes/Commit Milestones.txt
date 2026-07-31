@@ -49,27 +49,28 @@ CALCULATION AND RESULTS
   total costs, owner pay, business profit, and profit margin. Include unit
   tests and manual examples.
 
-□ Extend the calculation engine with break-even analysis and factual warnings
+☑ Extend the calculation engine with break-even analysis and factual warnings
   Use the existing calculation results to calculate break-even sales and
   customers, evaluate the selected profit target, and produce factual
   profitability and assumption warnings with focused tests.
 
-□ Build the Event Analysis workspace
+□ >Revise the demand model for shared food demand and competition
+  Replace the percentage expected to buy from this business with the
+  percentage expected to buy food. Divide expected food demand among the
+  user’s business and other competing food vendors, update revenue and
+  order-based calculations, add early demand indicators and factual
+  break-even comparisons, and update affected models, validation, and tests.
+
+□ *Build the interactive Event Analysis workspace
   Create the primary post-input experience with financial results and
-  adjustable scenario factors sharing the screen. Allow the user to adjust
-  attendance, weather, competition, sales assumptions, food costs, labor,
-  fees, and other relevant variables without returning to the initial setup
-  form.
+  adjustable scenario assumptions sharing the screen. Recalculate every
+  dependent result and warning automatically as assumptions change.
 
-□ Add live scenario recalculation
-  Automatically update every dependent result and warning whenever an
-  adjustable assumption changes. Do not require a separate Calculate button.
-  Provide clear reset, start-new-event, and return-to-input actions.
-
-□ Add scenario save and version actions
-  Allow the current workspace state to be saved as the first scenario,
-  saved over an existing scenario, or saved as a new scenario without
-  overwriting the original.
+□ Add automatic initial saving and scenario version actions
+  Automatically save each valid Event Inputs submission as a new Event with
+  an “Original estimate” Scenario before opening the workspace. From the
+  workspace, provide one Save action that defaults to saving adjustments as
+  a new Scenario while allowing deliberate overwriting of the active Scenario.
 
 
 SAVED WORK AND COMPARISON

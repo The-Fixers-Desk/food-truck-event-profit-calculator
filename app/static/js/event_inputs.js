@@ -71,6 +71,100 @@ weatherOutlook.addEventListener("change", updateWeatherControls);
 customWeatherInput.addEventListener("input", updateWeatherControls);
 updateWeatherControls();
 
+const demandPreview = document.querySelector("#demand-preview");
+const demandPreviewStatus = document.querySelector(
+  "#demand-preview-status",
+);
+const demandPreviewValues = document.querySelector(
+  "#demand-preview-values",
+);
+const demandPreviewSummary = document.querySelector(
+  "#demand-preview-summary",
+);
+const demandPreviewBreakEven = document.querySelector(
+  "#demand-preview-break-even",
+);
+const eventInputsForm = demandPreview?.closest("form");
+let demandPreviewTimer;
+let demandPreviewRequest;
+
+function setDemandValue(name, value) {
+  demandPreview.querySelector(
+    `[data-demand-value="${name}"]`,
+  ).textContent = value;
+}
+
+async function updateDemandPreview() {
+  demandPreviewStatus.textContent = "Updating estimate…";
+  demandPreviewRequest?.abort();
+  demandPreviewRequest = new AbortController();
+  try {
+    const response = await fetch("/event-inputs/demand-preview", {
+      method: "POST",
+      body: new FormData(eventInputsForm),
+      signal: demandPreviewRequest.signal,
+    });
+    const preview = await response.json();
+    if (!preview.ready) {
+      demandPreviewValues.hidden = true;
+      demandPreviewSummary.hidden = true;
+      demandPreviewBreakEven.hidden = true;
+      demandPreviewStatus.textContent =
+        "Complete the demand and weather fields to see an even-split estimate.";
+      return;
+    }
+    setDemandValue(
+      "weather-adjusted-attendance",
+      preview.weather_adjusted_attendance,
+    );
+    setDemandValue(
+      "total-expected-food-buyers",
+      preview.total_expected_food_buyers,
+    );
+    setDemandValue("total-food-vendors", preview.total_food_vendors);
+    setDemandValue(
+      "estimated-business-buyers",
+      preview.estimated_business_buyers,
+    );
+    demandPreviewValues.hidden = false;
+    demandPreviewSummary.textContent =
+      `At an even split, this event provides about `
+      + `${preview.estimated_business_buyers} expected buyers per vendor.`;
+    demandPreviewSummary.hidden = false;
+    demandPreviewBreakEven.textContent =
+      preview.break_even_message ?? "";
+    demandPreviewBreakEven.hidden = !preview.break_even_message;
+    demandPreviewStatus.textContent = "Demand estimate updated.";
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      demandPreviewStatus.textContent =
+        "The demand estimate is temporarily unavailable.";
+    }
+  }
+}
+
+function scheduleDemandPreview() {
+  clearTimeout(demandPreviewTimer);
+  demandPreviewTimer = setTimeout(updateDemandPreview, 250);
+}
+
+[
+  "#estimated_attendance",
+  "#expected_food_buyer_percentage",
+  "#other_competing_food_vendors",
+  "#weather_outlook",
+  "#custom_weather_reduction",
+].forEach((selector) => {
+  document.querySelector(selector).addEventListener(
+    "input",
+    scheduleDemandPreview,
+  );
+});
+protectionChoices.forEach((choice) => {
+  choice.addEventListener("change", scheduleDemandPreview);
+});
+scheduleDemandPreview();
+
 const revenueMethod = document.querySelector("#revenue_method");
 const useCustomSales = document.querySelector("#use-custom-sales");
 const customSalesField = document.querySelector("#custom-sales-field");

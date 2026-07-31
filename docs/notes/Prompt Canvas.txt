@@ -2,17 +2,3 @@ Prompt Canvas
 
 -----------------------------------------------------------
 
-Compare the current uncommitted implementation against the DEFAULTS section of the milestone list.
-
-For each milestone, tell me whether it is fully complete, partly complete, or not started, with one brief reason:
-
-- Build business defaults form
-- Add defaults form validation
-- Add model-level validation
-- Save business defaults to the local database
-- Load saved defaults into the Defaults screen
-- Add confirmation and error states for saving defaults
-- Verify first-time setup workflow
-
-Do not change any files.
-Keep the response concise.

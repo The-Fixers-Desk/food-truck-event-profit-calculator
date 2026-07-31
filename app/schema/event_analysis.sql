@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS event_scenarios (
 
     estimated_attendance INTEGER NOT NULL
         CHECK (estimated_attendance >= 0),
-    competing_food_vendors INTEGER NOT NULL
-        CHECK (competing_food_vendors >= 0),
-    expected_buyer_basis_points INTEGER NOT NULL
-        CHECK (expected_buyer_basis_points BETWEEN 0 AND 10000),
+    other_competing_food_vendors INTEGER NOT NULL
+        CHECK (other_competing_food_vendors >= 0),
+    expected_food_buyer_basis_points INTEGER NOT NULL
+        CHECK (expected_food_buyer_basis_points BETWEEN 0 AND 10000),
 
     event_protection TEXT NOT NULL
         CHECK (

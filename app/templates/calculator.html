@@ -64,10 +64,10 @@
       <div class="form-grid">
         {% for name, label, step in (
           ("estimated_attendance", "Estimated attendance", "1"),
-          ("competing_food_vendors",
-           "Number of competing food vendors", "1"),
-          ("expected_buyer_percentage",
-           "Expected percentage of attendees who buy from you", "0.01"),
+          ("other_competing_food_vendors",
+           "Other competing food vendors", "1"),
+          ("expected_food_buyer_percentage",
+           "Percentage of attendees expected to buy food", "0.01"),
           ("average_order_sale_amount",
            "Average order sale amount ($)", "0.01")
         ) %}
@@ -75,7 +75,7 @@
             <div class="label-row">
               <label class="form-label" for="{{ name }}">{{ label }}</label>
               {% if name in (
-                "estimated_attendance", "expected_buyer_percentage",
+                "estimated_attendance", "expected_food_buyer_percentage",
                 "average_order_sale_amount"
               ) %}
                 <span class="field-indicator">Estimate</span>
@@ -109,9 +109,42 @@
                 {{ errors[name] }}
               </p>
             {% endif %}
+            {% if name == "other_competing_food_vendors" %}
+              <p class="form-hint">
+                Do not include your own business.
+              </p>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
+
+      <section id="demand-preview" class="demand-preview"
+        aria-live="polite" aria-labelledby="demand-preview-title">
+        <h2 id="demand-preview-title">Early demand estimate</h2>
+        <p id="demand-preview-status">
+          Complete the demand and weather fields to see an even-split estimate.
+        </p>
+        <dl id="demand-preview-values" hidden>
+          <div>
+            <dt>Weather-adjusted attendance</dt>
+            <dd data-demand-value="weather-adjusted-attendance"></dd>
+          </div>
+          <div>
+            <dt>Total expected food buyers</dt>
+            <dd data-demand-value="total-expected-food-buyers"></dd>
+          </div>
+          <div>
+            <dt>Total food vendors, including you</dt>
+            <dd data-demand-value="total-food-vendors"></dd>
+          </div>
+          <div>
+            <dt>Expected buyers per vendor at an even split</dt>
+            <dd data-demand-value="estimated-business-buyers"></dd>
+          </div>
+        </dl>
+        <p id="demand-preview-summary" hidden></p>
+        <p id="demand-preview-break-even" hidden></p>
+      </section>
 
       <div class="assumption-step">
         <div class="form-field">

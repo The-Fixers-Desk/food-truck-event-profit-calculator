@@ -46,13 +46,13 @@ class EventIdentity:
 @dataclass(frozen=True)
 class DemandAssumptions:
     estimated_attendance: int
-    competing_food_vendors: int
-    expected_buyer_percentage: Decimal
+    other_competing_food_vendors: int
+    expected_food_buyer_percentage: Decimal
 
     def __post_init__(self) -> None:
-        if self.estimated_attendance < 0 or self.competing_food_vendors < 0:
+        if self.estimated_attendance < 0 or self.other_competing_food_vendors < 0:
             raise ValueError("Demand counts cannot be negative.")
-        _require_percentage(self.expected_buyer_percentage)
+        _require_percentage(self.expected_food_buyer_percentage)
 
 
 @dataclass(frozen=True)
