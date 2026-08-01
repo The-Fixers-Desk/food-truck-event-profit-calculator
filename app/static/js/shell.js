@@ -51,7 +51,80 @@ utilityTriggers.forEach((trigger) => {
     closeUtilityPanels(panel);
     panel.hidden = !opening;
     trigger.setAttribute("aria-expanded", String(opening));
+    if (opening) panel.querySelector("button, a")?.focus();
   });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".topbar-utilities")) closeUtilityPanels();
+  if (workspacePanel && !workspacePanel.hidden && !event.target.closest(".workspace-menu")) {
+    workspacePanel.hidden = true;
+    workspaceTrigger.setAttribute("aria-expanded", "false");
+  }
+});
+
+async function updateNotification(path, statusText) {
+  const response = await fetch(path, { method: "POST", headers: { "X-Requested-With": "fetch" } });
+  if (!response.ok) throw new Error("Notification update failed");
+  const status = document.querySelector("#notification-status");
+  if (status) status.textContent = statusText;
+}
+
+document.querySelectorAll("[data-notification-read]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const item = button.closest("[data-notification-id]");
+    await updateNotification(`/notifications/${item.dataset.notificationId}/read`, "Notification marked as read.");
+    item.classList.remove("notification-item--unread");
+    button.remove();
+  });
+});
+document.querySelector("[data-notifications-read-all]")?.addEventListener("click", async (event) => {
+  await updateNotification("/notifications/read-all", "All notifications marked as read.");
+  document.querySelectorAll(".notification-item--unread").forEach((item) => item.classList.remove("notification-item--unread"));
+  document.querySelectorAll("[data-notification-read]").forEach((button) => button.remove());
+  event.currentTarget.remove();
+});
+document.querySelectorAll("[data-notification-dismiss]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const item = button.closest("[data-notification-id]");
+    await updateNotification(`/notifications/${item.dataset.notificationId}/dismiss`, "Notification dismissed.");
+    item.remove();
+    if (!document.querySelector(".notification-item")) window.location.reload();
+  });
+});
+document.querySelectorAll("[data-notification-action]").forEach((link) => {
+  link.addEventListener("click", () => {
+    const item = link.closest("[data-notification-id]");
+    navigator.sendBeacon?.(`/notifications/${item.dataset.notificationId}/read`, new Blob());
+  });
+});
+
+const profileDialog = document.querySelector("#local-profile-dialog");
+document.querySelectorAll("[data-profile-open]").forEach((button) => {
+  button.addEventListener("click", () => {
+    workspacePanel.hidden = true;
+    workspaceTrigger.setAttribute("aria-expanded", "false");
+    profileDialog.showModal();
+    profileDialog.querySelector("input")?.focus();
+  });
+});
+document.querySelector("#local-profile-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  form.querySelectorAll(".field-error").forEach((node) => { node.textContent = ""; });
+  const response = await fetch(form.action, { method: "POST", body: new FormData(form) });
+  const payload = await response.json();
+  if (!payload.saved) {
+    Object.entries(payload.errors || {}).forEach(([field, message]) => {
+      const error = document.querySelector(`#profile-${field.replaceAll("_", "-")}-error`);
+      if (error) error.textContent = message;
+    });
+    document.querySelector("#local-profile-status").textContent = "Correct the highlighted profile fields.";
+    form.querySelector(".field-error:not(:empty)")?.previousElementSibling?.focus();
+    return;
+  }
+  document.querySelector("#local-profile-status").textContent = "Local profile saved.";
+  window.location.reload();
 });
 
 const workspaceTrigger = document.querySelector("#workspace-menu-trigger");

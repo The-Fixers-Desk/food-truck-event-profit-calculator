@@ -68,13 +68,15 @@
         </nav>
         <div class="workspace-menu">
           <button class="workspace-menu__trigger" id="workspace-menu-trigger"
-            type="button" aria-expanded="false" aria-controls="workspace-menu-panel">
-            <span class="workspace-menu__avatar" aria-hidden="true">L</span>
-            <span class="workspace-menu__copy"><span>Local workspace</span><small>The Fixer&rsquo;s Desk</small></span>
+            type="button" aria-expanded="false" aria-controls="workspace-menu-panel"
+            aria-label="{{ ('Open local profile menu for ' ~ local_profile.display_name) if local_profile else 'Open local workspace menu' }}">
+            <span class="workspace-menu__avatar" aria-hidden="true">{{ local_profile_initials }}</span>
+            <span class="workspace-menu__copy">{% if local_profile %}<span title="{{ local_profile.display_name }}">{{ local_profile.display_name }}</span><small title="{{ local_profile.email_address }}">{{ local_profile.email_address }}</small>{% else %}<span>Local workspace</span><small>Profile not set up</small>{% endif %}</span>
             <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevrons"></use></svg>
           </button>
           <div class="workspace-menu__panel" id="workspace-menu-panel" hidden>
             <p>Your work is stored on this device.</p>
+            <button class="button-secondary button--small" type="button" data-profile-open>{{ 'Edit profile' if local_profile else 'Set up local profile' }}</button>
             <a class="button-tertiary button--small" href="{{ url_for('main.data_safety') }}">Manage local data</a>
           </div>
         </div>
@@ -89,24 +91,31 @@
           </button>
           <svg class="mobile-brand-mark nav-icon" aria-label="Food Truck Event Profit Calculator"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#truck"></use></svg>
           <nav class="breadcrumbs" aria-label="Breadcrumb">
+            {% set top_level = active_page in ('dashboard', 'saved_events', 'defaults', 'data_safety', 'welcome') and not nested_breadcrumb|default(false) %}
+            {% if not top_level %}
             <a href="{{ url_for('main.dashboard') if business_defaults_setup_complete or onboarding_deferred else url_for('main.welcome') }}">{{ 'Dashboard' if business_defaults_setup_complete or onboarding_deferred else 'Welcome' }}</a>
             <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevron"></use></svg>
-            <span class="breadcrumbs__current">{% block context_label %}{% if active_page == 'calculator' %}Event Analysis{% elif active_page == 'saved_events' %}Saved events{% elif active_page == 'defaults' %}Business defaults{% elif active_page == 'data_safety' %}Data safety{% elif active_page == 'dashboard' %}Dashboard{% elif active_page == 'welcome' %}Welcome{% else %}System{% endif %}{% endblock %}</span>
+            {% endif %}
+            <span class="breadcrumbs__current" aria-current="page">{% block context_label %}{% if active_page == 'calculator' %}New analysis{% elif active_page == 'saved_events' %}Saved events{% elif active_page == 'defaults' %}Business defaults{% elif active_page == 'data_safety' %}Data safety{% elif active_page == 'dashboard' %}Dashboard{% elif active_page == 'welcome' %}Welcome{% else %}System{% endif %}{% endblock %}</span>
           </nav>
           <div class="topbar-utilities">
             <a class="topbar-search" href="{{ url_for('main.saved_events') }}#saved-work-search" aria-label="Search saved events">
               <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#search"></use></svg><span>Search</span>
             </a>
-            <button class="utility-button" type="button" aria-label="Notifications"
+            <button class="utility-button notification-trigger" type="button" aria-label="Notifications"
               aria-expanded="false" aria-controls="notifications-panel" data-utility-trigger="notifications-panel">
               <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#bell"></use></svg>
+              {% if unread_notification_count %}<span class="visually-hidden">{{ unread_notification_count }} unread notifications</span>{% endif %}
+              {% if unread_notification_count %}<span class="notification-count" aria-hidden="true">{{ unread_notification_count if unread_notification_count < 100 else '99+' }}</span>{% endif %}
             </button>
             <button class="utility-button" type="button" aria-label="Help"
               aria-expanded="false" aria-controls="help-panel" data-utility-trigger="help-panel">
               <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#help"></use></svg>
             </button>
-            <section class="utility-panel" id="notifications-panel" hidden>
-              <h2>Notifications</h2><p>You have no new notifications.</p>
+            <section class="utility-panel notification-panel" id="notifications-panel" aria-labelledby="notifications-title" hidden>
+              <div class="notification-panel__header"><h2 id="notifications-title">Notifications</h2>{% if unread_notification_count %}<button class="button-tertiary button--small" type="button" data-notifications-read-all>Mark all read</button>{% endif %}</div>
+              <p class="visually-hidden" id="notification-status" role="status" aria-live="polite"></p>
+              {% if notifications %}<ul class="notification-list">{% for item in notifications %}<li class="notification-item notification-item--{{ item.severity }}{% if not item.read_at %} notification-item--unread{% endif %}" data-notification-id="{{ item.id }}"><div><p>{{ item.message }}</p><time datetime="{{ item.created_at }}">{{ item.created_at }}</time></div><div class="notification-item__actions">{% if item.action_url %}<a href="{{ item.action_url }}" data-notification-action>{{ item.action_label or 'Open' }}</a>{% endif %}{% if not item.read_at %}<button type="button" data-notification-read>Mark read</button>{% endif %}<button type="button" data-notification-dismiss aria-label="Dismiss notification: {{ item.message }}">Dismiss</button></div></li>{% endfor %}</ul>{% else %}<div class="notification-empty"><p>You&rsquo;re all caught up.</p><small>Useful local updates will appear here.</small></div>{% endif %}
             </section>
             <section class="utility-panel" id="help-panel" hidden>
               <h2>Help</h2><p>Start with Business Defaults, then analyze an event. Your work stays on this device.</p>
@@ -127,6 +136,16 @@
         </main>
       </div>
     </div>
+    <dialog class="confirmation-dialog profile-dialog" id="local-profile-dialog" aria-labelledby="local-profile-title">
+      <form method="dialog" class="dialog-close-form"><button class="button-tertiary" type="submit" aria-label="Close local profile editor">Close</button></form>
+      <p class="page-eyebrow">Stored on this device</p><h2 id="local-profile-title">Local profile</h2>
+      <p>This optional profile personalizes this workspace. It is not an account, and it is never synced.</p>
+      <form id="local-profile-form" method="post" action="{{ url_for('main.edit_local_profile') }}" novalidate>
+        <div class="form-field"><label class="form-label" for="profile-display-name">Display name</label><input class="form-input" id="profile-display-name" name="display_name" value="{{ local_profile.display_name if local_profile else '' }}" autocomplete="name" maxlength="120" aria-describedby="profile-display-name-error" /><p class="field-error" id="profile-display-name-error"></p></div>
+        <div class="form-field"><label class="form-label" for="profile-email-address">Email address</label><input class="form-input" id="profile-email-address" name="email_address" type="email" value="{{ local_profile.email_address if local_profile else '' }}" autocomplete="email" maxlength="254" aria-describedby="profile-email-address-help profile-email-address-error" /><p class="field-help" id="profile-email-address-help">For local display only. This address is not verified or sent anywhere.</p><p class="field-error" id="profile-email-address-error"></p></div>
+        <p id="local-profile-status" role="status" aria-live="polite"></p><button class="button" type="submit">Save local profile</button>
+      </form>
+    </dialog>
     <script src="{{ url_for('static', filename='js/shell.js') }}"></script>
   </body>
 </html>

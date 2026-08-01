@@ -204,7 +204,7 @@ def test_estimate_and_event_only_indicators_are_visible(client):
 
     assert "Changes on this screen apply only to this event." in page
     assert page.count("Estimate") >= 5
-    assert "About estimates" in page
+    assert "This estimate applies only to this event." in page
 
 
 def test_event_inputs_uses_complete_five_step_wizard(client):

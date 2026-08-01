@@ -1,0 +1,203 @@
+MILESTONE — REFINE SHELL CONTEXT, EVENT GUIDANCE, LOCAL PROFILE, AND NOTIFICATIONS
+
+You are refining the existing Food Truck Event Profit Calculator after the approved UI implementation. The current interface is visually successful and should not be broadly redesigned. Make the smallest safe changes needed to correct the remaining shell and event-entry issues and add a useful local-only profile and notification system.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the current shell, breadcrumb generation, Event Inputs guidance implementation, sidebar identity component, notification bell behavior, database/schema versioning, migrations, tests, and existing toast/status-message system.
+2. Preserve the approved charcoal visual direction, spacing, typography, hierarchy, routes, calculations, persistence, responsive behavior, accessibility, and workflows.
+3. Reuse existing design tokens and shared components. Do not create a second visual system.
+4. Keep the application fully local and offline-first.
+5. Do not add authentication, passwords, cloud accounts, cloud sync, telemetry, remote APIs, operating-system push notifications, or background network requests.
+6. Add safe schema migrations for persistent changes and preserve existing user data.
+7. Add or update focused tests and run the broadest practical regression suite.
+8. Do not create a git commit.
+
+PRIMARY OBJECTIVE
+
+Correct the remaining visible UI inconsistencies, replace the placeholder workspace identity with a locally stored user profile, and make the notification bell a real, restrained in-app notification center.
+
+REQUIRED SCOPE
+
+1. Correct redundant breadcrumbs
+
+- Top-level destinations must not repeat themselves.
+- Dashboard must display either one non-linked “Dashboard” location label or no breadcrumb according to the existing shell pattern, but never “Dashboard > Dashboard”.
+- Apply the same rule consistently to every top-level destination.
+- Preserve meaningful nested breadcrumbs such as:
+  - Dashboard > New analysis
+  - Dashboard > Saved events
+  - Saved events > [Event name] > Analysis
+- Preserve accessible current-page semantics, truncation, and responsive behavior.
+
+2. Replace the “About estimates” disclosure
+
+Remove the visually inconsistent raw disclosure/toggle from Event Inputs.
+
+Replace it with an integrated, always-visible guidance callout using existing card/callout primitives and restrained styling. It should communicate:
+
+“This estimate applies only to this event.
+Your saved business defaults provide the starting values. Changes here do not alter those defaults. You can save multiple scenarios to test different assumptions.”
+
+Requirements:
+- subtle informational icon;
+- compact charcoal surface;
+- restrained copper heading or accent;
+- no disclosure triangle;
+- no excessive border or vertical height;
+- accessible semantic structure;
+- responsive placement that does not disrupt the wizard;
+- preserve any additional useful estimate guidance by integrating it into the callout.
+
+3. Add a local user profile
+
+Implement a locally stored profile, not an online account.
+
+Fields:
+- display name;
+- email address.
+
+Behavior:
+- store only in the local database or approved local persistence layer;
+- add a safe migration if required;
+- do not require a profile to use the app;
+- do not treat email as verified;
+- do not imply login, authentication, password recovery, ownership, or synchronization;
+- validate and normalize appropriately without rejecting reasonable names;
+- preserve “no account required”, “no cloud sync”, and “data stays on this device”.
+
+Add an accessible profile-editing UI using existing shell patterns. Prefer a sidebar user menu with “Edit profile” opening a modal, drawer, or compact dedicated screen. Avoid a major top-level navigation destination unless clearly required by the current architecture.
+
+4. Update the sidebar identity block
+
+Configured state:
+- initials/avatar derived from display name;
+- primary line: display name;
+- secondary line: email address;
+- accessible menu trigger;
+- “Edit profile” action.
+
+Unconfigured state:
+- polished local-workspace fallback;
+- clear “Set up local profile” action;
+- no fabricated user data.
+
+Support desktop, tablet, and mobile. Handle long names/emails with truncation and an accessible full-value label or tooltip.
+
+5. Verify and implement the notification center
+
+First determine whether the bell already works. If decorative or incomplete, implement a local in-app notification center. Extend any partial existing system rather than duplicating it.
+
+Requirements:
+- bell opens an accessible dropdown, popover, panel, or drawer;
+- unread indicator/count;
+- read and unread states;
+- mark one as read;
+- mark all as read;
+- dismiss individual items where appropriate;
+- locally persisted state;
+- newest first;
+- bounded retention, defaulting to the most recent 50 unless existing architecture provides a better limit;
+- actionable items link to a relevant local screen;
+- empty state;
+- keyboard operation, focus management, Escape behavior, outside-click behavior, and screen-reader labels/status;
+- responsive mobile presentation;
+- no OS push notifications and no network activity.
+
+6. Notification events
+
+Persist only meaningful, reviewable events.
+
+Appropriate events include:
+- backup/export completed;
+- import completed;
+- import failed because the file is invalid or incompatible;
+- recovery snapshot created;
+- local recovery or migration completed when user attention is useful;
+- scenario saved as a new scenario;
+- active scenario deliberately overwritten;
+- draft restored, if supported;
+- business defaults updated only if later review adds value;
+- migrated data requires review;
+- another durable, actionable recovery condition already supported by the product.
+
+Do not persist notifications for:
+- every autosave;
+- every field change;
+- transient validation errors;
+- duplicate copies of immediate-only toast messages;
+- weather changes, organizer messages, remote activity, or any external event this offline app cannot observe.
+
+Immediate toasts and inline messages may remain for transient confirmations.
+
+7. Backup reminder behavior
+
+Implement a restrained reminder policy:
+- never show on every launch;
+- do not interrupt onboarding;
+- trigger only after meaningful saved data exists and no export has occurred, or after a reasonable interval since the last export;
+- persist reminder/read/dismissal state locally;
+- provide a direct action to Data Safety;
+- avoid alarming or shame-based wording;
+- use real last-export data if available.
+
+8. Data export and deletion integration
+
+Define and test how profile and notifications interact with local data management:
+- include them in full export/import if consistent with the existing backup contract, or explicitly exclude and document that choice;
+- clearing all app data must clear them;
+- resetting business defaults must not clear them;
+- deleting saved events must not delete the profile;
+- imports must validate profile and notification records safely;
+- migrations and restores must preserve database integrity.
+
+9. Accessibility and privacy wording
+
+- Use “Local profile” or equivalent wording that clearly means stored on this device.
+- Do not call it an account if that implies authentication.
+- Preserve accessible names for the bell, unread count, menu, profile editor, errors, and statuses.
+- Ensure semantic headings, logical reading order, contrast, and visible focus.
+
+10. Tests
+
+Add or update tests for:
+- top-level breadcrumb deduplication;
+- nested breadcrumb preservation;
+- Event Inputs guidance callout and removal of the old disclosure;
+- local profile create, edit, validation, persistence, restart, fallback state, and long-value handling;
+- migration safety with existing databases;
+- notification creation, ordering, retention, read/unread, mark-all-read, dismissal, persistence, and empty state;
+- actionable notification navigation;
+- backup reminder eligibility and throttling;
+- no notification spam from autosave;
+- export/import/clear/reset interactions involving profile and notifications;
+- keyboard-accessible notification and profile menus;
+- regression protection for onboarding, Defaults, Event Inputs, Saved Events, Data Safety, and Dashboard.
+
+COMPLETION GATE
+
+Do not declare completion until:
+- redundant top-level breadcrumbs are gone;
+- nested breadcrumbs still work;
+- the old About Estimates toggle is replaced by a polished integrated callout;
+- the sidebar shows the local profile when configured and a truthful fallback when not;
+- profile data persists locally without authentication implications;
+- the bell provides a working, accessible, locally persisted notification center;
+- notification events are useful and restrained;
+- backup reminders are actionable without becoming repetitive;
+- export/import/reset/clear behavior is safe and tested;
+- existing functionality and the approved charcoal UI remain intact.
+
+FINAL REPORT
+
+Report:
+- files changed;
+- schema and migration changes;
+- profile behavior;
+- notification types and trigger rules;
+- breadcrumb changes;
+- Event Inputs guidance changes;
+- tests run and results;
+- unresolved blockers.
+
+Do not create a commit.

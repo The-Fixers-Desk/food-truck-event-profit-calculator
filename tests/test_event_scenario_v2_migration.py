@@ -155,7 +155,7 @@ def test_empty_mixed_schema_migrates_and_complete_submission_saves(
     } <= columns
     assert database.execute(
         "SELECT version FROM schema_migrations ORDER BY version"
-    ).fetchall() == [(1,), (2,)]
+    ).fetchall() == [(1,), (2,), (3,)]
     assert database.execute(
         """
         SELECT other_competing_food_vendors,
@@ -363,4 +363,4 @@ def test_current_version_1_schema_is_stamped_without_rebuild(database_path):
     ).fetchone()[0] == rootpage
     assert database.execute(
         "SELECT version FROM schema_migrations ORDER BY version"
-    ).fetchall() == [(1,), (2,)]
+    ).fetchall() == [(1,), (2,), (3,)]

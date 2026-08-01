@@ -60,7 +60,7 @@ def test_backup_archive_manifest_checksum_and_complete_snapshot(tmp_path):
     manifest, database_bytes = archive_parts(payload)
 
     assert manifest["backup_format_version"] == BACKUP_FORMAT_VERSION
-    assert manifest["database_schema_version"] == 2
+    assert manifest["database_schema_version"] == 3
     assert manifest["database_filename"] == "database.sqlite"
     assert manifest["database_sha256"] == sha256(database_bytes).hexdigest()
     snapshot = tmp_path / "snapshot.sqlite"
@@ -361,7 +361,7 @@ def test_unversioned_supported_backup_is_migrated_only_in_staging(tmp_path):
     database = sqlite3.connect(restored)
     assert database.execute(
         "SELECT version FROM schema_migrations ORDER BY version"
-    ).fetchall() == [(1,), (2,)]
+    ).fetchall() == [(1,), (2,), (3,)]
     assert database.execute(
         "SELECT business_name FROM business_defaults"
     ).fetchone()[0] == "Roadside Kitchen"
@@ -424,22 +424,22 @@ def test_pending_migration_creates_recovery_snapshot_first(tmp_path):
     paths = app.config["DATA_PATHS"]
     before = len(list(paths.automatic_recovery.glob("recovery-*.ftbackup")))
 
-    def apply_v3(connection):
-        connection.execute("CREATE TABLE migration_v3_test (id INTEGER)")
+    def apply_v4(connection):
+        connection.execute("CREATE TABLE migration_v4_test (id INTEGER)")
 
-    migration_v3 = Migration(
-        3,
+    migration_v4 = Migration(
+        4,
         "test_future",
-        apply_v3,
+        apply_v4,
         lambda connection: connection.execute(
-            "SELECT * FROM migration_v3_test"
+                "SELECT * FROM migration_v4_test"
         ).fetchall(),
     )
     with app.app_context():
         migrate_database(
             get_database(),
-            migrations=(*MIGRATIONS, migration_v3),
-            latest_version=3,
+            migrations=(*MIGRATIONS, migration_v4),
+            latest_version=4,
             before_migrations=lambda connection: (
                 create_automatic_recovery_snapshot(
                     connection, paths, "pre-migration"
@@ -454,17 +454,17 @@ def test_pending_migration_creates_recovery_snapshot_first(tmp_path):
 def test_failed_pre_migration_snapshot_aborts_migration(tmp_path):
     app = isolated_app(tmp_path / "data")
 
-    def apply_v3(connection):
+    def apply_v4(connection):
         connection.execute("CREATE TABLE should_not_exist (id INTEGER)")
 
-    migration_v3 = Migration(
-        3, "test_future", apply_v3, lambda connection: None
+    migration_v4 = Migration(
+        4, "test_future", apply_v4, lambda connection: None
     )
     with app.app_context(), pytest.raises(OSError):
         migrate_database(
             get_database(),
-            migrations=(*MIGRATIONS, migration_v3),
-            latest_version=3,
+            migrations=(*MIGRATIONS, migration_v4),
+            latest_version=4,
             before_migrations=lambda connection: (_ for _ in ()).throw(
                 OSError("injected snapshot failure")
             ),
@@ -475,7 +475,7 @@ def test_failed_pre_migration_snapshot_aborts_migration(tmp_path):
     ).fetchone() is None
     assert database.execute(
         "SELECT version FROM schema_migrations ORDER BY version"
-    ).fetchall() == [(1,), (2,)]
+    ).fetchall() == [(1,), (2,), (3,)]
     database.close()
 
 

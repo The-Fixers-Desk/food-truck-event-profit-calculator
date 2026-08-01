@@ -15,7 +15,8 @@ from app.migrations import (
     DatabaseMigrationError,
     LATEST_SUPPORTED_SCHEMA_VERSION,
     migrate_database,
-    verify_version_1,
+    verify_version_3,
+    verify_version_2,
 )
 
 
@@ -71,7 +72,7 @@ def _validate_database(path: Path, *, allow_migration: bool = False) -> None:
                 raise BackupValidationError(
                     "The backup database version is not current."
                 )
-            verify_version_1(connection)
+            verify_version_3(connection)
     except sqlite3.Error as error:
         raise BackupValidationError(
             "The backup database could not be read."
@@ -121,8 +122,11 @@ def _snapshot_database(
             if "schema_migrations" in tables:
                 _verify_ledger(connection)
                 recorded = _recorded_migrations(connection)
-                if recorded and recorded[-1][0] == 1:
-                    _verify_version_2_source(connection)
+                if recorded and recorded[-1][0] in {1, 2}:
+                    if recorded[-1][0] == 1:
+                        _verify_version_2_source(connection)
+                    else:
+                        verify_version_2(connection)
                     return
             raise
         finally:

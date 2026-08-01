@@ -48,12 +48,12 @@ def test_demand_fields_present_with_conditional_custom_sales(client):
     assert "/event-inputs/warnings" in script
 
 
-def test_about_estimates_is_collapsed_and_can_be_toggled(client):
+def test_estimate_guidance_is_integrated_and_always_visible(client):
     response = client.get("/events/new")
 
-    assert b"About estimates" in response.data
-    assert b"<details" in response.data
-    assert b"<details open" not in response.data
+    assert b"This estimate applies only to this event." in response.data
+    assert b"Changes here do not alter those defaults." in response.data
+    assert b'id="about-estimates"' not in response.data
 
 
 def test_weather_percentage_guidance_and_accessible_disclosure(client):

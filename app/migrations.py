@@ -6,7 +6,7 @@ import sqlite3
 from typing import Callable, Iterable
 
 
-LATEST_SUPPORTED_SCHEMA_VERSION = 2
+LATEST_SUPPORTED_SCHEMA_VERSION = 3
 SCHEMA_DIRECTORY = Path(__file__).resolve().parent / "schema"
 
 
@@ -292,6 +292,7 @@ def verify_version_1(
     connection: sqlite3.Connection,
     *,
     allow_obsolete_demand_columns: bool = False,
+    allowed_extra_tables: set[str] | None = None,
 ) -> None:
     """Verify that the complete established Version 1 schema is compatible."""
     tables = {
@@ -305,7 +306,7 @@ def verify_version_1(
     }
     expected_tables = set(EXPECTED_COLUMNS)
     missing = expected_tables - tables
-    unexpected = tables - expected_tables - {"schema_migrations"}
+    unexpected = tables - expected_tables - {"schema_migrations"} - (allowed_extra_tables or set())
     if missing or unexpected:
         raise DatabaseMigrationError(
             "Version 1 table mismatch: "
@@ -511,7 +512,9 @@ def _apply_version_2(connection: sqlite3.Connection) -> None:
 
 
 def verify_version_2(connection: sqlite3.Connection) -> None:
-    verify_version_1(connection)
+    tables = _user_tables(connection)
+    allowed = {"local_profile", "notifications"} & tables
+    verify_version_1(connection, allowed_extra_tables=allowed)
     obsolete = (
         _event_scenario_columns(connection)
         & OBSOLETE_EVENT_SCENARIO_COLUMNS
@@ -522,6 +525,54 @@ def verify_version_2(connection: sqlite3.Connection) -> None:
         )
 
 
+def _apply_version_3(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE local_profile (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            display_name TEXT NOT NULL CHECK (length(trim(display_name)) BETWEEN 1 AND 120),
+            email_address TEXT NOT NULL CHECK (length(trim(email_address)) BETWEEN 3 AND 254),
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE notifications (
+            id INTEGER PRIMARY KEY,
+            code TEXT NOT NULL CHECK (length(trim(code)) > 0),
+            message TEXT NOT NULL CHECK (length(trim(message)) > 0),
+            severity TEXT NOT NULL CHECK (severity IN ('info', 'success', 'warning', 'critical')),
+            action_url TEXT,
+            action_label TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            read_at TEXT,
+            dismissed_at TEXT
+        )
+        """
+    )
+    connection.execute(
+        "CREATE INDEX notifications_created_at_index ON notifications(created_at DESC, id DESC)"
+    )
+
+
+def verify_version_3(connection: sqlite3.Connection) -> None:
+    verify_version_1(connection, allowed_extra_tables={"local_profile", "notifications"})
+    obsolete = _event_scenario_columns(connection) & OBSOLETE_EVENT_SCENARIO_COLUMNS
+    if obsolete:
+        raise DatabaseMigrationError(f"Obsolete Event Scenario columns remain: {sorted(obsolete)}")
+    tables = _user_tables(connection)
+    if not {"local_profile", "notifications"} <= tables:
+        raise DatabaseMigrationError("Local profile and notification tables are missing.")
+    profile_columns = {row[1] for row in connection.execute("PRAGMA table_info(local_profile)")}
+    notification_columns = {row[1] for row in connection.execute("PRAGMA table_info(notifications)")}
+    if not {"id", "display_name", "email_address", "created_at", "updated_at"} <= profile_columns:
+        raise DatabaseMigrationError("The local profile table is incompatible.")
+    if not {"id", "code", "message", "severity", "action_url", "action_label", "created_at", "read_at", "dismissed_at"} <= notification_columns:
+        raise DatabaseMigrationError("The notifications table is incompatible.")
+
+
 MIGRATIONS = (
     Migration(1, "version_1_baseline", _apply_version_1, verify_version_1),
     Migration(
@@ -530,6 +581,7 @@ MIGRATIONS = (
         _apply_version_2,
         verify_version_2,
     ),
+    Migration(3, "add_local_profile_and_notifications", _apply_version_3, verify_version_3),
 )
 
 
@@ -640,12 +692,24 @@ def migrate_database(
                             "Upgrading recognized pre-Version 1 Defaults schema."
                         )
                     _upgrade_known_pre_v1_defaults(connection)
-                registry[0].verify(connection)
+                compatible_version = None
+                for candidate in reversed(registry):
+                    try:
+                        candidate.verify(connection)
+                    except DatabaseMigrationError:
+                        continue
+                    compatible_version = candidate.version
+                    break
+                if compatible_version is None:
+                    raise DatabaseMigrationError(
+                        "The unversioned schema does not match a supported version."
+                    )
                 _create_ledger(connection)
-                connection.execute(
-                    "INSERT INTO schema_migrations (version, name) VALUES (?, ?)",
-                    (registry[0].version, registry[0].name),
-                )
+                for adopted in registry[:compatible_version]:
+                    connection.execute(
+                        "INSERT INTO schema_migrations (version, name) VALUES (?, ?)",
+                        (adopted.version, adopted.name),
+                    )
                 connection.commit()
             except Exception as error:
                 connection.rollback()
@@ -656,7 +720,7 @@ def migrate_database(
                 ) from error
             if logger:
                 logger.info("Adopted compatible unversioned database as Version 1.")
-            current_version = 1
+            current_version = compatible_version
         else:
             migration = registry[0]
             if logger:

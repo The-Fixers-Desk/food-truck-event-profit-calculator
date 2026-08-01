@@ -377,11 +377,13 @@ def reset_business_defaults() -> None:
 
 
 def clear_customer_data() -> None:
-    """Remove all customer-created Defaults and saved Event data."""
+    """Remove all customer-created data, including local shell state."""
     database = get_database()
     with database:
         database.execute("DELETE FROM events")
         database.execute("DELETE FROM business_defaults")
+        database.execute("DELETE FROM notifications")
+        database.execute("DELETE FROM local_profile")
 
 
 def rename_event(event_id: int, name: str) -> bool:

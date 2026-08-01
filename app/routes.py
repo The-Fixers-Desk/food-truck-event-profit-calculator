@@ -64,6 +64,15 @@ from app.event_inputs_form import (
     validate_and_calculate_event_analysis,
     weather_allows_protection,
 )
+from app.local_state import (
+    create_notification,
+    dismiss_notification,
+    mark_all_notifications_read,
+    mark_notification_read,
+    maybe_create_backup_reminder,
+    save_local_profile,
+    validate_profile,
+)
 
 main = Blueprint("main", __name__)
 
@@ -123,6 +132,10 @@ def require_business_defaults_setup():
         "main.delete_all_saved_events",
         "main.reset_saved_defaults",
         "main.clear_all_customer_data",
+        "main.edit_local_profile",
+        "main.read_notification",
+        "main.read_all_notifications",
+        "main.dismiss_local_notification",
     }:
         return None
     if (
@@ -178,6 +191,9 @@ def dashboard():
         recent_events = list_saved_events()[:3]
     else:
         event_count, scenario_count, recent_events = 0, 0, []
+    marker = current_app.config["DATA_PATHS"].root / "last-export.txt"
+    last_export = marker.read_text(encoding="utf-8").strip() if marker.exists() else None
+    maybe_create_backup_reminder(last_export=last_export)
     return render_template(
         "dashboard.html",
         active_page="dashboard",
@@ -231,6 +247,17 @@ def download_backup():
         abort(500)
     marker = current_app.config["DATA_PATHS"].root / "last-export.txt"
     marker.write_text(datetime.now().astimezone().isoformat(timespec="minutes"), encoding="utf-8")
+    get_database().execute(
+        "UPDATE notifications SET read_at = COALESCE(read_at, CURRENT_TIMESTAMP), dismissed_at = COALESCE(dismissed_at, CURRENT_TIMESTAMP) WHERE code = 'backup_reminder'"
+    )
+    get_database().commit()
+    create_notification(
+        "backup_exported",
+        "A complete local-data backup was exported.",
+        severity="success",
+        action_url=url_for("main.data_safety"),
+        action_label="Open Data Safety",
+    )
     return send_file(
         payload,
         as_attachment=True,
@@ -298,12 +325,27 @@ def restore_backup():
                 raise
     except BackupValidationError as error:
         current_app.logger.warning("Backup restore validation failed: %s", error)
+        if not current_app.config.get("RECOVERY_MODE"):
+            create_notification(
+                "import_failed",
+                "A backup import was not completed because the file was invalid or incompatible.",
+                severity="warning",
+                action_url=url_for("main.data_safety"),
+                action_label="Review Data Safety",
+            )
         return _render_restore_error(str(error))
     except (OSError, sqlite3.Error):
         current_app.logger.exception("Backup restore failed.")
         abort(500)
     current_app.config["RECOVERY_MODE"] = False
     session.clear()
+    create_notification(
+        "import_completed",
+        "A local-data backup was imported successfully.",
+        severity="success",
+        action_url=url_for("main.data_safety"),
+        action_label="Open Data Safety",
+    )
     flash("Backup restored successfully.", "success")
     if business_defaults_setup_is_complete():
         return redirect(url_for("main.dashboard"))
@@ -352,6 +394,13 @@ def calculator():
                     "The event could not be saved. Please try again."
                 )
             else:
+                create_notification(
+                    "scenario_created",
+                    'Scenario "Original estimate" was saved.',
+                    severity="success",
+                    action_url=url_for("main.open_saved_scenario", event_id=active_event_id, scenario_id=active_scenario_id),
+                    action_label="Open scenario",
+                )
                 workspace = True
                 _, identity, scenario = load_event_scenario(
                     active_scenario_id
@@ -468,6 +517,9 @@ def clear_all_customer_data():
         flash('Type "CLEAR ALL DATA" to confirm.', "error")
         return redirect(url_for("main.data_safety"))
     clear_customer_data()
+    marker = current_app.config["DATA_PATHS"].root / "last-export.txt"
+    if marker.exists():
+        marker.unlink()
     session.clear()
     flash("All customer data was cleared.", "success")
     return redirect(url_for("main.welcome"))
@@ -543,6 +595,13 @@ def save_event_analysis():
             scenario_id = new_scenario_id
             active_name = name
             message = f'Scenario "{name}" saved.'
+            create_notification(
+                "scenario_created",
+                f'Scenario "{name}" was saved.',
+                severity="success",
+                action_url=url_for("main.open_saved_scenario", event_id=event_id, scenario_id=scenario_id),
+                action_label="Open scenario",
+            )
         elif mode == "overwrite":
             if request.form.get("overwrite_confirmed") != "true":
                 return jsonify(
@@ -560,6 +619,13 @@ def save_event_analysis():
             overwrite_event_scenario(scenario_id, scenario)
             active_name = stored.scenario_name
             message = f'Scenario "{active_name}" overwritten.'
+            create_notification(
+                "scenario_overwritten",
+                f'Scenario "{active_name}" was overwritten with the latest assumptions.',
+                severity="info",
+                action_url=url_for("main.open_saved_scenario", event_id=event_id, scenario_id=scenario_id),
+                action_label="Open scenario",
+            )
         else:
             return jsonify(
                 {"saved": False, "save_error": "Choose a save option."}
@@ -623,6 +689,41 @@ def defaults():
         active_step=request.form.get("wizard_step", "1"),
         snapshot_values=defaults_to_form(persisted_defaults),
     )
+
+
+@main.post("/local-profile")
+def edit_local_profile():
+    display_name = request.form.get("display_name", "")
+    email_address = request.form.get("email_address", "")
+    errors = validate_profile(display_name, email_address)
+    if errors:
+        return jsonify({"saved": False, "errors": errors}), 400
+    profile = save_local_profile(display_name, email_address)
+    return jsonify({
+        "saved": True,
+        "display_name": profile.display_name,
+        "email_address": profile.email_address,
+    })
+
+
+@main.post("/notifications/<int:notification_id>/read")
+def read_notification(notification_id: int):
+    if not mark_notification_read(notification_id):
+        abort(404)
+    return jsonify({"updated": True})
+
+
+@main.post("/notifications/read-all")
+def read_all_notifications():
+    mark_all_notifications_read()
+    return jsonify({"updated": True})
+
+
+@main.post("/notifications/<int:notification_id>/dismiss")
+def dismiss_local_notification(notification_id: int):
+    if not dismiss_notification(notification_id):
+        abort(404)
+    return jsonify({"updated": True})
 
 
 @main.post("/defaults/finish-later")
@@ -769,6 +870,12 @@ def delete_saved_scenario(event_id: int, scenario_id: int):
         )
     if not deleted:
         abort(404)
+    database = get_database()
+    with database:
+        database.execute(
+            "UPDATE notifications SET dismissed_at = CURRENT_TIMESTAMP WHERE action_url = ? AND dismissed_at IS NULL",
+            (url_for("main.open_saved_scenario", event_id=event_id, scenario_id=scenario_id),),
+        )
     flash("Scenario deleted.", "success")
     return redirect(url_for("main.saved_events"))
 
@@ -798,6 +905,12 @@ def delete_saved_event(event_id: int):
         )
     if not deleted:
         abort(404)
+    database = get_database()
+    with database:
+        database.execute(
+            "UPDATE notifications SET dismissed_at = CURRENT_TIMESTAMP WHERE action_url LIKE ? AND dismissed_at IS NULL",
+            (f"/events/{event_id}/scenarios/%",),
+        )
     flash("Event and its saved scenarios deleted.", "success")
     return redirect(url_for("main.saved_events"))
 

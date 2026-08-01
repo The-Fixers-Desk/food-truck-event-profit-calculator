@@ -256,7 +256,7 @@ APPROVED UI IMPLEMENTATION
   Complete both screen checklists plus scenario, comparison, and recalculation tests
   before continuing.
 
-□ >Implement saved-work management and data control, then close UI implementation
+☑ Implement saved-work management and data control, then close UI implementation
   Build Saved Events and all list, filter, sort, pagination, empty, open, compare,
   rename, and delete states. Build Data Safety with local-data summaries, export,
   import, sample format, backup status, and all confirmation-protected danger-zone
@@ -264,6 +264,29 @@ APPROVED UI IMPLEMENTATION
   mockups, specifications, rationales, and acceptance checklists; correct visual or
   behavioral deviations; run the full pre-polish regression suite; and verify
   keyboard, screen-reader, responsive, persistence, restart, and offline behavior.
+
+☑ Refine shell context, event guidance, local profile, and notifications
+  Remove redundant top-level breadcrumbs, replace the Event Inputs “About
+  estimates” disclosure with an integrated guidance callout, add an optional
+  locally stored user profile with name and email, and display it in the sidebar
+  identity area. Verify the notification bell and implement a restrained local
+  notification center with unread state, actionable backup and recovery notices,
+  persistence, accessibility, and safe integration with export, import, reset,
+  and clear-data behavior. Preserve the approved charcoal UI, offline operation,
+  existing workflows, and all no-account and no-cloud promises.
+
+□ Build the in-app Help Center and support diagnostics
+  Replace the currently limited Help action with an accessible in-app Help Center
+  covering getting started, Business Defaults versus event-specific inputs, events
+  and scenarios, revenue and food-cost methods, profit targets, recommendation
+  states, backups, restores, data location, and common in-app troubleshooting.
+  Add app version and platform details, a privacy-safe “Copy support information”
+  action that excludes customer event data, a link to the external product support
+  page, and email support at contact@fixersdesk.com. State that support begins
+  by email and that phone calls may be arranged only when written troubleshooting
+  cannot resolve the issue. Preserve offline use by bundling core help content
+  locally and test navigation, section discovery, accessibility, copied diagnostics,
+  links, responsive behavior, and unavailable-link states.
 
 
 DESKTOP APPLICATION AND PACKAGING
@@ -281,6 +304,16 @@ DESKTOP APPLICATION AND PACKAGING
   Bundle dependencies, add metadata and icons, create the installer or disk
   image, use the correct data location, and verify installation behavior.
 
+□ Add pre-installation support entry points to every distribution package
+  Include a clearly named “START HERE — Installation and Support.txt” file with
+  Windows and macOS downloads, link installation troubleshooting and support from
+  installer or disk-image instructions and completion experiences where supported,
+  and include the same support destination in download and purchase confirmation
+  materials. Cover installation, launch, and security-warning help without requiring
+  the app to open. Verify that support files, links, version references, and
+  contact@fixersdesk.com remain available in clean installs, reinstall scenarios,
+  shortcuts, and offline-distributed packages.
+
 
 QUALITY ASSURANCE
 
@@ -294,6 +327,19 @@ QUALITY ASSURANCE
 
 
 DOCUMENTATION AND RELEASE
+
+□ Publish the external product support center and support process
+  Create the public Food Truck Event Profit Calculator support page with Windows
+  and macOS installation instructions, launch and security-warning troubleshooting,
+  reinstall guidance, data-location explanations, backup and restore instructions,
+  known issues, and contact@fixersdesk.com. Define email as the first-line
+  support channel, publish a normal response-time expectation, request operating
+  system, app version, exact error text, and screenshots, and explain that a phone
+  call may be scheduled only when written troubleshooting fails. State that support
+  covers installation, app functionality, backups, and troubleshooting—not tax,
+  legal, financial, event-planning, or business-assumption validation. Verify the
+  page on desktop and mobile and confirm every in-app, installer, package, purchase,
+  and download support link resolves to the correct product-specific destination.
 
 □ -Finalize the complete V1 documentation set
   Finalize the PDR, ADR, calculation methodology, installation guide,

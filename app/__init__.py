@@ -52,6 +52,13 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.context_processor
     def application_state():
         from app.database import business_defaults_setup_is_complete
+        from app.local_state import list_notifications, load_local_profile, profile_initials
+
+        profile = None
+        notifications = []
+        if not app.config.get("RECOVERY_MODE"):
+            profile = load_local_profile()
+            notifications = list_notifications()
 
         return {
             "business_defaults_setup_complete": (
@@ -62,6 +69,10 @@ def create_app(test_config: dict | None = None) -> Flask:
                 )
             ),
             "onboarding_deferred": bool(session.get("onboarding_deferred")),
+            "local_profile": profile,
+            "local_profile_initials": profile_initials(profile.display_name) if profile else "L",
+            "notifications": notifications,
+            "unread_notification_count": sum(item["read_at"] is None for item in notifications),
         }
 
     if app.config.get("TESTING"):

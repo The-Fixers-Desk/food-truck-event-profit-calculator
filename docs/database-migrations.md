@@ -13,6 +13,10 @@ in recovery mode with the original database unchanged. Version 1 databases
 that already match the current schema are validated and stamped Version 2
 without reconstruction.
 
+Version 3 adds the optional singleton `local_profile` table and the bounded
+`notifications` table. Both are local-only customer state. The migration adds
+the tables without rebuilding or rewriting Defaults, Events, or Scenarios.
+
 Applied versions are stored once in `schema_migrations`. Startup reads this
 ledger from SQLite, applies every missing migration in order, verifies it, and
 records it last in the same transaction. Never edit a released migration.
@@ -36,7 +40,10 @@ the new table explicitly, copy named columns explicitly, verify row counts and
 relationships, then replace the original. Do not reuse or silently delete an
 unexpected temporary table.
 
-A compatible unversioned database is checked for the complete Version 1
+A compatible unversioned database is checked against the complete shape of a
+recognized schema version, beginning with the newest supported version, and
+then receives the matching sequential ledger records. Version 1 is checked for
+the complete
 tables, columns and types, important indexes and foreign keys, SQLite
 integrity, and foreign-key consistency before it is stamped Version 1. Its
 business rows, identifiers, ordering, and timestamps are not rewritten.

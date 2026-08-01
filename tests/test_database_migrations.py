@@ -127,13 +127,14 @@ def snapshot(database):
     }
 
 
-def test_fresh_database_reaches_complete_version_2(database_path):
+def test_fresh_database_reaches_complete_version_3(database_path):
     app = create_app({"DATABASE": database_path, "TESTING": True})
     with app.app_context():
         database = connect(database_path)
         assert [row[:2] for row in ledger_rows(database)] == [
             (1, "version_1_baseline"),
             (2, "remove_obsolete_event_demand_columns"),
+            (3, "add_local_profile_and_notifications"),
         ]
         tables = {
             row[0]
@@ -149,6 +150,8 @@ def test_fresh_database_reaches_complete_version_2(database_path):
             "event_scenarios",
             "event_scenario_employee_labor_entries",
             "event_scenario_additional_costs",
+            "local_profile",
+            "notifications",
         } <= tables
         columns = {
             row[1]
@@ -198,6 +201,7 @@ def test_compatible_unversioned_database_is_adopted_without_data_changes(
     assert [row[:2] for row in ledger_rows(database)] == [
         (1, "version_1_baseline"),
         (2, "remove_obsolete_event_demand_columns"),
+        (3, "add_local_profile_and_notifications"),
     ]
     assert snapshot(database) == before
 
@@ -271,7 +275,7 @@ def test_future_version_is_rejected_without_changes(database_path):
     database.execute(
         """
         INSERT INTO schema_migrations (version, name)
-        VALUES (3, 'future_release')
+        VALUES (4, 'future_release')
         """
     )
     database.commit()

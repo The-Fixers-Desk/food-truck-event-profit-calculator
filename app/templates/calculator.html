@@ -1,3 +1,4 @@
+{% set nested_breadcrumb = workspace %}
 {% extends "base.html" %}
 {% block title %}{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %} | Food Truck Event Profit Calculator{% endblock %}
 {% block context_label %}
@@ -107,14 +108,11 @@
       </div>
       <p class="active-scenario visually-hidden">Active scenario: <strong id="active-scenario-name">{{ active_scenario_name }}</strong></p>
     {% else %}
-    <p class="event-only-notice">Changes on this screen apply only to this event.</p>
-    <details class="estimate-information" id="about-estimates">
-      <summary>About estimates</summary>
-      <p>
-        Attendance, customer demand, weather, and sales are estimates.
-        Review these assumptions whenever conditions change.
-      </p>
-    </details>
+    <aside class="estimate-guidance" aria-labelledby="estimate-guidance-title">
+      <span class="estimate-guidance__icon" aria-hidden="true">i</span>
+      <div><h2 id="estimate-guidance-title">This estimate applies only to this event.</h2>
+      <p>Changes on this screen apply only to this event. Your saved business defaults provide the starting values. Changes here do not alter those defaults. You can save multiple scenarios to test different assumptions. Attendance, shared food demand, weather, and sales remain estimates, so review them when conditions change.</p></div>
+    </aside>
     {% endif %}
   </header>
   {% if not workspace %}

@@ -13,6 +13,11 @@ members, never trusts archive paths, validates the manifest and checksum,
 checks SQLite integrity and relationships, and migrates an older supported
 database only in staging.
 
+Because profile and notification records live in the same versioned SQLite
+database, a full export and import includes them. Resetting Business Defaults
+or deleting saved Events preserves both. Clearing all app data removes both,
+along with the persisted last-export marker.
+
 Restore is complete replacement, not a merge. After staged validation the app
 creates a validated pre-restore recovery snapshot, closes the live connection,
 atomically replaces the database, reopens and verifies it, and checks normal
