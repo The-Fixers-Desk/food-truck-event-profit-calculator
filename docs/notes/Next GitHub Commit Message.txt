@@ -2,6 +2,18 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
+Build in-app Help Center and support tools
+
+Replaced the limited Help action with a complete offline Help Center covering setup, calculator concepts, backups, restores, data handling, and common in-app troubleshooting. Added privacy-safe support diagnostics, external support links, accessibility improvements, and email support through contact@fixersdesk.com.
+
+---------------------------------------------------------------------------------
+
+Build cross-platform desktop application shell
+
+Added the pywebview desktop entrypoint with localhost-only server startup, readiness checks, single-instance protection, native loading and startup-error states, navigation restrictions, and orderly shutdown. Preserved browser-based development, offline operation, centralized application-data storage, database recovery safeguards, and headless automated testing.
+
+---------------------------------------------------------------------------------
+
 Package Windows application
 
 - Build a 64-bit Windows application bundle with PyInstaller
@@ -30,6 +42,12 @@ Package macOS application
 - Verify architecture slices, signatures, Gatekeeper status, and bundle contents
 - Add reproducible macOS build automation and artifact checksums
 - Add macOS packaging, frozen-runtime, metadata, and data-preservation tests
+
+---------------------------------------------------------------------------------
+
+Add installation and support resources to packages
+
+Added pre-installation support resources to Windows and macOS distribution packages, including the START HERE installation and support file, installer and download guidance, launch troubleshooting links, and consistent contact information using contact@fixersdesk.com.
 
 ---------------------------------------------------------------------------------
 
@@ -64,4 +82,8 @@ Complete platform acceptance testing and fix V1 defects
 - Record separate Windows and macOS release-readiness outcomes
 
 ---------------------------------------------------------------------------------
+
+Create external support center and support process
+
+Created the product support center with installation, launch, reinstall, backup, recovery, known-issue, and contact guidance. Added the email-first support process, scheduled phone escalation policy, support boundaries, responsive support content, and unified support links across the app and distribution materials.
 

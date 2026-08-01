@@ -108,18 +108,13 @@
               {% if unread_notification_count %}<span class="visually-hidden">{{ unread_notification_count }} unread notifications</span>{% endif %}
               {% if unread_notification_count %}<span class="notification-count" aria-hidden="true">{{ unread_notification_count if unread_notification_count < 100 else '99+' }}</span>{% endif %}
             </button>
-            <button class="utility-button" type="button" aria-label="Help"
-              aria-expanded="false" aria-controls="help-panel" data-utility-trigger="help-panel">
+            <a class="utility-button" href="{{ url_for('main.help_center') }}" aria-label="Help Center">
               <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#help"></use></svg>
-            </button>
+            </a>
             <section class="utility-panel notification-panel" id="notifications-panel" aria-labelledby="notifications-title" hidden>
               <div class="notification-panel__header"><h2 id="notifications-title">Notifications</h2>{% if unread_notification_count %}<button class="button-tertiary button--small" type="button" data-notifications-read-all>Mark all read</button>{% endif %}</div>
               <p class="visually-hidden" id="notification-status" role="status" aria-live="polite"></p>
               {% if notifications %}<ul class="notification-list">{% for item in notifications %}<li class="notification-item notification-item--{{ item.severity }}{% if not item.read_at %} notification-item--unread{% endif %}" data-notification-id="{{ item.id }}"><div><p>{{ item.message }}</p><time datetime="{{ item.created_at }}">{{ item.created_at }}</time></div><div class="notification-item__actions">{% if item.action_url %}<a href="{{ item.action_url }}" data-notification-action>{{ item.action_label or 'Open' }}</a>{% endif %}{% if not item.read_at %}<button type="button" data-notification-read>Mark read</button>{% endif %}<button type="button" data-notification-dismiss aria-label="Dismiss notification: {{ item.message }}">Dismiss</button></div></li>{% endfor %}</ul>{% else %}<div class="notification-empty"><p>You&rsquo;re all caught up.</p><small>Useful local updates will appear here.</small></div>{% endif %}
-            </section>
-            <section class="utility-panel" id="help-panel" hidden>
-              <h2>Help</h2><p>Start with Business Defaults, then analyze an event. Your work stays on this device.</p>
-              <a class="button-secondary button--small" href="{{ url_for('main.defaults') }}">Review defaults</a>
             </section>
           </div>
         </header>

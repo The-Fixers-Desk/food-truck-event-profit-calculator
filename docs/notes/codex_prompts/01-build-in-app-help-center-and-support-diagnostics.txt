@@ -1,0 +1,168 @@
+MILESTONE — BUILD THE IN-APP HELP CENTER AND SUPPORT DIAGNOSTICS
+
+
+You are implementing a focused support milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the current app architecture, desktop packaging approach, documentation structure, routing, styling system, tests, and existing support-related UI or files.
+2. Preserve all existing calculations, persistence, migrations, workflows, approved charcoal visual direction, responsive behavior, accessibility, and offline-first behavior.
+3. Reuse the existing design system and shared components. Do not create a second visual system.
+4. Do not add authentication, cloud accounts, telemetry, remote APIs, or background network activity.
+5. Do not add dependencies unless absolutely necessary.
+6. Use the company support email exactly as: contact@fixersdesk.com
+7. Add or update focused tests where the current stack supports them.
+8. Do not create a git commit.
+
+FINAL REPORT
+
+Report:
+- files changed;
+- behavior implemented;
+- tests run and results;
+- any unresolved blocker;
+- any manual verification still required.
+
+Do not create a commit.
+
+
+PRIMARY OBJECTIVE
+
+Replace the limited Help action with a real, useful, accessible in-app Help Center for users who can already open the application.
+
+REQUIRED SCOPE
+
+1. Help Center entry point
+
+- Make the existing Help control open a real Help Center.
+- Preserve the approved shell and charcoal visual system.
+- The Help Center may be a dedicated route, panel, drawer, or modal according to the current architecture, but it must be easy to reopen and navigate.
+- Provide clear section navigation and sensible responsive behavior.
+- Ensure keyboard operation, visible focus, screen-reader labels, and correct focus restoration.
+
+2. Help content
+
+Include concise, plain-language guidance for:
+
+Getting started:
+- set business defaults;
+- create an event analysis;
+- review results;
+- save multiple scenarios;
+- compare scenarios;
+- export backups.
+
+Core concepts:
+- Business Defaults versus event-specific inputs;
+- Events versus Scenarios;
+- revenue methods;
+- food and packaging cost methods;
+- profit targets;
+- expected buyers and break-even buyers;
+- what Worth it, Borderline, and Not worth it mean.
+
+Data and safety:
+- where data is stored;
+- local-only and offline behavior;
+- automatic saving;
+- export and import;
+- recovery and restore basics;
+- what clearing data does.
+
+Common in-app troubleshooting:
+- information did not appear to save;
+- backup import failed;
+- saved event is missing;
+- numbers look unexpected;
+- draft or scenario behavior is confusing;
+- app needs to be reset;
+- how to reach Data Safety.
+
+Do not include installation troubleshooting that assumes the app can open. Instead, link to the external product support page for install and launch issues.
+
+3. Contact support
+
+Include a support section with wording equivalent to:
+
+“Still need help?
+Email contact@fixersdesk.com with a description of the problem, what you were doing when it happened, and a screenshot if possible.
+
+Support begins by email. If written troubleshooting cannot resolve the issue, a phone call may be arranged.”
+
+Also state a normal response-time expectation if one already exists in product documentation. Do not invent one if the business has not defined it.
+
+Do not publish a phone number in the app.
+
+4. Support diagnostics
+
+Add a privacy-safe “Copy support information” action.
+
+The copied content should include only useful technical metadata, such as:
+- app name and version;
+- operating system and version where available;
+- application data location or category, without exposing private event contents;
+- database/schema version;
+- last successful backup/export timestamp if already available;
+- whether the app is online/offline, if meaningful;
+- current screen or route;
+- relevant non-sensitive error identifier if the app already produces one.
+
+The copied content must not include:
+- event names;
+- locations;
+- financial values;
+- customer assumptions;
+- profile email unless the user explicitly chooses to include it;
+- raw database contents;
+- stack traces;
+- secrets or local filesystem details beyond what is genuinely useful.
+
+Show a clear success or failure message after copying.
+
+5. External support link
+
+Add a link or button to the external Food Truck Event Profit Calculator support page.
+
+- Use a single configurable support URL rather than hardcoding it in multiple templates.
+- If the final URL is not yet configured, centralize a placeholder setting and make the unavailable state graceful.
+- Do not break offline use. Core help content must be bundled locally.
+- Clearly label external navigation.
+
+6. Search or findability
+
+Provide simple section discovery:
+- a left-side section list, anchored headings, or compact in-page navigation;
+- optional local search only if it fits the existing architecture without unnecessary complexity;
+- no network dependency for help content.
+
+7. Support boundaries
+
+Include plain-language support boundaries:
+- support covers installation, app functionality, backups, restores, and troubleshooting;
+- support does not provide tax, legal, financial, event-planning, or business-assumption validation advice.
+
+Keep this concise and professional.
+
+8. Tests
+
+Add or update tests for:
+- Help control opens the Help Center;
+- section navigation;
+- bundled content renders offline;
+- support email is exactly contact@fixersdesk.com;
+- external support link behavior;
+- Copy support information excludes private business data;
+- copied diagnostics contain required metadata;
+- keyboard navigation and focus restoration where testable;
+- responsive rendering or route behavior where testable.
+
+COMPLETION GATE
+
+Do not declare completion until:
+- the Help button is meaningfully useful;
+- core guidance works offline;
+- support contact uses contact@fixersdesk.com;
+- no phone number is published;
+- copied support information is privacy-safe;
+- the external support page is clearly reachable when configured;
+- accessibility and existing workflows remain intact.

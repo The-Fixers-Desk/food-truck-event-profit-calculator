@@ -16,6 +16,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         ENFORCE_SETUP=True,
         MAX_CONTENT_LENGTH=101 * 1024 * 1024,
         SECRET_KEY="development-only",
+        SUPPORT_URL=None,
     )
 
     if test_config is not None:
@@ -69,6 +70,7 @@ def create_app(test_config: dict | None = None) -> Flask:
                 )
             ),
             "onboarding_deferred": bool(session.get("onboarding_deferred")),
+            "support_url": app.config.get("SUPPORT_URL"),
             "local_profile": profile,
             "local_profile_initials": profile_initials(profile.display_name) if profile else "L",
             "notifications": notifications,

@@ -33,7 +33,7 @@ def test_shell_renders_topbar_breadcrumbs_utilities_and_workspace_block(client):
     assert 'aria-label="Breadcrumb"' in page
     assert 'aria-label="Search saved events"' in page
     assert 'aria-label="Notifications"' in page
-    assert 'aria-label="Help"' in page
+    assert 'aria-label="Help Center"' in page
     assert 'id="workspace-menu-trigger"' in page
     assert "Local workspace" in page
     assert 'aria-current="page"' in page

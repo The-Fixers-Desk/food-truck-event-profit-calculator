@@ -136,6 +136,8 @@ def require_business_defaults_setup():
         "main.read_notification",
         "main.read_all_notifications",
         "main.dismiss_local_notification",
+        "main.help_center",
+        "main.support_diagnostics",
     }:
         return None
     if (
@@ -208,6 +210,20 @@ def dashboard():
 def system_states():
     """Display deterministic reusable system states for support review."""
     return render_template("system_states.html", active_page="system")
+
+
+@main.get("/help")
+def help_center():
+    """Display bundled guidance for using and troubleshooting the app."""
+    return render_template("help.html", active_page="help")
+
+
+@main.get("/help/support-information")
+def support_diagnostics():
+    """Return privacy-safe metadata for a customer-directed support email."""
+    from app.support import support_information
+
+    return jsonify(support_information())
 
 
 @main.get("/data-safety")

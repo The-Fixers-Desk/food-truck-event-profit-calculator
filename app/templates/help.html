@@ -1,0 +1,319 @@
+{% extends "base.html" %} {% block title %}Help Center | Food Truck Event Profit
+Calculator{% endblock %} {% block context_label %}Help Center{% endblock %} {%
+block content %}
+<section class="page help-center-page workspace-page--wide">
+  <header class="page-header">
+    <p class="page-eyebrow">Local guidance</p>
+    <h1>Help Center</h1>
+    <p class="page-description">
+      Find clear answers about event analysis, saved work, and keeping your
+      local data safe.
+    </p>
+  </header>
+
+  <div class="help-center-layout">
+    <nav class="help-section-nav" aria-label="Help Center sections">
+      <strong>On this page</strong>
+      <a href="#getting-started">Getting started</a>
+      <a href="#core-concepts">Core concepts</a>
+      <a href="#data-safety-help">Data and safety</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#support-information">Support information</a>
+      <a href="#contact-support">Contact support</a>
+    </nav>
+
+    <div class="help-center-content">
+      <section
+        class="help-section"
+        id="getting-started"
+        tabindex="-1"
+        aria-labelledby="getting-started-title"
+      >
+        <h2 id="getting-started-title">Getting started</h2>
+        <ol>
+          <li>
+            <strong>Set Business Defaults.</strong> Save the values you normally
+            use so each new event starts from a useful baseline.
+          </li>
+          <li>
+            <strong>Create an event analysis.</strong> Enter the event details,
+            demand assumptions, costs, labor, and conditions.
+          </li>
+          <li>
+            <strong>Review the results.</strong> Check expected sales, total
+            costs, business profit, margin, break-even buyers, and factual
+            warnings.
+          </li>
+          <li>
+            <strong>Test scenarios.</strong> Save a new scenario to try
+            different assumptions without overwriting the original. Compare two
+            to four saved scenarios from Saved Events.
+          </li>
+          <li>
+            <strong>Export backups.</strong> Visit Data Safety and download a
+            complete backup regularly.
+          </li>
+        </ol>
+        <div class="help-actions">
+          <a
+            class="button-secondary button--small"
+            href="{{ url_for('main.defaults') }}"
+            >Review defaults</a
+          ><a
+            class="button-secondary button--small"
+            href="{{ url_for('main.calculator') }}"
+            >Start an analysis</a
+          >
+        </div>
+      </section>
+
+      <section
+        class="help-section"
+        id="core-concepts"
+        tabindex="-1"
+        aria-labelledby="core-concepts-title"
+      >
+        <h2 id="core-concepts-title">Core concepts</h2>
+        <dl class="help-definition-list">
+          <div>
+            <dt>Business Defaults and event inputs</dt>
+            <dd>
+              Defaults are reusable starting values. Changes in Event Inputs
+              affect only that event and do not update your Defaults.
+            </dd>
+          </div>
+          <div>
+            <dt>Events and Scenarios</dt>
+            <dd>
+              An Event holds its name, date, time, and location. Each Scenario
+              is a complete set of assumptions saved for that Event.
+            </dd>
+          </div>
+          <div>
+            <dt>Revenue methods</dt>
+            <dd>
+              The normal estimate uses attendance-based expected orders and
+              average order sale amount. A custom expected-sales amount can
+              override sales while order-based costs still use estimated orders.
+            </dd>
+          </div>
+          <div>
+            <dt>Food and packaging methods</dt>
+            <dd>
+              Estimate these costs using an average cost per order, a percentage
+              of sales, or a total for the event.
+            </dd>
+          </div>
+          <div>
+            <dt>Profit targets</dt>
+            <dd>
+              Choose either a minimum profit amount or minimum profit margin.
+              The target helps compare the calculated outcome with your own
+              goal.
+            </dd>
+          </div>
+          <div>
+            <dt>Expected and break-even buyers</dt>
+            <dd>
+              Expected buyers are the orders predicted from attendance, food
+              demand, competition, weather, and protection. Break-even buyers
+              are the minimum whole buyers needed to cover the scenario&rsquo;s
+              current total cost at its average order amount.
+            </dd>
+          </div>
+        </dl>
+        <div class="help-status-guide" aria-label="Analysis status meanings">
+          <div>
+            <span class="badge badge--success">Worth it</span>
+            <p>
+              The scenario is not losing money and meets the selected profit
+              target when one can be evaluated.
+            </p>
+          </div>
+          <div>
+            <span class="badge badge--warning">Borderline</span>
+            <p>
+              The scenario is not currently a loss, but it is below the selected
+              profit target.
+            </p>
+          </div>
+          <div>
+            <span class="badge badge--danger">Not worth it</span>
+            <p>
+              The scenario has an estimated business loss. The app reports the
+              result; you make the final decision.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="help-section"
+        id="data-safety-help"
+        tabindex="-1"
+        aria-labelledby="data-safety-help-title"
+      >
+        <h2 id="data-safety-help-title">Data and safety</h2>
+        <p>
+          Your information is stored in local application data on this device.
+          The app works offline, has no cloud sync, and does not require an
+          account. Completed records are saved automatically through their
+          normal save actions.
+        </p>
+        <p>
+          Export creates a portable backup. Import validates a backup before
+          replacing current data and creates a recovery snapshot first.
+          Automatic recovery snapshots help protect migrations and restores, but
+          they do not replace your own exported backups.
+        </p>
+        <p>
+          Deleting saved Events preserves Business Defaults and your local
+          profile. Resetting Defaults preserves saved Events. Clearing all app
+          data removes Defaults, Events, Scenarios, your local profile, and
+          notifications.
+        </p>
+        <a
+          class="button-secondary button--small"
+          href="{{ url_for('main.data_safety') }}"
+          >Open Data Safety</a
+        >
+      </section>
+
+      <section
+        class="help-section"
+        id="troubleshooting"
+        tabindex="-1"
+        aria-labelledby="troubleshooting-title"
+      >
+        <h2 id="troubleshooting-title">Common troubleshooting</h2>
+        <details>
+          <summary>Information did not appear to save</summary>
+          <p>
+            Look for a success message and return to the saved screen. Invalid
+            forms preserve your entries but do not partially save. Draft
+            progress and saved Scenarios are different: finish the form or use
+            the Scenario save action when you need a durable result.
+          </p>
+        </details>
+        <details>
+          <summary>A backup import failed</summary>
+          <p>
+            Use a complete <code>.ftbackup</code> file exported by this app. An
+            invalid, damaged, incomplete, or newer-format file is rejected
+            without replacing current data.
+          </p>
+        </details>
+        <details>
+          <summary>A saved event is missing</summary>
+          <p>
+            Open Saved Events and search the event name or location. Confirm
+            that the original Event Inputs form reached the Analysis workspace,
+            which is when the Event and Original estimate are saved.
+          </p>
+        </details>
+        <details>
+          <summary>The numbers look unexpected</summary>
+          <p>
+            Review attendance, shared food demand, competing vendors, weather
+            protection, custom sales, food-cost method, card fees, labor, other
+            costs, and the selected profit target. The Analysis workspace shows
+            calculation details and factual warnings.
+          </p>
+        </details>
+        <details>
+          <summary>Draft or Scenario behavior is confusing</summary>
+          <p>
+            A draft preserves unfinished browser input. A saved Scenario is a
+            complete durable set of event assumptions. Saving a new Scenario
+            keeps the current one; overwrite deliberately replaces the active
+            Scenario.
+          </p>
+        </details>
+        <details>
+          <summary>The app needs to be reset</summary>
+          <p>
+            Open Data Safety. Choose the narrowest action that fits: delete
+            saved Events, reset Business Defaults, or clear all app data. Export
+            a backup first when possible.
+          </p>
+        </details>
+      </section>
+
+      <section
+        class="help-section"
+        id="support-information"
+        tabindex="-1"
+        aria-labelledby="support-information-title"
+      >
+        <h2 id="support-information-title">Support information</h2>
+        <p>
+          Copy privacy-safe technical details to include in a support email.
+          This excludes event names, locations, financial values, assumptions,
+          profile email, database contents, stack traces, secrets, and private
+          filesystem paths.
+        </p>
+        <button
+          class="button-secondary"
+          id="copy-support-information"
+          type="button"
+          data-diagnostics-url="{{ url_for('main.support_diagnostics') }}"
+        >
+          Copy support information
+        </button>
+        <p
+          class="status-message help-copy-status"
+          id="support-copy-status"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></p>
+      </section>
+
+      <section
+        class="help-section"
+        id="contact-support"
+        tabindex="-1"
+        aria-labelledby="contact-support-title"
+      >
+        <h2 id="contact-support-title">Still need help?</h2>
+        <p>
+          Email
+          <a href="mailto:contact@fixersdesk.com">contact@fixersdesk.com</a>
+          with a description of the problem, what you were doing when it
+          happened, and a screenshot if possible.
+        </p>
+        <p>
+          Support begins by email. If written troubleshooting cannot resolve the
+          issue, a phone call will be scheduled.
+        </p>
+        {% if support_url %}<a
+          class="button-secondary"
+          href="{{ support_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Open external product support
+          <span class="visually-hidden">(opens in a new window)</span></a
+        >{% else %}
+        <p class="field-help">
+          The external product support page is not configured yet. All in-app
+          guidance remains available offline.
+        </p>
+        {% endif %}
+        <div class="support-boundaries">
+          <h3>What support covers</h3>
+          <p>
+            Installation, app functionality, backups, restores, and
+            troubleshooting.
+          </p>
+          <h3>What support does not provide</h3>
+          <p>
+            Tax, legal, financial, event-planning, or business-assumption
+            validation advice.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/help.js') }}"></script>
+</section>
+{% endblock %}

@@ -1,0 +1,161 @@
+MILESTONE — PUBLISH THE EXTERNAL PRODUCT SUPPORT CENTER AND SUPPORT PROCESS
+
+
+You are implementing a focused support milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the current app architecture, desktop packaging approach, documentation structure, routing, styling system, tests, and existing support-related UI or files.
+2. Preserve all existing calculations, persistence, migrations, workflows, approved charcoal visual direction, responsive behavior, accessibility, and offline-first behavior.
+3. Reuse the existing design system and shared components. Do not create a second visual system.
+4. Do not add authentication, cloud accounts, telemetry, remote APIs, or background network activity.
+5. Do not add dependencies unless absolutely necessary.
+6. Use the company support email exactly as: contact@fixersdesk.com
+7. Add or update focused tests where the current stack supports them.
+8. Do not create a git commit.
+
+FINAL REPORT
+
+Report:
+- files changed;
+- behavior implemented;
+- tests run and results;
+- any unresolved blocker;
+- any manual verification still required.
+
+Do not create a commit.
+
+
+PRIMARY OBJECTIVE
+
+Create the public support destination for users who cannot install or open the app, and define a sustainable email-first support process.
+
+IMPORTANT BOUNDARY
+
+Implement only what the current repository can legitimately publish or prepare. If the public website is maintained in a separate repository or external platform, create the complete support-page content, structure, assets, and deployment handoff rather than pretending deployment occurred.
+
+REQUIRED SCOPE
+
+1. Product-specific support page
+
+Create a support page for the Food Truck Event Profit Calculator with a stable product-specific URL.
+
+The page should include:
+
+Installation:
+- Windows installation steps;
+- macOS installation steps;
+- where to find the downloaded file;
+- installer or disk-image steps;
+- first launch.
+
+Launch and security warnings:
+- Windows security warning guidance;
+- macOS Gatekeeper or unidentified-developer guidance, if relevant;
+- app will not open;
+- app opens and immediately closes;
+- missing shortcut or application location.
+
+Reinstall and data:
+- safe reinstall instructions;
+- whether reinstall affects local data;
+- where application data is stored;
+- backup before reinstall;
+- uninstall guidance.
+
+Backup and recovery:
+- exporting a backup;
+- importing a backup;
+- invalid or incompatible backup file;
+- recovery safeguards;
+- what to include when requesting help.
+
+Known issues:
+- a clearly marked section;
+- do not invent issues;
+- support an empty “No known issues” state if appropriate;
+- include app-version context.
+
+Contact:
+- email contact@fixersdesk.com;
+- request operating system, app version, exact error text, steps already tried, and screenshots;
+- state that support begins by email;
+- explain that a phone call may be scheduled only when written troubleshooting cannot resolve the issue;
+- do not publish a phone number.
+
+2. Support expectations and boundaries
+
+Publish:
+- normal support hours or response-time expectation only if the business has defined them;
+- support coverage for installation, launch, app functionality, backups, restores, and troubleshooting;
+- exclusions for tax, legal, financial, event-planning, and business-assumption validation;
+- a respectful explanation that the calculator supports decisions but does not guarantee event outcomes.
+
+Do not invent legal policy text beyond what the business has approved. Flag any legal-policy gap for review.
+
+3. Mobile and desktop usability
+
+- responsive layout;
+- clear headings and anchor navigation;
+- readable troubleshooting steps;
+- accessible links and controls;
+- strong contrast and keyboard navigation;
+- printable or copyable instructions where practical.
+
+4. Cross-linking
+
+Ensure the page is linked from:
+- in-app Help Center;
+- START HERE file;
+- installer or package instructions;
+- release/download README;
+- purchase/download confirmation template or handoff notes.
+
+Use one canonical URL.
+
+5. Support process documentation
+
+Create an internal support-process document covering:
+- first-line email intake;
+- required customer details;
+- triage categories;
+- reusable response templates;
+- when to request logs or support diagnostics;
+- when to arrange a phone call;
+- how to document the outcome;
+- when to turn a repeated issue into a Help Center article or product fix;
+- how to protect customer data;
+- escalation for data-loss or security concerns.
+
+Phone escalation must be scheduled, not an always-available public hotline.
+
+6. Verification
+
+Verify:
+- page renders on desktop and mobile;
+- email is exactly contact@fixersdesk.com;
+- all links resolve;
+- no phone number is public;
+- in-app, package, installer, release, and purchase-support references all point to the same canonical destination;
+- content does not promise capabilities the app does not have;
+- installation guidance matches actual Windows and macOS packaging behavior.
+
+7. Tests or publish checks
+
+Where supported, add:
+- link checks;
+- accessibility checks;
+- responsive smoke checks;
+- content checks for the exact support email;
+- deployment or publishing checklist;
+- a release gate requiring support-page verification before V1 publication.
+
+COMPLETION GATE
+
+Do not declare completion until:
+- a complete external support destination is implemented or fully prepared for deployment;
+- contact@fixersdesk.com is used everywhere;
+- installation help is available without opening the app;
+- email-first support and scheduled phone escalation are clearly defined;
+- all product support entry points converge on one canonical page;
+- the support process is documented for future delegation.

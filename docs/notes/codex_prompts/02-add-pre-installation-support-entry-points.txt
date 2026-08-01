@@ -1,0 +1,112 @@
+MILESTONE — ADD PRE-INSTALLATION SUPPORT ENTRY POINTS TO EVERY DISTRIBUTION PACKAGE
+
+
+You are implementing a focused support milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the current app architecture, desktop packaging approach, documentation structure, routing, styling system, tests, and existing support-related UI or files.
+2. Preserve all existing calculations, persistence, migrations, workflows, approved charcoal visual direction, responsive behavior, accessibility, and offline-first behavior.
+3. Reuse the existing design system and shared components. Do not create a second visual system.
+4. Do not add authentication, cloud accounts, telemetry, remote APIs, or background network activity.
+5. Do not add dependencies unless absolutely necessary.
+6. Use the company support email exactly as: contact@fixersdesk.com
+7. Add or update focused tests where the current stack supports them.
+8. Do not create a git commit.
+
+FINAL REPORT
+
+Report:
+- files changed;
+- behavior implemented;
+- tests run and results;
+- any unresolved blocker;
+- any manual verification still required.
+
+Do not create a commit.
+
+
+PRIMARY OBJECTIVE
+
+Ensure users can reach installation and launch help even when the application cannot be installed or opened.
+
+REQUIRED SCOPE
+
+1. START HERE file
+
+Create a clearly named plain-text file:
+
+START HERE — Installation and Support.txt
+
+Include it with every Windows and macOS distribution package.
+
+The file must contain:
+- the product name;
+- where to find installation instructions;
+- where to find troubleshooting;
+- the external product support URL through a configurable value or documented placeholder;
+- support email: contact@fixersdesk.com;
+- a short request to include operating system, app version if known, exact error text, and a screenshot when contacting support;
+- a statement that support begins by email and phone calls may be arranged only if written troubleshooting cannot resolve the issue;
+- no public phone number.
+
+2. Installer and package integration
+
+For Windows:
+- include the START HERE file in the installer payload or download bundle;
+- link to support from installer instructions, completion screens, or generated shortcuts where the packaging technology safely supports it;
+- ensure the support file remains available after clean install and reinstall.
+
+For macOS:
+- include the START HERE file in the disk image, installer package, or download bundle;
+- place it where users can see it before opening the app;
+- ensure support instructions remain available if Gatekeeper or launch restrictions block the app.
+
+3. Installation and launch support coverage
+
+The included materials must point users to help for:
+- download and installation;
+- Windows security warnings;
+- macOS Gatekeeper or unidentified-developer warnings, if applicable;
+- app will not open;
+- reinstalling safely;
+- finding the application after installation;
+- preserving user data during reinstall;
+- clean uninstall guidance if the external documentation covers it.
+
+Do not duplicate a large troubleshooting manual inside the installer package. Keep the START HERE file concise and direct users to the external support center for complete instructions.
+
+4. Purchase and download handoff
+
+Where repository-controlled templates or release assets exist, add the same support destination to:
+- download instructions;
+- purchase confirmation templates;
+- release notes or distribution README;
+- installer completion instructions.
+
+Do not claim to modify external commerce systems that are not present in the repository. Instead, add a clearly named handoff note or template for the release process.
+
+5. Version and link maintenance
+
+- centralize the support URL and support email where practical;
+- avoid stale product-version references;
+- ensure contact@fixersdesk.com appears correctly everywhere;
+- add release checks so broken or missing support assets are caught before packaging.
+
+6. Tests and verification
+
+Add or update packaging checks for:
+- START HERE file exists;
+- exact support email is present;
+- support URL placeholder/configuration is present;
+- Windows package includes the file;
+- macOS package includes the file;
+- clean install and reinstall retain access to it;
+- no phone number is published;
+- links are valid or clearly marked for release-time configuration.
+
+If automated packaging tests are not available, add a reproducible manual verification checklist in the repository and perform the checks possible in the current environment.
+
+COMPLETION GATE
+
+Do not declare completion until users can find support before the app opens, the START HERE file is present in every distribution path, and every support reference uses contact@fixersdesk.com.
