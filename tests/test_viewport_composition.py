@@ -21,7 +21,7 @@ def test_dashboard_composes_hero_and_recent_work_across_desktop_widths(client):
     page = client.get("/dashboard").data.decode()
     css = client.get("/static/css/components.css").data.decode()
 
-    assert page.index("dashboard-intro") < page.index("dashboard-recent")
+    assert page.index("dashboard-hero") < page.index("dashboard-recent")
     assert "Analyze new event" in page
     assert "Continue where you left off" in page
     assert "font-size: clamp(3rem, 4.5vw, 4.75rem)" in css

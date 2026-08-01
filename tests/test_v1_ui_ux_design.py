@@ -65,11 +65,11 @@ def test_defaults_has_fast_section_navigation_and_sticky_save(client):
     script = client.get("/static/js/business_defaults.js").data.decode()
 
     for label in (
-        "Business and sales",
-        "Food and payment costs",
-        "Labor and event costs",
-        "Profit target",
-        "Review and save",
+        "Revenue assumptions",
+        "Food cost method",
+        "Profit rule",
+        "Operating assumptions",
+        "Review",
     ):
         assert label in page
     assert page.count("data-defaults-target=") == 5

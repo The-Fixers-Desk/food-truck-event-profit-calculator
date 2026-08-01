@@ -53,7 +53,7 @@ def test_customer_actions_use_specific_consistent_wording(client):
     )
 
     for action in (
-        "Get started",
+        "Start setup",
         "Save changes",
         "Analyze event",
         "Analyze new event",

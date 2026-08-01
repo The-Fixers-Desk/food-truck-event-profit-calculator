@@ -48,10 +48,10 @@ def test_fresh_launch_welcome_and_get_started_create_no_records(database_path):
 
     page = client.get("/").data.decode()
 
-    assert "Save your usual costs" in page
-    assert "Describe an event" in page
-    assert "Decide with the numbers" in page
-    assert "Get started" in page
+    assert "Business defaults" in page
+    assert "Operating assumptions" in page
+    assert "Ready to analyze" in page
+    assert "Start setup" in page
     assert "/defaults?setup=1" in page
     assert client.get("/defaults?setup=1").status_code == 200
     with app.app_context():
@@ -110,7 +110,7 @@ def test_existing_setup_skips_welcome_and_dashboard_has_empty_states(
     dashboard = client.get("/dashboard").data.decode()
 
     assert "Your saved defaults are ready" in dashboard
-    assert "No recent work yet" in dashboard
+    assert "No saved events yet" in dashboard
     assert "/events/new" in dashboard
     assert "dashboard-shortcuts" not in dashboard
     assert "/defaults" in dashboard

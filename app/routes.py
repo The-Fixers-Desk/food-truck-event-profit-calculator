@@ -76,11 +76,18 @@ def require_business_defaults_setup():
     if request.endpoint in {
         "main.home",
         "main.welcome",
+        "main.defer_onboarding",
         "main.defaults",
+        "main.finish_defaults_later",
         "main.data_safety",
         "main.download_backup",
         "main.restore_backup",
     }:
+        return None
+    if (
+        request.endpoint == "main.dashboard"
+        and session.get("onboarding_deferred")
+    ):
         return None
     if not business_defaults_setup_is_complete():
         flash(
@@ -96,7 +103,10 @@ def home():
     """Open Welcome on first use and Dashboard after setup."""
     if current_app.config.get("RECOVERY_MODE"):
         return redirect(url_for("main.data_safety"))
-    if business_defaults_setup_is_complete():
+    if (
+        business_defaults_setup_is_complete()
+        or session.get("onboarding_deferred")
+    ):
         return redirect(url_for("main.dashboard"))
     return render_template("welcome.html", active_page="welcome")
 
@@ -109,19 +119,31 @@ def welcome():
     return render_template("welcome.html", active_page="welcome")
 
 
+@main.post("/welcome/defer")
+def defer_onboarding():
+    """Let a first-time customer explore the Dashboard before setup."""
+    session["onboarding_deferred"] = True
+    return redirect(url_for("main.dashboard"))
+
+
 @main.get("/dashboard")
 def dashboard():
     """Display persisted setup and saved-analysis context."""
-    if not business_defaults_setup_is_complete():
+    setup_complete = business_defaults_setup_is_complete()
+    if not setup_complete and not session.get("onboarding_deferred"):
         return redirect(url_for("main.welcome"))
-    event_count, scenario_count = saved_event_counts()
-    recent_events = list_saved_events()[:3]
+    if setup_complete:
+        event_count, scenario_count = saved_event_counts()
+        recent_events = list_saved_events()[:3]
+    else:
+        event_count, scenario_count, recent_events = 0, 0, []
     return render_template(
         "dashboard.html",
         active_page="dashboard",
         event_count=event_count,
         scenario_count=scenario_count,
         recent_events=recent_events,
+        setup_complete=setup_complete,
     )
 
 
@@ -444,12 +466,14 @@ def defaults():
     """Display the Defaults screen."""
     errors = {}
     initial_setup = not business_defaults_setup_is_complete()
+    persisted_defaults = load_business_defaults()
     if request.method == "POST":
         defaults_record, form_values, errors = validate_defaults_form(
             request.form
         )
         if defaults_record is not None:
             save_business_defaults(defaults_record)
+            session.pop("onboarding_deferred", None)
             flash("Business defaults saved successfully.", "success")
             if (
                 initial_setup
@@ -458,14 +482,25 @@ def defaults():
                 return redirect(url_for("main.dashboard"))
             return redirect(url_for("main.defaults"))
     else:
-        form_values = defaults_to_form(load_business_defaults())
+        form_values = defaults_to_form(persisted_defaults)
 
     return render_template(
         "defaults.html",
         active_page="defaults",
         form_values=form_values,
         errors=errors,
+        initial_setup=initial_setup,
+        active_step=request.form.get("wizard_step", "1"),
+        snapshot_values=defaults_to_form(persisted_defaults),
     )
+
+
+@main.post("/defaults/finish-later")
+def finish_defaults_later():
+    """Preserve browser-saved setup progress and return to Dashboard."""
+    session["onboarding_deferred"] = True
+    flash("Your setup progress is saved on this device.", "info")
+    return redirect(url_for("main.dashboard"))
 
 
 @main.get("/saved-events")

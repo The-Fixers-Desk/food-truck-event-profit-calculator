@@ -1,15 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Defaults | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page">
-  <header class="page-header">
-    <p class="page-eyebrow">Business Setup</p>
-    <h1>Defaults</h1>
+<section class="page defaults-page workspace-page--wide"
+  data-initial-setup="{{ 'true' if initial_setup else 'false' }}"
+  data-initial-step="{{ active_step }}">
+  <div class="defaults-heading-row">
+  <header class="page-header defaults-page__header">
+    <p class="page-eyebrow">{{ 'First-time setup' if initial_setup else 'Business defaults' }}</p>
+    <h1>Set your business defaults once</h1>
     <p class="page-description">
-      Save reusable business information that can be applied automatically when
-      evaluating events.
+      These values become the starting point for every new event analysis. You
+      can change them later for any event.
     </p>
   </header>
+  {% if initial_setup %}
+    <ol class="journey-progress journey-progress--compact" aria-label="First-time setup progress">
+      <li class="is-complete"><span class="journey-progress__marker">✓</span><span>Setup<br><small>completed</small></span></li>
+      <li class="is-active"><span class="journey-progress__marker">2</span><span>Defaults<br><small>active</small></span></li>
+      <li><span class="journey-progress__marker">3</span><span>Dashboard<br><small>upcoming</small></span></li>
+    </ol>
+  {% endif %}
+  </div>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -18,16 +29,34 @@
   {% endwith %}
 
   <div class="guided-workflow">
+    <div class="defaults-sidebar">
     <nav class="section-switcher workflow-stepper defaults-sections"
       aria-label="Defaults setup stages" data-defaults-navigation>
-      {% for number, label in ((1, "Business and sales"), (2, "Food and payment costs"), (3, "Labor and event costs"), (4, "Profit target"), (5, "Review and save")) %}
+      {% for number, label, description in (
+        (1, "Revenue assumptions", "Average ticket and revenue method"),
+        (2, "Food cost method", "Percent of revenue or per-customer cost"),
+        (3, "Profit rule", "How you decide an event is worth taking"),
+        (4, "Operating assumptions", "Crew, travel, fees, and conditions"),
+        (5, "Review", "Confirm defaults before finishing")) %}
         <button type="button" data-defaults-target="{{ number }}">
-          <span class="stage-completion-indicator">{{ number }}</span>{{ label }}
+          <span class="stage-completion-indicator">{{ number }}</span>
+          <span class="workflow-stepper__copy"><strong>{{ label }}</strong><small>{{ description }}</small></span>
         </button>
       {% endfor %}
     </nav>
+    <aside class="defaults-why-card" aria-labelledby="defaults-why-title">
+      <h2 id="defaults-why-title">Why defaults matter</h2>
+      <ul>
+        <li>Faster event setup</li>
+        <li>More consistent estimates</li>
+        <li>Easy to override per event</li>
+      </ul>
+    </aside>
+    </div>
     <form class="form-panel defaults-form workflow-stage" method="post"
+      data-finish-later-url="{{ url_for('main.finish_defaults_later') }}"
       novalidate>
+    <input id="wizard_step" name="wizard_step" type="hidden" value="{{ active_step }}" />
     {% if errors %}
       <section class="error-summary validation-summary" id="defaults-error-summary" role="alert"
         aria-labelledby="defaults-error-summary-title" tabindex="-1">
@@ -36,6 +65,10 @@
       </section>
     {% endif %}
     <div class="form-grid grouped-form-layout" data-defaults-section="1">
+      <header class="defaults-step-header form-field--wide">
+        <span>Step 1 of 5</span><h2>Revenue assumptions</h2>
+        <p>Set the sales values used as the starting point for a typical event.</p>
+      </header>
       {% macro field(name, label, required=true, hint="") %}
         <div class="form-field">
           <label class="form-label" for="{{ name }}">{{ label }}</label>
@@ -66,7 +99,12 @@
     </div>
 
     <fieldset class="choice-section" data-defaults-section="2">
-      <legend>How do you usually estimate food and packaging costs?</legend>
+      <legend class="visually-hidden">Food cost method</legend>
+      <div class="defaults-step-header">
+        <span>Step 2 of 5</span><h2>Food cost method</h2>
+        <p>Choose how you normally estimate food and packaging costs.</p>
+      </div>
+      <p class="defaults-step-question">How do you usually estimate food and packaging costs?</p>
       <div class="method-confirmation">
         <label class="form-label" for="food_cost_method_choice">
           Cost method
@@ -147,8 +185,13 @@
       </div>
     </fieldset>
 
-    <fieldset class="choice-section" data-defaults-section="4">
-      <legend>How do you decide whether an event is worth accepting?</legend>
+    <fieldset class="choice-section" data-defaults-section="3">
+      <legend class="visually-hidden">Profit rule</legend>
+      <div class="defaults-step-header">
+        <span>Step 3 of 5</span><h2>Profit rule</h2>
+        <p>Choose the default rule you use to decide whether an event is worth accepting.</p>
+      </div>
+      <p class="defaults-step-question">How do you decide whether an event is worth accepting?</p>
       <div class="choice-options">
         <label class="choice-option">
           <input type="radio" name="profit_target_type"
@@ -204,8 +247,13 @@
       </div>
     </fieldset>
 
-    <fieldset class="labor-section" data-defaults-section="3">
-      <legend>Default labor</legend>
+    <fieldset class="labor-section" data-defaults-section="4">
+      <legend class="visually-hidden">Operating assumptions</legend>
+      <div class="defaults-step-header">
+        <span>Step 4 of 5</span><h2>Operating assumptions</h2>
+        <p>Set the labor, payment, and travel costs you usually expect.</p>
+      </div>
+      <h3 class="defaults-step-question">Default labor</h3>
       <p class="form-hint">
         Add each hourly rate and the combined worker-hours typically paid at
         that rate. Two employees working six hours each equals 12 total hours.
@@ -278,6 +326,9 @@
 
     <section class="stage-review" data-defaults-section="5"
       aria-labelledby="defaults-review-title">
+      <div class="defaults-step-header">
+        <span>Step 5 of 5</span>
+      </div>
       <h2 id="defaults-review-title">Review your business defaults</h2>
       <p class="form-hint">
         Check the key values below. Use Edit to revisit a section before saving.
@@ -285,20 +336,27 @@
       <div id="defaults-review-summary" class="review-grid"></div>
     </section>
 
+    <aside class="defaults-snapshot" aria-labelledby="defaults-snapshot-title">
+      <h2 id="defaults-snapshot-title">Current default snapshot</h2>
+      <dl>
+        <div><dt>Average ticket</dt><dd>{{ ('$' ~ snapshot_values.average_order_sale_amount) if snapshot_values.average_order_sale_amount else 'Not saved' }}</dd></div>
+        <div><dt>Food cost</dt><dd>{% if snapshot_values.food_cost_method == 'average_per_order' %}${{ snapshot_values.average_food_cost_per_order }} per order{% elif snapshot_values.food_cost_method == 'sales_percentage' %}{{ snapshot_values.food_cost_percentage }}% of sales{% elif snapshot_values.food_cost_method == 'typical_event_total' %}${{ snapshot_values.typical_food_cost_total }} per event{% else %}Not saved{% endif %}</dd></div>
+        <div><dt>Crew size</dt><dd>{{ snapshot_values.labor_entries|length if snapshot_values.labor_entries and snapshot_values.labor_entries[0].hourly_rate else 'Not saved' }}</dd></div>
+        <div><dt>Travel cost</dt><dd>{{ ('$' ~ snapshot_values.default_travel_cost) if snapshot_values.default_travel_cost else 'Not saved' }}</dd></div>
+      </dl>
+      <p>These are starting defaults &mdash; every event can still be adjusted individually.</p>
+    </aside>
+
     <div class="form-actions sticky-actions">
       <button class="button-secondary" id="defaults-back"
         type="button">Back</button>
-      <span id="defaults-progress" aria-live="polite"></span>
+      <span class="defaults-save-status" id="defaults-save-status" role="status" aria-live="polite">Progress saved automatically</span>
+      <button class="button-tertiary" id="defaults-finish-later" type="button">Save and finish later</button>
       <button class="button" id="defaults-continue"
         type="button">Continue</button>
       <button class="button" id="save-defaults" type="submit" hidden>
-        Save changes
+        {{ 'Finish setup' if initial_setup else 'Save changes' }}
       </button>
-      {% if business_defaults_setup_complete %}
-        <a class="button-secondary" href="{{ url_for('main.dashboard') }}">
-          Back to Dashboard
-        </a>
-      {% endif %}
     </div>
     </form>
   </div>

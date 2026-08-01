@@ -2,56 +2,65 @@
 {% block title %}Dashboard | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
 <section class="page dashboard-page workspace-page--wide">
-  <header class="page-header dashboard-intro">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="status-message" role="status">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <header class="dashboard-hero">
     <p class="page-eyebrow">Next event</p>
     <h1>Is your next event worth it?</h1>
     <p class="page-description">
       Test the demand, costs, and conditions before you commit.
     </p>
-    <a class="button button--large dashboard-primary-action"
-      href="{{ url_for('main.calculator') }}">Analyze new event</a>
+    {% if setup_complete %}
+      <a class="button button--large dashboard-primary-action"
+        href="{{ url_for('main.calculator') }}">Analyze new event</a>
+    {% else %}
+      <a class="button button--large dashboard-primary-action"
+        href="{{ url_for('main.defaults', setup=1) }}">Finish setup to analyze</a>
+    {% endif %}
   </header>
 
-  {% if event_count == 0 %}
-    <section class="empty-state dashboard-prompt"
-      aria-labelledby="empty-dashboard-title">
-      <h2 class="empty-state__title" id="empty-dashboard-title">
-        No recent work yet
-      </h2>
-      <p>Your saved defaults are ready when you start an analysis.</p>
-    </section>
-  {% else %}
-    <section class="dashboard-recent" aria-labelledby="recent-work-title">
-      <div class="section-heading-row">
-        <div>
-          <h2 id="recent-work-title">Continue where you left off</h2>
-          <p>Most recently updated analyses</p>
-        </div>
+  <section class="dashboard-recent" aria-labelledby="recent-work-title">
+    <div class="section-heading-row">
+      <div>
+        <h2 id="recent-work-title">Continue where you left off</h2>
+        <p>Most recently updated analyses</p>
+      </div>
+      {% if event_count %}
         <a class="button-tertiary" href="{{ url_for('main.saved_events') }}">
           View all saved events
         </a>
+      {% endif %}
+    </div>
+
+    {% if event_count == 0 %}
+      <div class="dashboard-empty">
+        <h3>No saved events yet</h3>
+        <p>{% if setup_complete %}Your saved defaults are ready when you start an analysis.{% else %}Complete your business defaults, then start your first analysis.{% endif %}</p>
+        <a class="button-secondary" href="{{ url_for('main.calculator') if setup_complete else url_for('main.defaults', setup=1) }}">
+          {{ 'Start your first analysis' if setup_complete else 'Continue setup' }}
+        </a>
       </div>
+    {% else %}
       <div class="dashboard-recent-list">
         {% for event in recent_events %}
           {% set scenario = event.scenarios[0] %}
-          <a class="recent-work-row{% if loop.first %} recent-work-row--primary{% endif %}"
+          <a class="recent-work-row"
             aria-label="Open {{ event.event_name }}, {{ scenario.scenario_name }} analysis"
             href="{{ url_for('main.open_saved_scenario', event_id=event.id, scenario_id=scenario.id) }}">
             <div class="recent-work-row__identity">
               <h3>{{ event.event_name }}</h3>
-              <p>
-                <strong>{{ scenario.scenario_name }}</strong>
-                <span>{{ event.event_date }} · {{ event.location }}</span>
-              </p>
+              <p><strong>{{ scenario.scenario_name }}</strong><span>{{ event.event_date }} &middot; {{ event.location }}</span></p>
             </div>
-            <span class="recent-work-row__meta">
-              {{ event.scenario_count }} scenario{% if event.scenario_count != 1 %}s{% endif %}
-            </span>
-            <span class="recent-work-row__affordance" aria-hidden="true">Open</span>
+            <span class="badge">{{ event.scenario_count }} scenario{% if event.scenario_count != 1 %}s{% endif %}</span>
+            <svg class="recent-work-row__chevron icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevron"></use></svg>
           </a>
         {% endfor %}
       </div>
-    </section>
-  {% endif %}
+    {% endif %}
+  </section>
 </section>
 {% endblock %}

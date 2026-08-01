@@ -2,12 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build shared UI foundation and application shell
-
-Implemented the approved charcoal design system, reusable UI primitives, persistent application shell, responsive navigation, and shared empty, loading, error, not-found, and offline states. Preserved existing routes, accessibility behavior, and application-wide error handling
-
----------------------------------------------------------------------------------
-
 Build onboarding, defaults wizard, and dashboard
 
 Implemented the complete first-use experience, including Welcome, the multi-step Business Defaults wizard, setup detection, save and validation states, and the redesigned Dashboard. Preserved the Welcome → Defaults → Dashboard flow, returning-user behavior, saved defaults, and responsive layouts.

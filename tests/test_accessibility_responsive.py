@@ -8,8 +8,8 @@ from tests.test_complete_event_inputs_workflow import complete_event_inputs
 @pytest.mark.parametrize(
     ("path", "title", "heading"),
     (
-        ("/", "Welcome", "Know whether an event is worth accepting"),
-        ("/defaults", "Defaults", "Defaults"),
+        ("/", "Welcome", "Welcome to your event profit calculator"),
+        ("/defaults", "Defaults", "Set your business defaults once"),
         ("/events/new", "Event Inputs", "Event Inputs"),
         ("/saved-events", "Saved Events", "Saved events"),
         ("/data-safety", "Data Safety", "Back up or restore your data"),

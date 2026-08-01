@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from pathlib import Path
 import sqlite3
 
@@ -60,7 +60,8 @@ def create_app(test_config: dict | None = None) -> Flask:
                     not app.config.get("ENFORCE_SETUP", True)
                     or business_defaults_setup_is_complete()
                 )
-            )
+            ),
+            "onboarding_deferred": bool(session.get("onboarding_deferred")),
         }
 
     if app.config.get("TESTING"):

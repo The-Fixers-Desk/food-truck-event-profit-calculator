@@ -8,10 +8,10 @@ from tests.test_saved_events_management import save_sibling
 def test_welcome_is_compact_three_step_orientation(client):
     page = client.get("/welcome").data.decode()
 
-    assert 'class="page onboarding-page workspace-page--empty"' in page
-    assert page.count('class="concise-onboarding-step"') == 3
-    assert 'aria-label="Getting started steps"' in page
-    assert "Get started" in page
+    assert 'class="page onboarding-page workspace-page--wide"' in page
+    assert page.count('class="setup-preview__number"') == 3
+    assert 'aria-label="First-time setup progress"' in page
+    assert "Start setup" in page
 
 
 def test_dashboard_has_one_primary_launch_and_no_destination_shortcuts(client):
@@ -20,7 +20,7 @@ def test_dashboard_has_one_primary_launch_and_no_destination_shortcuts(client):
 
     assert 'class="button button--large dashboard-primary-action"' in page
     assert "Analyze new event" in page
-    assert "No recent work yet" in page
+    assert "No saved events yet" in page
     assert page.count("Analyze new event") == 1
     assert "dashboard-shortcuts" not in page
     assert "Useful shortcuts" not in page
@@ -38,7 +38,7 @@ def test_dashboard_renders_accessible_whole_row_recent_work(client, database_pat
     assert "Continue where you left off" in page
     assert "Summer Festival" in page
     assert "Rain plan" in page
-    assert 'class="recent-work-row recent-work-row--primary"' in page
+    assert 'class="recent-work-row"' in page
     assert 'aria-label="Open Summer Festival, Rain plan analysis"' in page
     assert "Continue analysis" not in page
 

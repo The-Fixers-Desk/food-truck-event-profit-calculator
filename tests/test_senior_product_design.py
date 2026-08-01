@@ -22,7 +22,7 @@ def test_dashboard_limits_recent_work_and_uses_semantic_row_links(client, databa
     page = client.get("/dashboard").data.decode()
 
     assert page.count('<a class="recent-work-row') <= 3
-    assert page.count("recent-work-row--primary") == 1
+    assert "recent-work-row--primary" not in page
     assert "Continue analysis" not in page
     assert 'aria-label="Open Summer Festival,' in page
     assert 'href="/saved-events"' in page

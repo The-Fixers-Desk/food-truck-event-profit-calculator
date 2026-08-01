@@ -48,6 +48,15 @@
             <a data-discard-navigation
               class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
               href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#data-safety"></use></svg>Data safety</a>
+          {% elif onboarding_deferred %}
+            <a class="nav-link {% if active_page == 'dashboard' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.dashboard') }}" {% if active_page == 'dashboard' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#dashboard"></use></svg>Dashboard</a>
+            <span class="nav-link nav-link--disabled" aria-disabled="true"><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#new-analysis"></use></svg>New analysis</span>
+            <span class="nav-link nav-link--disabled" aria-disabled="true"><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#saved-events"></use></svg>Saved events</span>
+            <a class="nav-link {% if active_page == 'defaults' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.defaults', setup=1) }}" {% if active_page == 'defaults' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#defaults"></use></svg>Business defaults</a>
+            <a class="nav-link {% if active_page == 'data_safety' %}nav-link--active{% endif %}"
+              href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#data-safety"></use></svg>Data safety</a>
           {% else %}
             <a class="nav-link {% if active_page == 'welcome' %}nav-link--active{% endif %}"
               href="{{ url_for('main.welcome') }}" {% if active_page == 'welcome' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#welcome"></use></svg>Welcome</a>
@@ -80,7 +89,7 @@
           </button>
           <svg class="mobile-brand-mark nav-icon" aria-label="Food Truck Event Profit Calculator"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#truck"></use></svg>
           <nav class="breadcrumbs" aria-label="Breadcrumb">
-            <a href="{{ url_for('main.dashboard') if business_defaults_setup_complete else url_for('main.welcome') }}">{{ 'Dashboard' if business_defaults_setup_complete else 'Welcome' }}</a>
+            <a href="{{ url_for('main.dashboard') if business_defaults_setup_complete or onboarding_deferred else url_for('main.welcome') }}">{{ 'Dashboard' if business_defaults_setup_complete or onboarding_deferred else 'Welcome' }}</a>
             <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevron"></use></svg>
             <span class="breadcrumbs__current">{% block context_label %}{% if active_page == 'calculator' %}Event Analysis{% elif active_page == 'saved_events' %}Saved events{% elif active_page == 'defaults' %}Business defaults{% elif active_page == 'data_safety' %}Data safety{% elif active_page == 'dashboard' %}Dashboard{% elif active_page == 'welcome' %}Welcome{% else %}System{% endif %}{% endblock %}</span>
           </nav>

@@ -12,7 +12,7 @@ def test_defaults_uses_five_stage_review_workflow(client):
     assert 'data-defaults-section="5"' in page
     assert "Review your business defaults" in page
     assert 'id="save-defaults" type="submit" hidden' in page
-    assert "Save changes" in page
+    assert "Finish setup" in page
 
 
 def test_defaults_stage_navigation_does_not_submit_or_reset_values(client):

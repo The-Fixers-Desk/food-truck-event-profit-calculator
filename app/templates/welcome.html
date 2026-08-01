@@ -1,24 +1,81 @@
 {% extends "base.html" %}
 {% block title %}Welcome | Food Truck Event Profit Calculator{% endblock %}
+{% block context_label %}Onboarding{% endblock %}
 {% block content %}
-<section class="page onboarding-page workspace-page--empty">
-  <header class="page-header">
-    <p class="page-eyebrow">Welcome</p>
-    <h1>Know whether an event is worth accepting</h1>
-    <p class="page-description">
-      Estimate your sales, account for every cost, and compare the result with
-      the profit you need.
-    </p>
-  </header>
+<section class="page onboarding-page workspace-page--wide" data-onboarding-page>
+  <div class="onboarding-hero">
+    <header class="page-header onboarding-hero__copy">
+      <p class="page-eyebrow">First-time setup</p>
+      <h1>Welcome to your event profit calculator</h1>
+      <p class="page-description">
+        Set your defaults once so every event analysis starts with numbers that
+        reflect your business.
+      </p>
+      <div class="onboarding-actions">
+        <a class="button button--large" href="{{ url_for('main.defaults', setup=1) }}">
+          Start setup
+          <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevron"></use></svg>
+        </a>
+        <a class="button-secondary button--large" href="#setup-preview">
+          What you&rsquo;ll set up
+        </a>
+        <form action="{{ url_for('main.defer_onboarding') }}" method="post">
+          <button class="button-tertiary button--large" type="submit">
+            I&rsquo;ll do this later
+          </button>
+        </form>
+      </div>
+    </header>
 
-  <ol class="onboarding-steps" aria-label="Getting started steps">
-    <li class="concise-onboarding-step"><span>1</span><div><h2>Save your usual costs</h2><p>Set reusable assumptions once.</p></div></li>
-    <li class="concise-onboarding-step"><span>2</span><div><h2>Describe an event</h2><p>Add demand, conditions, and event-specific costs.</p></div></li>
-    <li class="concise-onboarding-step"><span>3</span><div><h2>Decide with the numbers</h2><p>Review profit, target status, and break-even customers.</p></div></li>
-  </ol>
+    <ol class="journey-progress" aria-label="First-time setup progress">
+      <li class="is-active" data-onboarding-progress="setup">
+        <span class="journey-progress__marker">1</span>
+        <span>Setup</span>
+      </li>
+      <li data-onboarding-progress="defaults">
+        <span class="journey-progress__marker">2</span>
+        <span>Defaults</span>
+      </li>
+      <li>
+        <span class="journey-progress__marker">3</span>
+        <span>Dashboard</span>
+      </li>
+    </ol>
+  </div>
 
-  <a class="button" href="{{ url_for('main.defaults', setup=1) }}">
-    Get started
-  </a>
+  <div class="onboarding-details" id="setup-preview" tabindex="-1">
+    <section class="setup-preview card" aria-labelledby="setup-preview-title">
+      <p class="section-eyebrow" id="setup-preview-title">What happens next</p>
+      <ol class="setup-preview__steps">
+        <li>
+          <span class="setup-preview__number">1</span>
+          <div><h2>Business defaults</h2><p>Enter your average ticket, cost method, and profit rule.</p></div>
+        </li>
+        <li>
+          <span class="setup-preview__number">2</span>
+          <div><h2>Operating assumptions</h2><p>Set crew, travel, fees, and event conditions.</p></div>
+        </li>
+        <li>
+          <span class="setup-preview__number">3</span>
+          <div><h2>Ready to analyze</h2><p>Open the dashboard and create your first event estimate.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <aside class="before-you-begin card" aria-labelledby="before-title">
+      <p class="section-eyebrow" id="before-title">Before you begin</p>
+      <ul>
+        <li><span aria-hidden="true">5</span><p>Takes about 5 minutes</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#defaults"></use></svg><p>You can change any default later</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#data-safety"></use></svg><p>All data stays on this device</p></li>
+      </ul>
+    </aside>
+  </div>
+
+  <aside class="privacy-callout" aria-labelledby="privacy-title">
+    <svg class="privacy-callout__icon icon icon--large" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#data-safety"></use></svg>
+    <div><h2 id="privacy-title">Your data is private</h2><p>Everything is stored locally on this device. No accounts. No cloud. You&rsquo;re always in control.</p></div>
+  </aside>
 </section>
+<script src="{{ url_for('static', filename='js/welcome.js') }}"></script>
 {% endblock %}

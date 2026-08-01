@@ -60,6 +60,7 @@
 .nav-link--active { background: var(--color-surface-elevated); color: var(--color-text); font-weight: var(--weight-medium); }
 .nav-link--active::before { position: absolute; inset-block: 0; left: calc(-1 * var(--space-3)); width: 4px; border-radius: 0 var(--radius-xs) var(--radius-xs) 0; background: var(--color-primary); content: ""; }
 .nav-link--active .nav-icon { color: var(--color-primary); }
+.nav-link--disabled { color: var(--color-text-muted); cursor: not-allowed; opacity: .48; }
 
 .workspace-menu { position: relative; margin-top: auto; border-top: var(--border-default); }
 .workspace-menu__trigger { display: grid; width: 100%; min-height: 5rem; grid-template-columns: 2.25rem minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-5); border: 0; background: transparent; color: var(--color-text); text-align: left; cursor: pointer; }
