@@ -3,20 +3,19 @@ import sqlite3
 from tests.test_complete_event_inputs_workflow import complete_event_inputs
 
 
-def test_event_inputs_has_six_ordered_guided_stages(client):
+def test_event_inputs_has_five_ordered_guided_stages(client):
     page = client.get("/events/new").data.decode()
     labels = (
-        "Event details",
-        "Demand and weather",
-        "Revenue and food costs",
-        "Labor",
-        "Event costs and fees",
-        "Profit target and review",
+        "Event basics",
+        "Revenue inputs",
+        "Operating costs",
+        "Conditions",
+        "Review",
     )
-    positions = [page.index(label) for label in labels]
+    positions = [page.index(f"<strong>{label}</strong>") for label in labels]
 
     assert positions == sorted(positions)
-    assert page.count("data-section-target=") == 6
+    assert page.count("data-section-target=") == 5
     assert 'id="section-back"' in page
     assert 'id="section-continue"' in page
     assert 'id="analyze-event"' in page

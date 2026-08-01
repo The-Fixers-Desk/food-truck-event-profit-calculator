@@ -189,8 +189,8 @@ def test_factual_highlights_include_ties_targets_and_warning_differences(
         comparison = build_comparison(ids)
 
     highlights = comparison["highlights"]
-    assert highlights["highest_profit"] == [tied_id]
-    assert highlights["lowest_cost"] == [ids[0]]
+    assert highlights["highest_profit"] == [ids[0], tied_id]
+    assert highlights["lowest_cost"] == [ids[0], tied_id]
     assert loss_id in highlights["target_not_met"]
     assert highlights["warning_differences"][loss_id]
 

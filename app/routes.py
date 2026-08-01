@@ -273,7 +273,7 @@ def calculator():
     if request.method == "POST":
         identity, form_values, errors, result = (
             validate_and_calculate_event_analysis(
-                request.form, allow_custom_sales=False
+                request.form
             )
         )
         if result is not None:
@@ -330,13 +330,19 @@ def demand_preview():
     return jsonify({"ready": True, **preview})
 
 
+@main.post("/event-inputs/finish-later")
+def finish_event_inputs_later():
+    """Return from a locally preserved incomplete Event Inputs draft."""
+    flash("Your event draft is saved on this device.", "info")
+    return redirect(url_for("main.dashboard"))
+
+
 @main.post("/event-inputs/warnings")
 def event_input_warnings():
     """Return contextual structured warnings without persistence writes."""
     _, _, errors, result = validate_and_calculate_event_analysis(
         request.form,
         require_identity=False,
-        allow_custom_sales=False,
     )
     if errors:
         return jsonify({"ready": False, "warnings": []})

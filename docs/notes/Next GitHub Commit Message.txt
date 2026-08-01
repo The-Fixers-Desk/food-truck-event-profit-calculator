@@ -2,12 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build onboarding, defaults wizard, and dashboard
-
-Implemented the complete first-use experience, including Welcome, the multi-step Business Defaults wizard, setup detection, save and validation states, and the redesigned Dashboard. Preserved the Welcome → Defaults → Dashboard flow, returning-user behavior, saved defaults, and responsive layouts.
-
----------------------------------------------------------------------------------
-
 Build complete Event Inputs wizard
 
 Implemented all Event Inputs steps and substates, including event basics, revenue, operating costs, conditions, review, conditional methods, saved-default application, overrides, validation, warnings, draft saving, sticky actions, and responsive behavior. Preserved the existing demand model, calculations, and initial scenario-saving workflow.

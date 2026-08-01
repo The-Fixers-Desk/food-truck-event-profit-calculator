@@ -73,10 +73,12 @@
   </aside>
 {% endmacro %}
 {% block content %}
-<section class="page{% if workspace %} analysis-workspace-page{% endif %}">
-  <header class="page-header">
+<section class="page{% if workspace %} analysis-workspace-page{% else %} event-inputs-page workspace-page--wide{% endif %}"
+  {% if not workspace %}data-event-inputs-wizard{% endif %}>
+  <div class="{% if not workspace %}event-inputs-heading-row{% endif %}">
+  <header class="page-header{% if not workspace %} event-inputs-page__header{% endif %}">
     <p class="page-eyebrow">Event Analysis</p>
-    <h1>{% if workspace %}{{ event_identity.event_name }}{% else %}Event Inputs{% endif %}</h1>
+    <h1>{% if workspace %}{{ event_identity.event_name }}{% else %}Enter the details for this event{% endif %}</h1>
     {% if workspace %}
       <dl class="event-context" aria-label="Event identity">
         <div><dt>Date</dt><dd>{{ event_identity.event_date }}</dd></div>
@@ -93,7 +95,8 @@
         Adjust the assumptions below to explore this event. Results update
         automatically.
       {% else %}
-        Start by identifying the event you want to evaluate.
+        These values shape this specific event estimate and can be adjusted
+        before results are calculated.
       {% endif %}
     </p>
     <p class="event-only-notice">
@@ -107,6 +110,14 @@
       </p>
     </details>
   </header>
+  {% if not workspace %}
+    <ol class="event-wizard-progress" aria-label="Event Inputs progress">
+      {% for number, label in ((1, "Event basics"), (2, "Revenue inputs"), (3, "Operating costs"), (4, "Conditions"), (5, "Review")) %}
+        <li data-event-progress="{{ number }}"><span>{{ number }}</span><small>{{ label }}</small></li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+  </div>
 
   {% if workspace %}
     <div class="analysis-workspace">
@@ -138,6 +149,7 @@
         </section>
   {% endif %}
   <div class="{% if not workspace %}guided-workflow{% endif %}">
+  {% if not workspace %}<div class="event-inputs-sidebar">{% endif %}
   <nav class="section-switcher {% if not workspace %}workflow-stepper event-stepper{% endif %}"
     aria-label="{% if workspace %}Assumption sections{% else %}Event Input stages{% endif %}"
     data-section-navigation>
@@ -146,15 +158,29 @@
         <button type="button" data-section-target="{{ number }}">{{ label }}</button>
       {% endfor %}
     {% else %}
-      {% for number, label in ((1, "Event details"), (2, "Demand and weather"), (3, "Revenue and food costs"), (4, "Labor"), (5, "Event costs and fees"), (6, "Profit target and review")) %}
+      {% for number, label, description in (
+        (1, "Event basics", "Name, date, location, and timing"),
+        (2, "Revenue inputs", "Demand, buyers, and sales"),
+        (3, "Operating costs", "Food, labor, and other expenses"),
+        (4, "Conditions", "Weather, protection, and profit rule"),
+        (5, "Review", "Check inputs before analyzing")) %}
         <button type="button" data-section-target="{{ number }}">
-          <span class="stage-completion-indicator">{{ number }}</span>{{ label }}
+          <span class="stage-completion-indicator">{{ number }}</span>
+          <span class="workflow-stepper__copy"><strong>{{ label }}</strong><small>{{ description }}</small></span>
         </button>
       {% endfor %}
     {% endif %}
   </nav>
+  {% if not workspace %}
+    <aside class="event-inputs-why" aria-labelledby="event-inputs-why-title">
+      <h2 id="event-inputs-why-title">Why event inputs matter</h2>
+      <ul><li>Better estimates</li><li>Faster comparisons</li><li>Clearer scenario planning</li></ul>
+    </aside>
+  </div>
+  {% endif %}
   <form class="form-panel{% if workspace %} workspace-form{% endif %}"
     method="post" novalidate
+    {% if not workspace %}data-finish-later-url="{{ url_for('main.finish_event_inputs_later') }}"{% endif %}
     {% if workspace %}
       data-workspace="true"
       data-calculation-url="{{ url_for('main.recalculate_event_analysis') }}"
@@ -190,8 +216,17 @@
 
     <fieldset class="input-section" data-form-section="1"
       {% if workspace %}hidden aria-hidden="true"{% endif %}>
-      <legend>Event information</legend>
+      <legend class="visually-hidden">Event basics</legend>
+      {% if not workspace %}<div class="event-step-header"><span>Step 1 of 5</span><h2>Event basics</h2><p>Identify the event and its original estimate.</p></div>{% endif %}
       <div class="form-grid grouped-form-layout">
+        {% if not workspace %}
+          <div class="form-field">
+            <label class="form-label" for="initial_scenario_name">Scenario name</label>
+            <input class="form-input" id="initial_scenario_name" name="scenario_name"
+              type="text" value="Original estimate" readonly required />
+            <p class="form-hint">The first saved scenario is your original estimate.</p>
+          </div>
+        {% endif %}
         {% for name, label, type in (
           ("event_name", "Event name", "text"),
           ("event_date", "Event date", "date"),
@@ -216,7 +251,8 @@
     </fieldset>
 
     <fieldset class="input-section" data-form-section="2">
-      <legend>Demand and sales potential</legend>
+      <legend{% if not workspace %} class="visually-hidden"{% endif %}>{% if workspace %}Demand and sales potential{% else %}Revenue inputs{% endif %}</legend>
+      {% if not workspace %}<div class="event-step-header"><span>Step 2 of 5</span><h2>Revenue inputs</h2><p>Estimate the demand and sales potential for this event.</p></div>{% endif %}
       <div class="contextual-warnings" data-warning-group="demand"
         aria-live="polite" hidden></div>
       <div class="form-grid">
@@ -368,15 +404,20 @@
         </div>
       </div>
 
-      <input id="revenue_method" name="revenue_method" type="hidden"
-        value="{% if workspace %}{{ form_values.revenue_method }}{% else %}attendance{% endif %}" />
-      {% if workspace %}
-        <section class="workspace-revenue-control">
+      <section class="workspace-revenue-control event-revenue-method">
+        <p class="section-question">How do you want to estimate revenue for this event?</p>
+        <div class="choice-options">
           <label class="choice-option">
-            <input id="use-custom-sales" type="checkbox"
-              {% if form_values.revenue_method == "manual_sales" %}checked{% endif %} />
-            Use a custom expected sales amount
+            <input type="radio" name="revenue_method" value="attendance"
+              {% if form_values.revenue_method != "manual_sales" %}checked{% endif %} />
+            Use average ticket &times; buyers
           </label>
+          <label class="choice-option">
+            <input type="radio" name="revenue_method" value="manual_sales"
+              {% if form_values.revenue_method == "manual_sales" %}checked{% endif %} />
+            Use custom total sales
+          </label>
+        </div>
           <div id="custom-sales-field" class="form-field conditional-field"
             {% if form_values.revenue_method != "manual_sales" %}hidden{% endif %}>
           <label class="form-label" for="expected_sales_amount">
@@ -393,15 +434,13 @@
             <p class="field-error">{{ errors.expected_sales_amount }}</p>
           {% endif %}
           </div>
-        </section>
-      {% else %}
-        <input id="expected_sales_amount" name="expected_sales_amount"
-          type="hidden" value="" />
-      {% endif %}
+      </section>
     </fieldset>
 
     <fieldset class="input-section" data-form-section="3">
-      <legend>Food and transaction costs</legend>
+      <legend{% if not workspace %} class="visually-hidden"{% endif %}>{% if workspace %}Food and transaction costs{% else %}Operating costs{% endif %}</legend>
+      {% if not workspace %}<div class="event-step-header"><span>Step 3 of 5</span><h2>Operating costs</h2><p>Review food, labor, fees, and other event expenses.</p></div>{% endif %}
+      <h3 class="event-input-subsection">Food and transaction costs</h3>
       <div class="contextual-warnings" data-warning-group="food"
         aria-live="polite" hidden></div>
       <div class="label-row">
@@ -514,7 +553,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section" data-form-section="4">
+    <fieldset class="input-section" data-form-section="{{ 4 if workspace else 3 }}">
       <legend>Labor</legend>
       <div class="contextual-warnings" data-warning-group="labor"
         aria-live="polite" hidden></div>
@@ -617,7 +656,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section" data-form-section="5">
+    <fieldset class="input-section" data-form-section="{{ 5 if workspace else 3 }}">
       <legend>Fixed event costs and fees</legend>
       <div class="contextual-warnings" data-warning-group="fixed"
         aria-live="polite" hidden></div>
@@ -666,7 +705,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section" data-form-section="5">
+    <fieldset class="input-section" data-form-section="{{ 5 if workspace else 3 }}">
       <legend>Event and payment fees</legend>
       <div class="form-grid">
         {% for name, label in (
@@ -751,7 +790,15 @@
       </div>
     </fieldset>
 
-    <fieldset class="input-section" data-form-section="6">
+    {% if not workspace %}
+      <fieldset class="input-section event-conditions-section" data-form-section="4">
+        <legend class="visually-hidden">Conditions</legend>
+        <div class="event-step-header"><span>Step 4 of 5</span><h2>Conditions</h2><p>Account for weather, event protection, and your profit rule.</p></div>
+        <div id="event-conditions-fields"></div>
+      </fieldset>
+    {% endif %}
+
+    <fieldset class="input-section" data-form-section="{{ 6 if workspace else 4 }}">
       <legend>Profit target</legend>
       <div class="contextual-warnings" data-warning-group="profit"
         aria-live="polite" hidden></div>
@@ -830,15 +877,9 @@
           <p class="field-error">{{ errors.minimum_profit_margin }}</p>
         {% endif %}
       </div>
-      {% if not workspace %}
-        <section class="stage-review" aria-labelledby="stage-review-title">
-          <h2 id="stage-review-title">Review your event</h2>
-          <div id="event-review-summary" class="review-grid"></div>
-        </section>
-      {% endif %}
     </fieldset>
 
-    <fieldset class="input-section" data-form-section="5">
+    <fieldset class="input-section" data-form-section="{{ 5 if workspace else 3 }}">
       <legend>Additional costs</legend>
       <div id="event-additional-cost-entries">
         {% for cost in form_values.additional_costs %}
@@ -876,11 +917,32 @@
       </button>
     </fieldset>
 
+    {% if not workspace %}
+      <section class="input-section stage-review" data-form-section="5"
+        aria-labelledby="stage-review-title">
+        <div class="event-step-header"><span>Step 5 of 5</span><h2 id="stage-review-title">Review your event</h2><p>Check every assumption before creating the analysis.</p></div>
+        <div id="event-review-summary" class="review-grid"></div>
+      </section>
+
+      <aside class="event-scenario-snapshot" aria-labelledby="event-snapshot-title">
+        <h2 id="event-snapshot-title">Current scenario snapshot</h2>
+        <dl>
+          <div><dt>Estimated revenue</dt><dd id="snapshot-estimated-revenue">Complete revenue inputs</dd></div>
+          <div><dt>Food cost method</dt><dd id="snapshot-food-method">Not selected</dd></div>
+          <div><dt>Employee labor entries</dt><dd id="snapshot-crew-size">0</dd></div>
+          <div><dt>Travel cost</dt><dd id="snapshot-travel-cost">Not entered</dd></div>
+        </dl>
+        <p>These inputs apply only to this event scenario. You can save multiple scenarios for the same event.</p>
+      </aside>
+    {% endif %}
+
     <div class="form-actions sticky-actions">
       {% if not workspace %}
         <button class="button-secondary" id="section-back"
           type="button">Back</button>
         <span id="section-progress" aria-live="polite"></span>
+        <span id="event-draft-status" class="event-draft-status" role="status" aria-live="polite">Progress saved automatically</span>
+        <button class="button-tertiary" id="save-event-draft" type="button">Save as draft</button>
         <button class="button" id="section-continue"
           type="button">Continue</button>
         <button class="button" id="analyze-event" type="submit" hidden>

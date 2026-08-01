@@ -30,7 +30,7 @@ def test_invalid_event_inputs_remain_on_input_form(client):
 
     response = client.post("/events/new", data=form_data)
 
-    assert b"<h1>Event Inputs</h1>" in response.data
+    assert b"<h1>Enter the details for this event</h1>" in response.data
     assert b"Estimated attendance is required." in response.data
     assert b'data-workspace="true"' not in response.data
 
@@ -69,12 +69,12 @@ def test_workspace_contains_all_adjustable_groups_and_actions(client):
 def test_initial_workspace_displays_complete_calculation(client):
     page = client.post("/events/new", data=complete_event_inputs()).data.decode()
 
-    assert "$233.75" in page
-    assert "custom_sales_assumption" not in page
+    assert "$5000" in page
+    assert "custom_sales_assumption" in page
     assert "Exact break-even customers" not in page
     assert "Break-even customers" in page
-    assert 'id="use-custom-sales" type="checkbox"' in page
-    assert 'id="use-custom-sales" type="checkbox" checked' not in page
+    assert 'name="revenue_method" value="attendance"' in page
+    assert 'name="revenue_method" value="manual_sales"' in page
 
 
 def test_live_endpoint_recalculates_demand_revenue_and_costs(client):
@@ -252,7 +252,7 @@ def test_start_new_analysis_returns_clean_event_inputs(client):
 
     response = client.get("/events/new")
 
-    assert b"<h1>Event Inputs</h1>" in response.data
+    assert b"<h1>Enter the details for this event</h1>" in response.data
     assert b'value="Summer Festival"' not in response.data
 
 

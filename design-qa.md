@@ -1,37 +1,29 @@
-# Design QA
+# Event Inputs Wizard design QA
 
-- Sources: `app/static/images/Welcome Onboarding Mockup.png`, `app/static/images/Business Defaults Mockup.png`, and `app/static/images/Dashboard Mockup.png` (1568 x 1024 each)
-- Implementations: `docs/testing/first-use-defaults-dashboard/welcome-desktop.png`, `defaults-desktop.png`, and `dashboard-desktop.png` (1568 x 1024 each)
-- Combined comparisons: `welcome-comparison.png`, `defaults-comparison.png`, and `dashboard-comparison.png` in `docs/testing/first-use-defaults-dashboard/`
-- Responsive evidence: `welcome-mobile.png` and `defaults-mobile.png` at a 390 x 844 CSS viewport
-- Density: device scale factor 1; full-page browser captures
-- States: fresh Welcome, first-use Defaults step 3 with a selected profit-amount target, populated returning-user Dashboard, and fresh mobile Welcome/Defaults
+Reference: `app/static/images/Event Inputs Mockup.png`
 
-## Required fidelity surfaces
+Implementation evidence:
 
-- Typography: approved display, section, card, body, label, metadata, and eyebrow hierarchy uses the existing system-font stack and matches the source wrapping at equivalent content widths.
-- Spacing/layout: desktop two-column Welcome and Dashboard compositions, 312 px Defaults navigation, 20 px wizard gap, responsive stacking, and sticky mobile actions match the package.
-- Colors/tokens: the approved charcoal family, copper primary accent, green completion state, quiet borders, and inset surfaces are reused from Milestone 1.
-- Assets/icons: the established local Lucide-style sprite supplies all visible product icons; no placeholder raster assets, emoji, or external resources are used.
-- Copy/content: approved headings, actions, progress labels, reassurance, wizard sections, and Dashboard recent-work language are present. Flat travel cost replaces the obsolete per-mile mockup wording to preserve the approved domain model.
+- `.audit-runtime/event-inputs/desktop.png` — 1568 × 1024, Revenue inputs active
+- `.audit-runtime/event-inputs/mobile.png` — 390 × 844, compact single-column state
+- `.audit-runtime/event-inputs/comparison.png` — approved reference and implementation in one frame
+- `.audit-runtime/event-inputs/results.json` — interaction, console, and overflow checks
 
-## Comparison findings and iteration history
+## Visual comparison
 
-1. First browser comparison found legacy generic stepper selectors styling the Defaults copy wrapper as a numbered marker (P1). The selector was scoped to the marker, copy dimensions were reset, and the corrected state was recaptured.
-2. First comparison showed the Defaults title wrapping more than the source and omitted the source's `Why defaults matter` support panel (P2). The title scale was corrected, the support panel was added, and the state was recaptured.
-3. The first wizard evidence showed an unselected target and active saving message (P2 evidence mismatch). The final capture uses the source's selected profit-amount state after the autosave debounce completes.
-4. Mobile evidence verifies progress-first Welcome layout, stacked actions/cards, compact wizard navigation, visible `Step 1 of 5`, and full-width primary action.
+The implementation matches the approved charcoal/copper direction, five-node progress, 312 px section rail, flexible form workspace, conditional revenue cards, scenario snapshot, and sticky action hierarchy. The current application’s newer shared-demand model remains intact, so obsolete mockup fields such as service hours, direct expected buyers, and travel distance were not restored. Travel remains a flat cost and the initial scenario remains `Original estimate`.
 
-## Intentional product constraints
+The first comparison exposed two visible issues: the average-order field appeared above the Revenue header, and inherited step-label sizing clipped sidebar text. Both were corrected before the final capture. Desktop and mobile captures show no horizontal overflow, and the mobile form includes bottom clearance for the sticky actions.
 
-- `Local workspace` replaces the mockup's named person because the application has no account system.
-- The wizard does not invent a revenue-method field absent from the current approved `BusinessDefaults` domain model.
-- Current-default snapshot values remain `Not saved` during first-time draft entry because the acceptance package requires the snapshot to reflect persisted values only.
+## Functional checks
 
-## Interaction verification
-
-- Tested Welcome to Defaults navigation, two valid step advances, food-method confirmation, profit-target conditional disclosure, full wizard completion, database-backed Dashboard redirect, and populated Dashboard rendering.
-- Mobile Welcome and Defaults states were rendered at 390 x 844.
-- Browser console errors checked: none.
+- Event basics advanced to Revenue inputs only after required values were present.
+- Custom total sales was hidden initially and appeared after selecting its revenue method.
+- Draft input generated local progress data.
+- Desktop and mobile widths reported no horizontal overflow.
+- Browser runtime reported no JavaScript exceptions.
+- Focused tests: 127 passed.
+- Full suite: 562 passed.
+- Product-owner visual approval remains external to this implementation review.
 
 final result: passed

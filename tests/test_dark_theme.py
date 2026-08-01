@@ -71,12 +71,11 @@ def test_guided_workflow_and_analysis_keep_their_primary_structure(client):
     forms = client.get("/static/css/forms.css").data.decode()
 
     for stage in (
-        "Event details",
-        "Demand and weather",
-        "Revenue and food costs",
-        "Labor",
-        "Event costs and fees",
-        "Profit target and review",
+        "Event basics",
+        "Revenue inputs",
+        "Operating costs",
+        "Conditions",
+        "Review",
     ):
         assert stage in inputs
     assert "grid-template-columns: minmax(15rem, 17rem)" in forms

@@ -10,7 +10,7 @@ from tests.test_complete_event_inputs_workflow import complete_event_inputs
     (
         ("/", "Welcome", "Welcome to your event profit calculator"),
         ("/defaults", "Defaults", "Set your business defaults once"),
-        ("/events/new", "Event Inputs", "Event Inputs"),
+        ("/events/new", "Event Inputs", "Enter the details for this event"),
         ("/saved-events", "Saved Events", "Saved events"),
         ("/data-safety", "Data Safety", "Back up or restore your data"),
     ),

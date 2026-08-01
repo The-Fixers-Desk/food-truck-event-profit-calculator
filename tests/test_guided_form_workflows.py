@@ -32,7 +32,7 @@ def test_event_inputs_uses_same_guided_workflow_and_review_primitives(client):
 
     assert 'class="guided-workflow"' in page
     assert 'class="section-switcher workflow-stepper event-stepper"' in page
-    assert page.count('class="stage-completion-indicator"') == 6
+    assert page.count('class="stage-completion-indicator"') == 5
     assert "stage-review" in page
     assert 'card.className = "review-section"' in script
     assert "updateReview" in script

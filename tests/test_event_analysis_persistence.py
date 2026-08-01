@@ -52,9 +52,10 @@ def test_valid_submission_persists_complete_original_estimate(
     )
     assert scenario[2] == "Original estimate"
     assert scenario[4:7] == (1000, 5, 1000)
-    assert scenario[10] == "attendance"
-    assert scenario[11] == 1650
-    assert scenario[12] is None
+    assert scenario[10] == "manual_sales"
+    assert scenario[11] is None
+    assert scenario[12] == 500000
+    assert scenario[13] == 1650
     assert labor == [(0, 2000, 600), (1, 2500, 240)]
     assert costs[:2] == [(0, "Ice", 4000), (1, "Extra propane", 6000)]
     assert [row[1] for row in costs[2:]] == [

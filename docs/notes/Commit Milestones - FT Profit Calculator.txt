@@ -220,11 +220,11 @@ production-quality experience.
 
 ☑ Create new milestones to build screens
 
-☑ Create Codex prompt, one per package
+☑ Create Codex prompts, one per package
 
 APPROVED UI IMPLEMENTATION
 
-□ >Implement the shared UI foundation, Application Shell, and System Pages
+☑ Implement the shared UI foundation, Application Shell, and System Pages
   Build the approved charcoal design tokens, typography, spacing, icons, controls,
   cards, tables, badges, alerts, focus states, responsive breakpoints, sidebar,
   top bar, page-header patterns, mobile navigation, and reusable empty, loading,
@@ -232,7 +232,7 @@ APPROVED UI IMPLEMENTATION
   Complete the Application Shell and System Pages acceptance checklists before
   continuing because every later screen depends on these shared primitives.
 
-□ Implement the complete first-use and business-setup experience
+☑ Implement the complete first-use and business-setup experience
   Build Welcome / Onboarding, the Business Defaults Wizard and all of its steps,
   review and conditional-input states, and the Dashboard with normal, first-use,
   empty, and recent-work states. Preserve setup detection, saved values, validation,
@@ -240,7 +240,7 @@ APPROVED UI IMPLEMENTATION
   Welcome → Defaults → Dashboard flow. Complete all three screen checklists and
   their cross-screen workflow tests before continuing.
 
-□ Implement the complete event-entry experience
+□ >Implement the complete event-entry experience
   Build the Business Event Inputs Wizard and every step and substate: event basics,
   revenue inputs, operating costs, conditions, review, conditional revenue and cost
   methods, saved-default application, event overrides, validation, warnings,
@@ -248,7 +248,7 @@ APPROVED UI IMPLEMENTATION
   all existing calculations and persistence behavior. Complete the Event Inputs
   checklist and focused regression tests before opening work on result screens.
 
-□ Implement the complete decision and scenario-analysis experience
+□ *Implement the complete decision and scenario-analysis experience
   Build the Event Analysis Workspace and Scenario Comparison, including all result
   summaries, cost breakdowns, decision checks, warnings, sensitivity cues, scenario
   selection, duplication, saving, overwriting, comparison, recommendation states,
@@ -256,7 +256,7 @@ APPROVED UI IMPLEMENTATION
   Complete both screen checklists plus scenario, comparison, and recalculation tests
   before continuing.
 
-□ Implement saved-work management and data control, then close UI implementation
+□ *Implement saved-work management and data control, then close UI implementation
   Build Saved Events and all list, filter, sort, pagination, empty, open, compare,
   rename, and delete states. Build Data Safety with local-data summaries, export,
   import, sample format, backup status, and all confirmation-protected danger-zone

@@ -207,6 +207,56 @@ def test_estimate_and_event_only_indicators_are_visible(client):
     assert "About estimates" in page
 
 
+def test_event_inputs_uses_complete_five_step_wizard(client):
+    page = client.get("/events/new").data.decode()
+    labels = (
+        "Event basics",
+        "Revenue inputs",
+        "Operating costs",
+        "Conditions",
+        "Review",
+    )
+
+    assert page.count("data-section-target=") == 5
+    assert [page.index(f"<strong>{label}</strong>") for label in labels] == sorted(
+        page.index(f"<strong>{label}</strong>") for label in labels
+    )
+    assert 'name="scenario_name"' in page
+    assert 'value="Original estimate" readonly required' in page
+    assert "Current scenario snapshot" in page
+    assert "Save as draft" in page
+
+
+def test_event_inputs_script_supports_draft_restore_review_and_snapshot(client):
+    script = client.get("/static/js/event_inputs.js").data.decode()
+
+    for behavior in (
+        'const draftKey = "event-inputs-draft"',
+        "window.localStorage.setItem",
+        "window.localStorage.getItem",
+        "restoreEventWizardState",
+        "restoreRepeatable",
+        "updateReview",
+        "updateScenarioSnapshot",
+        'document.querySelector("#save-event-draft")',
+    ):
+        assert behavior in script
+
+
+def test_save_event_draft_returns_to_dashboard_without_database_rows(
+    client, database_path
+):
+    response = client.post("/event-inputs/finish-later")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/dashboard")
+    with sqlite3.connect(database_path) as database:
+        assert database.execute("SELECT COUNT(*) FROM events").fetchone()[0] == 0
+        assert database.execute(
+            "SELECT COUNT(*) FROM event_scenarios"
+        ).fetchone()[0] == 0
+
+
 def _read_defaults(database_path) -> tuple:
     with sqlite3.connect(database_path) as database:
         defaults_row = database.execute(

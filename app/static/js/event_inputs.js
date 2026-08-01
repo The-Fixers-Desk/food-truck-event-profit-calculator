@@ -168,15 +168,17 @@ protectionChoices.forEach((choice) => {
 scheduleDemandPreview();
 */
 
-const revenueMethod = document.querySelector("#revenue_method");
-const useCustomSales = document.querySelector("#use-custom-sales");
+const revenueMethodChoices = document.querySelectorAll(
+  'input[name="revenue_method"]',
+);
 const customSalesField = document.querySelector("#custom-sales-field");
 const expectedSalesAmount = document.querySelector("#expected_sales_amount");
 
 function updateSalesControls() {
-  const customIsActive = revenueMethod.value === "manual_sales";
-  if (!useCustomSales || !customSalesField || !expectedSalesAmount) return;
-  useCustomSales.checked = customIsActive;
+  const customIsActive = document.querySelector(
+    'input[name="revenue_method"]:checked',
+  )?.value === "manual_sales";
+  if (!customSalesField || !expectedSalesAmount) return;
   customSalesField.hidden = !customIsActive;
   expectedSalesAmount.required = customIsActive;
   if (!customIsActive) {
@@ -184,14 +186,12 @@ function updateSalesControls() {
   }
 }
 
-if (useCustomSales) {
-  useCustomSales.addEventListener("change", () => {
-    revenueMethod.value = useCustomSales.checked
-      ? "manual_sales" : "attendance";
+revenueMethodChoices.forEach((choice) => {
+  choice.addEventListener("change", () => {
     updateSalesControls();
     scheduleWorkspaceCalculation();
   });
-}
+});
 
 updateSalesControls();
 
@@ -1007,6 +1007,7 @@ if (workspaceForm && saveAnalysisDialog) {
 
 const sectionNavigation = document.querySelector("[data-section-navigation]");
 const formSections = Array.from(document.querySelectorAll("[data-form-section]"));
+let restoreEventWizardState;
 
 if (sectionNavigation && formSections.length) {
   const sectionButtons = Array.from(
@@ -1017,6 +1018,7 @@ if (sectionNavigation && formSections.length) {
   const continueButton = document.querySelector("#section-continue");
   const analyzeButton = document.querySelector("#analyze-event");
   const progress = document.querySelector("#section-progress");
+  const totalSections = isWorkspaceSections ? 6 : 5;
   let completedThrough = 0;
   let activeSection = Number(
     formSections.find((section) => section.querySelector(
@@ -1030,17 +1032,28 @@ if (sectionNavigation && formSections.length) {
     completedThrough = Math.max(0, activeSection - 1);
   }
   const revenueSection = formSections.find(
-    (section) => section.dataset.formSection === "3",
+    (section) => section.dataset.formSection === (
+      isWorkspaceSections ? "3" : "2"
+    ),
   );
   const averageOrderField = document.querySelector(
     "#average_order_sale_amount",
   )?.closest(".form-field");
-  if (revenueSection && averageOrderField) revenueSection.prepend(averageOrderField);
+  if (isWorkspaceSections && revenueSection && averageOrderField) {
+    revenueSection.prepend(averageOrderField);
+  }
   const customRevenueControl = document.querySelector(
     ".workspace-revenue-control",
   );
-  if (revenueSection && customRevenueControl) {
+  if (isWorkspaceSections && revenueSection && customRevenueControl) {
     revenueSection.prepend(customRevenueControl);
+  } else if (revenueSection && customRevenueControl) {
+    revenueSection.querySelector(".event-step-header")?.after(customRevenueControl);
+  }
+  if (!isWorkspaceSections) {
+    const conditionsFields = document.querySelector("#event-conditions-fields");
+    const weatherFields = document.querySelector(".assumption-step");
+    if (conditionsFields && weatherFields) conditionsFields.append(weatherFields);
   }
 
   function sectionFields(number) {
@@ -1055,14 +1068,17 @@ if (sectionNavigation && formSections.length) {
     const review = document.querySelector("#event-review-summary");
     if (!review) return;
     review.replaceChildren();
-    for (let number = 1; number <= 5; number += 1) {
+    for (let number = 1; number < totalSections; number += 1) {
       const card = document.createElement("article");
       card.className = "review-section";
       const heading = document.createElement("h3");
-      heading.textContent = sectionButtons[number - 1].textContent.trim();
+      heading.textContent = sectionButtons.find((button) => (
+        Number(button.dataset.sectionTarget) === number
+      ))?.querySelector("strong")?.textContent ?? `Step ${number}`;
       const values = sectionFields(number)
-        .filter((field) => field.name && field.type !== "hidden" && field.value)
-        .slice(0, 4)
+        .filter((field) => field.name && field.type !== "hidden" && field.value
+          && !field.closest("[hidden]")
+          && (!(field.type === "radio" || field.type === "checkbox") || field.checked))
         .map((field) => {
           const label = field.labels?.[0]?.textContent.trim();
           return label ? `${label}: ${field.value}` : field.value;
@@ -1096,10 +1112,22 @@ if (sectionNavigation && formSections.length) {
       }
     });
     if (backButton) backButton.hidden = number === 1;
-    if (continueButton) continueButton.hidden = number === 6;
-    if (analyzeButton) analyzeButton.hidden = number !== 6;
-    if (progress) progress.textContent = `Step ${number} of 6`;
-    if (number === 6) updateReview();
+    if (continueButton) continueButton.hidden = number === totalSections;
+    if (analyzeButton) analyzeButton.hidden = number !== totalSections;
+    if (progress) progress.textContent = `Step ${number} of ${totalSections}`;
+    document.querySelectorAll("[data-event-progress]").forEach((item) => {
+      const target = Number(item.dataset.eventProgress);
+      item.classList.toggle("is-active", target === number);
+      item.classList.toggle("is-complete", target <= completedThrough);
+    });
+    if (number === totalSections) updateReview();
+  }
+
+  if (!isWorkspaceSections) {
+    restoreEventWizardState = (section, completed) => {
+      completedThrough = Math.max(0, Math.min(4, Number(completed) || 0));
+      showSection(Math.max(1, Math.min(5, Number(section) || 1)));
+    };
   }
 
   function validateActiveSection() {
@@ -1138,6 +1166,131 @@ if (sectionNavigation && formSections.length) {
     }
   });
   showSection(activeSection);
+}
+
+const eventWizard = document.querySelector("[data-event-inputs-wizard]");
+const eventDraftForm = eventWizard?.querySelector("form.form-panel");
+if (eventDraftForm) {
+  const draftKey = "event-inputs-draft";
+  const draftStatus = document.querySelector("#event-draft-status");
+  let draftTimer;
+
+  function draftData() {
+    return {
+      entries: Array.from(new FormData(eventDraftForm).entries()),
+      activeSection: Number(document.querySelector(
+        "[data-section-target].is-active",
+      )?.dataset.sectionTarget || 1),
+      completedThrough: document.querySelectorAll(
+        "[data-section-target].is-complete",
+      ).length,
+    };
+  }
+
+  function saveDraftLocally() {
+    window.localStorage.setItem(draftKey, JSON.stringify(draftData()));
+    if (draftStatus) draftStatus.textContent = "Progress saved automatically";
+  }
+
+  function restoreRepeatable(entries, name, amountName, template, container, connect) {
+    const values = entries.filter(([key]) => key === name).map(([, value]) => value);
+    const amounts = entries.filter(([key]) => key === amountName).map(([, value]) => value);
+    if (!values.length) return;
+    container.replaceChildren();
+    values.forEach((value, index) => {
+      const fragment = template.content.cloneNode(true);
+      const row = fragment.firstElementChild;
+      row.querySelector(`[name="${name}"]`).value = value;
+      row.querySelector(`[name="${amountName}"]`).value = amounts[index] ?? "";
+      connect(row.querySelector("button"));
+      container.append(fragment);
+    });
+  }
+
+  function restoreDraft() {
+    let entries;
+    try {
+      const draft = JSON.parse(window.localStorage.getItem(draftKey));
+      entries = draft?.entries;
+      if (Array.isArray(entries)
+          && !document.querySelector('[aria-invalid="true"], .field-error')) {
+        restoreEventWizardState?.(draft.activeSection, draft.completedThrough);
+      }
+    } catch {
+      return;
+    }
+    if (!Array.isArray(entries)
+        || document.querySelector('[aria-invalid="true"], .field-error')) return;
+    restoreRepeatable(entries, "employee_labor_rate", "employee_labor_hours",
+      employeeLaborTemplate, employeeLaborEntries, connectEventLaborRemove);
+    restoreRepeatable(entries, "additional_cost_name", "additional_cost_amount",
+      additionalCostTemplate, additionalCostEntries, connectAdditionalCostRemove);
+    const repeated = new Set(["employee_labor_rate", "employee_labor_hours",
+      "additional_cost_name", "additional_cost_amount"]);
+    eventDraftForm.querySelectorAll("[name]").forEach((field) => {
+      if (repeated.has(field.name) || field.name.startsWith("baseline_")) return;
+      const values = entries.filter(([name]) => name === field.name).map(([, value]) => value);
+      if (field.type === "radio" || field.type === "checkbox") {
+        field.checked = values.includes(field.value);
+      } else if (values.length && !field.readOnly) {
+        field.value = values[0];
+      }
+    });
+    updateWeatherControls();
+    updateSalesControls();
+    showConfirmedEventFoodMethod();
+    updateEventProfitTarget();
+    if (draftStatus) draftStatus.textContent = "Saved draft restored";
+  }
+
+  function updateScenarioSnapshot() {
+    const attendance = Number(document.querySelector("#estimated_attendance")?.value || 0);
+    const buyerRate = Number(document.querySelector("#expected_food_buyer_percentage")?.value || 0) / 100;
+    const competitors = Number(document.querySelector("#other_competing_food_vendors")?.value || 0);
+    const orderValue = Number(document.querySelector("#average_order_sale_amount")?.value || 0);
+    const manual = document.querySelector('[name="revenue_method"]:checked')?.value === "manual_sales";
+    const sales = manual
+      ? Number(document.querySelector("#expected_sales_amount")?.value || 0)
+      : Math.floor(attendance * buyerRate / (competitors + 1)) * orderValue;
+    const revenue = document.querySelector("#snapshot-estimated-revenue");
+    if (revenue) revenue.textContent = sales
+      ? sales.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      : "Complete revenue inputs";
+    const food = document.querySelector("#snapshot-food-method");
+    const confirmedFood = document.querySelector("#event_food_cost_method")?.value;
+    if (food) food.textContent = ({
+      average_per_order: "Average cost per order",
+      sales_percentage: "Percentage of sales",
+      manual_event_total: "Total for this event",
+    })[confirmedFood] ?? "Not selected";
+    const crew = document.querySelector("#snapshot-crew-size");
+    if (crew) crew.textContent = String(employeeLaborEntries.querySelectorAll(".labor-entry").length);
+    const travel = document.querySelector("#snapshot-travel-cost");
+    const travelValue = document.querySelector("#travel_cost")?.value;
+    if (travel) travel.textContent = travelValue ? `$${travelValue}` : "Not entered";
+  }
+
+  restoreDraft();
+  updateScenarioSnapshot();
+  eventDraftForm.addEventListener("input", () => {
+    if (draftStatus) draftStatus.textContent = "Saving progressâ€¦";
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveDraftLocally, 250);
+    updateScenarioSnapshot();
+  });
+  eventDraftForm.addEventListener("change", updateScenarioSnapshot);
+  eventDraftForm.addEventListener("submit", () => {
+    window.localStorage.removeItem(draftKey);
+  });
+  document.querySelector("#save-event-draft")?.addEventListener("click", async () => {
+    saveDraftLocally();
+    try {
+      const response = await fetch(eventDraftForm.dataset.finishLaterUrl, { method: "POST" });
+      window.location.assign(response.url || "/dashboard");
+    } catch {
+      if (draftStatus) draftStatus.textContent = "Draft saved on this device";
+    }
+  });
 }
 
 const firstEventError = document.querySelector('[aria-invalid="true"]')

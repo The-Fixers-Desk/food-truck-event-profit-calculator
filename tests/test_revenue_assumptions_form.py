@@ -31,11 +31,11 @@ def opening_tag(response_data: bytes, element_id: str) -> bytes:
     return match.group()
 
 
-def test_demand_fields_present_without_result_previews_or_custom_sales(client):
+def test_demand_fields_present_with_conditional_custom_sales(client):
     response = client.get("/events/new")
     page = response.data.decode()
 
-    assert "Demand and sales potential" in page
+    assert "Revenue inputs" in page
     assert "Estimated attendance" in page
     assert "Other competing food vendors" in page
     assert "Do not include your own business." in page
@@ -192,15 +192,16 @@ def test_event_protection_is_required_after_weather_selection(client):
     assert b"Choose the event protection." in response.data
 
 
-def test_initial_submission_ignores_custom_expected_sales(client):
+def test_initial_submission_preserves_custom_expected_sales(client):
     form_data = valid_event_inputs()
     form_data["revenue_method"] = "manual_sales"
     form_data["expected_sales_amount"] = "5000"
     form_data["location"] = ""
     response = client.post("/events/new", data=form_data)
-    assert b'value="attendance"' in response.data
-    assert b'value="5000"' not in response.data
-    assert b'id="custom-sales-field"' not in response.data
+    assert b'value="manual_sales"' in response.data
+    assert b'value="5000"' in response.data
+    custom_field = response.data.split(b'id="custom-sales-field"', 1)[1].split(b">", 1)[0]
+    assert b"hidden" not in custom_field
 
 
 def test_calculated_estimate_state_clears_hidden_custom_sales(client):
@@ -213,7 +214,8 @@ def test_calculated_estimate_state_clears_hidden_custom_sales(client):
 
     assert b'value="attendance"' in response.data
     assert b'value="9999"' not in response.data
-    assert b'id="custom-sales-field"' not in response.data
+    custom_field = response.data.split(b'id="custom-sales-field"', 1)[1].split(b">", 1)[0]
+    assert b"hidden" in custom_field
 
 
 @pytest.mark.parametrize(

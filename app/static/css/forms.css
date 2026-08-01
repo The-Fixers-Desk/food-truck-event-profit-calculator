@@ -1240,3 +1240,98 @@
   #defaults-continue, #save-defaults { grid-column: 1; grid-row: 3; width: 100%; }
   #defaults-finish-later { grid-column: 1; grid-row: 4; width: 100%; }
 }
+
+/* Approved Event Inputs Wizard. */
+.event-inputs-page { max-width: none; }
+.event-inputs-heading-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(28rem, 36rem);
+  gap: var(--space-7);
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+.event-inputs-page__header.page-header { margin: 0; padding: 0; border: 0; }
+.event-inputs-page__header h1 { max-width: none; font-size: var(--text-3xl); }
+.event-wizard-progress {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.event-wizard-progress li { position: relative; display: grid; gap: var(--space-2); justify-items: center; color: var(--color-text-muted); text-align: center; }
+.event-wizard-progress li::before { position: absolute; top: .875rem; right: 50%; left: -50%; height: 1px; background: var(--color-border); content: ""; }
+.event-wizard-progress li:first-child::before { display: none; }
+.event-wizard-progress span { z-index: 1; display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; background: var(--color-background); font-size: var(--text-xs); font-weight: var(--weight-bold); }
+.event-wizard-progress .is-active span { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-background); }
+.event-wizard-progress .is-complete span { border-color: var(--color-success); background: var(--color-success); color: var(--color-background); }
+.event-inputs-page .guided-workflow { display: grid; grid-template-columns: 312px minmax(560px, 1fr); gap: 20px; align-items: start; }
+.event-inputs-sidebar { display: grid; gap: var(--space-3); align-content: start; }
+.event-inputs-page .workflow-stepper { display: grid; gap: var(--space-2); margin: 0; padding: var(--space-2); overflow: visible; border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface-subtle); }
+.event-inputs-page .workflow-stepper::before { margin: var(--space-2) var(--space-2) var(--space-1); color: var(--color-primary-hover); font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: .08em; text-transform: uppercase; content: "Event steps"; }
+.event-inputs-page .workflow-stepper button { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: var(--space-3); align-items: center; min-height: 4rem; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text-secondary); text-align: left; }
+.event-inputs-page .workflow-stepper button.is-active { border-color: var(--color-primary); background: var(--color-surface-elevated); box-shadow: none; color: var(--color-text); }
+.event-inputs-page .stage-completion-indicator { display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; background: var(--color-background); }
+.event-inputs-page .workflow-stepper button.is-active .stage-completion-indicator { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-background); }
+.event-inputs-page .workflow-stepper button.is-complete .stage-completion-indicator { border-color: var(--color-success); background: var(--color-success); color: var(--color-background); }
+.event-inputs-page .workflow-stepper button .workflow-stepper__copy {
+  display: grid;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  margin: 0;
+  gap: 2px;
+  place-items: initial;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+}
+.event-inputs-why { padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface-subtle); }
+.event-inputs-why h2 { margin: 0; color: var(--color-primary-hover); font-size: var(--text-sm); }
+.event-inputs-why ul { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: var(--space-5); color: var(--color-text-secondary); font-size: var(--text-sm); }
+.event-inputs-page .form-panel { min-width: 0; padding: 0 var(--space-5); overflow: clip; }
+.event-inputs-page [data-form-section] { margin: 0; padding: var(--space-5) 0; border: 0; }
+.event-step-header { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); }
+.event-step-header > span { justify-self: end; color: var(--color-text-muted); font-size: var(--text-sm); }
+.event-step-header h2, .event-step-header p { margin: 0; }
+.event-step-header h2 { font-size: var(--text-xl); }
+.event-step-header p { color: var(--color-text-secondary); }
+.event-revenue-method { margin: 0 0 var(--space-5); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-small); background: var(--color-surface-subtle); }
+.event-revenue-method .choice-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.event-scenario-snapshot { margin: 0; padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
+.event-scenario-snapshot h2 { margin: 0 0 var(--space-3); color: var(--color-primary-hover); font-size: var(--text-sm); }
+.event-scenario-snapshot dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+.event-scenario-snapshot dl > div { padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); background: var(--color-surface-subtle); }
+.event-scenario-snapshot dt { color: var(--color-text-muted); font-size: var(--text-xs); }
+.event-scenario-snapshot dd { margin: var(--space-1) 0 0; font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.event-scenario-snapshot > p { margin: var(--space-3) 0 0; color: var(--color-text-secondary); font-size: var(--text-sm); }
+.event-inputs-page .sticky-actions { display: grid; grid-template-columns: auto auto minmax(12rem, 1fr) auto auto; margin: 0 calc(-1 * var(--space-5)); border-radius: 0 0 var(--radius-medium) var(--radius-medium); background: rgb(24 27 29 / 96%); }
+.event-draft-status { color: var(--color-text-secondary); font-size: var(--text-sm); }
+.event-draft-status::before { margin-right: var(--space-2); color: var(--color-success); content: "\2713"; }
+
+@media (max-width: 1100px) {
+  .event-inputs-heading-row { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .event-wizard-progress { max-width: 42rem; }
+  .event-inputs-page .guided-workflow { grid-template-columns: 15rem minmax(0, 1fr); }
+  .event-inputs-page .workflow-stepper__copy small { display: none; }
+  .event-scenario-snapshot dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .event-inputs-heading-row .event-wizard-progress { grid-row: 1; width: 100%; }
+  .event-inputs-page__header h1 { font-size: var(--text-2xl); }
+  .event-inputs-page .guided-workflow { display: block; }
+  .event-inputs-why { display: none; }
+  .event-inputs-page .workflow-stepper { display: flex; margin-bottom: var(--space-3); padding: 0 0 var(--space-2); overflow-x: auto; border: 0; border-radius: 0; background: transparent; }
+  .event-inputs-page .workflow-stepper::before { display: none; }
+  .event-inputs-page .workflow-stepper button { flex: 0 0 auto; min-width: 7rem; min-height: 2.75rem; grid-template-columns: auto minmax(0, 1fr); }
+  .event-inputs-page .workflow-stepper__copy small { display: none; }
+  .event-inputs-page .form-panel { padding-inline: var(--space-4); }
+  .event-inputs-page .form-panel { padding-bottom: 10rem; }
+  .event-inputs-page .form-grid, .event-inputs-page .choice-options { grid-template-columns: minmax(0, 1fr); }
+  .event-scenario-snapshot dl { grid-template-columns: minmax(0, 1fr); }
+  .event-inputs-page .sticky-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-inline: calc(-1 * var(--space-4)); padding-inline: var(--space-4); }
+  .event-draft-status { grid-column: 1 / -1; grid-row: 1; }
+  #section-back, #save-event-draft, #section-continue, #analyze-event { width: 100%; }
+  #section-progress { align-self: center; }
+}
