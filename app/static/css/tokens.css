@@ -1,30 +1,31 @@
 :root {
   /* Semantic color system */
-  --color-background: #f6f3ed;
-  --color-surface: #ffffff;
-  --color-surface-elevated: #ffffff;
-  --color-surface-subtle: #efede7;
-  --color-text: #18232d;
-  --color-text-muted: #65717a;
-  --color-border: #d9d7d0;
-  --color-divider: #e7e3dc;
-  --color-accent: #a75726;
-  --color-accent-dark: #7d3d1d;
+  --color-background: #101416;
+  --color-surface: #171c1f;
+  --color-surface-elevated: #1d2327;
+  --color-surface-subtle: #14191c;
+  --color-sidebar: #0c1113;
+  --color-text: #f1f0ed;
+  --color-text-muted: #aeb5b7;
+  --color-border: #343b3e;
+  --color-divider: #282f32;
+  --color-accent: #c66f36;
+  --color-accent-dark: #df8750;
   --color-primary: var(--color-accent);
   --color-primary-hover: var(--color-accent-dark);
-  --color-secondary: #53636e;
-  --color-success: #26704a;
-  --color-success-surface: #eaf5ee;
-  --color-warning: #9a6500;
-  --color-warning-surface: #fff5dc;
-  --color-danger: #a3312d;
-  --color-danger-surface: #faeceb;
-  --color-info: #285d7a;
-  --color-info-surface: #eaf3f7;
-  --color-disabled: #9aa2a7;
-  --color-disabled-surface: #ececea;
-  --color-focus: #1b6f9b;
-  --color-selected: #fff3e8;
+  --color-secondary: #879296;
+  --color-success: #67c391;
+  --color-success-surface: #152820;
+  --color-warning: #e2aa52;
+  --color-warning-surface: #2c2416;
+  --color-danger: #ec7971;
+  --color-danger-surface: #301a1b;
+  --color-info: #79b5d8;
+  --color-info-surface: #162731;
+  --color-disabled: #7e878a;
+  --color-disabled-surface: #242a2d;
+  --color-focus: #f1a064;
+  --color-selected: #2a211c;
 
   --font-body:
     system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -32,13 +33,13 @@
   --font-heading: var(--font-body);
 
   /* Type scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-md: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.25rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.5rem;
   --leading-tight: 1.2;
   --leading-normal: 1.5;
   --leading-relaxed: 1.65;
@@ -67,15 +68,15 @@
   --border-default: var(--border-width) solid var(--color-border);
   --divider-default: var(--border-width) solid var(--color-divider);
 
-  --shadow-1: 0 1px 2px rgb(24 35 45 / 7%);
-  --shadow-2: 0 1px 2px rgb(24 35 45 / 6%), 0 8px 22px rgb(24 35 45 / 5%);
-  --shadow-3: 0 14px 38px rgb(24 35 45 / 12%);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 28%);
+  --shadow-2: 0 2px 5px rgb(0 0 0 / 22%), 0 12px 30px rgb(0 0 0 / 18%);
+  --shadow-3: 0 18px 48px rgb(0 0 0 / 45%);
   --shadow-panel: var(--shadow-2);
 
   /* Layout and interaction */
-  --control-height-small: 2rem;
-  --control-height: 2.75rem;
-  --control-height-large: 3.25rem;
+  --control-height-small: 2.375rem;
+  --control-height: 3rem;
+  --control-height-large: 3.5rem;
   --breakpoint-narrow: 800px;
   --transition-fast: 120ms ease;
 }

@@ -6,6 +6,7 @@
 
 html {
   min-height: 100%;
+  color-scheme: dark;
 }
 
 [hidden] {
@@ -18,11 +19,22 @@ body {
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-body);
+  font-size: var(--text-md);
   line-height: 1.5;
 }
 
 a {
   color: inherit;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #fffaf6;
+}
+
+::placeholder {
+  color: #899195;
+  opacity: 1;
 }
 
 .skip-link {
@@ -58,8 +70,12 @@ p {
 h1 {
   margin-bottom: var(--space-3);
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  font-size: clamp(2.125rem, 3vw, 3.25rem);
   line-height: 1.1;
+}
+
+h2 {
+  line-height: 1.25;
 }
 
 h1, h2, h3, p, dd, td, th {

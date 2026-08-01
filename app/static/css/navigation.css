@@ -2,35 +2,35 @@
   position: sticky;
   top: 0;
   display: flex;
-  width: clamp(14.5rem, 16vw, 16.5rem);
+  width: clamp(17rem, 18vw, 19rem);
   height: 100vh;
   flex-direction: column;
-  gap: clamp(var(--space-5), 4vh, var(--space-7));
-  padding: var(--space-5) var(--space-4);
+  gap: clamp(var(--space-6), 5vh, var(--space-8));
+  padding: var(--space-6) var(--space-4);
   border-right: var(--divider-default);
-  background: var(--color-surface-subtle);
+  background: var(--color-sidebar);
 }
 
 .product-identity {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3) var(--space-5);
   color: var(--color-text);
   text-decoration: none;
 }
 
 .product-identity__desk {
   color: var(--color-text-muted);
-  font-size: 0.6875rem;
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
 }
 
 .product-identity__name {
   color: var(--color-text);
-  max-width: 13rem;
-  font-size: 0.9375rem;
+  max-width: 15rem;
+  font-size: clamp(1.25rem, 1.35vw, 1.5rem);
   font-weight: var(--weight-bold);
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .app-navigation {
@@ -43,23 +43,23 @@
   min-height: var(--control-height);
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3);
   border: 1px solid transparent;
   border-radius: var(--radius-xs);
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: var(--weight-medium);
   text-decoration: none;
 }
 
 .nav-link:hover {
-  background: rgb(255 255 255 / 55%);
+  background: rgb(255 255 255 / 5%);
   color: var(--color-text);
 }
 
 .nav-icon {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.35rem;
+  height: 1.35rem;
   flex: 0 0 auto;
   fill: none;
   stroke: currentColor;
@@ -70,7 +70,7 @@
 
 .nav-link--active {
   border-color: transparent;
-  background: transparent;
+  background: rgb(255 255 255 / 6%);
   color: var(--color-text);
   box-shadow: inset 3px 0 var(--color-primary);
   font-weight: var(--weight-bold);
@@ -87,6 +87,7 @@
     padding: var(--space-2) var(--space-3);
     border-right: 0;
     border-bottom: var(--divider-default);
+    background: var(--color-sidebar);
   }
 
   .product-identity { display: flex; gap: var(--space-2); align-items: baseline; padding: var(--space-2); }

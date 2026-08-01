@@ -2,16 +2,16 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Refine viewport composition and responsive visual rhythm
+Implement premium dark application theme and scale refinement
 
-- Refine viewport composition, proportional relationships, and responsive layout behavior across the application
-- Improve Dashboard composition, hero presentation, recent-work flow, and viewport utilization
-- Strengthen branding hierarchy, sidebar proportions, navigation refinement, and selected-state treatment
-- Improve whitespace, visual rhythm, typography hierarchy, metadata presentation, and component proportions
-- Refine responsive behavior across desktop viewport sizes while preserving readability and balance
-- Improve cross-screen consistency, accessibility, motion, and interaction polish
-- Preserve all existing functionality, workflows, calculations, persistence, and navigation
-- Add responsive, accessibility, composition, and regression test coverage
+- Apply the approved dark-mode visual system across the entire application using the reference mockup as the implementation target
+- Preserve the approved Dashboard hero while extending its visual quality to every remaining screen
+- Increase sidebar branding, navigation scale, typography, icons, spacing, and interaction targets
+- Refine Event Inputs, Event Analysis, Saved Events, Scenario Comparison, Business Defaults, Data Safety, dialogs, forms, tables, and shared components for a cohesive premium desktop experience
+- Improve visual hierarchy, responsive composition, accessibility, semantic colors, elevation, and component proportions throughout the application
+- Consolidate the design system into a single maintainable dark theme and remove obsolete light-theme styling where appropriate
+- Preserve all calculations, workflows, persistence, backup/restore behavior, navigation, and business logic
+- Add comprehensive regression, accessibility, responsive, and visual-system test coverage
 
 ---------------------------------------------------------------------------------
 

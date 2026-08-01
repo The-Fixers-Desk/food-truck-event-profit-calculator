@@ -51,14 +51,14 @@
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.button { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+.button { border-color: var(--color-primary); background: var(--color-primary); color: #fffaf6; }
 .button:hover { border-color: var(--color-primary-hover); background: var(--color-primary-hover); }
 .button-secondary { background: var(--color-surface); color: var(--color-text); }
 .button-secondary:hover { border-color: var(--color-secondary); background: var(--color-surface-subtle); }
 .button-tertiary { border-color: transparent; background: transparent; color: var(--color-primary-hover); }
 .button-tertiary:hover { background: var(--color-selected); }
-.button-destructive { border-color: var(--color-danger); background: var(--color-danger); color: #fff; }
-.button-destructive:hover { background: #812622; }
+.button-destructive { border-color: var(--color-danger); background: #b64f4a; color: #fff; }
+.button-destructive:hover { background: #ca5f58; }
 .button-icon { width: var(--control-height); padding: 0; background: transparent; }
 .button--small { min-height: var(--control-height-small); padding: var(--space-1) var(--space-3); font-size: var(--text-sm); }
 .button--large { min-height: var(--control-height-large); padding-inline: var(--space-5); }
@@ -73,6 +73,7 @@
   border: var(--border-default);
   border-radius: var(--radius-small);
   background: var(--color-surface);
+  color: var(--color-text);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .form-input:hover:not(:disabled) { border-color: var(--color-secondary); }
@@ -80,7 +81,7 @@
 .form-input:disabled { background: var(--color-disabled-surface); color: var(--color-disabled); cursor: not-allowed; }
 .form-input[aria-invalid="true"] { border-color: var(--color-danger); box-shadow: inset 3px 0 var(--color-danger); }
 .form-input[data-warning="true"] { border-color: var(--color-warning); box-shadow: inset 3px 0 var(--color-warning); }
-input[type="checkbox"], input[type="radio"] { width: 1.125rem; height: 1.125rem; accent-color: var(--color-primary); }
+input[type="checkbox"], input[type="radio"] { width: 1.25rem; height: 1.25rem; accent-color: var(--color-primary); }
 .switch { display: inline-flex; gap: var(--space-2); align-items: center; }
 
 .tabs, .section-switcher { display: flex; gap: var(--space-2); overflow-x: auto; border-bottom: var(--divider-default); }
@@ -102,7 +103,7 @@ input[type="checkbox"], input[type="radio"] { width: 1.125rem; height: 1.125rem;
 
 .badge, .field-indicator, .status-badge {
   display: inline-flex;
-  min-height: 1.5rem;
+  min-height: 1.75rem;
   align-items: center;
   padding: 0 var(--space-2);
   border: var(--border-default);
@@ -138,7 +139,7 @@ input[type="checkbox"], input[type="radio"] { width: 1.125rem; height: 1.125rem;
 .skeleton { min-height: 1em; border-radius: var(--radius-xs); background: var(--color-disabled-surface); }
 
 dialog, .dialog, .save-analysis-dialog { max-width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); padding: var(--space-5); overflow: auto; border: var(--border-default); border-radius: var(--radius-large); background: var(--color-surface-elevated); box-shadow: var(--shadow-3); color: var(--color-text); }
-dialog::backdrop { background: rgb(24 35 45 / 52%); }
+dialog::backdrop { background: rgb(0 0 0 / 72%); }
 .dialog__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
 
 summary {
@@ -189,7 +190,7 @@ summary:hover { color: var(--color-primary-hover); }
   align-items: center;
   padding: var(--space-3);
   border: var(--divider-default);
-  background: rgb(255 255 255 / 97%);
+  background: rgb(23 28 31 / 97%);
 }
 .selected-count-bar p { margin: 0; }
 
@@ -262,7 +263,7 @@ summary:hover { color: var(--color-primary-hover); }
   color: var(--color-text);
   text-decoration: none;
 }
-.recent-work-row:hover { background: rgb(255 255 255 / 64%); }
+.recent-work-row:hover { background: rgb(255 255 255 / 4%); }
 .recent-work-row:hover .recent-work-row__affordance { color: var(--color-primary); }
 .recent-work-row--primary { min-height: 5.25rem; padding-block: var(--space-4); }
 .recent-work-row h3, .recent-work-row p { margin: 0; }

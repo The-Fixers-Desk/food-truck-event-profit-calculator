@@ -37,7 +37,7 @@ def test_sidebar_branding_and_selected_navigation_remain_accessible(client):
     assert "Food Truck Event Profit Calculator" in page
     assert "The Fixer&rsquo;s Desk" in page
     assert 'aria-current="page"' in page
-    assert "width: clamp(14.5rem, 16vw, 16.5rem)" in css
+    assert "width: clamp(17rem, 18vw, 19rem)" in css
     assert "box-shadow: inset 3px 0 var(--color-primary)" in css
     assert ".nav-link--active .nav-icon" in css
 

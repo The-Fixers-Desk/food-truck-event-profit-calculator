@@ -22,18 +22,19 @@
 }
 
 .form-label {
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
 .form-hint {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .form-input {
   width: 100%;
-  min-height: 44px;
+  min-height: var(--control-height);
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-small);
@@ -41,8 +42,9 @@
 }
 
 .form-input:focus {
-  border-color: var(--color-accent);
-  outline: 2px solid rgb(139 63 47 / 20%);
+  border-color: var(--color-focus);
+  outline: 3px solid color-mix(in srgb, var(--color-focus) 28%, transparent);
+  outline-offset: 1px;
 }
 
 .form-input[aria-invalid="true"] {
@@ -52,7 +54,7 @@
 .field-error {
   margin: 0;
   color: var(--color-danger);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -69,7 +71,7 @@
 }
 
 .section-switcher button {
-  min-height: 42px;
+  min-height: var(--control-height);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-small);
@@ -92,7 +94,7 @@
 
 .section-switcher button.is-active {
   border-color: var(--color-accent);
-  background: #fff9f3;
+  background: var(--color-selected);
   color: var(--color-accent-dark);
 }
 
@@ -118,7 +120,7 @@
   padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--color-border);
   border-radius: 0 0 var(--radius-medium) var(--radius-medium);
-  background: rgb(255 255 255 / 96%);
+  background: rgb(23 28 31 / 96%);
 }
 
 #section-progress {
@@ -350,7 +352,7 @@
   padding: var(--space-3);
   border: var(--divider-default);
   border-radius: var(--radius-small);
-  background: rgb(255 255 255 / 97%);
+  background: rgb(23 28 31 / 97%);
   box-shadow: var(--shadow-1);
 }
 .scenario-more-actions { position: relative; }
@@ -547,8 +549,8 @@
 .contextual-warning {
   margin: 0;
   padding: var(--space-3);
-  border-left: 4px solid #b7791f;
-  background: #fff8e6;
+  border-left: 4px solid var(--color-warning);
+  background: var(--color-warning-surface);
 }
 
 .workspace-revenue-control {
@@ -567,7 +569,7 @@
 }
 
 .save-analysis-dialog::backdrop {
-  background: rgb(0 0 0 / 45%);
+  background: rgb(0 0 0 / 72%);
 }
 
 .save-analysis-dialog h2 {
@@ -653,19 +655,21 @@
 @media (min-width: 900px) {
   .guided-workflow {
     display: grid;
-    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
-    gap: var(--space-5);
+    grid-template-columns: minmax(15rem, 17rem) minmax(0, 1fr);
+    gap: clamp(var(--space-5), 2.5vw, var(--space-7));
     align-items: start;
   }
 
-  .workflow-stepper {
+  .section-switcher.workflow-stepper {
     position: sticky;
     z-index: 6;
     top: 4rem;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
     margin: 0;
     border-bottom: 0;
+    overflow-x: visible;
   }
 
   .workflow-stepper button { width: 100%; }
@@ -895,7 +899,8 @@
 .field-indicator {
   display: inline-flex;
   padding: 0.1rem var(--space-2);
-  background: #eee8de;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
   border-radius: 999px;
   color: var(--color-text-muted);
   font-size: 0.75rem;
@@ -967,8 +972,8 @@
 .status-message {
   margin-bottom: var(--space-5);
   padding: var(--space-4);
-  background: #eef6ec;
-  border: 1px solid #9aba92;
+  background: var(--color-success-surface);
+  border: 1px solid var(--color-success);
   border-radius: var(--radius-small);
 }
 
