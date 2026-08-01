@@ -100,7 +100,7 @@ def test_management_and_safety_screens_remain_available_in_dark_shell(client):
 
     assert "Search" in saved
     assert "Sort by" in saved
-    assert "Compare selected" in saved
+    assert "Compare" in saved
     assert "Download backup" in safety
     assert "Restore backup" in safety
     assert 'class="app-shell"' in saved

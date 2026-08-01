@@ -2,12 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build analysis workspace and scenario comparison
-
-Implemented the approved Event Analysis workspace and Scenario Comparison experience, including live recalculation, financial summaries, cost breakdowns, decision checks, warnings, scenario actions, assumption comparisons, recommendation states, and responsive layouts. Preserved calculation rules, persistence, and scenario version behavior.
-
----------------------------------------------------------------------------------
-
 Complete saved work, data safety, and UI polish
 
 Implemented Saved Events and Data Safety, including filtering, sorting, scenario access, export, import, backup status, destructive-action safeguards, and responsive states. Completed the final review of all 10 screens against their approved mockups, specifications, rationales, and acceptance checklists, and corrected remaining accessibility, consistency, and workflow issues.

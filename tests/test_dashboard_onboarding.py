@@ -171,7 +171,7 @@ def test_dashboard_keeps_comparison_in_saved_events_with_two_scenarios(
     assert "Rain plan" in ready
     assert "comparison-selection-form" not in ready
     assert 'href="/saved-events"' in ready
-    assert 'id="comparison-selection-form"' in client.get("/saved-events").data.decode()
+    assert 'action="/comparison"' in client.get("/saved-events").data.decode()
 
 
 def test_dashboard_repository_failure_uses_error_handler(

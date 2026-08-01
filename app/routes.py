@@ -1,6 +1,9 @@
 import sqlite3
 import os
 from dataclasses import replace
+from datetime import datetime, timedelta
+from io import BytesIO
+import json
 from pathlib import Path
 import tempfile
 
@@ -34,6 +37,8 @@ from app.database import (
     business_defaults_setup_is_complete,
     create_event_scenario,
     create_event_with_initial_scenario,
+    clear_customer_data,
+    delete_all_events,
     delete_event,
     delete_event_scenario,
     list_saved_events,
@@ -42,6 +47,7 @@ from app.database import (
     overwrite_event_scenario,
     rename_event,
     rename_event_scenario,
+    reset_business_defaults,
     save_business_defaults,
     saved_event_counts,
     close_database,
@@ -113,6 +119,10 @@ def require_business_defaults_setup():
         "main.data_safety",
         "main.download_backup",
         "main.restore_backup",
+        "main.download_sample_format",
+        "main.delete_all_saved_events",
+        "main.reset_saved_defaults",
+        "main.clear_all_customer_data",
     }:
         return None
     if (
@@ -178,14 +188,31 @@ def dashboard():
     )
 
 
+@main.get("/system-states")
+def system_states():
+    """Display deterministic reusable system states for support review."""
+    return render_template("system_states.html", active_page="system")
+
+
 @main.get("/data-safety")
 def data_safety():
     """Display customer backup, restore, and recovery controls."""
+    event_count, scenario_count = (0, 0)
+    defaults_count = 0
+    if not current_app.config.get("RECOVERY_MODE", False):
+        event_count, scenario_count = saved_event_counts()
+        defaults_count = int(business_defaults_setup_is_complete())
+    marker = current_app.config["DATA_PATHS"].root / "last-export.txt"
+    last_export = marker.read_text(encoding="utf-8").strip() if marker.exists() else None
     return render_template(
         "data_safety.html",
         active_page="data_safety",
         recovery_mode=current_app.config.get("RECOVERY_MODE", False),
         restore_error=None,
+        event_count=event_count,
+        scenario_count=scenario_count,
+        defaults_count=defaults_count,
+        last_export=last_export,
     )
 
 
@@ -202,6 +229,8 @@ def download_backup():
     except (OSError, sqlite3.Error, BackupValidationError):
         current_app.logger.exception("Customer backup creation failed.")
         abort(500)
+    marker = current_app.config["DATA_PATHS"].root / "last-export.txt"
+    marker.write_text(datetime.now().astimezone().isoformat(timespec="minutes"), encoding="utf-8")
     return send_file(
         payload,
         as_attachment=True,
@@ -382,6 +411,66 @@ def event_input_warnings():
     if errors:
         return jsonify({"ready": False, "warnings": []})
     return jsonify({"ready": True, "warnings": customer_warning_data(result)})
+
+
+@main.get("/data-safety/sample-format")
+def download_sample_format():
+    """Download a harmless description of the versioned backup format."""
+    sample = {
+        "product": "Food Truck Event Profit Calculator",
+        "backup_extension": ".ftbackup",
+        "contents": ["manifest.json", "database.sqlite"],
+        "includes": ["business defaults", "events", "scenarios", "labor", "additional costs"],
+        "note": "Use Export all data in the app to create a restorable backup.",
+    }
+    return send_file(
+        BytesIO(json.dumps(sample, indent=2).encode("utf-8")),
+        as_attachment=True,
+        download_name="food-truck-calculator-backup-format.json",
+        mimetype="application/json",
+    )
+
+
+def _require_data_action_confirmation(expected: str):
+    if request.form.get("confirmation") != expected:
+        flash("Confirm the exact data you want to remove.", "error")
+        return redirect(url_for("main.data_safety"))
+    return None
+
+
+@main.post("/data-safety/delete-events")
+def delete_all_saved_events():
+    """Delete saved Events while preserving Business Defaults."""
+    rejected = _require_data_action_confirmation("delete-events")
+    if rejected:
+        return rejected
+    delete_all_events()
+    flash("All saved events and scenarios were deleted.", "success")
+    return redirect(url_for("main.data_safety"))
+
+
+@main.post("/data-safety/reset-defaults")
+def reset_saved_defaults():
+    """Reset Business Defaults while preserving saved Events."""
+    rejected = _require_data_action_confirmation("reset-defaults")
+    if rejected:
+        return rejected
+    reset_business_defaults()
+    session.pop("onboarding_deferred", None)
+    flash("Business defaults were reset.", "success")
+    return redirect(url_for("main.data_safety"))
+
+
+@main.post("/data-safety/clear")
+def clear_all_customer_data():
+    """Clear all customer-created data after high-friction confirmation."""
+    if request.form.get("confirmation_phrase", "").strip() != "CLEAR ALL DATA":
+        flash('Type "CLEAR ALL DATA" to confirm.', "error")
+        return redirect(url_for("main.data_safety"))
+    clear_customer_data()
+    session.clear()
+    flash("All customer data was cleared.", "success")
+    return redirect(url_for("main.welcome"))
 
 
 @main.post("/event-analysis/calculate")
@@ -767,10 +856,78 @@ def _render_saved_events(
     comparison_error: str | None = None,
     selected_scenarios: list[str] | None = None,
 ):
+    all_events = list_saved_events()
+    for event in all_events:
+        latest = event["scenarios"][0]
+        _, _, scenario = load_event_scenario(latest["id"])
+        result = calculate_event_scenario(scenario)
+        evaluation = result.profit_target_evaluation
+        if result.business_profit < 0:
+            status, tone = "Not worth it", "danger"
+        elif evaluation is not None and evaluation.is_met is False:
+            status, tone = "Borderline", "warning"
+        else:
+            status, tone = "Worth it", "success"
+        event.update(
+            recommendation=status,
+            recommendation_key=status.lower().replace(" ", "-"),
+            recommendation_tone=tone,
+            latest_scenario_id=latest["id"],
+            latest_scenario_name=latest["scenario_name"],
+        )
+    status_counts = {
+        key: sum(event["recommendation_key"] == key for event in all_events)
+        for key in ("worth-it", "borderline", "not-worth-it")
+    }
+    search = request.args.get("q", "").strip()
+    status_filter = request.args.get("status", "all")
+    sort = request.args.get("sort", "modified")
+    filtered = all_events
+    if search:
+        folded = search.casefold()
+        filtered = [
+            event for event in filtered
+            if folded in event["event_name"].casefold()
+            or folded in event["location"].casefold()
+            or any(folded in item["scenario_name"].casefold() for item in event["scenarios"])
+        ]
+    if status_filter in status_counts:
+        filtered = [event for event in filtered if event["recommendation_key"] == status_filter]
+    if sort == "name":
+        filtered.sort(key=lambda item: (item["event_name"].casefold(), item["id"]))
+    elif sort == "event-date":
+        filtered.sort(key=lambda item: (item["event_date"], item["id"]), reverse=True)
+    elif sort == "recommendation":
+        order = {"worth-it": 0, "borderline": 1, "not-worth-it": 2}
+        filtered.sort(key=lambda item: (order[item["recommendation_key"]], item["event_name"].casefold()))
+    page_size = 25
+    page = max(request.args.get("page", 1, type=int) or 1, 1)
+    page_count = max((len(filtered) + page_size - 1) // page_size, 1)
+    page = min(page, page_count)
+    start = (page - 1) * page_size
+    events = filtered[start:start + page_size]
+    recent_cutoff = (datetime.now().astimezone().date() - timedelta(days=6)).isoformat()
+    recently_updated = sum(
+        event["last_modified"][:10] >= recent_cutoff
+        for event in all_events
+    )
     return render_template(
         "saved_events.html",
         active_page="saved_events",
-        events=list_saved_events(),
+        events=events,
+        has_events=bool(all_events),
+        total_events=len(all_events),
+        total_scenarios=sum(event["scenario_count"] for event in all_events),
+        recently_updated=recently_updated,
+        status_counts=status_counts,
+        search=search,
+        status_filter=status_filter,
+        sort=sort,
+        page=page,
+        page_count=page_count,
+        result_start=(start + 1 if filtered else 0),
+        result_end=min(start + page_size, len(filtered)),
+        result_count=len(filtered),
         event_errors=event_errors or {},
         event_values=event_values or {},
         scenario_errors=scenario_errors or {},

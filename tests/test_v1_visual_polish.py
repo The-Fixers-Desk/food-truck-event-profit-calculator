@@ -22,11 +22,10 @@ def test_scenario_save_has_specific_busy_and_recovery_states(client):
 def test_management_posts_prevent_duplicate_actions_with_specific_verbs(client):
     script = client.get("/static/js/saved_events.js").data.decode()
 
-    assert 'compareButton.disabled = true' in script
-    assert 'compareButton.textContent = "Comparing…"' in script
-    assert 'document.querySelectorAll(".management-action form")' in script
+    assert "requestSubmit" in script
+    assert 'document.querySelectorAll(".management-action form, .event-library-more form")' in script
     assert 'button.disabled = true' in script
-    assert '"Deleting…" : "Renaming…"' in script
+    assert '"Deleting…" : "Saving…"' in script
     assert 'aria-busy' in script
 
 
@@ -57,7 +56,7 @@ def test_customer_actions_use_specific_consistent_wording(client):
         "Save changes",
         "Analyze event",
         "Analyze new event",
-        "Compare selected",
+        "Compare",
         "Download backup",
         "Restore backup",
     ):

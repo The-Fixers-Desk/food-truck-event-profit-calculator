@@ -47,11 +47,11 @@ def test_saved_events_preserves_compact_open_compare_and_management(client, data
 
     assert 'id="saved-work-search"' in page
     assert 'id="saved-work-sort"' in page
-    assert 'id="comparison-selection-form"' in page
+    assert 'action="/comparison"' in page
     assert page.count('class="scenario-row__open"') == 2
-    assert "Manage event" in page
+    assert "Manage" in page
     assert "Rename" in page and "Delete" in page
-    assert 'id="saved-work-no-results" hidden' in page
+    assert 'class="event-library-table"' in page
 
 
 def test_hidden_states_override_component_display_rules(client):

@@ -362,6 +362,28 @@ def saved_event_counts() -> tuple[int, int]:
     return row["event_count"], row["scenario_count"]
 
 
+def delete_all_events() -> None:
+    """Delete every saved Event and its cascading Scenario data."""
+    database = get_database()
+    with database:
+        database.execute("DELETE FROM events")
+
+
+def reset_business_defaults() -> None:
+    """Remove the single Business Defaults record and its labor rows."""
+    database = get_database()
+    with database:
+        database.execute("DELETE FROM business_defaults")
+
+
+def clear_customer_data() -> None:
+    """Remove all customer-created Defaults and saved Event data."""
+    database = get_database()
+    with database:
+        database.execute("DELETE FROM events")
+        database.execute("DELETE FROM business_defaults")
+
+
 def rename_event(event_id: int, name: str) -> bool:
     """Rename only an Event and update its modified timestamp."""
     database = get_database()

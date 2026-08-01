@@ -360,7 +360,8 @@ def test_selection_and_comparison_structure_are_accessible_and_responsive(
     ).data.decode()
     styles = client.get("/static/css/forms.css").data.decode()
 
-    assert "Select Summer Festival — Original estimate" in saved_page
+    assert 'aria-label="Saved events library"' in saved_page
+    assert 'action="/comparison"' in saved_page
     assert 'aria-live="polite"' in saved_page
     assert '<table class="comparison-table">' in comparison_page
     assert 'scope="row"' in comparison_page

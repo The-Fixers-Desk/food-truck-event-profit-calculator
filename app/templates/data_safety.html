@@ -1,73 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Data Safety | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
-<section class="page data-safety-page workspace-page--form">
+<section class="page data-safety-page workspace-page--wide">
   <header class="page-header">
-    <p class="page-eyebrow">Data Safety</p>
-    <h1>Back up or restore your data</h1>
-    {% if recovery_mode %}
-      <p class="field-error" role="alert">
-        Your customer data could not be opened. The damaged database was
-        preserved. Restore a valid backup to continue.
-      </p>
-    {% else %}
-      <p class="page-description">
-        Download a portable copy of all saved business defaults, events,
-        scenarios, labor entries, and additional costs.
-      </p>
-    {% endif %}
+    <p class="page-eyebrow">Privacy &amp; storage</p>
+    <h1>Your data stays on this device</h1>
+    {% if recovery_mode %}<p class="field-error" role="alert">Your customer data could not be opened. The damaged database was preserved. Restore a valid backup to continue.</p>{% else %}<p class="page-description">This app works offline and stores everything locally on your device. No account, no cloud—you remain in full control.</p>{% endif %}
   </header>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<p class="flash-message flash-message--{{ category }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      <p class="flash-message flash-message--{{ category }}" role="status">
-        {{ message }}
-      </p>
-    {% endfor %}
-  {% endwith %}
-
-  <div class="safety-action-grid">
   {% if not recovery_mode %}
-    <section class="safety-action-panel safety-action-panel--primary">
-      <h2>Download backup</h2>
-      <p>Save a local copy of your Defaults, Events, Scenarios, labor, and additional costs.</p>
-      <form id="download-backup-form" method="post" action="{{ url_for('main.download_backup') }}">
-        <button class="button" id="download-backup" type="submit">Download backup</button>
-      </form>
-      <details class="supporting-disclosure">
-        <summary>About local backups</summary>
-        <p>Downloading does not change your saved work. The backup remains wherever you choose to store it.</p>
-      </details>
+  <section class="local-data-summary" aria-labelledby="local-data-title">
+    <h2 id="local-data-title">Local data summary</h2>
+    <div class="local-data-metrics"><div><span>Saved events</span><strong>{{ event_count|default(0) }}</strong></div><div><span>Scenarios</span><strong>{{ scenario_count|default(0) }}</strong></div><div><span>Business defaults</span><strong>{{ defaults_count|default(0) }}</strong></div></div>
+    <dl><div><dt>Last export</dt><dd>{% if last_export %}<time datetime="{{ last_export }}">{{ last_export|replace('T', ' ') }}</time>{% else %}Not exported yet{% endif %}</dd></div><div><dt>Auto-saved locally</dt><dd>Changes are saved automatically as you work.</dd></div></dl>
+  </section>
+
+  <div class="data-safety-grid">
+    <section class="privacy-model-card" aria-labelledby="privacy-model-title"><h2 id="privacy-model-title">Your privacy model</h2><ul>{% for title, copy in (("Stored locally", "All data lives only on this device."), ("No cloud sync", "We do not upload, sync, or back up your data."), ("No account required", "You do not need to sign up or log in."), ("Works offline", "Use the app without an internet connection.")) %}<li><div><strong>{{ title }}</strong><span>{{ copy }}</span></div><span class="privacy-check">Included</span></li>{% endfor %}</ul></section>
+
+    <section class="manage-data-card" aria-labelledby="manage-data-title"><h2 id="manage-data-title">Manage your data</h2>
+      <div class="data-action-row"><div><h3>Export all data</h3><p>Save a complete, versioned backup of events, scenarios, and business defaults.</p></div><form id="download-backup-form" method="post" action="{{ url_for('main.download_backup') }}"><button class="button-secondary" id="download-backup" type="submit">Download backup</button></form></div>
+      <div class="data-action-row"><div><h3>Import backup</h3><p>The app validates the file and creates a recovery snapshot before replacing current data.</p></div><button class="button-secondary" type="button" data-dialog-open="restore-dialog">Import</button></div>
+      <div class="data-action-row"><div><h3>Download sample format</h3><p>View the backup structure without including customer data.</p></div><a class="button-secondary" href="{{ url_for('main.download_sample_format') }}">Download</a></div>
     </section>
+  </div>
+
+  <section class="danger-zone" aria-labelledby="danger-zone-title"><div class="danger-zone__intro"><h2 id="danger-zone-title">Danger zone</h2><strong>Destructive actions cannot be undone.</strong><p>We recommend exporting your data before proceeding.</p></div>
+    <div><h3>Delete all saved events</h3><p>Remove events and scenarios; preserve defaults.</p><button class="button-destructive" type="button" data-dialog-open="delete-events-dialog">Delete events</button></div>
+    <div><h3>Reset business defaults</h3><p>Remove defaults; preserve saved events.</p><button class="button-destructive" type="button" data-dialog-open="reset-defaults-dialog">Reset defaults</button></div>
+    <div><h3>Clear app data</h3><p>Erase events, scenarios, and defaults.</p><button class="button-destructive" type="button" data-dialog-open="clear-data-dialog">Clear everything</button></div>
+  </section>
   {% endif %}
 
-  <section class="safety-action-panel safety-action-panel--restore">
-    <h2>Restore backup</h2>
-    <p>Restore replaces all current application data. It does not merge records.</p>
-    {% if restore_error %}
-      <p class="field-error" role="alert">{{ restore_error }}</p>
-    {% endif %}
-    <form id="restore-backup-form" method="post" enctype="multipart/form-data"
-      action="{{ url_for('main.restore_backup') }}">
-      <div class="form-field">
-        <label class="form-label" for="backup-file">Backup file</label>
-        <input class="form-input" id="backup-file" name="backup_file"
-          type="file" accept=".ftbackup" required />
-      </div>
-      <label>
-        <input name="confirm_restore" type="checkbox" value="yes" required />
-        I understand that this replaces all current saved data.
-      </label>
-      <div class="form-actions">
-        <button class="button-destructive" id="restore-backup" type="submit">Restore backup</button>
-      </div>
-    </form>
-    <details class="supporting-disclosure">
-      <summary>What happens before restore?</summary>
-      <p>The app validates the backup and creates a recovery snapshot before replacing current data.</p>
-    </details>
-  </section>
-  </div>
+  <dialog class="confirmation-dialog" id="restore-dialog" {% if restore_error %}open{% endif %}><form method="dialog" class="dialog-close-form"><button class="button-tertiary" type="submit" aria-label="Close import dialog">Close</button></form><h2>Import backup</h2><p>Restore replaces all current application data. It does not merge records.</p>{% if restore_error %}<p class="field-error" role="alert">{{ restore_error }}</p>{% endif %}<form id="restore-backup-form" method="post" enctype="multipart/form-data" action="{{ url_for('main.restore_backup') }}"><div class="form-field"><label class="form-label" for="backup-file">Backup file</label><input class="form-input" id="backup-file" name="backup_file" type="file" accept=".ftbackup" required /></div><label class="choice-option"><input name="confirm_restore" type="checkbox" value="yes" required />I understand this replaces all current saved data.</label><button class="button-destructive" id="restore-backup" type="submit">Restore backup</button></form></dialog>
+
+  {% if not recovery_mode %}
+  <dialog class="confirmation-dialog" id="delete-events-dialog"><form method="dialog" class="dialog-close-form"><button class="button-tertiary" type="submit">Cancel</button></form><h2>Delete all saved events?</h2><p>This removes every event, scenario, labor entry, and additional event cost. Business defaults remain.</p><form method="post" action="{{ url_for('main.delete_all_saved_events') }}"><input name="confirmation" type="hidden" value="delete-events" /><button class="button-destructive" type="submit">Delete all saved events</button></form></dialog>
+  <dialog class="confirmation-dialog" id="reset-defaults-dialog"><form method="dialog" class="dialog-close-form"><button class="button-tertiary" type="submit">Cancel</button></form><h2>Reset business defaults?</h2><p>This removes your saved defaults. Existing events and scenarios remain unchanged.</p><form method="post" action="{{ url_for('main.reset_saved_defaults') }}"><input name="confirmation" type="hidden" value="reset-defaults" /><button class="button-destructive" type="submit">Reset business defaults</button></form></dialog>
+  <dialog class="confirmation-dialog" id="clear-data-dialog"><form method="dialog" class="dialog-close-form"><button class="button-tertiary" type="submit">Cancel</button></form><h2>Clear all app data?</h2><p>This permanently removes business defaults, events, scenarios, labor, and additional costs.</p><form method="post" action="{{ url_for('main.clear_all_customer_data') }}"><div class="form-field"><label class="form-label" for="clear-confirmation">Type CLEAR ALL DATA to continue</label><input class="form-input" id="clear-confirmation" name="confirmation_phrase" autocomplete="off" required /></div><button class="button-destructive" type="submit">Clear app data</button></form></dialog>
+  {% endif %}
   <script src="{{ url_for('static', filename='js/data_safety.js') }}"></script>
 </section>
 {% endblock %}

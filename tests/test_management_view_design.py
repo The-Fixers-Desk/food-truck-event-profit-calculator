@@ -45,17 +45,17 @@ def test_dashboard_renders_accessible_whole_row_recent_work(client, database_pat
 
 def test_saved_library_has_accessible_search_sort_and_no_results(client):
     client.post("/events/new", data=complete_event_inputs())
-    page = client.get("/saved-events").data.decode()
+    page = client.get("/saved-events?q=missing").data.decode()
 
     assert 'role="search"' in page
     assert 'for="saved-work-search"' in page
     assert 'type="search"' in page
     assert 'for="saved-work-sort"' in page
-    assert "Recently modified" in page
+    assert "Last updated" in page
     assert "Event date" in page
     assert "Event name" in page
-    assert 'id="saved-work-no-results" hidden' in page
-    assert "No matching saved work" in page
+    assert 'id="saved-work-no-results"' in page
+    assert "No events match these filters" in page
     assert 'id="saved-work-filter-status"' in page
     assert 'aria-live="polite"' in page
 
@@ -66,11 +66,9 @@ def test_saved_library_script_filters_sorts_clears_and_marks_selection(client):
     assert "filterSavedWork" in script
     assert "sortSavedWork" in script
     assert "resetSearch" in script
-    assert "toLocaleLowerCase" in script
-    assert 'sort === "modified"' not in script  # default branch is modified-first
-    assert 'sort === "event-date"' in script
-    assert 'sort === "name"' in script
-    assert 'classList.toggle(\n        "is-selected"' in script
+    assert "server-backed" in script
+    assert "requestSubmit" in script
+    assert "window.location.assign" in script
 
 
 def test_saved_rows_expose_event_scenario_identity_and_primary_actions(
@@ -80,7 +78,7 @@ def test_saved_rows_expose_event_scenario_identity_and_primary_actions(
     save_sibling(client, database_path, "Rain plan")
     page = client.get("/saved-events").data.decode()
 
-    assert 'class="saved-event event-library-row"' in page
+    assert 'class="event-library-row"' in page
     assert 'data-event-name="Summer Festival"' in page
     assert 'data-event-date="2026-08-15"' in page
     assert 'data-scenario-name="Rain plan"' in page
@@ -113,8 +111,8 @@ def test_comparison_has_sticky_controls_identity_and_local_scrollers(
 def test_data_safety_has_clear_normal_and_high_impact_tasks(client):
     page = client.get("/data-safety").data.decode()
 
-    assert 'class="safety-action-grid"' in page
-    assert "Download backup" in page
+    assert 'class="data-safety-grid"' in page
+    assert "Export all data" in page
     assert "Restore replaces all current application data" in page
     assert "It does not merge records" in page
     assert 'class="button-destructive" id="restore-backup"' in page

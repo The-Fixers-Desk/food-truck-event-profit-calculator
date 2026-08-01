@@ -11,8 +11,8 @@ from tests.test_complete_event_inputs_workflow import complete_event_inputs
         ("/", "Welcome", "Welcome to your event profit calculator"),
         ("/defaults", "Defaults", "Set your business defaults once"),
         ("/events/new", "Event Inputs", "Enter the details for this event"),
-        ("/saved-events", "Saved Events", "Saved events"),
-        ("/data-safety", "Data Safety", "Back up or restore your data"),
+        ("/saved-events", "Saved Events", "Your saved events"),
+        ("/data-safety", "Data Safety", "Your data stays on this device"),
     ),
 )
 def test_pages_have_skip_target_title_landmarks_and_one_h1(

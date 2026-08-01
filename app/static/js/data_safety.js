@@ -12,6 +12,23 @@ function clearBusy(button, label) {
   button.textContent = label;
 }
 
+let dialogTrigger = null;
+document.querySelectorAll("[data-dialog-open]").forEach((trigger) => {
+  trigger.addEventListener("click", () => {
+    const dialog = document.getElementById(trigger.dataset.dialogOpen);
+    if (!dialog) return;
+    dialogTrigger = trigger;
+    dialog.showModal();
+    dialog.querySelector("button, input")?.focus();
+  });
+});
+document.querySelectorAll(".confirmation-dialog").forEach((dialog) => {
+  dialog.addEventListener("close", () => {
+    dialogTrigger?.focus();
+    dialogTrigger = null;
+  });
+});
+
 const downloadForm = document.querySelector("#download-backup-form");
 if (downloadForm) {
   const downloadButton = document.querySelector("#download-backup");
