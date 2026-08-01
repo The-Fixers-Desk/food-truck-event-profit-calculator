@@ -357,6 +357,190 @@ summary:hover { color: var(--color-primary-hover); }
 .scenario-row__open:hover strong { color: var(--color-primary-hover); }
 .scenario-row__open span { color: var(--color-text-muted); font-size: var(--text-sm); }
 .scenario-actions { margin: 0; }
+
+/* Approved Event Analysis Workspace and Scenario Comparison. */
+.analysis-workspace-page > .page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-5);
+  align-items: end;
+  margin-bottom: var(--space-4);
+}
+.analysis-workspace-page > .page-header > :not(.workspace-header-controls) { grid-column: 1; }
+.workspace-header-controls {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto auto;
+  gap: var(--space-2);
+  align-items: end;
+}
+.workspace-header-controls > label { grid-column: 1; color: var(--color-text-muted); font-size: var(--text-xs); }
+.workspace-header-controls select { grid-column: 1; }
+.workspace-header-controls form { margin: 0; }
+.analysis-overview {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+.analysis-overview__rail { display: grid; gap: var(--space-3); }
+.analysis-rail-card,
+.analysis-metric-strip,
+.profitability-panel,
+.decision-checks,
+.result-drivers,
+.workspace-warning-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+.analysis-rail-card { padding: var(--space-3); }
+.analysis-rail-card h2,
+.decision-checks h2,
+.result-drivers h2,
+.workspace-warning-panel h2 { margin: 0 0 var(--space-3); color: var(--color-primary-hover); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: .04em; }
+.analysis-rail-card dl,
+.decision-checks dl { display: grid; gap: 0; margin: 0; }
+.analysis-rail-card dl > div,
+.decision-checks dl > div { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--color-divider); }
+.analysis-rail-card dt,
+.decision-checks dt { color: var(--color-text-muted); font-size: var(--text-xs); }
+.analysis-rail-card dd,
+.decision-checks dd { margin: 0; font-size: var(--text-xs); font-weight: var(--weight-medium); text-align: right; }
+.scenario-list-card ol { display: grid; gap: var(--space-1); margin: 0 0 var(--space-2); padding: 0; list-style: none; }
+.scenario-list-card li a { display: grid; grid-template-columns: 1.75rem minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; min-height: 2.5rem; padding: var(--space-2); border: 1px solid transparent; border-radius: var(--radius-small); color: var(--color-text); text-decoration: none; }
+.scenario-list-card li.is-active a { border-color: var(--color-primary); background: var(--color-surface-elevated); }
+.scenario-list-card li a > span { display: grid; width: 1.5rem; height: 1.5rem; place-items: center; border-radius: 50%; background: var(--color-background); font-size: var(--text-xs); }
+.scenario-list-card small[data-tone="success"] { color: var(--color-success); }
+.scenario-list-card small[data-tone="warning"] { color: var(--color-warning); }
+.scenario-list-card small[data-tone="danger"] { color: var(--color-danger); }
+.analysis-overview__main { display: grid; gap: var(--space-3); min-width: 0; }
+.analysis-overview__main > .analysis-update-status { justify-self: end; margin: 0; font-size: var(--text-xs); }
+.analysis-metric-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: var(--space-2); }
+.analysis-metric-strip article { display: grid; gap: var(--space-2); min-width: 0; padding: var(--space-3); border-right: 1px solid var(--color-divider); }
+.analysis-metric-strip article:last-child { border-right: 0; }
+.analysis-metric-strip span { color: var(--color-text-muted); font-size: var(--text-xs); }
+.analysis-metric-strip strong { font-size: clamp(var(--text-lg), 2vw, var(--text-2xl)); font-variant-numeric: tabular-nums; }
+.analysis-metric-strip article:nth-child(3) strong { color: var(--color-success); }
+.profitability-panel { padding: var(--space-4); }
+.profitability-panel > .type-label { margin: 0 0 var(--space-3); color: var(--color-primary-hover); }
+.profitability-panel__headline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-5); align-items: center; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-small); }
+.profitability-panel__headline h2 { margin: 0; font-size: var(--text-2xl); }
+.profitability-panel__headline p { margin: var(--space-1) 0 0; color: var(--color-text-secondary); }
+.profitability-panel__headline > div:last-child { display: grid; text-align: right; }
+.profitability-panel__headline > div:last-child strong { color: var(--color-success); font-size: var(--text-2xl); }
+.profitability-panel[data-recommendation-tone="success"] { border-color: var(--color-success); }
+.profitability-panel[data-recommendation-tone="warning"] { border-color: var(--color-warning); }
+.profitability-panel[data-recommendation-tone="danger"] { border-color: var(--color-danger); }
+.cost-composition { display: flex; height: .875rem; margin-top: var(--space-4); overflow: hidden; border-radius: var(--radius-pill); background: var(--color-background); }
+.cost-composition [data-cost-segment="variable_costs"] { background: var(--color-primary); }
+.cost-composition [data-cost-segment="fixed_costs"] { background: var(--color-warning); }
+.cost-composition [data-cost-segment="business_profit"] { background: var(--color-success); }
+.cost-composition-legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.cost-composition-legend li { display: grid; gap: var(--space-1); color: var(--color-text-muted); font-size: var(--text-xs); }
+.cost-composition-legend strong { color: var(--color-text); }
+.analysis-support-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.decision-checks,
+.result-drivers { padding: var(--space-4); }
+.result-drivers > p { color: var(--color-text-muted); font-size: var(--text-sm); }
+.result-drivers ol { display: grid; gap: var(--space-2); margin: 0; padding-left: var(--space-5); }
+.result-drivers li { padding-left: var(--space-2); }
+.result-drivers li span { display: inline-block; min-width: 65%; }
+.workspace-warning-panel { padding: var(--space-4); }
+.analysis-workspace-page .analysis-workspace { grid-template-columns: minmax(0, 1.25fr) minmax(22rem, .75fr); margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--color-divider); }
+.analysis-workspace-page .workspace-assumptions { grid-column: 1; grid-row: 1; }
+.analysis-workspace-page .analysis-results { grid-column: 2; grid-row: 1; }
+
+.comparison-page__header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-5); align-items: end; margin-bottom: var(--space-5); }
+.comparison-page__header h1 { margin: 0; font-size: var(--text-3xl); }
+.comparison-header-controls { display: grid; grid-template-columns: minmax(16rem, 1fr) auto auto; gap: var(--space-2); align-items: end; }
+.comparison-header-controls > label { grid-column: 1; color: var(--color-text-muted); font-size: var(--text-xs); }
+.comparison-header-controls > select { grid-column: 1; }
+.add-comparison-scenario { position: relative; }
+.add-comparison-scenario > summary { list-style: none; }
+.add-comparison-scenario > form { position: absolute; z-index: 9; right: 0; width: 22rem; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-small); background: var(--color-surface-elevated); box-shadow: var(--shadow-2); }
+.add-comparison-scenario fieldset { display: grid; gap: var(--space-2); margin: 0 0 var(--space-3); padding: 0; border: 0; }
+.comparison-scenario-tabs { display: none; }
+.comparison-identities { display: grid; grid-template-columns: repeat(var(--comparison-columns, 3), minmax(0, 1fr)); gap: var(--space-3); }
+.comparison-identities[data-comparison-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.comparison-identities[data-comparison-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.comparison-identities[data-comparison-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.comparison-identity { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface); cursor: pointer; }
+.comparison-identity[data-best="true"] { border-color: var(--color-primary); }
+.comparison-identity.is-selected { box-shadow: var(--shadow-focus); }
+.comparison-card__heading { display: grid; grid-template-columns: 1.75rem minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.comparison-card__heading > span { display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; }
+.comparison-card__heading h2 { margin: 0; font-size: var(--text-base); }
+.comparison-card__heading small { padding: 2px var(--space-2); border: 1px solid currentColor; border-radius: var(--radius-pill); }
+.comparison-card__heading small[data-tone="success"] { color: var(--color-success); }
+.comparison-card__heading small[data-tone="warning"] { color: var(--color-warning); }
+.comparison-card__heading small[data-tone="danger"] { color: var(--color-danger); }
+.best-scenario-label { grid-column: 1 / -1; color: var(--color-primary-hover); font-size: var(--text-xs); }
+.comparison-card__metrics { display: grid; gap: var(--space-2); margin: 0; }
+.comparison-card__metrics > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.comparison-card__metrics dt { color: var(--color-text-muted); font-size: var(--text-sm); }
+.comparison-card__metrics dd { margin: 0; font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; }
+.comparison-tradeoffs { margin-top: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface); }
+.comparison-table-wrap { max-height: 32rem; overflow: auto; }
+.comparison-table { width: 100%; border-collapse: collapse; }
+.comparison-table th,
+.comparison-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-divider); text-align: left; vertical-align: top; }
+.comparison-table thead th { position: sticky; z-index: 1; top: 0; background: var(--color-surface); }
+.comparison-table tbody th { color: var(--color-text-secondary); font-weight: var(--weight-medium); }
+.comparison-difference { display: block; color: var(--color-text-muted); font-size: var(--text-xs); }
+.comparison-impact { color: var(--color-text-muted); font-size: var(--text-xs); }
+.comparison-recommendation { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-4); align-items: center; margin-top: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-success); border-radius: var(--radius-medium); background: var(--color-surface); }
+.comparison-recommendation h2,
+.comparison-recommendation p { margin: 0; }
+.comparison-recommendation dl { display: grid; grid-template-columns: repeat(3, minmax(7rem, 1fr)); margin: 0; }
+.comparison-recommendation dl > div { padding: var(--space-2) var(--space-3); border-left: 1px solid var(--color-divider); }
+.comparison-recommendation dt { color: var(--color-text-muted); font-size: var(--text-xs); }
+.comparison-recommendation dd { margin: var(--space-1) 0 0; font-weight: var(--weight-bold); }
+.comparison-warnings { margin-top: var(--space-5); }
+
+@media (max-width: 1100px) {
+  .analysis-workspace-page > .page-header,
+  .comparison-page__header { grid-template-columns: minmax(0, 1fr); }
+  .workspace-header-controls,
+  .comparison-header-controls { grid-column: 1; grid-row: auto; }
+  .analysis-overview { grid-template-columns: minmax(0, 1fr); }
+  .analysis-overview__rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .analysis-metric-strip { grid-template-columns: repeat(5, minmax(8rem, 1fr)); overflow-x: auto; }
+  .comparison-identities { grid-template-columns: repeat(2, minmax(18rem, 1fr)) !important; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .comparison-identity { scroll-snap-align: start; }
+  .comparison-recommendation { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .workspace-header-controls,
+  .comparison-header-controls { grid-template-columns: minmax(0, 1fr); }
+  .workspace-header-controls > *,
+  .workspace-header-controls form > button,
+  .comparison-header-controls > * { width: 100%; }
+  .analysis-overview__rail { grid-template-columns: minmax(0, 1fr); }
+  .analysis-metric-strip { grid-template-columns: repeat(5, minmax(8.5rem, 1fr)); }
+  .analysis-support-grid,
+  .cost-composition-legend { grid-template-columns: minmax(0, 1fr); }
+  .analysis-workspace-page .analysis-workspace { grid-template-columns: minmax(0, 1fr); }
+  .analysis-workspace-page .workspace-assumptions,
+  .analysis-workspace-page .analysis-results { grid-column: 1; grid-row: auto; }
+  .comparison-scenario-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-3); overflow-x: auto; }
+  .comparison-scenario-tabs button { flex: 0 0 auto; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-pill); background: transparent; color: var(--color-text-secondary); }
+  .comparison-scenario-tabs button[aria-selected="true"] { border-color: var(--color-primary); color: var(--color-text); }
+  .comparison-identities { display: block; overflow: visible; }
+  .comparison-identity { display: none; }
+  .comparison-identity.is-selected { display: grid; }
+  .comparison-table thead { display: none; }
+  .comparison-table tr { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .comparison-table td[data-scenario-cell] { display: none; }
+  .comparison-table td[data-scenario-cell].is-mobile-selected { display: block; }
+  .comparison-impact { display: block; }
+  .comparison-recommendation dl { grid-template-columns: minmax(0, 1fr); }
+  .comparison-warning-grid article { display: none; }
+  .comparison-warning-grid article.is-mobile-selected { display: block; }
+  #keep-selected-scenario { position: sticky; z-index: 5; bottom: var(--space-3); }
+}
 .scenario-actions > summary, .event-actions > summary { color: var(--color-text-muted); cursor: pointer; font-size: var(--text-sm); font-weight: var(--weight-bold); }
 .event-actions { margin-top: var(--space-3); }
 .management-overflow-actions { align-items: start; padding: var(--space-3) 0; }

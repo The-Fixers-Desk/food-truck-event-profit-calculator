@@ -1,5 +1,6 @@
 import sqlite3
 import os
+from dataclasses import replace
 from pathlib import Path
 import tempfile
 
@@ -59,6 +60,36 @@ from app.event_inputs_form import (
 )
 
 main = Blueprint("main", __name__)
+
+
+def _workspace_scenario_summaries(event_id: int) -> list[dict]:
+    """Return calculation-backed scenario cards for one saved Event."""
+    event = next(
+        (item for item in list_saved_events() if item["id"] == event_id),
+        None,
+    )
+    if event is None:
+        return []
+    summaries = []
+    for item in reversed(event["scenarios"]):
+        _, _, scenario = load_event_scenario(item["id"])
+        result = calculate_event_scenario(scenario)
+        evaluation = result.profit_target_evaluation
+        if result.business_profit < 0:
+            status, tone = "Not worth it", "danger"
+        elif evaluation is not None and evaluation.is_met is False:
+            status, tone = "Borderline", "warning"
+        else:
+            status, tone = "Worth it", "success"
+        summaries.append(
+            {
+                **item,
+                "status": status,
+                "tone": tone,
+                "analysis": calculation_result_data(result),
+            }
+        )
+    return summaries
 
 
 @main.before_request
@@ -306,7 +337,7 @@ def calculator():
 
     return render_template(
         "calculator.html",
-        active_page="calculator",
+        active_page="saved_events" if workspace else "calculator",
         form_values=form_values,
         errors=errors,
         protection_reductions=protection_reductions(form_values),
@@ -317,6 +348,10 @@ def calculator():
         active_event_id=active_event_id,
         active_scenario_id=active_scenario_id,
         active_scenario_name=active_scenario_name,
+        workspace_scenarios=(
+            _workspace_scenario_summaries(active_event_id)
+            if workspace else []
+        ),
         save_error=save_error,
     )
 
@@ -529,7 +564,7 @@ def open_saved_scenario(event_id: int, scenario_id: int):
     form_values = event_scenario_to_form(identity, scenario)
     return render_template(
         "calculator.html",
-        active_page="calculator",
+        active_page="saved_events",
         form_values=form_values,
         errors={},
         protection_reductions=protection_reductions(form_values),
@@ -542,7 +577,39 @@ def open_saved_scenario(event_id: int, scenario_id: int):
         active_event_id=event_id,
         active_scenario_id=scenario_id,
         active_scenario_name=scenario.scenario_name,
+        workspace_scenarios=_workspace_scenario_summaries(event_id),
         save_error=None,
+    )
+
+
+@main.post("/events/<int:event_id>/scenarios/<int:scenario_id>/duplicate")
+def duplicate_saved_scenario(event_id: int, scenario_id: int):
+    """Create a distinct saved copy beside the active Scenario."""
+    try:
+        stored_event_id, _, scenario = load_event_scenario(scenario_id)
+    except ValueError:
+        abort(404)
+    if stored_event_id != event_id:
+        abort(404)
+    existing = {
+        item["scenario_name"].casefold()
+        for item in _workspace_scenario_summaries(event_id)
+    }
+    base = f"{scenario.scenario_name} Copy"
+    name = base
+    number = 2
+    while name.casefold() in existing:
+        name = f"{base} {number}"
+        number += 1
+    copied = replace(scenario, scenario_name=name)
+    new_id = create_event_scenario(event_id, copied)
+    flash(f'Scenario "{name}" duplicated.', "success")
+    return redirect(
+        url_for(
+            "main.open_saved_scenario",
+            event_id=event_id,
+            scenario_id=new_id,
+        )
     )
 
 
@@ -679,10 +746,15 @@ def comparison():
             ),
             selected_scenarios=raw_ids,
         )
+    event_id = comparison_data["columns"][0]["event_id"]
+    event = next(
+        item for item in list_saved_events() if item["id"] == event_id
+    )
     return render_template(
         "comparison.html",
         active_page="saved_events",
         comparison=comparison_data,
+        comparison_event=event,
     )
 
 

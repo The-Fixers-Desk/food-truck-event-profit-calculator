@@ -1,29 +1,76 @@
-# Event Inputs Wizard design QA
+# Design QA — Event Analysis and Scenario Comparison
 
-Reference: `app/static/images/Event Inputs Mockup.png`
+## Evidence
 
-Implementation evidence:
+- Source visual truth:
+  - `app/static/images/Event Analysis Workspace Mockup.png`
+  - `app/static/images/Scenario Comparison Mockup.png`
+- Implementation screenshots:
+  - `.audit-runtime/analysis-comparison/workspace-desktop.png`
+  - `.audit-runtime/analysis-comparison/comparison-desktop.png`
+  - `.audit-runtime/analysis-comparison/workspace-mobile.png`
+  - `.audit-runtime/analysis-comparison/comparison-mobile.png`
+- Same-frame full-view comparisons:
+  - `.audit-runtime/analysis-comparison/workspace-comparison.png`
+  - `.audit-runtime/analysis-comparison/comparison-comparison.png`
+- Desktop viewport and source size: 1536 x 1024 CSS/pixels at device scale
+  factor 1. No density normalization was needed.
+- Mobile implementation viewport: 390 x 844 CSS/pixels at device scale factor
+  1. The source's embedded responsive previews were used as directional
+  evidence because no separate full-size mobile source was supplied.
+- State: Summer Festival with Original estimate, Rain plan, and Higher price
+  saved scenarios; Higher price active in the workspace; three scenarios in
+  comparison.
 
-- `.audit-runtime/event-inputs/desktop.png` — 1568 × 1024, Revenue inputs active
-- `.audit-runtime/event-inputs/mobile.png` — 390 × 844, compact single-column state
-- `.audit-runtime/event-inputs/comparison.png` — approved reference and implementation in one frame
-- `.audit-runtime/event-inputs/results.json` — interaction, console, and overflow checks
+## Findings
 
-## Visual comparison
+- No actionable P0, P1, or P2 differences remain. The implementation retains
+  the approved charcoal shell, orange action hierarchy, left-side scenario
+  context, decision-first metrics, bordered profitability summary, comparison
+  cards, aligned tradeoff table, and one-scenario-at-a-time mobile comparison.
+- Typography: the existing local heading/body families, weights, line heights,
+  and compact data hierarchy closely follow the references without adding a
+  network font.
+- Spacing and layout: desktop proportions preserve the rail/main composition;
+  mobile collapses cleanly to one column with 16px page gutters and no page
+  overflow.
+- Colors and tokens: existing dark surfaces, dividers, orange primary action,
+  green positive state, and warning/danger semantic colors are reused.
+- Image quality: the target screens contain no content imagery requiring a new
+  asset; the existing application mark remains sharp and consistent.
+- Copy: labels are customer-facing and use the approved “break-even buyers,”
+  “Worth it,” “Borderline,” and “Not worth it” language.
 
-The implementation matches the approved charcoal/copper direction, five-node progress, 312 px section rail, flexible form workspace, conditional revenue cards, scenario snapshot, and sticky action hierarchy. The current application’s newer shared-demand model remains intact, so obsolete mockup fields such as service hours, direct expected buyers, and travel distance were not restored. Travel remains a flat cost and the initial scenario remains `Original estimate`.
+## Focused evidence
 
-The first comparison exposed two visible issues: the average-order field appeared above the Revenue header, and inherited step-label sizing clipped sidebar text. Both were corrected before the final capture. Desktop and mobile captures show no horizontal overflow, and the mobile form includes bottom clearance for the sticky actions.
+The full-frame composites retain readable header controls, metric cards,
+profitability summary, scenario cards, and tradeoff rows, so a separate crop
+was not required. Mobile captures separately verify the header controls,
+scenario list/tabs, selected card, and sticky keep action.
 
-## Functional checks
+## Interaction and browser evidence
 
-- Event basics advanced to Revenue inputs only after required values were present.
-- Custom total sales was hidden initially and appeared after selecting its revenue method.
-- Draft input generated local progress data.
-- Desktop and mobile widths reported no horizontal overflow.
-- Browser runtime reported no JavaScript exceptions.
-- Focused tests: 127 passed.
-- Full suite: 562 passed.
-- Product-owner visual approval remains external to this implementation review.
+- Scenario selector contained all three saved scenarios.
+- Editing average order amount changed the live status to “Analysis updated.”
+- Comparison rendered three real scenario cards and 28 assumption rows.
+- Selecting the second mobile tab showed exactly one card (“Rain plan”).
+- Workspace and comparison had no document-level horizontal overflow.
+- No JavaScript exceptions were reported. A missing favicon request was the
+  only browser log error and does not affect the UI.
+
+## Comparison history
+
+- First mobile capture caught the sidebar midway through its responsive CSS
+  transition, creating a false clipped-frame artifact.
+- The capture was repeated after the transition completed. Post-fix evidence
+  shows the sidebar at x = -280, main content at x = 16, scrollX = 0, and no
+  overflow.
+- The comparison breadcrumb exposed an encoding artifact. It was replaced with
+  HTML middot entities and the final desktop/mobile captures show clean text.
+
+## Follow-up polish
+
+- P3: a future pass could add small local icons to the cost composition legend
+  if a matching approved icon set is introduced elsewhere in the product.
 
 final result: passed

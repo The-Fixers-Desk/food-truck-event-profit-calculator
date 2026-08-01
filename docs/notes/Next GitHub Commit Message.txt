@@ -2,12 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build complete Event Inputs wizard
-
-Implemented all Event Inputs steps and substates, including event basics, revenue, operating costs, conditions, review, conditional methods, saved-default application, overrides, validation, warnings, draft saving, sticky actions, and responsive behavior. Preserved the existing demand model, calculations, and initial scenario-saving workflow.
-
----------------------------------------------------------------------------------
-
 Build analysis workspace and scenario comparison
 
 Implemented the approved Event Analysis workspace and Scenario Comparison experience, including live recalculation, financial summaries, cost breakdowns, decision checks, warnings, scenario actions, assumption comparisons, recommendation states, and responsive layouts. Preserved calculation rules, persistence, and scenario version behavior.

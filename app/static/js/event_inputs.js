@@ -667,18 +667,39 @@ function updateWorkspaceResults(result) {
   const recommendation = document.querySelector("#decision-recommendation");
   if (result.profit_target?.is_met == null) {
     targetResult.textContent = "Unavailable";
-    recommendation.textContent =
+    if (recommendation) recommendation.textContent =
       "Your profit target cannot be evaluated with these assumptions.";
   } else if (result.profit_target?.is_met) {
     targetResult.textContent = "Target met";
-    recommendation.textContent =
+    if (recommendation) recommendation.textContent =
       "These assumptions meet your selected profit target.";
   } else {
     targetResult.textContent = "Target not met";
-    recommendation.textContent =
+    if (recommendation) recommendation.textContent =
       "These assumptions are below your selected profit target.";
   }
-  recommendation.dataset.profitabilityStatus = result.profitability_status;
+  if (recommendation) {
+    recommendation.dataset.profitabilityStatus = result.profitability_status;
+  }
+  const recommendationLabel = document.querySelector(
+    "[data-recommendation-label]",
+  );
+  if (recommendationLabel) {
+    recommendationLabel.textContent = result.recommendation_label;
+    recommendationLabel.closest(".profitability-panel").dataset.recommendationTone =
+      result.recommendation_tone;
+  }
+  const recommendationCopy = document.querySelector(
+    "#workspace-recommendation-copy",
+  );
+  if (recommendationCopy) {
+    recommendationCopy.textContent = result.profit_target?.is_met == null
+      ? "The selected profit target is not currently calculable."
+      : result.profit_target.is_met
+        ? "This scenario meets your selected profit target."
+        : "This scenario is below your selected profit target.";
+  }
+  updateCostComposition(result);
   const warningList = document.querySelector("#analysis-warnings");
   warningList.replaceChildren();
   const warnings = result.warnings.length
@@ -1004,6 +1025,30 @@ if (workspaceForm && saveAnalysisDialog) {
     },
   );
 }
+
+function updateCostComposition(result = null) {
+  const segments = Array.from(document.querySelectorAll("[data-cost-segment]"));
+  if (!segments.length) return;
+  const values = segments.map((segment) => {
+    const raw = result?.[segment.dataset.costSegment] ?? segment.dataset.value;
+    const value = Math.max(0, Number(raw || 0));
+    if (result) segment.dataset.value = String(value);
+    return value;
+  });
+  const total = values.reduce((sum, value) => sum + value, 0) || 1;
+  segments.forEach((segment, index) => {
+    const percentage = values[index] / total * 100;
+    segment.style.width = `${percentage}%`;
+    segment.title = `${segment.dataset.segmentLabel}: ${percentage.toFixed(1)}%`;
+  });
+}
+
+updateCostComposition();
+
+document.querySelector("#workspace-scenario-selector")?.addEventListener(
+  "change",
+  (event) => window.location.assign(event.target.value),
+);
 
 const sectionNavigation = document.querySelector("[data-section-navigation]");
 const formSections = Array.from(document.querySelectorAll("[data-form-section]"));

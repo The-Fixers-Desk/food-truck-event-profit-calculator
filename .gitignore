@@ -19,3 +19,6 @@ data/application.lock
 
 # Local runtime logs
 instance/
+
+# Local visual QA and browser-audit runtime
+.audit-runtime/

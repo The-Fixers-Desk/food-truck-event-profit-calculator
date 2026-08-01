@@ -72,7 +72,7 @@ def test_initial_workspace_displays_complete_calculation(client):
     assert "$5000" in page
     assert "custom_sales_assumption" in page
     assert "Exact break-even customers" not in page
-    assert "Break-even customers" in page
+    assert "Break-even buyers" in page
     assert 'name="revenue_method" value="attendance"' in page
     assert 'name="revenue_method" value="manual_sales"' in page
 

@@ -2,7 +2,7 @@
 {% block title %}{% if workspace %}Event Analysis{% else %}Event Inputs{% endif %} | Food Truck Event Profit Calculator{% endblock %}
 {% block context_label %}
   {% if workspace %}
-    {{ event_identity.event_name }} · {{ active_scenario_name }}
+    Saved events &middot; {{ event_identity.event_name }} &middot; Analysis
   {% else %}
     New analysis
   {% endif %}
@@ -79,29 +79,35 @@
   <header class="page-header{% if not workspace %} event-inputs-page__header{% endif %}">
     <p class="page-eyebrow">Event Analysis</p>
     <h1>{% if workspace %}{{ event_identity.event_name }}{% else %}Enter the details for this event{% endif %}</h1>
-    {% if workspace %}
-      <dl class="event-context" aria-label="Event identity">
-        <div><dt>Date</dt><dd>{{ event_identity.event_date }}</dd></div>
-        <div><dt>Start time</dt><dd>{{ event_identity.start_time.strftime("%H:%M") }}</dd></div>
-        <div><dt>Location</dt><dd>{{ event_identity.location }}</dd></div>
-      </dl>
-      <p class="active-scenario">
-        Active scenario:
-        <strong id="active-scenario-name">{{ active_scenario_name }}</strong>
-      </p>
-    {% endif %}
     <p class="page-description">
       {% if workspace %}
-        Adjust the assumptions below to explore this event. Results update
-        automatically.
+        Review this scenario&rsquo;s revenue, costs, and recommendation. Adjust
+        assumptions to see whether this event is worth taking.
       {% else %}
         These values shape this specific event estimate and can be adjusted
         before results are calculated.
       {% endif %}
     </p>
-    <p class="event-only-notice">
-      Changes on this screen apply only to this event.
-    </p>
+    {% if workspace %}
+      <div class="workspace-header-controls">
+        <label for="workspace-scenario-selector">Scenario</label>
+        <select class="form-input" id="workspace-scenario-selector">
+          {% for item in workspace_scenarios %}
+            <option value="{{ url_for('main.open_saved_scenario', event_id=active_event_id, scenario_id=item.id) }}"
+              {% if item.id == active_scenario_id %}selected{% endif %}>{{ item.scenario_name }}</option>
+          {% endfor %}
+        </select>
+        <form method="post" action="{{ url_for('main.duplicate_saved_scenario', event_id=active_event_id, scenario_id=active_scenario_id) }}">
+          <button class="button-secondary" type="submit">Duplicate scenario</button>
+        </form>
+        <form method="post" action="{{ url_for('main.comparison') }}">
+          {% for item in workspace_scenarios[:4] %}<input name="scenario_id" type="hidden" value="{{ item.id }}" />{% endfor %}
+          <button class="button" type="submit" {% if workspace_scenarios|length < 2 %}disabled{% endif %}>Compare scenarios</button>
+        </form>
+      </div>
+      <p class="active-scenario visually-hidden">Active scenario: <strong id="active-scenario-name">{{ active_scenario_name }}</strong></p>
+    {% else %}
+    <p class="event-only-notice">Changes on this screen apply only to this event.</p>
     <details class="estimate-information" id="about-estimates">
       <summary>About estimates</summary>
       <p>
@@ -109,6 +115,7 @@
         Review these assumptions whenever conditions change.
       </p>
     </details>
+    {% endif %}
   </header>
   {% if not workspace %}
     <ol class="event-wizard-progress" aria-label="Event Inputs progress">
@@ -120,9 +127,111 @@
   </div>
 
   {% if workspace %}
+    <div class="analysis-overview" aria-labelledby="decision-summary-title">
+      <h2 class="visually-hidden" id="decision-summary-title">Scenario decision summary</h2>
+      <span class="visually-hidden">Break-even customers</span>
+      <aside class="analysis-overview__rail">
+        <section class="analysis-rail-card scenario-list-card" aria-labelledby="workspace-scenarios-title">
+          <h2 id="workspace-scenarios-title">Scenarios</h2>
+          <ol>
+            {% for item in workspace_scenarios %}
+              <li class="{% if item.id == active_scenario_id %}is-active{% endif %}">
+                <a href="{{ url_for('main.open_saved_scenario', event_id=active_event_id, scenario_id=item.id) }}">
+                  <span>{{ loop.index }}</span><strong>{{ item.scenario_name }}</strong>
+                  <small data-tone="{{ item.tone }}">{{ item.status }}</small>
+                </a>
+              </li>
+            {% endfor %}
+          </ol>
+          <a class="button-tertiary" href="{{ url_for('main.calculator') }}">+ New scenario</a>
+        </section>
+        <section class="analysis-rail-card" aria-labelledby="event-snapshot-title">
+          <h2 id="event-snapshot-title">Event snapshot</h2>
+          <dl>
+            <div><dt>Event date</dt><dd>{{ event_identity.event_date }}</dd></div>
+            <div><dt>Location</dt><dd>{{ event_identity.location }}</dd></div>
+            <div><dt>Estimated attendance</dt><dd>{{ form_values.estimated_attendance }}</dd></div>
+            <div><dt>Start time</dt><dd>{{ event_identity.start_time.strftime("%H:%M") }}</dd></div>
+          </dl>
+        </section>
+        <section class="analysis-rail-card" aria-labelledby="input-summary-title">
+          <h2 id="input-summary-title">Input summary</h2>
+          <dl>
+            <div><dt>Revenue method</dt><dd>{{ "Custom total sales" if form_values.revenue_method == "manual_sales" else "Average ticket Ã— buyers" }}</dd></div>
+            <div><dt>Average order</dt><dd>${{ form_values.average_order_sale_amount }}</dd></div>
+            <div><dt>Expected buyers</dt><dd data-result-field="estimated_business_buyers">{{ analysis.estimated_business_buyers }}</dd></div>
+            <div><dt>Food cost</dt><dd>{{ form_values.food_cost_method|replace("_", " ")|title }}</dd></div>
+            <div><dt>Labor entries</dt><dd>{{ form_values.employee_labor|length }}</dd></div>
+            <div><dt>Profit rule</dt><dd>{{ form_values.profit_target_type|replace("_", " ")|title }}</dd></div>
+          </dl>
+          <a class="button-secondary button--small" href="#adjustable-assumptions">Edit inputs</a>
+        </section>
+      </aside>
+
+      <main class="analysis-overview__main">
+        <p id="analysis-update-status" class="analysis-update-status" aria-live="polite">Current analysis</p>
+        <section class="analysis-metric-strip" aria-label="Key scenario metrics">
+          {% for key, label, format in (
+            ("expected_sales", "Estimated revenue", "money"),
+            ("total_event_cost", "Total costs", "money"),
+            ("business_profit", "Estimated profit", "money"),
+            ("profit_margin", "Profit margin", "percent"),
+            ("minimum_whole_break_even_customers", "Break-even buyers", "")
+          ) %}
+            <article><span>{{ label }}</span><strong data-result-field="{{ key }}" data-format="{{ format }}">{% if format == "money" %}${% endif %}{{ analysis[key] }}{% if format == "percent" and analysis[key] is not none %}%{% endif %}</strong></article>
+          {% endfor %}
+        </section>
+
+        <section class="profitability-panel" data-recommendation-tone="{{ analysis.recommendation_tone }}" aria-labelledby="profitability-summary-title">
+          <p class="type-label">Profitability summary</p>
+          <div class="profitability-panel__headline">
+            <div><h2 id="profitability-summary-title" data-recommendation-label>{{ analysis.recommendation_label }}</h2><p id="workspace-recommendation-copy">{% if analysis.profit_target.is_met %}This scenario meets your selected profit target.{% elif analysis.profit_target.is_met is none %}The selected profit target is not currently calculable.{% else %}This scenario is below your selected profit target.{% endif %}</p></div>
+            <div><span>Net profit</span><strong data-result-field="business_profit" data-format="money">${{ analysis.business_profit }}</strong></div>
+          </div>
+          <div class="cost-composition" aria-label="Current cost composition compared with revenue">
+            {% for key, label in (("variable_costs", "Variable costs"), ("fixed_costs", "Fixed costs"), ("business_profit", "Net profit")) %}<span data-cost-segment="{{ key }}" data-segment-label="{{ label }}" data-value="{{ analysis[key] }}"></span>{% endfor %}
+          </div>
+          <ul class="cost-composition-legend">
+            <li>Food <strong data-result-field="food_and_packaging_cost" data-format="money">${{ analysis.food_and_packaging_cost }}</strong></li>
+            <li>Labor <strong data-result-field="employee_labor_cost" data-format="money">${{ analysis.employee_labor_cost }}</strong></li>
+            <li>Total costs <strong data-result-field="total_event_cost" data-format="money">${{ analysis.total_event_cost }}</strong></li>
+            <li>Net profit <strong data-result-field="business_profit" data-format="money">${{ analysis.business_profit }}</strong></li>
+          </ul>
+        </section>
+
+        <div class="analysis-support-grid">
+          <section class="decision-checks" aria-labelledby="decision-checks-title">
+            <h2 id="decision-checks-title">Decision checks</h2>
+            <dl>
+              <div><dt>Minimum target</dt><dd id="workspace-target-value">{% if analysis.profit_target.target_type == "profit_amount" %}${% endif %}{{ analysis.profit_target.target_value }}{% if analysis.profit_target.target_type == "profit_margin" %}%{% endif %}</dd></div>
+              <div><dt>Target status</dt><dd id="profit-target-result">{{ "Target met" if analysis.profit_target.is_met else "Target not met" }}</dd></div>
+              <div><dt>Profit margin</dt><dd data-result-field="profit_margin" data-format="percent">{{ analysis.profit_margin }}%</dd></div>
+              <div><dt>Break-even buyers</dt><dd data-result-field="minimum_whole_break_even_customers">{{ analysis.minimum_whole_break_even_customers }}</dd></div>
+            </dl>
+          </section>
+          <section class="result-drivers" aria-labelledby="result-drivers-title">
+            <h2 id="result-drivers-title">What changes the result</h2>
+            <p>Watch the assumptions that directly change sales and the largest event costs.</p>
+            <ol>
+              <li><span>Expected buyers</span><strong data-result-field="estimated_business_buyers">{{ analysis.estimated_business_buyers }}</strong></li>
+              <li><span>Average order amount</span><strong>${{ form_values.average_order_sale_amount }}</strong></li>
+              <li><span>Food and packaging</span><strong data-result-field="food_and_packaging_cost" data-format="money">${{ analysis.food_and_packaging_cost }}</strong></li>
+              <li><span>Employee labor</span><strong data-result-field="employee_labor_cost" data-format="money">${{ analysis.employee_labor_cost }}</strong></li>
+            </ol>
+          </section>
+        </div>
+
+        <section class="warning-panel workspace-warning-panel" aria-labelledby="workspace-warnings-title">
+          <h2 id="workspace-warnings-title">Factual warnings</h2>
+          <ul id="analysis-warnings" class="analysis-warnings" aria-live="polite">
+            {% for warning in analysis.warnings %}<li data-warning-code="{{ warning.code }}" data-severity="{{ warning.severity }}">{{ warning.message }}</li>{% else %}<li data-warning-code="none" data-severity="info">No factual notices for the current assumptions.</li>{% endfor %}
+          </ul>
+        </section>
+      </main>
+    </div>
+
     <div class="analysis-workspace">
-      {{ decision_region(analysis) }}
-      <div class="workspace-assumptions">
+      <div class="workspace-assumptions" id="adjustable-assumptions">
         <h2>Adjustable assumptions</h2>
         <section class="scenario-action-bar" aria-labelledby="scenario-actions-title">
           <div class="scenario-action-bar__identity">

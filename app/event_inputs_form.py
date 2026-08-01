@@ -300,6 +300,18 @@ def validate_and_calculate_event_analysis(
 def calculation_result_data(result: EventCalculationResult) -> dict:
     """Return structured display data without changing calculation precision."""
     target = result.profit_target_evaluation
+    if result.business_profit < 0:
+        recommendation_label = "Not worth accepting"
+        recommendation_tone = "danger"
+    elif target is not None and target.is_met is False:
+        recommendation_label = "Borderline"
+        recommendation_tone = "warning"
+    elif target is not None and target.is_met is True:
+        recommendation_label = "Worth accepting"
+        recommendation_tone = "success"
+    else:
+        recommendation_label = "Review this estimate"
+        recommendation_tone = "neutral"
     return {
         "weather_adjusted_attendance": _format_decimal(
             result.weather_adjusted_attendance
@@ -353,6 +365,8 @@ def calculation_result_data(result: EventCalculationResult) -> dict:
             result.minimum_whole_break_even_customers
         ),
         "profitability_status": result.profitability_status,
+        "recommendation_label": recommendation_label,
+        "recommendation_tone": recommendation_tone,
         "profit_target": (
             None
             if target is None

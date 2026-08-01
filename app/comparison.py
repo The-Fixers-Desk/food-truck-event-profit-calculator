@@ -51,6 +51,8 @@ def build_comparison(
                 ),
             }
         )
+    if len({column["event_id"] for column in columns}) != 1:
+        raise ValueError("Scenarios must belong to the same event.")
     if baseline_id not in scenario_ids:
         baseline_id = scenario_ids[0]
 
@@ -351,6 +353,7 @@ def _highlights(columns: list[dict]) -> dict:
     }
     return {
         "highest_profit": tied("business_profit", max),
+        "highest_margin": tied("profit_margin", max),
         "lowest_cost": tied("total_event_cost", min),
         "lowest_break_even": tied(
             "minimum_whole_break_even_customers", min

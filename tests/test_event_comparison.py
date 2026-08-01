@@ -44,7 +44,7 @@ def test_selecting_two_three_or_four_scenarios(
     assert response.data.count(b"Open analysis") == count
 
 
-def test_comparing_scenarios_from_different_events(client, database_path):
+def test_comparing_scenarios_from_different_events_is_rejected(client, database_path):
     first = complete_event_inputs()
     first["event_name"] = "First Event"
     client.post("/events/new", data=first)
@@ -59,8 +59,7 @@ def test_comparing_scenarios_from_different_events(client, database_path):
         data={"scenario_id": [str(first_id), str(second_id)]},
     ).data
 
-    assert b"First Event" in page
-    assert b"Second Event" in page
+    assert b"One or more selected Scenarios are no longer available." in page
 
 
 @pytest.mark.parametrize(
@@ -308,6 +307,47 @@ def test_compared_scenario_opens_clean_existing_workspace(
         assert database.execute(
             "SELECT COUNT(*) FROM event_scenarios"
         ).fetchone()[0] == 2
+
+
+def test_comparison_has_selection_keep_and_mobile_switching_controls(
+    client, database_path
+):
+    ids = create_scenarios(client, database_path, 3)
+    page = client.post(
+        "/comparison", data={"scenario_id": [str(item) for item in ids]}
+    ).data.decode()
+    script = client.get("/static/js/comparison.js").data.decode()
+
+    assert "Compare your scenarios" in page
+    assert 'id="comparison-event"' in page
+    assert "Add scenario" in page
+    assert 'id="keep-selected-scenario"' in page
+    assert page.count("data-mobile-scenario=") == 3
+    assert "Strongest current option" in page
+    assert "Best profit" in page
+    assert "Best margin" in page
+    assert "Lowest break-even" in page
+    assert "selectScenario" in script
+    assert "window.location.assign(destination)" in script
+
+
+def test_duplicate_scenario_creates_copy_and_opens_it(client, database_path):
+    client.post("/events/new", data=complete_event_inputs())
+    event_id, scenario_id = latest_ids(database_path)
+
+    response = client.post(
+        f"/events/{event_id}/scenarios/{scenario_id}/duplicate"
+    )
+
+    assert response.status_code == 302
+    with sqlite3.connect(database_path) as database:
+        rows = database.execute(
+            "SELECT id, scenario_name FROM event_scenarios ORDER BY id"
+        ).fetchall()
+    assert [row[1] for row in rows] == ["Original estimate", "Original estimate Copy"]
+    assert response.headers["Location"].endswith(
+        f"/events/{event_id}/scenarios/{rows[-1][0]}"
+    )
 
 
 def test_selection_and_comparison_structure_are_accessible_and_responsive(
