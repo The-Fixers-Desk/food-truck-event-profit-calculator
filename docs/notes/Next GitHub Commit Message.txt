@@ -2,17 +2,16 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Perform senior product-design audit and simplify the application
+Refine viewport composition and responsive visual rhythm
 
-- Recompose each screen around one dominant task and primary action
-- Simplify the Dashboard and remove shortcuts that duplicate global navigation
-- Refine application chrome, sidebar hierarchy, icons, branding, and context areas
-- Reduce unnecessary cards, borders, repeated metadata, and competing actions
-- Replace repeated buttons with clearer whole-row, text, and overflow actions where appropriate
-- Strengthen hierarchy across Event Analysis, Saved Events, comparison, and Data Safety
-- Improve composition, whitespace, progressive disclosure, and responsive prioritization
-- Preserve access to every existing capability, workflow, calculation, and safeguard
-- Add accessibility, responsive, senior-design audit, and regression test coverage
+- Refine viewport composition, proportional relationships, and responsive layout behavior across the application
+- Improve Dashboard composition, hero presentation, recent-work flow, and viewport utilization
+- Strengthen branding hierarchy, sidebar proportions, navigation refinement, and selected-state treatment
+- Improve whitespace, visual rhythm, typography hierarchy, metadata presentation, and component proportions
+- Refine responsive behavior across desktop viewport sizes while preserving readability and balance
+- Improve cross-screen consistency, accessibility, motion, and interaction polish
+- Preserve all existing functionality, workflows, calculations, persistence, and navigation
+- Add responsive, accessibility, composition, and regression test coverage
 
 ---------------------------------------------------------------------------------
 

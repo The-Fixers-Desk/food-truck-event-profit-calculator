@@ -196,12 +196,19 @@ production-quality experience.
   restrained desktop experience comparable in clarity and finish to ChatGPT,
   Notion, Linear, Stripe, and Zillow.
 
-□ >Refine viewport composition, responsive proportions, and visual rhythm
+☑ Refine viewport composition, responsive proportions, and visual rhythm
   Perform a final composition pass across the application to improve
   proportional relationships, responsive layout behavior, whitespace, branding,
   viewport utilization, and editorial balance. Refine the remaining 10–15% of
   the visual experience so every screen feels intentionally composed rather
   than simply well styled.
+
+□ >Apply the approved dark-mode art direction and correct application-wide scale
+  Use the approved reference mockup in the project’s images folder to establish
+  a cohesive premium dark theme across the full application. Preserve the
+  Dashboard hero while increasing sidebar branding, navigation, typography,
+  controls, and interaction scale; refine surfaces, contrast, spacing, and
+  proportions so every screen reaches the same confidence and finish.
 
 
 DESKTOP APPLICATION AND PACKAGING

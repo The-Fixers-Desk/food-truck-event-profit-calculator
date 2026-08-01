@@ -96,7 +96,7 @@ def test_workspace_css_preserves_two_regions_and_narrow_source_order(client):
         ".calculation-section",
     ):
         assert component in css
-    assert "grid-template-columns: minmax(30rem, 1.15fr)" in css
+    assert "grid-template-columns: minmax(32rem, 1.12fr)" in css
     assert "@media (max-width: 1100px)" in css
     assert "@media (max-width: 800px)" in css
     assert ".decision-region," in css

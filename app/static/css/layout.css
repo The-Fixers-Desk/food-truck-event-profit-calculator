@@ -9,24 +9,27 @@
 }
 
 .app-main {
-  width: min(calc(100% - 2.5rem), var(--content-width));
+  width: min(
+    calc(100% - clamp(2rem, 4vw, 5rem)),
+    var(--content-width)
+  );
   margin-inline: auto;
-  padding-block: var(--space-5);
+  padding-block: clamp(var(--space-4), 3.5vh, var(--space-7));
 }
 
 .app-main--calculator,
 .app-main--saved_events {
-  --content-width: 1440px;
+  --content-width: 1760px;
 }
 
 .app-main--defaults {
-  --content-width: 1040px;
+  --content-width: 1200px;
 }
 
 .workspace-page { max-width: 1100px; }
 .workspace-page--wide { max-width: none; }
-.workspace-page--form { max-width: 960px; }
-.workspace-page--list { max-width: 1200px; }
+.workspace-page--form { max-width: 1080px; }
+.workspace-page--list { max-width: 1380px; }
 .workspace-page--empty, .workspace-page--recovery { max-width: 720px; }
 
 .page {
@@ -34,7 +37,7 @@
 }
 
 .page-header {
-  margin-bottom: var(--space-4);
+  margin-bottom: clamp(var(--space-4), 2.5vw, var(--space-6));
 }
 
 .page-eyebrow {
@@ -47,7 +50,7 @@
 }
 
 .page-description {
-  max-width: 680px;
+  max-width: 65ch;
   margin-bottom: 0;
   color: var(--color-text-muted);
   font-size: 1.05rem;

@@ -1,0 +1,917 @@
+Implement the milestone:
+
+Apply the approved dark-mode art direction and correct application-wide scale.
+
+The application is functionally complete and has already received several
+design-system, layout, workflow, workspace, management-screen, simplification,
+and responsive-composition passes.
+
+The Dashboard hero is now approved.
+
+Do not redesign or substantially alter:
+
+- “Is your next event worth it?”
+- its supporting sentence
+- the Analyze new event button
+- the hero’s current basic composition and purpose
+
+Use that approved hero as the quality benchmark for the rest of the
+application.
+
+Approved visual reference
+
+The developer will add an approved dark-mode reference mockup to the project’s
+images folder before this run.
+
+Locate and inspect that image before making design changes.
+
+It is the mockup showing:
+
+- a premium dark Food Truck Event Profit Calculator interface
+- a wider, more substantial sidebar
+- prominent product identity and restrained The Fixer’s Desk branding
+- larger sidebar icons and navigation labels
+- warm copper accents
+- dark layered surfaces
+- stronger typography and spacing
+- the approved Dashboard hero
+- refined recent-work rows
+- confident proportions and visual hierarchy
+
+Treat the image as the approved art direction.
+
+Do not attempt to embed the reference image into the application.
+
+Use it to guide implementation.
+
+If several files exist in images/, identify the reference by its dark interface,
+Food Truck Event Profit Calculator Dashboard, copper accent, and right-side
+design-audit content.
+
+Do not proceed as though the image were merely optional inspiration.
+
+Implement the underlying visual direction using the existing HTML, Jinja, CSS,
+and JavaScript architecture.
+
+Primary objective
+
+Transform the current light application into a cohesive, premium dark desktop
+product while correcting undersized typography, navigation, branding, controls,
+and metadata across every screen.
+
+The current UI is much improved, but many non-hero elements remain visually too
+small, timid, or mechanically styled.
+
+The whole application should now receive the same confidence, scale, hierarchy,
+and compositional care as the approved Dashboard hero.
+
+The quality bar is comparable in professionalism—not copied appearance—to:
+
+- ChatGPT
+- Notion
+- Linear
+- Stripe Dashboard
+- Zillow
+
+Preserve all existing functionality.
+
+Dark-theme direction
+
+Apply a unified dark visual system throughout the application.
+
+Use a restrained palette based on the approved reference:
+
+- very dark neutral application background
+- slightly lighter sidebar and elevated surfaces
+- soft layered panels rather than flat black everywhere
+- warm copper accent
+- high-contrast primary text
+- softer but readable secondary text
+- subtle neutral dividers
+- accessible semantic success, warning, danger, and information colors
+
+Avoid:
+
+- pure black across every surface
+- glaring white panels
+- excessive gradients
+- neon accents
+- oversaturated colors
+- heavy glowing effects
+- decorative visual noise
+- novelty styling
+
+The result should feel calm, warm, premium, and professional.
+
+Theme scope
+
+For V1, dark mode should become the application’s intended visual presentation.
+
+Do not build a customer-selectable theme switch unless one already exists and
+can be retained without expanding scope.
+
+Do not preserve a partially light application.
+
+Every normal screen, component, dialog, form, table, state, and recovery view
+must use the same coherent dark system.
+
+Dashboard hero
+
+Preserve the approved hero.
+
+Do not:
+
+- rewrite the headline
+- reduce its scale
+- alter its purpose
+- replace the primary call to action
+- return it to a stacked narrow-column layout
+- add decorative graphics
+- add analytics
+- add competing actions
+
+Minor token-level adjustments are allowed only if required for the new dark
+theme, accessible contrast, or cross-screen consistency.
+
+The hero should remain recognizably the same composition.
+
+Application identity and sidebar branding
+
+The product identity in the sidebar is currently too small.
+
+Redesign the identity area so it feels deliberate and anchors the application.
+
+Include:
+
+Food Truck Event Profit Calculator
+
+The Fixer’s Desk
+
+Requirements:
+
+- product name substantially larger than it is now
+- product name readable at a glance
+- company name clearly subordinate but intentional
+- stronger spacing around the brand block
+- optional product icon or simple existing mark if supported by the established
+  icon system
+- no giant logo treatment
+- no marketing-style masthead
+- no tiny metadata-like branding
+
+The brand area should feel comparable in confidence to the reference image.
+
+If no approved logo asset exists, use typography and the established icon
+family rather than inventing a complex logo.
+
+Sidebar scale
+
+The full sidebar is currently undersized.
+
+Increase and rebalance:
+
+- sidebar width
+- product identity scale
+- navigation font size
+- navigation icon size
+- navigation row height
+- internal padding
+- spacing between destinations
+- focus and hover targets
+- bottom or secondary identity area where applicable
+
+Navigation should feel comfortable and substantial, not miniature.
+
+Desktop navigation targets should be easy to acquire with mouse and keyboard.
+
+Do not make the sidebar excessively wide.
+
+Use responsive CSS so proportions adapt across supported desktop sizes.
+
+Navigation treatment
+
+Refine global navigation to match the approved reference.
+
+Requirements:
+
+- larger, consistent icons
+- larger readable labels
+- comfortable click targets
+- quiet default state
+- clear hover state
+- confident selected state
+- slim copper indicator or equivalent restrained accent
+- subtle selected surface
+- no heavy button-like boxes
+- no weak tiny bullets
+- no color-only active indication
+- consistent icon alignment
+- consistent text baseline
+- visible keyboard focus
+
+Keep these destinations:
+
+- Dashboard
+- New analysis
+- Saved events
+- Business defaults
+- Data safety
+
+Preserve all existing routes, setup safeguards, recovery restrictions, and
+dirty-workspace navigation protection.
+
+Application-wide scale correction
+
+Audit every screen for elements that remain too small relative to the approved
+hero and sidebar direction.
+
+Correct scale for:
+
+- page titles
+- section titles
+- body text
+- labels
+- helper text
+- metadata
+- badges
+- table headers
+- table cells
+- navigation
+- tabs
+- steppers
+- buttons
+- inputs
+- selects
+- radio buttons
+- checkboxes
+- switches
+- alerts
+- dialogs
+- empty states
+- scenario controls
+- comparison controls
+- backup and restore controls
+
+Do not simply increase everything by one fixed percentage.
+
+Use hierarchy.
+
+Primary information should be visibly stronger.
+
+Secondary text should remain readable but quiet.
+
+Tertiary metadata should be smaller without becoming difficult to read.
+
+No important interface text should look like tiny engineering annotations.
+
+Typography
+
+Refine the typography system for the dark UI.
+
+Requirements:
+
+- strong, readable primary headings
+- confident but restrained page titles
+- larger navigation and form labels
+- comfortable line heights
+- consistent weights
+- professional numeric emphasis
+- readable metadata
+- no excessively tiny captions
+- no oversized marketing headings outside the approved hero
+- no one-off screen-specific font sizing
+
+Use fluid sizing with clamp() where useful.
+
+Retain sensible minimum and maximum sizes.
+
+Form controls
+
+The guided Event Inputs and Business Defaults workflows must feel native to the
+dark application.
+
+Refine:
+
+- input height
+- label scale
+- field spacing
+- surface contrast
+- border contrast
+- focus rings
+- placeholders
+- helper text
+- validation text
+- warnings
+- radio groups
+- repeatable rows
+- sticky action areas
+- review summaries
+
+Ensure:
+
+- controls are easy to scan and click
+- inactive or disabled controls remain readable
+- inputs do not disappear into the background
+- focus is unmistakable
+- error and warning states remain distinct
+- conditional controls remain clearly associated
+- no white form islands remain inside the dark shell
+
+Preserve all fields, stages, validation, warnings, review behavior, and
+persistence semantics.
+
+Event Inputs stepper
+
+The current side stepper appears cramped and may horizontally overflow.
+
+Refine it.
+
+Requirements:
+
+- each stage label is readable
+- no clipped text
+- no awkward internal horizontal scrollbar at normal desktop widths
+- current, completed, and invalid states remain clear
+- stage numbers and titles have appropriate scale
+- vertical or horizontal presentation adapts to available width
+- the workflow card and stepper feel compositionally connected
+- Back and Continue remain visible and accessible
+
+Do not change the six-stage workflow.
+
+Do not merge or remove stages.
+
+Event Analysis workspace
+
+Apply the approved dark art direction and scale correction to the flagship
+workspace.
+
+Preserve its two-region decision-making structure.
+
+Improve:
+
+- page header scale and hierarchy
+- Event and Scenario metadata
+- scenario action area
+- assumption tabs or sections
+- form-control scale
+- result-panel surfaces
+- Business Profit emphasis
+- target status
+- break-even presentation
+- warnings
+- metric spacing
+- cost breakdown
+- progressive disclosure
+- sticky behavior
+- alignment across columns
+
+The current decision summary has good structure but should feel fully integrated
+into the dark design.
+
+Requirements:
+
+- Business Profit remains the primary number
+- target status and break-even remain immediately visible
+- warnings use accessible dark-theme surfaces
+- secondary financial figures remain scannable
+- no pale cards that look pasted onto a dark app
+- no raw Decimal strings
+- no undersized labels
+- no cramped action controls
+- assumptions and results remain visible together where practical
+
+Do not change live recalculation, Scenario behavior, formulas, warnings, or save
+semantics.
+
+Saved Events
+
+Apply the same confidence and scale to the Saved Events library.
+
+Improve:
+
+- page-title hierarchy
+- search and sort scale
+- selection toolbar
+- Event grouping
+- Scenario rows
+- checkboxes
+- metadata
+- scenario counts
+- row actions
+- Manage event disclosure
+- dividers
+- hover and focus states
+- vertical rhythm
+
+The current page should no longer feel like a white document with small database
+rows.
+
+Requirements:
+
+- dark cohesive surfaces
+- readable compact rows
+- whole-row or clear Open analysis affordance
+- comfortable selection controls
+- clear selected state
+- secondary More actions remain discoverable
+- destructive actions remain quiet until opened
+- search and sort controls do not dominate the page
+- two-to-four comparison selection remains obvious
+
+Preserve search, sorting, rename, delete, final-Scenario protection, selection,
+and comparison behavior.
+
+Scenario Comparison
+
+Apply the dark visual system and scale correction to:
+
+- selection interface
+- baseline controls
+- Scenario headers
+- financial-result tables
+- assumption comparison
+- difference indicators
+- Show differences only
+- Open analysis actions
+- sticky headers where present
+
+Requirements:
+
+- aligned data remains easy to scan
+- numeric columns remain legible
+- difference states do not rely on color alone
+- table boundaries remain subtle
+- comparison identity is prominent
+- no tiny labels or cramped controls
+- horizontal scrolling remains localized and only when necessary
+
+Do not change comparison calculations or baseline semantics.
+
+Dashboard recent work
+
+Keep the current hero unchanged.
+
+Refine the recent-work region to match the reference.
+
+Improve:
+
+- section-heading scale
+- supporting-copy scale
+- row spacing
+- Event-name hierarchy
+- Scenario metadata
+- scenario-count treatment
+- directional affordance
+- hover and focus
+- alignment
+- relationship to the hero
+
+Use subtle dark dividers and surfaces.
+
+Do not return to large cards or repeated heavy buttons.
+
+Data Safety
+
+Apply the dark visual system while preserving its clear two-task structure.
+
+Improve:
+
+- Download backup prominence
+- Restore backup caution
+- text scale
+- task panels
+- progressive disclosure
+- confirmation dialogs
+- success and failure states
+
+The normal Data Safety page should feel calm.
+
+Recovery states may be more cautionary.
+
+Preserve all backup, restore, validation, snapshot, and recovery behavior.
+
+Dialogs and overlays
+
+Convert every dialog and overlay to the same dark design system.
+
+Audit:
+
+- rename
+- delete
+- overwrite
+- unsaved changes
+- restore
+- informational help
+- error states
+- recovery confirmation
+
+Requirements:
+
+- readable title and body
+- correct focus behavior
+- clear primary and cancel actions
+- accessible backdrop
+- restrained elevation
+- no white modal floating inside a dark application
+- consistent width and spacing
+- correct destructive emphasis
+
+Tables, cards, panels, and surfaces
+
+Create a coherent dark elevation and surface hierarchy.
+
+Define clear roles for:
+
+- application background
+- sidebar
+- primary workspace
+- elevated card
+- selected row
+- hover row
+- dialog
+- warning surface
+- input surface
+- disabled surface
+
+Avoid excessive borders.
+
+Use:
+
+- subtle tonal changes
+- restrained dividers
+- spacing
+- typography
+- limited elevation
+
+Do not turn the UI into a collection of glowing cards.
+
+Component proportions
+
+Audit and refine:
+
+- button heights
+- input heights
+- chip and badge heights
+- card padding
+- panel padding
+- table row height
+- tab height
+- dialog actions
+- navigation rows
+- icon-to-text spacing
+
+Components should feel substantial without becoming oversized.
+
+The reference image should guide perceived scale.
+
+Dark-theme semantic states
+
+Define and apply accessible dark-theme states for:
+
+- success
+- warning
+- danger
+- information
+- selected
+- focus
+- hover
+- disabled
+- loading
+- dirty
+- target met
+- target not met
+- estimated loss
+- exactly break-even
+
+Do not rely on copper for every state.
+
+Copper is the brand and primary-action accent, not a universal semantic color.
+
+Ensure WCAG-compatible contrast for normal text, controls, and important states.
+
+Responsive behavior
+
+Apply the approved proportions across:
+
+- small laptop windows
+- medium desktop windows
+- large desktop monitors
+- ultra-wide monitors
+
+Requirements:
+
+- sidebar scales sensibly
+- identity remains readable
+- navigation remains usable
+- hero remains approved
+- content regions use available space intentionally
+- Event Inputs stepper remains usable
+- Event Analysis columns remain balanced
+- Saved Events remains scannable
+- comparison remains understandable
+- no clipped text
+- no page-wide accidental overflow
+- no tiny UI caused by fixed scaling
+- no huge empty areas caused by rigid max-widths
+
+Use fluid CSS and component-specific constraints rather than one universal
+scale.
+
+Accessibility
+
+Preserve or improve:
+
+- semantic landmarks
+- navigation semantics
+- keyboard navigation
+- visible focus
+- focus contrast on dark surfaces
+- skip link
+- form labels
+- validation associations
+- warning announcements
+- dialog focus management
+- row-action semantics
+- selected-state communication
+- reduced-motion support
+- screen-reader structure
+
+Dark mode must not reduce accessibility.
+
+Do not use low-contrast gray-on-black text.
+
+Do not hide focus rings for aesthetic reasons.
+
+Icon system
+
+Continue using one consistent icon family.
+
+Ensure:
+
+- increased sizes remain optically balanced
+- stroke weight fits the dark interface
+- the same action uses the same icon
+- decorative icons are hidden
+- icon-only controls have accessible names and tooltips
+- no improvised emoji or mixed icon styles
+
+Design-system changes
+
+Update the existing V1 design system rather than creating a parallel theme.
+
+Refine tokens for:
+
+- dark backgrounds
+- dark surfaces
+- text colors
+- borders
+- copper accent
+- semantic states
+- focus
+- elevation
+- typography scale
+- component scale
+- sidebar size
+- navigation size
+- responsive spacing
+
+Remove or replace obsolete light-only tokens and duplicated screen-specific
+values.
+
+Do not leave both design systems partially active.
+
+Preserve maintainable token naming and component architecture.
+
+Capability preservation
+
+Before implementation, inventory all existing customer capabilities.
+
+After implementation, verify continued access to:
+
+- onboarding
+- Dashboard
+- new analysis
+- Business Defaults
+- Event Inputs
+- Event submission
+- Event Analysis
+- live recalculation
+- Save
+- Save as new
+- overwrite
+- reset
+- rename
+- delete
+- Saved Events
+- search
+- sort
+- Scenario selection
+- comparison
+- baseline changes
+- Show differences only
+- backup
+- restore
+- recovery
+- dialogs
+- dirty-navigation protection
+- error handling
+
+No capability may become inaccessible because of visual changes.
+
+Testing
+
+Add or update focused tests covering:
+
+Theme application:
+- all normal screens use the dark design-system classes or tokens
+- no obsolete light page wrapper remains
+- dialogs and overlays use dark surfaces
+- inputs and tables use dark surfaces
+- recovery states remain legible
+
+Dashboard:
+- approved hero content and primary action remain unchanged
+- hero composition remains intact
+- sidebar branding is present at the increased hierarchy
+- recent rows remain accessible
+- global navigation remains complete
+
+Sidebar:
+- larger navigation structure is rendered
+- labels remain visible
+- selected state remains accessible
+- keyboard navigation works
+- narrow responsive behavior works
+
+Event Inputs:
+- six stages remain
+- stage labels do not become clipped in supported layouts
+- all controls remain reachable
+- Continue and Back work
+- validation and warnings remain visible
+- no persistence behavior changes
+
+Event Analysis:
+- Business Profit remains primary
+- target status and break-even remain visible
+- assumptions remain editable
+- live recalculation works
+- all Scenario actions remain accessible
+- detailed calculations remain available
+
+Saved Events:
+- search and sort work
+- selection works
+- Scenario rows remain readable and actionable
+- rename and delete remain accessible
+- comparison selection remains functional
+
+Comparison:
+- aligned results remain intact
+- baseline control works
+- Show differences only works
+- two-to-four Scenario support remains
+- Open analysis remains accessible
+
+Data Safety:
+- Download backup works
+- Restore backup works
+- confirmations remain accessible
+- recovery safeguards remain unchanged
+
+Accessibility:
+- contrast checks where existing test tools support them
+- focus visibility
+- semantic navigation
+- accessible dialog names
+- accessible icon-only controls
+- selected state not color-only
+- reduced-motion support
+
+Responsive:
+- small laptop
+- medium desktop
+- large desktop
+- ultra-wide
+- no unsupported page-wide overflow
+- no clipped brand or navigation labels
+- no unusably small controls
+
+Regression:
+- calculations unchanged
+- persistence unchanged
+- routes unchanged
+- migrations unchanged
+- backup format unchanged
+- restore semantics unchanged
+- warning conditions unchanged
+- dirty-state protection unchanged
+
+Manual visual review
+
+Create a concise manual dark-theme review checklist covering:
+
+- approved Dashboard hero unchanged
+- sidebar branding and navigation scale
+- Welcome
+- Dashboard
+- Business Defaults
+- every Event Inputs stage
+- Event Analysis
+- Saved Events
+- comparison selection
+- comparison results
+- Data Safety
+- dialogs
+- empty states
+- warning states
+- success states
+- validation
+- recovery
+- long names
+- many rows
+- four-Scenario comparison
+- keyboard-only use
+- reduced motion
+- all supported desktop widths
+
+Compare the running application directly against the approved reference image.
+
+Document any intentional differences.
+
+Definition of done
+
+The milestone is complete when:
+
+- the Dashboard hero remains approved and unchanged
+- the full application uses one coherent dark visual system
+- sidebar branding and navigation no longer appear undersized
+- the rest of the application has the same confidence and scale as the hero
+- controls, metadata, tables, lists, and dialogs no longer look miniature
+- all screens feel like parts of the same premium desktop product
+- contrast and accessibility remain strong
+- every existing workflow remains functional
+
+Regression boundaries
+
+Do not change:
+
+- calculations
+- business formulas
+- warning conditions
+- persistence semantics
+- database schema
+- migrations
+- backup format
+- restore behavior
+- route URLs
+- Scenario semantics
+- comparison semantics
+- setup behavior
+- workflow order
+
+Small template and JavaScript changes are allowed only where required to apply
+the new theme, scale, responsive layout, and accessible interaction treatment.
+
+Scope
+
+Do not implement:
+
+- new product features
+- new calculations
+- new warnings
+- charts
+- AI recommendations
+- cloud sync
+- sharing
+- user accounts
+- selectable themes
+- theme persistence
+- light/dark toggle
+- frontend-framework migration
+- new dependencies
+- packaging changes
+
+Do not preserve undersized or weak UI merely to minimize the diff.
+
+Do not make unrelated backend changes.
+
+Do not commit.
+
+Afterward:
+
+1. Run focused design-system, shell, Dashboard, forms, Event Analysis, Saved
+   Events, comparison, Data Safety, dialog, accessibility, and responsive tests.
+2. Run all existing UI and workflow tests.
+3. Run the full automated test suite.
+4. Run git diff --check.
+5. Summarize the dark-theme system and scale corrections.
+6. List every screen updated.
+7. Explain how the approved reference image was used.
+8. Confirm that the Dashboard hero remained unchanged.
+9. List obsolete light-theme code or tokens removed.
+10. Identify any screen that still falls below the approved visual direction.
+11. Report every command and its exact result.
+
+Keep the response concise.
