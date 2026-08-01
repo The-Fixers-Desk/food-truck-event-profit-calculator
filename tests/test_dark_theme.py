@@ -8,11 +8,11 @@ def test_dark_design_tokens_replace_the_light_palette(client):
     tokens = client.get("/static/css/tokens.css").data.decode()
     base = client.get("/static/css/base.css").data.decode()
 
-    assert "--color-background: #101416" in tokens
-    assert "--color-surface: #171c1f" in tokens
-    assert "--color-sidebar: #0c1113" in tokens
-    assert "--color-accent: #c66f36" in tokens
-    assert "--color-text: #f1f0ed" in tokens
+    assert "--color-background: #111315" in tokens
+    assert "--color-surface: #181b1d" in tokens
+    assert "--color-sidebar: #121416" in tokens
+    assert "--color-accent: #c47a3a" in tokens
+    assert "--color-text: #f4f2ee" in tokens
     assert "--color-success-surface: #152820" in tokens
     assert "--color-warning-surface: #2c2416" in tokens
     assert "--color-danger-surface: #301a1b" in tokens
@@ -39,13 +39,13 @@ def test_dark_component_surfaces_cover_controls_tables_and_dialogs(client):
 def test_sidebar_has_substantial_brand_and_accessible_selected_navigation(client):
     navigation = client.get("/static/css/navigation.css").data.decode()
 
-    assert "width: clamp(17rem, 18vw, 19rem)" in navigation
-    assert "font-size: clamp(1.25rem, 1.35vw, 1.5rem)" in navigation
-    assert "min-height: var(--control-height)" in navigation
+    assert "width: var(--sidebar-width)" in navigation
+    assert "font-size: var(--text-lg)" in navigation
+    assert "min-height: 3rem" in navigation
     assert "font-size: var(--text-md)" in navigation
-    assert "box-shadow: inset 3px 0 var(--color-primary)" in navigation
-    assert "@media (max-width: 800px)" in navigation
-    assert "overflow-x: auto" in navigation
+    assert ".nav-link--active::before" in navigation
+    assert "@media (max-width: 1023px)" in navigation
+    assert "transform: translateX(-100%)" in navigation
 
 
 def test_approved_dashboard_hero_and_navigation_are_unchanged(client):

@@ -1,0 +1,114 @@
+MILESTONE 4 — EVENT ANALYSIS WORKSPACE AND SCENARIO COMPARISON
+
+
+You are implementing an approved UI milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the existing framework, routes, templates/components, styling system, tests, persistence layer, calculation engine, and current behavior.
+2. Use the supplied implementation packages as binding requirements:
+   - approved reference mockup(s): visual source of truth;
+   - engineering specification(s): implementation blueprint;
+   - acceptance checklist(s): objective definition of done;
+   - design rationale(s): intent and priority guidance.
+3. The mockups are specifications, not inspiration. Match their composition, hierarchy, charcoal color direction, spacing, typography, controls, responsive behavior, and states as closely as the existing technology permits.
+4. Preserve all existing functionality, calculation rules, persistence, validation, migrations, navigation safeguards, and workflows unless a supplied document explicitly requires a change.
+5. Reuse and extend shared components and tokens. Do not create one-off styling where a reusable primitive is appropriate.
+6. Do not replace working domain logic with mock data. Wire the approved interface to the real application state and existing backend behavior.
+7. Do not silently omit a required state, sub-screen, interaction, or responsive adaptation.
+8. Keep the application offline-first. Do not add cloud services, accounts, telemetry, external fonts, CDNs, or network-dependent UI behavior.
+9. Do not add dependencies unless absolutely necessary. Prefer the existing stack and built-in capabilities. If a dependency is genuinely required, explain why before adding it.
+10. Maintain accessibility: semantic structure, keyboard operation, visible focus, labels, descriptions, errors, status announcements, contrast, and sensible reading order.
+11. Keep tests deterministic. Add or update focused tests for the milestone’s changed behavior and run the relevant existing suites.
+12. Do not create a git commit.
+
+IMPLEMENTATION METHOD
+
+A. Read every supplied artifact for this milestone before coding.
+B. Map each acceptance item to the current code and identify the smallest safe implementation plan.
+C. Build shared primitives before screen-specific composition where applicable.
+D. Implement the complete milestone, including loading, empty, validation, error, saved, and responsive states required by the package.
+E. Review the result against every acceptance item. Correct deviations rather than merely listing them.
+F. Run focused tests, then the broadest practical regression suite.
+G. Report:
+   - files changed;
+   - reusable components/tokens added or changed;
+   - workflows and states completed;
+   - tests run and results;
+   - any acceptance item that could not be satisfied, with the exact blocker.
+
+
+SUPPLIED ARTIFACTS
+
+Use the packages for:
+- 06 Event Analysis Workspace
+- 08 Scenario Comparison
+
+PRIMARY OBJECTIVE
+
+Implement the complete decision-making experience: inspect one scenario transparently, adjust it with live recalculation, save versions, and compare multiple scenarios for the same event.
+
+REQUIRED SCOPE
+
+1. Event Analysis Workspace:
+   - real event and active-scenario identity;
+   - scenario selector/list and status states;
+   - key metrics: estimated revenue, total costs, estimated profit, profit margin, and break-even buyers;
+   - profitability recommendation tied to the selected user profit rule;
+   - transparent cost breakdown;
+   - decision checks;
+   - factual warnings;
+   - assumption/input summary;
+   - sensitivity or “what changes the result” cues;
+   - event snapshot;
+   - edit controls and approved responsive composition.
+
+2. Live interaction:
+   - all editable scenario assumptions supported by the existing product;
+   - automatic recalculation of every dependent result and warning;
+   - exact existing formulas and rounding rules;
+   - no stale metric, recommendation, or warning after changes;
+   - invalid adjustments cannot corrupt the saved scenario.
+
+3. Scenario actions:
+   - automatic original scenario remains intact;
+   - save adjustments as a new scenario by default;
+   - deliberate overwrite of the active scenario only through the approved explicit path;
+   - duplicate scenario;
+   - rename/delete where existing product behavior requires it;
+   - active scenario and unsaved-change safeguards;
+   - persistence after restart.
+
+4. Scenario Comparison:
+   - select eligible scenarios belonging to the same event;
+   - approved side-by-side key metrics;
+   - aligned assumption differences;
+   - clear best-option and recommendation signaling without hiding tradeoffs;
+   - impact indicators;
+   - open a compared scenario back in the workspace;
+   - keep/select scenario action;
+   - meaningful empty and insufficient-scenario states;
+   - desktop columns, compressed tablet view, and usable mobile scenario switching rather than unreadably narrow columns.
+
+5. Semantic states:
+   - worth accepting;
+   - borderline;
+   - not worth accepting;
+   - best margin or strongest option where supported;
+   - warnings remain factual and derived from the real calculation results.
+
+6. Add or update tests for:
+   - live recalculation;
+   - all metric and warning dependencies;
+   - save-as-new and overwrite paths;
+   - duplicate, rename, and delete behavior;
+   - persistence after restart;
+   - dirty-navigation protection;
+   - comparison eligibility and selection;
+   - correct assumption differences;
+   - opening either scenario from comparison;
+   - mobile/condensed comparison behavior where testable.
+
+COMPLETION GATE
+
+Both acceptance checklists must pass, and the existing calculation-engine tests must remain green. Do not substitute static chart values, mock scenario data, or approximate formulas for the real domain engine.

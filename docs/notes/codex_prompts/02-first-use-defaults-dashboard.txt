@@ -1,0 +1,107 @@
+MILESTONE 2 — FIRST-USE FLOW, BUSINESS DEFAULTS, AND DASHBOARD
+
+
+You are implementing an approved UI milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the existing framework, routes, templates/components, styling system, tests, persistence layer, calculation engine, and current behavior.
+2. Use the supplied implementation packages as binding requirements:
+   - approved reference mockup(s): visual source of truth;
+   - engineering specification(s): implementation blueprint;
+   - acceptance checklist(s): objective definition of done;
+   - design rationale(s): intent and priority guidance.
+3. The mockups are specifications, not inspiration. Match their composition, hierarchy, charcoal color direction, spacing, typography, controls, responsive behavior, and states as closely as the existing technology permits.
+4. Preserve all existing functionality, calculation rules, persistence, validation, migrations, navigation safeguards, and workflows unless a supplied document explicitly requires a change.
+5. Reuse and extend shared components and tokens. Do not create one-off styling where a reusable primitive is appropriate.
+6. Do not replace working domain logic with mock data. Wire the approved interface to the real application state and existing backend behavior.
+7. Do not silently omit a required state, sub-screen, interaction, or responsive adaptation.
+8. Keep the application offline-first. Do not add cloud services, accounts, telemetry, external fonts, CDNs, or network-dependent UI behavior.
+9. Do not add dependencies unless absolutely necessary. Prefer the existing stack and built-in capabilities. If a dependency is genuinely required, explain why before adding it.
+10. Maintain accessibility: semantic structure, keyboard operation, visible focus, labels, descriptions, errors, status announcements, contrast, and sensible reading order.
+11. Keep tests deterministic. Add or update focused tests for the milestone’s changed behavior and run the relevant existing suites.
+12. Do not create a git commit.
+
+IMPLEMENTATION METHOD
+
+A. Read every supplied artifact for this milestone before coding.
+B. Map each acceptance item to the current code and identify the smallest safe implementation plan.
+C. Build shared primitives before screen-specific composition where applicable.
+D. Implement the complete milestone, including loading, empty, validation, error, saved, and responsive states required by the package.
+E. Review the result against every acceptance item. Correct deviations rather than merely listing them.
+F. Run focused tests, then the broadest practical regression suite.
+G. Report:
+   - files changed;
+   - reusable components/tokens added or changed;
+   - workflows and states completed;
+   - tests run and results;
+   - any acceptance item that could not be satisfied, with the exact blocker.
+
+
+SUPPLIED ARTIFACTS
+
+Use the packages for:
+- 03 Welcome / Onboarding
+- 04 Business Defaults Wizard
+- 02 Dashboard
+
+Assume Milestone 1’s shared shell, tokens, controls, and system states are available and reuse them.
+
+PRIMARY OBJECTIVE
+
+Implement the complete approved first-use journey and its normal returning-user destination:
+Welcome / Onboarding → Business Defaults Wizard → Dashboard.
+
+REQUIRED SCOPE
+
+1. Welcome / Onboarding:
+   - first-use-only routing and setup detection;
+   - approved hero, progress indicator, setup preview, reassurance content, privacy message, and action hierarchy;
+   - Start setup, explanatory secondary action, and defer/do-later behavior;
+   - no dead ends or duplicate navigation;
+   - correct behavior after restart and after setup is completed.
+
+2. Business Defaults Wizard:
+   - all approved steps and sub-screens, not only the displayed example step;
+   - revenue assumptions;
+   - food and packaging cost method;
+   - profit rule;
+   - operating assumptions;
+   - final review;
+   - completed, active, upcoming, validation, saving, and review states;
+   - conditional disclosure so only the selected method’s inputs are shown and required;
+   - saved defaults load correctly;
+   - Back and Continue preserve values;
+   - step-level validation blocks invalid advancement without discarding input;
+   - automatic saving and Save/finish-later behavior;
+   - defaults remain editable later and overridable per event;
+   - exact existing model and database behavior must be preserved.
+
+3. Dashboard:
+   - approved decision-focused hero and primary New Analysis action;
+   - recent-work area using real saved events/scenarios;
+   - returning-user and empty states;
+   - links/actions to reopen work and view all saved events;
+   - first-use transition after defaults completion;
+   - normal launch behavior after setup has already been completed.
+
+4. Cross-screen flow:
+   - Welcome routes into Defaults correctly;
+   - completing Defaults routes to Dashboard;
+   - deferral behavior follows current product rules;
+   - revisiting Defaults from navigation does not restart onboarding;
+   - dirty-navigation safeguards and session state continue to work.
+
+5. Add or update tests for:
+   - first launch;
+   - deferred onboarding;
+   - completed setup detection after restart;
+   - every Defaults step and conditional method;
+   - invalid-input preservation;
+   - save/load behavior;
+   - Dashboard empty and populated states;
+   - the full Welcome → Defaults → Dashboard flow.
+
+COMPLETION GATE
+
+All three supplied acceptance checklists and the cross-screen workflow must pass. Do not leave placeholder panels, fake recent events, incomplete wizard steps, or styling that bypasses Milestone 1 primitives.

@@ -1,0 +1,118 @@
+MILESTONE 3 — COMPLETE EVENT INPUTS WIZARD
+
+
+You are implementing an approved UI milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the existing framework, routes, templates/components, styling system, tests, persistence layer, calculation engine, and current behavior.
+2. Use the supplied implementation packages as binding requirements:
+   - approved reference mockup(s): visual source of truth;
+   - engineering specification(s): implementation blueprint;
+   - acceptance checklist(s): objective definition of done;
+   - design rationale(s): intent and priority guidance.
+3. The mockups are specifications, not inspiration. Match their composition, hierarchy, charcoal color direction, spacing, typography, controls, responsive behavior, and states as closely as the existing technology permits.
+4. Preserve all existing functionality, calculation rules, persistence, validation, migrations, navigation safeguards, and workflows unless a supplied document explicitly requires a change.
+5. Reuse and extend shared components and tokens. Do not create one-off styling where a reusable primitive is appropriate.
+6. Do not replace working domain logic with mock data. Wire the approved interface to the real application state and existing backend behavior.
+7. Do not silently omit a required state, sub-screen, interaction, or responsive adaptation.
+8. Keep the application offline-first. Do not add cloud services, accounts, telemetry, external fonts, CDNs, or network-dependent UI behavior.
+9. Do not add dependencies unless absolutely necessary. Prefer the existing stack and built-in capabilities. If a dependency is genuinely required, explain why before adding it.
+10. Maintain accessibility: semantic structure, keyboard operation, visible focus, labels, descriptions, errors, status announcements, contrast, and sensible reading order.
+11. Keep tests deterministic. Add or update focused tests for the milestone’s changed behavior and run the relevant existing suites.
+12. Do not create a git commit.
+
+IMPLEMENTATION METHOD
+
+A. Read every supplied artifact for this milestone before coding.
+B. Map each acceptance item to the current code and identify the smallest safe implementation plan.
+C. Build shared primitives before screen-specific composition where applicable.
+D. Implement the complete milestone, including loading, empty, validation, error, saved, and responsive states required by the package.
+E. Review the result against every acceptance item. Correct deviations rather than merely listing them.
+F. Run focused tests, then the broadest practical regression suite.
+G. Report:
+   - files changed;
+   - reusable components/tokens added or changed;
+   - workflows and states completed;
+   - tests run and results;
+   - any acceptance item that could not be satisfied, with the exact blocker.
+
+
+SUPPLIED ARTIFACTS
+
+Use the package for:
+- 05 Business Event Inputs Wizard
+
+Assume the approved shared shell, design system, and wizard primitives from prior milestones are available.
+
+PRIMARY OBJECTIVE
+
+Implement the entire approved Event Inputs experience, including every step, conditional method, warning, validation state, draft state, review screen, and responsive adaptation.
+
+REQUIRED SCOPE
+
+1. Build all wizard steps and sub-screens:
+   - Event basics;
+   - Revenue inputs;
+   - Operating costs;
+   - Conditions;
+   - Review.
+   Include the exact fields and existing domain concepts already supported by the application, including travel, parking, permits, utilities, vendor/booking fees, organizer commission, processing fees, named miscellaneous costs, labor, food/supply costs, weather, event protection, food demand, competition, and any other current V1 inputs.
+
+2. Preserve the current calculation and demand model:
+   - percentage expected to buy food;
+   - division of expected food demand among the user and competing vendors;
+   - expected-buyer rounding down;
+   - break-even-customer rounding up;
+   - existing warnings and validation;
+   - no return of removed previews or obsolete demand fields.
+
+3. Conditional entry methods:
+   - revenue method choices;
+   - food/packaging cost method choices;
+   - custom expected sales where the approved workflow places it;
+   - show and require only the selected method’s fields;
+   - clear or ignore inactive values according to the current model and specification;
+   - reload saved selections correctly.
+
+4. Defaults and overrides:
+   - apply saved business defaults;
+   - clearly distinguish inherited/default values from event overrides;
+   - allow independent per-event changes without mutating global defaults;
+   - preserve values while moving Back and Continue.
+
+5. Guidance and validation:
+   - contextual weather and protection explanations;
+   - warnings beside the inputs that support them;
+   - early factual warnings as soon as enough valid information exists;
+   - accessible inline errors and a useful focus target when advancement is blocked;
+   - no loss of valid input after failed submission.
+
+6. Scenario and draft behavior:
+   - scenario name and event identity;
+   - Save as draft / finish later;
+   - automatic progress preservation;
+   - final review before analysis;
+   - valid submission creates the Event and Original estimate Scenario using the existing persistence workflow, then opens analysis.
+
+7. Responsive behavior:
+   - desktop step navigation plus form workspace;
+   - compact tablet layout;
+   - single-column mobile flow;
+   - sticky actions that do not obscure fields or errors.
+
+8. Add or update tests for:
+   - every step transition;
+   - conditional inputs;
+   - defaults and overrides;
+   - warnings;
+   - invalid-input preservation;
+   - draft save/reload;
+   - final review;
+   - valid submission and automatic initial save;
+   - long names and repeatable miscellaneous rows;
+   - regression protection for the calculation inputs.
+
+COMPLETION GATE
+
+The complete Event Inputs checklist must pass. Do not stop after implementing the Revenue Inputs example shown prominently in the mockup; every step and supported substate is part of this milestone.

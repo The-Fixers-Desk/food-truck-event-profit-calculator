@@ -1144,6 +1144,21 @@ const firstEventError = document.querySelector('[aria-invalid="true"]')
   ?? document.querySelector("[data-form-section] .field-error")
     ?.closest("[data-form-section]")?.querySelector("input, select, textarea");
 if (firstEventError) window.requestAnimationFrame(() => firstEventError.focus());
+
+const calculationLoadingState = document.querySelector(
+  "#calculation-loading-state",
+);
+if (calculationLoadingState && !workspaceForm) {
+  document.querySelector("form.form-panel")?.addEventListener(
+    "submit",
+    () => {
+      calculationLoadingState.hidden = false;
+      document.querySelector("#analyze-event")?.setAttribute(
+        "aria-busy", "true",
+      );
+    },
+  );
+}
 document.querySelectorAll('[aria-invalid="true"]').forEach((input, index) => {
   const error = input.closest(".form-field, fieldset")?.querySelector(".field-error");
   if (!error) return;

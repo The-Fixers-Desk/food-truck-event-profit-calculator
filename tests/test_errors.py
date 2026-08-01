@@ -11,4 +11,4 @@ def test_internal_server_error_page(client):
     response = client.get("/test-error")
 
     assert response.status_code == 500
-    assert b"Something went wrong." in response.data
+    assert "We couldn&#39;t load this event" in response.data.decode()

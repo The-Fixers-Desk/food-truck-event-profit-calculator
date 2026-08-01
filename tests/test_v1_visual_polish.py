@@ -70,7 +70,7 @@ def test_focus_reduced_motion_and_long_content_foundations(client):
     base = client.get("/static/css/base.css").data.decode()
     components = client.get("/static/css/components.css").data.decode()
 
-    assert "outline: 3px solid var(--color-focus)" in base
+    assert "outline: 2px solid var(--color-focus)" in base
     assert "scroll-margin-block: 5rem" in base
     assert "overflow-wrap: anywhere" in base
     assert "prefers-reduced-motion: reduce" in base
@@ -117,7 +117,7 @@ def test_error_pages_use_current_product_terminology(client):
     not_found = client.get("/missing-screen").data.decode()
     error = client.get("/test-error").data.decode()
 
-    assert "Start a new analysis" in not_found
-    assert "Start a new analysis" in error
+    assert "Go to saved events" in not_found
+    assert "Back to saved events" in error
     assert "Event Calculator" not in not_found
     assert "Event Calculator" not in error

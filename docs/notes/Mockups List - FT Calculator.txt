@@ -1,0 +1,12 @@
+Mockups List
+
+☑ Application Shell
+☑ Welcome / Onboarding
+☑ Dashboard
+☑ Business Defaults Wizard (Blue)
+☑ Event Inputs Wizard (Blue)
+☑ Event Analysis Workspace (Blue)
+☑ Saved Events
+☑ Scenario Comparison
+☑ Data Safety
+☑ System Pages

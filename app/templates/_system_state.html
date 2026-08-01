@@ -1,0 +1,43 @@
+{% macro system_state(variant, icon, title, description,
+  primary_label=None, primary_href=None, secondary_label=None,
+  secondary_href=None, retry=false, live=false, heading_level="h2",
+  status_label=None) %}
+  <section class="system-state system-state--{{ variant }}"
+    {% if live %}role="status" aria-live="polite" aria-busy="true"{% endif %}>
+    <span class="system-state__icon-frame">
+      {% if variant == "loading" %}
+        <span class="loading-indicator" aria-hidden="true"></span>
+      {% else %}
+        <svg class="system-state__icon icon icon--large" aria-hidden="true">
+          <use href="{{ url_for('static', filename='icons/navigation.svg') }}#{{ icon }}"></use>
+        </svg>
+      {% endif %}
+    </span>
+    <div class="system-state__copy">
+      {% if heading_level == "h1" %}<h1>{{ title }}</h1>{% else %}<h2>{{ title }}</h2>{% endif %}
+      <p>{{ description }}</p>
+    </div>
+    {% if status_label %}<span class="badge badge--success">{{ status_label }}</span>{% endif %}
+    {% if variant == "loading" %}
+      <div class="system-state__skeletons" aria-hidden="true">
+        {% for width in (92, 78, 86) %}
+          <span class="system-state__skeleton-row"><span class="skeleton" style="width: {{ width }}%"></span></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if primary_label or secondary_label %}
+      <div class="system-state__actions">
+        {% if primary_label %}
+          {% if retry %}
+            <button class="button" type="button" data-retry-page>{{ primary_label }}</button>
+          {% else %}
+            <a class="button" href="{{ primary_href }}">{{ primary_label }}</a>
+          {% endif %}
+        {% endif %}
+        {% if secondary_label %}
+          <a class="button-secondary" href="{{ secondary_href }}">{{ secondary_label }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+{% endmacro %}

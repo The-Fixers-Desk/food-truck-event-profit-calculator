@@ -2,16 +2,33 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Implement premium dark application theme and scale refinement
+Build shared UI foundation and application shell
 
-- Apply the approved dark-mode visual system across the entire application using the reference mockup as the implementation target
-- Preserve the approved Dashboard hero while extending its visual quality to every remaining screen
-- Increase sidebar branding, navigation scale, typography, icons, spacing, and interaction targets
-- Refine Event Inputs, Event Analysis, Saved Events, Scenario Comparison, Business Defaults, Data Safety, dialogs, forms, tables, and shared components for a cohesive premium desktop experience
-- Improve visual hierarchy, responsive composition, accessibility, semantic colors, elevation, and component proportions throughout the application
-- Consolidate the design system into a single maintainable dark theme and remove obsolete light-theme styling where appropriate
-- Preserve all calculations, workflows, persistence, backup/restore behavior, navigation, and business logic
-- Add comprehensive regression, accessibility, responsive, and visual-system test coverage
+Implemented the approved charcoal design system, reusable UI primitives, persistent application shell, responsive navigation, and shared empty, loading, error, not-found, and offline states. Preserved existing routes, accessibility behavior, and application-wide error handling
+
+---------------------------------------------------------------------------------
+
+Build onboarding, defaults wizard, and dashboard
+
+Implemented the complete first-use experience, including Welcome, the multi-step Business Defaults wizard, setup detection, save and validation states, and the redesigned Dashboard. Preserved the Welcome → Defaults → Dashboard flow, returning-user behavior, saved defaults, and responsive layouts.
+
+---------------------------------------------------------------------------------
+
+Build complete Event Inputs wizard
+
+Implemented all Event Inputs steps and substates, including event basics, revenue, operating costs, conditions, review, conditional methods, saved-default application, overrides, validation, warnings, draft saving, sticky actions, and responsive behavior. Preserved the existing demand model, calculations, and initial scenario-saving workflow.
+
+---------------------------------------------------------------------------------
+
+Build analysis workspace and scenario comparison
+
+Implemented the approved Event Analysis workspace and Scenario Comparison experience, including live recalculation, financial summaries, cost breakdowns, decision checks, warnings, scenario actions, assumption comparisons, recommendation states, and responsive layouts. Preserved calculation rules, persistence, and scenario version behavior.
+
+---------------------------------------------------------------------------------
+
+Complete saved work, data safety, and UI polish
+
+Implemented Saved Events and Data Safety, including filtering, sorting, scenario access, export, import, backup status, destructive-action safeguards, and responsive states. Completed the final review of all 10 screens against their approved mockups, specifications, rationales, and acceptance checklists, and corrected remaining accessibility, consistency, and workflow issues.
 
 ---------------------------------------------------------------------------------
 

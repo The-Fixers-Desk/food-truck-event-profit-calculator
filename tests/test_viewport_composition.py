@@ -8,10 +8,10 @@ def test_shared_layout_uses_fluid_content_widths(client):
     css = client.get("/static/css/layout.css").data.decode()
     tokens = client.get("/static/css/tokens.css").data.decode()
 
-    assert "--content-width: 1680px" in tokens
-    assert "calc(100% - clamp(2rem, 4vw, 5rem))" in css
-    assert "padding-block: clamp(" in css
-    assert "--content-width: 1760px" in css
+    assert "--content-width: 1280px" in tokens
+    assert "calc(100% - 4rem)" in css
+    assert "padding-block: var(--space-6)" in css
+    assert "--content-width: 1280px" in css
     assert ".workspace-page--list { max-width: 1380px; }" in css
 
 
@@ -37,8 +37,8 @@ def test_sidebar_branding_and_selected_navigation_remain_accessible(client):
     assert "Food Truck Event Profit Calculator" in page
     assert "The Fixer&rsquo;s Desk" in page
     assert 'aria-current="page"' in page
-    assert "width: clamp(17rem, 18vw, 19rem)" in css
-    assert "box-shadow: inset 3px 0 var(--color-primary)" in css
+    assert "width: var(--sidebar-width)" in css
+    assert ".nav-link--active::before" in css
     assert ".nav-link--active .nav-icon" in css
 
 
@@ -58,6 +58,6 @@ def test_focus_reduced_motion_and_horizontal_containment_are_preserved(client):
 
     assert ":focus-visible" in base
     assert "@media (prefers-reduced-motion: reduce)" in base
-    assert "overflow-x: auto" in navigation
+    assert "transform: translateX(-100%)" in navigation
     assert ".comparison-table-wrap" in forms
     assert "overflow-x: auto" in forms

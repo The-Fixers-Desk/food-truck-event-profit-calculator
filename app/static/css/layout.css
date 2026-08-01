@@ -1,25 +1,24 @@
 .app-shell {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .app-workspace {
+  display: grid;
+  grid-template-rows: var(--topbar-height) minmax(0, 1fr);
   min-width: 0;
 }
 
 .app-main {
-  width: min(
-    calc(100% - clamp(2rem, 4vw, 5rem)),
-    var(--content-width)
-  );
+  width: min(calc(100% - 4rem), var(--content-width));
   margin-inline: auto;
-  padding-block: clamp(var(--space-4), 3.5vh, var(--space-7));
+  padding-block: var(--space-6) var(--space-7);
 }
 
 .app-main--calculator,
 .app-main--saved_events {
-  --content-width: 1760px;
+  --content-width: 1280px;
 }
 
 .app-main--defaults {
@@ -37,8 +36,22 @@
 }
 
 .page-header {
-  margin-bottom: clamp(var(--space-4), 2.5vw, var(--space-6));
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: var(--divider-default);
 }
+
+.page-header--with-actions {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-5);
+  align-items: start;
+  justify-items: stretch;
+}
+.page-header__copy { min-width: 0; }
+.page-header__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
 
 .page-eyebrow {
   margin-bottom: var(--space-2);
@@ -85,10 +98,20 @@
 }
 
 @media (max-width: 600px) {
-  .app-main { width: min(calc(100% - 1rem), var(--content-width)); }
+  .app-main { width: min(calc(100% - 2rem), var(--content-width)); }
   .workflow-steps { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1023px) {
   .app-shell { grid-template-columns: minmax(0, 1fr); }
+  .app-workspace { grid-template-rows: var(--topbar-height) minmax(0, 1fr); }
+  .app-main { width: min(calc(100% - 3rem), var(--content-width)); padding-block: var(--space-5) var(--space-6); }
+}
+
+@media (max-width: 767px) {
+  .app-main { width: min(calc(100% - 2rem), var(--content-width)); padding-block: var(--space-4) var(--space-6); }
+  .page-header { margin-bottom: var(--space-5); }
+  .page-header--with-actions { grid-template-columns: minmax(0, 1fr); }
+  .page-header__actions { display: grid; justify-content: stretch; }
+  .page-header__actions > * { width: 100%; }
 }

@@ -1,0 +1,89 @@
+MILESTONE 1 — SHARED UI FOUNDATION, APPLICATION SHELL, AND SYSTEM PAGES
+
+
+You are implementing an approved UI milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the existing framework, routes, templates/components, styling system, tests, persistence layer, calculation engine, and current behavior.
+2. Use the supplied implementation packages as binding requirements:
+   - approved reference mockup(s): visual source of truth;
+   - engineering specification(s): implementation blueprint;
+   - acceptance checklist(s): objective definition of done;
+   - design rationale(s): intent and priority guidance.
+3. The mockups are specifications, not inspiration. Match their composition, hierarchy, charcoal color direction, spacing, typography, controls, responsive behavior, and states as closely as the existing technology permits.
+4. Preserve all existing functionality, calculation rules, persistence, validation, migrations, navigation safeguards, and workflows unless a supplied document explicitly requires a change.
+5. Reuse and extend shared components and tokens. Do not create one-off styling where a reusable primitive is appropriate.
+6. Do not replace working domain logic with mock data. Wire the approved interface to the real application state and existing backend behavior.
+7. Do not silently omit a required state, sub-screen, interaction, or responsive adaptation.
+8. Keep the application offline-first. Do not add cloud services, accounts, telemetry, external fonts, CDNs, or network-dependent UI behavior.
+9. Do not add dependencies unless absolutely necessary. Prefer the existing stack and built-in capabilities. If a dependency is genuinely required, explain why before adding it.
+10. Maintain accessibility: semantic structure, keyboard operation, visible focus, labels, descriptions, errors, status announcements, contrast, and sensible reading order.
+11. Keep tests deterministic. Add or update focused tests for the milestone’s changed behavior and run the relevant existing suites.
+12. Do not create a git commit.
+
+IMPLEMENTATION METHOD
+
+A. Read every supplied artifact for this milestone before coding.
+B. Map each acceptance item to the current code and identify the smallest safe implementation plan.
+C. Build shared primitives before screen-specific composition where applicable.
+D. Implement the complete milestone, including loading, empty, validation, error, saved, and responsive states required by the package.
+E. Review the result against every acceptance item. Correct deviations rather than merely listing them.
+F. Run focused tests, then the broadest practical regression suite.
+G. Report:
+   - files changed;
+   - reusable components/tokens added or changed;
+   - workflows and states completed;
+   - tests run and results;
+   - any acceptance item that could not be satisfied, with the exact blocker.
+
+
+SUPPLIED ARTIFACTS
+
+Use the packages for:
+- 01 Application Shell
+- 10 System Pages
+
+PRIMARY OBJECTIVE
+
+Build the approved shared visual foundation and persistent application frame first, then implement the reusable system-state patterns that all later screens will depend on.
+
+REQUIRED SCOPE
+
+1. Establish the approved design system in code:
+   - neutral charcoal and warm graphite surfaces with no navy/blue cast;
+   - copper primary accent;
+   - semantic green, amber, and red used only for status;
+   - typography scale, spacing scale, radii, borders, elevation, icon sizing, control sizing, and responsive breakpoints;
+   - reusable buttons, inputs, selects, radio/choice cards, cards, table treatments, badges, alerts, dividers, tooltips/help affordances, status rows, empty states, and page containers.
+
+2. Implement the approved Application Shell:
+   - persistent desktop sidebar with branding, navigation, active states, and bottom user/workspace block;
+   - top utility bar with breadcrumbs and existing search/help/notification behavior where supported;
+   - reusable page header with title, description, primary action, secondary actions, and overflow;
+   - main-content width and spacing rules;
+   - tablet/mobile app bar and navigation drawer behavior;
+   - keyboard navigation, focus management, and accessible active-location semantics;
+   - preserve every existing route and navigation safeguard.
+
+3. Implement reusable System Pages and states:
+   - empty state;
+   - loading state and skeleton treatment;
+   - recoverable error state;
+   - not-found/removed state;
+   - offline/local-data-available state;
+   - shared action hierarchy, messaging pattern, icons, and responsive presentation.
+   Integrate the patterns into the real application where equivalent states already exist instead of creating a disconnected demo only. A development/demo route may be retained only if the package requires it and it does not replace real integration.
+
+4. Preserve existing application-wide error handling and logging. Customer-facing states must not expose stack traces, SQL errors, or technical implementation details.
+
+5. Add or update tests for:
+   - active navigation and route rendering;
+   - responsive/navigation state where testable;
+   - keyboard-accessible drawer/menu behavior;
+   - shared empty/error/not-found/offline rendering;
+   - regression protection for existing routes.
+
+COMPLETION GATE
+
+Do not declare the milestone complete until every item in both supplied acceptance checklists passes or an exact, unavoidable blocker is documented. Later screens must be able to use the new shell and primitives without duplicating layout or styling logic.

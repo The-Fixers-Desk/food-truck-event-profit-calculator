@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_system_state.html" import system_state %}
+{% block title %}System Pages | Food Truck Event Profit Calculator{% endblock %}
+{% block context_label %}System pages{% endblock %}
+{% block content %}
+<section class="page system-state-gallery-page">
+  <header class="page-header page-header--with-actions">
+    <div class="page-header__copy">
+      <p class="page-eyebrow">Reusable states</p>
+      <h1>System page patterns</h1>
+      <p class="page-description">These shared states help the app communicate clearly and guide users when content is missing, unavailable, or taking time to load.</p>
+    </div>
+    <div class="page-header__actions"><a class="button" href="{{ url_for('main.calculator') }}">New analysis</a></div>
+  </header>
+  <div class="system-state-gallery">
+    {{ system_state("empty", "archive", "No saved events yet", "You haven't created any events or analyses yet.", "Start first analysis", url_for("main.calculator"), "Learn how it works", url_for("main.calculator") ~ "#about-estimates") }}
+    {{ system_state("loading", "", "Calculating your estimate…", "We're crunching the numbers for your event.", live=true) }}
+    {{ system_state("error", "alert", "We couldn't load this event", "Something went wrong while loading your event details.", "Retry", retry=true, secondary_label="Back to saved events", secondary_href=url_for("main.saved_events")) }}
+    {{ system_state("not-found", "file-x", "This event no longer exists", "It may have been deleted or moved.", "Go to saved events", url_for("main.saved_events"), "Learn more", url_for("main.data_safety")) }}
+    {{ system_state("offline", "cloud-off", "You're offline", "No internet connection. You can view your saved events locally.", "Try again", retry=true, status_label="Local data available") }}
+  </div>
+</section>
+{% endblock %}

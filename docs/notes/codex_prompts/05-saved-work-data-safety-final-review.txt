@@ -1,0 +1,120 @@
+MILESTONE 5 — SAVED WORK, DATA SAFETY, AND FINAL UI CLOSURE
+
+
+You are implementing an approved UI milestone in the existing Food Truck Event Profit Calculator repository.
+
+OPERATING RULES
+
+1. Inspect the repository before changing anything. Identify the existing framework, routes, templates/components, styling system, tests, persistence layer, calculation engine, and current behavior.
+2. Use the supplied implementation packages as binding requirements:
+   - approved reference mockup(s): visual source of truth;
+   - engineering specification(s): implementation blueprint;
+   - acceptance checklist(s): objective definition of done;
+   - design rationale(s): intent and priority guidance.
+3. The mockups are specifications, not inspiration. Match their composition, hierarchy, charcoal color direction, spacing, typography, controls, responsive behavior, and states as closely as the existing technology permits.
+4. Preserve all existing functionality, calculation rules, persistence, validation, migrations, navigation safeguards, and workflows unless a supplied document explicitly requires a change.
+5. Reuse and extend shared components and tokens. Do not create one-off styling where a reusable primitive is appropriate.
+6. Do not replace working domain logic with mock data. Wire the approved interface to the real application state and existing backend behavior.
+7. Do not silently omit a required state, sub-screen, interaction, or responsive adaptation.
+8. Keep the application offline-first. Do not add cloud services, accounts, telemetry, external fonts, CDNs, or network-dependent UI behavior.
+9. Do not add dependencies unless absolutely necessary. Prefer the existing stack and built-in capabilities. If a dependency is genuinely required, explain why before adding it.
+10. Maintain accessibility: semantic structure, keyboard operation, visible focus, labels, descriptions, errors, status announcements, contrast, and sensible reading order.
+11. Keep tests deterministic. Add or update focused tests for the milestone’s changed behavior and run the relevant existing suites.
+12. Do not create a git commit.
+
+IMPLEMENTATION METHOD
+
+A. Read every supplied artifact for this milestone before coding.
+B. Map each acceptance item to the current code and identify the smallest safe implementation plan.
+C. Build shared primitives before screen-specific composition where applicable.
+D. Implement the complete milestone, including loading, empty, validation, error, saved, and responsive states required by the package.
+E. Review the result against every acceptance item. Correct deviations rather than merely listing them.
+F. Run focused tests, then the broadest practical regression suite.
+G. Report:
+   - files changed;
+   - reusable components/tokens added or changed;
+   - workflows and states completed;
+   - tests run and results;
+   - any acceptance item that could not be satisfied, with the exact blocker.
+
+
+SUPPLIED ARTIFACTS
+
+Use the packages for:
+- 07 Saved Events
+- 09 Data Safety
+
+Also use all 10 acceptance checklists for the final cross-screen audit.
+
+PRIMARY OBJECTIVE
+
+Complete saved-work management and local-data control, then verify and correct the entire approved 10-screen interface as one cohesive product.
+
+REQUIRED SCOPE
+
+1. Saved Events:
+   - real event/scenario library;
+   - event name, date, location, scenario count, last updated state, recommendation, and actions;
+   - search where supported;
+   - recommendation filters;
+   - sorting;
+   - pagination or the approved equivalent for the current dataset;
+   - open event/scenario;
+   - compare entry points;
+   - rename and deletion workflows;
+   - empty, loading, error, and no-results states;
+   - persistence after restart;
+   - responsive conversion from desktop table to readable mobile records without horizontal-scroll dependence.
+
+2. Data Safety:
+   - plain-language local/offline privacy model;
+   - real local data summary;
+   - automatic-save status;
+   - export all data;
+   - import backup with validation and safe failure behavior;
+   - sample-format download if required by the specification;
+   - last-export or backup status;
+   - destructive actions for deleting events, resetting defaults, and clearing app data according to existing capabilities;
+   - confirmation safeguards and clear scope;
+   - recommendation to export before destruction;
+   - no technical errors exposed to the user;
+   - preserve schema versioning, migration safety, and separation of customer data from installed files.
+
+3. Final all-screen audit:
+   Review Application Shell, Dashboard, Welcome / Onboarding, Business Defaults Wizard, Event Inputs Wizard, Event Analysis Workspace, Saved Events, Scenario Comparison, Data Safety, and System Pages against:
+   - approved mockups;
+   - engineering specifications;
+   - design rationales;
+   - acceptance checklists.
+   Correct deviations in charcoal color direction, hierarchy, spacing, typography, components, wording, actions, responsive behavior, states, accessibility, and workflow continuity.
+
+4. Reuse and consistency:
+   - remove duplicated screen-specific primitives introduced during implementation;
+   - ensure all screens use the shared tokens and shell;
+   - ensure the same semantic state looks and behaves consistently everywhere;
+   - preserve one dominant task and one clear primary action per screen;
+   - verify no blue/navy cast remains in the approved charcoal interface.
+
+5. Final verification:
+   - keyboard-only navigation across all major workflows;
+   - visible focus and focus restoration;
+   - accessible names, descriptions, errors, tables, dialogs, and status announcements;
+   - responsive checks at desktop, tablet, and mobile breakpoints;
+   - long names, large values, repeatable rows, and empty datasets;
+   - restart persistence;
+   - offline behavior;
+   - backup/export/import and recovery;
+   - dirty-navigation protection;
+   - full functional regression suite.
+
+6. Add or update tests for:
+   - Saved Events filtering, sorting, opening, comparing, rename, delete, and persistence;
+   - export/import round trip;
+   - invalid or incompatible backup protection;
+   - destructive-action confirmations;
+   - post-clear/reset states;
+   - all critical V1 end-to-end workflows practical in the existing test stack.
+
+COMPLETION GATE
+
+Do not declare completion until all 10 acceptance checklists have been reviewed against the implemented application and every testable requirement passes. Report any genuinely untestable visual requirement separately with the exact manual verification performed.

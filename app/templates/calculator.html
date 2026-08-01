@@ -99,7 +99,7 @@
     <p class="event-only-notice">
       Changes on this screen apply only to this event.
     </p>
-    <details class="estimate-information">
+    <details class="estimate-information" id="about-estimates">
       <summary>About estimates</summary>
       <p>
         Attendance, customer demand, weather, and sales are estimates.
@@ -993,6 +993,21 @@
     </dialog>
   {% endif %}
 </section>
+{% if not workspace %}
+  <div class="calculation-loading-state" id="calculation-loading-state"
+    role="status" aria-live="polite" aria-busy="true" hidden>
+    <section class="system-state system-state--loading">
+      <span class="system-state__icon-frame"><span class="loading-indicator" aria-hidden="true"></span></span>
+      <div class="system-state__copy">
+        <h2>Calculating your estimate&hellip;</h2>
+        <p>We&rsquo;re crunching the numbers for your event.</p>
+      </div>
+      <div class="system-state__skeletons" aria-hidden="true">
+        {% for width in (92, 78, 86) %}<span class="system-state__skeleton-row"><span class="skeleton" style="width: {{ width }}%"></span></span>{% endfor %}
+      </div>
+    </section>
+  </div>
+{% endif %}
 <template id="event-employee-labor-template">
   <div class="labor-entry">
     <input name="baseline_employee_labor_rate" type="hidden" value="" />

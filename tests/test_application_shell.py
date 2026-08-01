@@ -93,12 +93,12 @@ def test_global_navigation_keeps_dirty_workspace_hooks(client):
 def test_responsive_shell_is_one_navigation_system(client):
     css = client.get("/static/css/navigation.css").data.decode()
 
-    assert "@media (max-width: 800px)" in css
+    assert "@media (max-width: 1023px)" in css
     assert ".app-sidebar" in css
-    assert "overflow-x: auto" in css
-    compact_rules = css.split("@media (max-width: 800px)", 1)[1]
-    assert ".app-sidebar {\n    display: none" not in compact_rules
-    assert ".app-navigation {\n    display: none" not in compact_rules
+    assert "transform: translateX(-100%)" in css
+    compact_rules = css.split("@media (max-width: 1023px)", 1)[1]
+    assert ".app-sidebar.is-open" in compact_rules
+    assert ".mobile-menu-button" in compact_rules
 
 
 def test_recovery_shell_exposes_only_data_safety(client, app):

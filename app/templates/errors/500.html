@@ -1,21 +1,15 @@
-{% extends "base.html" %} {% block title %} Application Error | Food Truck Event
-Profit Calculator {% endblock %} {% block content %}
-<section class="page">
-  <header class="page-header">
-    <p class="page-eyebrow">Application Error</p>
-
-    <h1>Something went wrong.</h1>
-
-    <p class="page-description">
-      The application could not complete that action. Please return to the
-      Event Analysis and try again.
-    </p>
-  </header>
-
-  <div class="error-panel">
-    <a class="button-link" href="{{ url_for('main.calculator') }}">
-      Start a new analysis
-    </a>
-  </div>
-</section>
+{% extends "base.html" %}
+{% from "_system_state.html" import system_state %}
+{% block title %}Application Error | Food Truck Event Profit Calculator{% endblock %}
+{% block content %}
+<div class="system-state-page">
+  {{ system_state(
+    "error", "alert", "We couldn't load this event",
+    "Something went wrong while loading your event details. Your saved information has not been changed.",
+    "Retry", retry=true,
+    secondary_label="Back to saved events",
+    secondary_href=url_for("main.saved_events"),
+    heading_level="h1"
+  ) }}
+</div>
 {% endblock %}

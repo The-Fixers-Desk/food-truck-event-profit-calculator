@@ -43,7 +43,7 @@ def test_saved_events_empty_state_and_navigation(client):
     page = client.get("/saved-events").data.decode()
 
     assert "No saved events" in page
-    assert "Analyze new event" in page
+    assert "Start first analysis" in page
     assert "Saved events" in client.get("/events/new").data.decode()
 
 

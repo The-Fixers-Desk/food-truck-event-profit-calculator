@@ -1,30 +1,33 @@
 :root {
   /* Semantic color system */
-  --color-background: #101416;
-  --color-surface: #171c1f;
-  --color-surface-elevated: #1d2327;
-  --color-surface-subtle: #14191c;
-  --color-sidebar: #0c1113;
-  --color-text: #f1f0ed;
-  --color-text-muted: #aeb5b7;
+  --color-background: #111315;
+  --color-surface: #181b1d;
+  --color-surface-elevated: #1e2123;
+  --color-surface-subtle: #151719;
+  --color-sidebar: #121416;
+  --color-text: #f4f2ee;
+  --color-text-secondary: #b8b8b6;
+  --color-text-muted: #85898b;
   --color-border: #343b3e;
+  --color-border-strong: #4a4e50;
   --color-divider: #282f32;
-  --color-accent: #c66f36;
-  --color-accent-dark: #df8750;
+  --color-accent: #c47a3a;
+  --color-accent-dark: #d48646;
+  --color-accent-pressed: #a95f2c;
   --color-primary: var(--color-accent);
   --color-primary-hover: var(--color-accent-dark);
   --color-secondary: #879296;
-  --color-success: #67c391;
+  --color-success: #4fae5a;
   --color-success-surface: #152820;
-  --color-warning: #e2aa52;
+  --color-warning: #d9902f;
   --color-warning-surface: #2c2416;
-  --color-danger: #ec7971;
+  --color-danger: #c95545;
   --color-danger-surface: #301a1b;
   --color-info: #79b5d8;
   --color-info-surface: #162731;
   --color-disabled: #7e878a;
   --color-disabled-surface: #242a2d;
-  --color-focus: #f1a064;
+  --color-focus: #c47a3a;
   --color-selected: #2a211c;
 
   --font-body:
@@ -33,12 +36,12 @@
   --font-heading: var(--font-body);
 
   /* Type scale */
-  --text-xs: 0.8125rem;
-  --text-sm: 0.9375rem;
-  --text-md: 1.0625rem;
-  --text-lg: 1.1875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
   --text-xl: 1.5rem;
-  --text-2xl: 1.875rem;
+  --text-2xl: 2rem;
   --text-3xl: 2.5rem;
   --leading-tight: 1.2;
   --leading-normal: 1.5;
@@ -47,7 +50,9 @@
   --weight-medium: 600;
   --weight-bold: 700;
 
-  --content-width: 1680px;
+  --content-width: 1280px;
+  --sidebar-width: 280px;
+  --topbar-height: 64px;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -59,8 +64,8 @@
   --space-8: 4rem;
 
   /* Shape, borders and elevation */
-  --radius-xs: 0.25rem;
-  --radius-small: 0.375rem;
+  --radius-xs: 0.375rem;
+  --radius-small: 0.5rem;
   --radius-medium: 0.75rem;
   --radius-large: 1rem;
   --radius-pill: 999px;
@@ -74,9 +79,10 @@
   --shadow-panel: var(--shadow-2);
 
   /* Layout and interaction */
-  --control-height-small: 2.375rem;
-  --control-height: 3rem;
-  --control-height-large: 3.5rem;
-  --breakpoint-narrow: 800px;
-  --transition-fast: 120ms ease;
+  --control-height-small: 2rem;
+  --control-height: 2.5rem;
+  --control-height-large: 2.75rem;
+  --breakpoint-narrow: 768px;
+  --transition-fast: 180ms ease-out;
+  --shadow-focus: 0 0 0 3px rgb(196 122 58 / 28%);
 }

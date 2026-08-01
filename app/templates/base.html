@@ -18,10 +18,13 @@
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="app-shell">
-      <aside class="app-sidebar">
+      <aside class="app-sidebar" id="app-sidebar" aria-label="Application menu">
         <a class="product-identity" href="{{ url_for('main.home') }}">
-          <span class="product-identity__name">Food Truck Event Profit Calculator</span>
-          <span class="product-identity__desk">The Fixer&rsquo;s Desk</span>
+          <svg class="product-identity__mark nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#truck"></use></svg>
+          <span class="product-identity__copy">
+            <span class="product-identity__name">Food Truck Event Profit Calculator</span>
+            <span class="product-identity__desk">The Fixer&rsquo;s Desk</span>
+          </span>
         </a>
         <nav class="app-navigation" aria-label="Primary navigation">
           {% if recovery_mode %}
@@ -54,11 +57,67 @@
               href="{{ url_for('main.data_safety') }}" {% if active_page == 'data_safety' %}aria-current="page"{% endif %}><svg class="nav-icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#data-safety"></use></svg>Data safety</a>
           {% endif %}
         </nav>
+        <div class="workspace-menu">
+          <button class="workspace-menu__trigger" id="workspace-menu-trigger"
+            type="button" aria-expanded="false" aria-controls="workspace-menu-panel">
+            <span class="workspace-menu__avatar" aria-hidden="true">L</span>
+            <span class="workspace-menu__copy"><span>Local workspace</span><small>The Fixer&rsquo;s Desk</small></span>
+            <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevrons"></use></svg>
+          </button>
+          <div class="workspace-menu__panel" id="workspace-menu-panel" hidden>
+            <p>Your work is stored on this device.</p>
+            <a class="button-tertiary button--small" href="{{ url_for('main.data_safety') }}">Manage local data</a>
+          </div>
+        </div>
       </aside>
+      <button class="drawer-backdrop" id="drawer-backdrop" type="button"
+        aria-label="Close navigation" hidden></button>
       <div class="app-workspace">
+        <header class="app-topbar">
+          <button class="mobile-menu-button" id="mobile-menu-trigger" type="button"
+            aria-label="Open navigation" aria-expanded="false" aria-controls="app-sidebar">
+            <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#menu"></use></svg>
+          </button>
+          <svg class="mobile-brand-mark nav-icon" aria-label="Food Truck Event Profit Calculator"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#truck"></use></svg>
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="{{ url_for('main.dashboard') if business_defaults_setup_complete else url_for('main.welcome') }}">{{ 'Dashboard' if business_defaults_setup_complete else 'Welcome' }}</a>
+            <svg class="icon icon--small" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#chevron"></use></svg>
+            <span class="breadcrumbs__current">{% block context_label %}{% if active_page == 'calculator' %}Event Analysis{% elif active_page == 'saved_events' %}Saved events{% elif active_page == 'defaults' %}Business defaults{% elif active_page == 'data_safety' %}Data safety{% elif active_page == 'dashboard' %}Dashboard{% elif active_page == 'welcome' %}Welcome{% else %}System{% endif %}{% endblock %}</span>
+          </nav>
+          <div class="topbar-utilities">
+            <a class="topbar-search" href="{{ url_for('main.saved_events') }}#saved-work-search" aria-label="Search saved events">
+              <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#search"></use></svg><span>Search</span>
+            </a>
+            <button class="utility-button" type="button" aria-label="Notifications"
+              aria-expanded="false" aria-controls="notifications-panel" data-utility-trigger="notifications-panel">
+              <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#bell"></use></svg>
+            </button>
+            <button class="utility-button" type="button" aria-label="Help"
+              aria-expanded="false" aria-controls="help-panel" data-utility-trigger="help-panel">
+              <svg class="icon" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#help"></use></svg>
+            </button>
+            <section class="utility-panel" id="notifications-panel" hidden>
+              <h2>Notifications</h2><p>You have no new notifications.</p>
+            </section>
+            <section class="utility-panel" id="help-panel" hidden>
+              <h2>Help</h2><p>Start with Business Defaults, then analyze an event. Your work stays on this device.</p>
+              <a class="button-secondary button--small" href="{{ url_for('main.defaults') }}">Review defaults</a>
+            </section>
+          </div>
+        </header>
         <main class="app-main app-main--{{ active_page|default('standard') }}"
-          id="main-content" tabindex="-1">{% block content %}{% endblock %}</main>
+          id="main-content" tabindex="-1">
+          <section class="system-state system-state--offline system-state--compact"
+            id="offline-system-state" aria-live="polite" hidden>
+            <svg class="system-state__icon icon icon--large" aria-hidden="true"><use href="{{ url_for('static', filename='icons/navigation.svg') }}#cloud-off"></use></svg>
+            <div class="system-state__copy"><h2>You&rsquo;re offline</h2><p>No internet connection. Your local saved data remains available.</p></div>
+            <span class="badge badge--success">Local data available</span>
+            <button class="button-secondary button--small" id="retry-connection" type="button">Try again</button>
+          </section>
+          {% block content %}{% endblock %}
+        </main>
       </div>
     </div>
+    <script src="{{ url_for('static', filename='js/shell.js') }}"></script>
   </body>
 </html>

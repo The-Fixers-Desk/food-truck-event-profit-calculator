@@ -27,6 +27,8 @@ a {
   color: inherit;
 }
 
+body.has-open-drawer { overflow: hidden; }
+
 ::selection {
   background: var(--color-primary);
   color: #fffaf6;
@@ -87,8 +89,9 @@ input, select, textarea, button, summary, [tabindex] {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-focus);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
+  box-shadow: var(--shadow-focus);
 }
 
 @media (prefers-reduced-motion: reduce) {

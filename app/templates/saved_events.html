@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_system_state.html" import system_state %}
 {% block title %}Saved Events | Food Truck Event Profit Calculator{% endblock %}
 {% block content %}
 <section class="page saved-events-page workspace-page--list">
@@ -47,11 +48,14 @@
   {% endwith %}
 
   {% if not events %}
-    <section class="empty-state saved-events-empty">
-      <h2 class="empty-state__title">No saved events</h2>
-      <p>Analyze an event to save your first scenario.</p>
-      <a class="button" href="{{ url_for('main.calculator') }}">Analyze new event</a>
-    </section>
+    <div class="system-state-page saved-events-empty">
+      {{ system_state(
+        "empty", "archive", "No saved events yet",
+        "You haven't created any events or analyses yet.",
+        "Start first analysis", url_for("main.calculator"),
+        "Learn how it works", url_for("main.calculator") ~ "#about-estimates"
+      ) }}
+    </div>
   {% endif %}
 
   <section class="empty-state no-results-state" id="saved-work-no-results" hidden>

@@ -188,7 +188,7 @@ def test_dashboard_repository_failure_uses_error_handler(
     response = client.get("/dashboard")
 
     assert response.status_code == 500
-    assert b"Something went wrong" in response.data
+    assert "We couldn&#39;t load this event" in response.data.decode()
 
 
 def business_defaults_setup_is_complete_in(app) -> bool:

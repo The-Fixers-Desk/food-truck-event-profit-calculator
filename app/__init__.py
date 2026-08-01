@@ -65,6 +65,15 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     if app.config.get("TESTING"):
 
+        @app.route("/test-system-states")
+        def test_system_states():
+            from flask import render_template
+
+            return render_template(
+                "system_states.html",
+                active_page="dashboard",
+            )
+
         @app.route("/test-error")
         def test_error():
             raise RuntimeError("Intentional test error.")
