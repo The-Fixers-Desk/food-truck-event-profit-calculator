@@ -22,3 +22,6 @@ Make a milestone list entry, and a Codex prompt for INSERT
 
 I agree with everything you just said. Make a milestone list entry, and a Codex prompt for all the corrections you just listed.
 
+---------------------------------------------------------------------------------
+
+I agree with everything you just said. Our milestones list needs updated so that we implement the approach. The current version is attached. Give me the content to add and tell me where to add it.

@@ -10,6 +10,10 @@ data/*.db
 data/logs/
 data/shell-temp/
 data/application.lock
+data/automatic-recovery/
+data/staging/
+data/last-export.txt
+*.ftbackup
 
 # macOS
 .DS_Store

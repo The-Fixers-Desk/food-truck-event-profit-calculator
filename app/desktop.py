@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import logging
+import os
 from pathlib import Path
+import shutil
 import threading
 import time
 from typing import Callable
@@ -29,9 +31,15 @@ STARTUP_ERROR_HTML = """<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width"><title>Could not start</title>
 <style>body{margin:0;padding:2rem;background:#f6f3ed;color:#18232d;font:16px system-ui,sans-serif}main{max-width:38rem;margin:auto}</style></head>
 <body><main><h1>The application could not start</h1><p>Your saved data was not intentionally deleted. Close and reopen the application. If the problem continues, use the troubleshooting information provided with the application.</p></main></body></html>"""
-ALREADY_OPEN_HTML = """<!doctype html><html><head><meta charset="utf-8">
-<title>Already open</title></head><body><main><h1>The application is already open</h1>
-<p>Return to the existing application window to continue.</p></main></body></html>"""
+ALREADY_OPEN_MESSAGE = (
+    "The application is already open. Return to the existing application "
+    "window to continue."
+)
+STARTUP_ERROR_MESSAGE = (
+    "The application could not start. Your saved data was not intentionally "
+    "deleted. Close and reopen the application. If the problem continues, "
+    "use the troubleshooting information provided with the application."
+)
 
 
 class InstanceAlreadyRunning(RuntimeError):
@@ -174,6 +182,59 @@ def allowed_primary_navigation(url: str, application_url: str) -> bool:
     )
 
 
+def enforce_primary_navigation(
+    window,
+    application_url: str,
+    *,
+    external_opener: Callable[[str], object] | None = None,
+) -> bool:
+    """Keep the primary window local and hand deliberate web links to the OS."""
+    current_url = window.get_current_url()
+    if not current_url or allowed_primary_navigation(
+        current_url, application_url
+    ):
+        return True
+    if urlparse(current_url).scheme in {"http", "https"}:
+        opener = external_opener or __import__("webbrowser").open
+        opener(current_url)
+    window.load_url(application_url)
+    return False
+
+
+def show_native_message(title: str, message: str) -> None:
+    """Show a brief OS dialog without creating another application webview."""
+    if os.name == "nt":
+        import ctypes
+
+        ctypes.windll.user32.MessageBoxW(None, message, title, 0x40)
+        return
+    import tkinter
+    from tkinter import messagebox
+
+    root = tkinter.Tk()
+    root.withdraw()
+    try:
+        messagebox.showinfo(title, message, parent=root)
+    finally:
+        root.destroy()
+
+
+def clean_shell_temporary(
+    paths: ApplicationDataPaths, logger: logging.Logger
+) -> None:
+    """Remove only shell-owned temporary children beneath the data root."""
+    try:
+        temporary = paths.shell_temporary.resolve()
+        temporary.relative_to(paths.root.resolve())
+        for child in temporary.iterdir():
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    except (OSError, ValueError):
+        logger.warning("Desktop shell temporary-file cleanup failed.", exc_info=True)
+
+
 @dataclass
 class DesktopLifecycle:
     """Own partial-startup cleanup, server shutdown and lock release."""
@@ -181,6 +242,7 @@ class DesktopLifecycle:
     lock: SingleInstanceLock
     logger: logging.Logger
     server: LocalServer | None = None
+    paths: ApplicationDataPaths | None = None
     shutting_down: bool = False
 
     def shutdown(self) -> None:
@@ -193,6 +255,8 @@ class DesktopLifecycle:
                 if self.server.thread_alive:
                     self.logger.error("Desktop server thread exceeded shutdown timeout.")
         finally:
+            if self.paths is not None:
+                clean_shell_temporary(self.paths, self.logger)
             self.lock.release()
 
 
@@ -210,27 +274,34 @@ def run_desktop(
     webview_module=None,
     app_factory=create_app,
     server_factory=LocalServer,
+    message_handler: Callable[[str, str], None] = show_native_message,
+    external_opener: Callable[[str], object] | None = None,
 ) -> int:
     """Explicit production desktop entrypoint; importing has no side effects."""
-    paths = desktop_data_paths(data_root)
-    lock = SingleInstanceLock(paths.safe_child(paths.root, "application.lock"))
     if webview_module is None:
         import webview as webview_module
     try:
+        paths = desktop_data_paths(data_root)
+        lock = SingleInstanceLock(paths.safe_child(paths.root, "application.lock"))
+    except Exception:
+        logging.getLogger("desktop").exception(
+            "Desktop application-data initialization failed."
+        )
+        message_handler(PRODUCT_NAME, STARTUP_ERROR_MESSAGE)
+        return 1
+    try:
         lock.acquire()
     except InstanceAlreadyRunning:
-        webview_module.create_window(PRODUCT_NAME, html=ALREADY_OPEN_HTML, width=440, height=240)
-        webview_module.start()
+        message_handler(PRODUCT_NAME, ALREADY_OPEN_MESSAGE)
         return 0
     except Exception:
         logging.getLogger("desktop").exception("Desktop instance lock failed.")
-        webview_module.create_window(
-            PRODUCT_NAME, html=STARTUP_ERROR_HTML, width=520, height=320
-        )
-        webview_module.start()
+        message_handler(PRODUCT_NAME, STARTUP_ERROR_MESSAGE)
         return 1
 
-    lifecycle = DesktopLifecycle(lock, logging.getLogger("desktop"))
+    lifecycle = DesktopLifecycle(
+        lock, logging.getLogger("desktop"), paths=paths
+    )
     try:
         window = webview_module.create_window(
             PRODUCT_NAME,
@@ -244,9 +315,13 @@ def run_desktop(
     except Exception:
         lifecycle.logger.exception("Desktop window creation failed.")
         lifecycle.shutdown()
+        message_handler(PRODUCT_NAME, STARTUP_ERROR_MESSAGE)
         return 1
 
+    startup_failed = False
+
     def startup() -> None:
+        nonlocal startup_failed
         try:
             application = app_factory(
                 {"DATA_ROOT": paths.root, "DATABASE": paths.database}
@@ -255,8 +330,17 @@ def run_desktop(
             lifecycle.server = server
             server.start()
             server.wait_until_ready()
+            if hasattr(window.events, "before_load"):
+                window.events.before_load += lambda active_window=window: (
+                    enforce_primary_navigation(
+                        active_window,
+                        server.url,
+                        external_opener=external_opener,
+                    )
+                )
             window.load_url(server.url)
         except Exception:
+            startup_failed = True
             lifecycle.logger.exception("Desktop application startup failed.")
             if hasattr(window, "load_html"):
                 window.load_html(STARTUP_ERROR_HTML)
@@ -266,7 +350,7 @@ def run_desktop(
         webview_module.start(startup)
     finally:
         lifecycle.shutdown()
-    return 0
+    return 1 if startup_failed else 0
 
 
 def main() -> int:

@@ -2,12 +2,6 @@ Next GitHub Commit Message
 
 ---------------------------------------------------------------------------------
 
-Build in-app Help Center and support tools
-
-Replaced the limited Help action with a complete offline Help Center covering setup, calculator concepts, backups, restores, data handling, and common in-app troubleshooting. Added privacy-safe support diagnostics, external support links, accessibility improvements, and email support through contact@fixersdesk.com.
-
----------------------------------------------------------------------------------
-
 Build cross-platform desktop application shell
 
 Added the pywebview desktop entrypoint with localhost-only server startup, readiness checks, single-instance protection, native loading and startup-error states, navigation restrictions, and orderly shutdown. Preserved browser-based development, offline operation, centralized application-data storage, database recovery safeguards, and headless automated testing.

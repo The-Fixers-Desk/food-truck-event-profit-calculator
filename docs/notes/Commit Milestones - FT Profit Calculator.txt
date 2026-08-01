@@ -275,7 +275,7 @@ APPROVED UI IMPLEMENTATION
   and clear-data behavior. Preserve the approved charcoal UI, offline operation,
   existing workflows, and all no-account and no-cloud promises.
 
-□ Build the in-app Help Center and support diagnostics
+☑ Build the in-app Help Center and support diagnostics
   Replace the currently limited Help action with an accessible in-app Help Center
   covering getting started, Business Defaults versus event-specific inputs, events
   and scenarios, revenue and food-cost methods, profit targets, recommendation
@@ -345,6 +345,111 @@ DOCUMENTATION AND RELEASE
   Finalize the PDR, ADR, calculation methodology, installation guide,
   usage guide, backup instructions, troubleshooting guide, README,
   release notes, and version history.
+
+
+CUSTOMER ACCESS AND PRODUCT UPDATES
+
+□ Define the centralized customer-access and product-entitlement architecture
+  Design the Fixer’s Desk system that will provide updates for products originally
+  purchased through the Fixer’s Desk website, Etsy, Gumroad, and other approved
+  marketplaces. Define customers, products, marketplace purchases, product-specific
+  entitlements, purchase claims, releases, download access, revoked or refunded
+  purchases, email changes, and administrative corrections. Keep entitlement and
+  download access on the Fixer’s Desk website rather than inside the offline desktop
+  application. Document privacy, security, data-retention, account-recovery, and
+  marketplace-integration decisions before implementation.
+
+□ Build secure customer sign-in and the Fixer’s Desk product library
+  Create an email-based customer sign-in flow using short-lived, single-use magic
+  links so customers can access their purchases without managing passwords. Build a
+  private customer library that displays only the products assigned to that customer,
+  including product name, platform downloads, current version, release notes, support
+  information, and purchase source. Add secure sessions, logout, expired-link handling,
+  rate limiting, email-change support, accessible responsive screens, and customer-
+  friendly empty and error states. Do not require customers to sign in to use an
+  already-installed desktop application.
+
+□ Build marketplace purchase claiming and entitlement verification
+  Allow customers who purchased through approved third-party marketplaces to claim
+  access to the matching product in their Fixer’s Desk library. Support marketplace-
+  appropriate evidence such as license keys, order or receipt numbers, purchaser
+  email, imported order records, or verified marketplace integrations. Prevent one
+  purchase from being claimed by multiple unrelated customers, reject refunded or
+  revoked purchases, and route uncertain claims to manual review rather than granting
+  access automatically. Record the marketplace, order identifier, product, purchase
+  date, claim status, and verification method without storing unnecessary payment
+  information.
+
+□ Add marketplace order imports and administrative entitlement tools
+  Create the internal tools needed to import or synchronize purchase records from
+  Etsy, Gumroad, the Fixer’s Desk store, and future approved sales channels. Provide
+  safe duplicate detection, product mapping, refund or revocation handling, import
+  validation, audit history, and clear failure reports. Add administrative tools to
+  search customers and orders, grant or revoke an entitlement, approve or reject a
+  manual claim, correct a purchasing email, resend a sign-in link, and view the source
+  and history of each entitlement. Protect all administrative actions with appropriate
+  authorization and audit records.
+
+□ Build centralized release management and protected product downloads
+  Create one Fixer’s Desk release record for each product version, including version
+  number, release date, release notes, supported platforms, installer files, file size,
+  integrity information, and release status. Store installers outside publicly
+  accessible website paths and issue short-lived authorized download links only to
+  customers with an active entitlement for that product. Prevent directory browsing,
+  permanent public file URLs, and access to products the customer does not own. Allow
+  replacement computers and clean reinstalls; do not require the previous app version
+  to be present before a legitimate customer can download or install the product.
+
+□ Configure installers for safe in-place product upgrades
+  Ensure each Windows and macOS installer retains the same product identity,
+  installation location, application name, shortcuts, and platform-specific package
+  identifiers across releases. A newer installer must upgrade or replace the existing
+  application files instead of creating a second copy, while preserving the separate
+  customer-data directory, saved events, defaults, local profile, notifications,
+  backups, and settings. Support clean installation on a replacement computer as well
+  as upgrading an existing installation. Test upgrades from every supported prior
+  version, interrupted upgrades, reinstall behavior, rollback or recovery expectations,
+  schema migrations, shortcut behavior, and application-data preservation.
+
+□ Connect the app Help Center to the centralized update workflow
+  Add a Help Center “Check for updates” section that displays the installed version
+  and opens the canonical Fixer’s Desk product page or customer library in the user’s
+  normal browser. Keep the check user-initiated: do not add automatic downloads,
+  background version checks, silent installation, forced sign-in, or self-replacing
+  application files. Explain that customers should export a backup before installing
+  an update and that the downloaded installer will upgrade the existing application
+  while preserving separately stored data. Keep the application fully functional
+  offline whether or not the customer signs in to the website.
+
+□ Build the customer update-notification and release workflow
+  Create a release process that identifies customers with an active entitlement to
+  the affected product and emails only those customers when an important update is
+  published. Include the product, new version, major changes, release notes, backup
+  reminder, secure customer-library destination, installation guidance, and
+  contact@fixersdesk.com. Respect unsubscribe and transactional-email requirements,
+  avoid exposing the customer list, record delivery status, and prevent duplicate
+  notifications. Do not require a marketplace seller to upload the updated installer
+  again after the initial sale; all later downloads must come from the centralized
+  Fixer’s Desk customer library.
+
+□ Update marketplace and direct-sale delivery materials for centralized access
+  Add claim and update-access instructions to the initial files delivered through
+  Etsy, Gumroad, the Fixer’s Desk store, and every other approved sales channel.
+  Explain that the marketplace provides the initial purchase while future versions
+  are maintained through the customer’s Fixer’s Desk library. Include the canonical
+  claim URL, support contact, required purchase information, and guidance for customers
+  who used a different purchasing email. Ensure the instructions do not publish
+  installer URLs, reusable claim credentials, or a general access code shared by all
+  purchasers.
+
+□ Test the complete purchase-claim, download, and upgrade lifecycle
+  Verify direct purchases, Etsy purchases, Gumroad purchases, imported historical
+  purchases, manual-review claims, duplicate claims, rejected claims, refunds,
+  revoked access, changed emails, expired magic links, replacement computers, clean
+  reinstalls, and in-place upgrades. Confirm customers can access only products they
+  own, protected files cannot be downloaded through public URLs, app data survives
+  upgrades, release emails reach the correct entitlement group, and the installed app
+  continues working without internet access or website authentication.
 
 □ -Prepare and publish Food Truck Event Profit Calculator V1
   Complete product and UI reviews, freeze calculation rules, prepare release

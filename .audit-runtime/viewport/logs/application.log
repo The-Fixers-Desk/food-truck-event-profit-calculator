@@ -1,7 +1,0 @@
-[2026-07-31 19:27:28,998] INFO in logging_config: Application logging initialized.
-[2026-07-31 19:27:29,010] INFO in migrations: Detected empty database at schema version 0.
-[2026-07-31 19:27:29,011] INFO in migrations: Beginning database migration 1: version_1_baseline.
-[2026-07-31 19:27:29,022] INFO in migrations: Completed database migration 1: version_1_baseline.
-[2026-07-31 19:27:29,022] INFO in migrations: Detected database schema version 1.
-[2026-07-31 19:27:29,036] INFO in migrations: Beginning database migration 2: remove_obsolete_event_demand_columns.
-[2026-07-31 19:27:29,040] INFO in migrations: Completed database migration 2: remove_obsolete_event_demand_columns.

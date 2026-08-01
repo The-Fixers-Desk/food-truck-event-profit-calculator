@@ -59,7 +59,8 @@ def test_external_support_url_is_centralized_and_graceful(tmp_path):
     })
     page = configured.test_client().get("/help").data.decode()
     assert page.count("https://support.fixersdesk.com/food-truck-calculator") == 1
-    assert 'target="_blank" rel="noopener noreferrer"' in page
+    assert 'target="_blank"' in page
+    assert 'rel="noopener noreferrer"' in page
     assert "opens in a new window" in page
 
 
@@ -118,7 +119,20 @@ def test_help_navigation_is_keyboard_and_responsive_ready(client):
     script = client.get("/static/js/help.js").data.decode()
     css = client.get("/static/css/components.css").data.decode()
     assert 'aria-label="Help Center sections"' in page
-    assert page.count('tabindex="-1" aria-labelledby=') == 6
+    for section_id in (
+        "getting-started",
+        "core-concepts",
+        "data-safety-help",
+        "troubleshooting",
+        "support-information",
+        "contact-support",
+    ):
+        section = re.search(rf'<section\b[^>]*\bid="{section_id}"[^>]*>', page)
+        assert section is not None
+        assert 'tabindex="-1"' in section.group()
+    assert re.search(
+        r'<main\b[^>]*\bid="main-content"[^>]*\btabindex="-1"[^>]*>', page
+    )
     assert "section?.focus()" in script
     assert "copySupportButton.focus()" in script
     assert "@media (max-width: 767px)" in css

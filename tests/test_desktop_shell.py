@@ -1,11 +1,11 @@
 from pathlib import Path
 from urllib.error import URLError
+from urllib.request import urlopen
 
 import pytest
 
 from app import create_app
 from app.desktop import (
-    ALREADY_OPEN_HTML,
     LOADING_HTML,
     LOOPBACK_HOST,
     PRODUCT_NAME,
@@ -15,7 +15,9 @@ from app.desktop import (
     LocalServer,
     SingleInstanceLock,
     allowed_primary_navigation,
+    clean_shell_temporary,
     desktop_data_paths,
+    enforce_primary_navigation,
     run_desktop,
 )
 
@@ -31,12 +33,19 @@ class Event:
 
 class FakeWindow:
     def __init__(self):
-        self.events = type("Events", (), {"closed": Event()})()
+        self.events = type(
+            "Events", (), {"closed": Event(), "before_load": Event()}
+        )()
         self.loaded_urls = []
         self.loaded_html = []
+        self.current_url = ""
 
     def load_url(self, url):
         self.loaded_urls.append(url)
+        self.current_url = url
+
+    def get_current_url(self):
+        return self.current_url
 
     def load_html(self, html):
         self.loaded_html.append(html)
@@ -215,7 +224,7 @@ def test_startup_failure_shows_friendly_html_and_releases_lock(tmp_path):
     def fail(_config):
         raise RuntimeError("customer/path/private.sqlite")
 
-    assert run_desktop(tmp_path, webview_module=webview, app_factory=fail) == 0
+    assert run_desktop(tmp_path, webview_module=webview, app_factory=fail) == 1
     assert webview.window.loaded_html == [STARTUP_ERROR_HTML]
     assert "private.sqlite" not in STARTUP_ERROR_HTML
     replacement = SingleInstanceLock(tmp_path / "application.lock")
@@ -223,21 +232,70 @@ def test_startup_failure_shows_friendly_html_and_releases_lock(tmp_path):
     replacement.release()
 
 
+def test_partial_server_startup_failure_shuts_down_and_releases_lock(tmp_path):
+    webview = FakeWebview()
+
+    class FailingServer(FakeServer):
+        def start(self):
+            self.calls.append("start")
+            raise RuntimeError("injected server startup failure")
+
+    assert run_desktop(
+        tmp_path,
+        webview_module=webview,
+        server_factory=FailingServer,
+    ) == 1
+    assert FailingServer.instances[-1].calls == ["start", "shutdown"]
+    assert webview.window.loaded_html == [STARTUP_ERROR_HTML]
+    replacement = SingleInstanceLock(tmp_path / "application.lock")
+    replacement.acquire()
+    replacement.release()
+
+
+def test_application_data_initialization_failure_shows_message_without_window(
+    tmp_path, monkeypatch
+):
+    import app.desktop as desktop
+
+    webview = FakeWebview()
+    messages = []
+    monkeypatch.setattr(
+        desktop,
+        "desktop_data_paths",
+        lambda _root: (_ for _ in ()).throw(OSError("private customer path")),
+    )
+    result = run_desktop(
+        tmp_path,
+        webview_module=webview,
+        message_handler=lambda title, message: messages.append((title, message)),
+    )
+
+    assert result == 1
+    assert webview.created == []
+    assert messages and "could not start" in messages[0][1]
+    assert "private customer path" not in messages[0][1]
+
+
 def test_second_desktop_launch_shows_message_without_server(tmp_path):
     held = SingleInstanceLock(tmp_path / "application.lock")
     held.acquire()
     webview = FakeWebview()
     FakeServer.instances.clear()
+    messages = []
     try:
         assert run_desktop(
             tmp_path,
             webview_module=webview,
             server_factory=FakeServer,
+            message_handler=lambda title, message: messages.append(
+                (title, message)
+            ),
         ) == 0
     finally:
         held.release()
-    assert len(webview.created) == 1
-    assert webview.created[0][1]["html"] == ALREADY_OPEN_HTML
+    assert webview.created == []
+    assert messages and messages[0][0] == PRODUCT_NAME
+    assert "already open" in messages[0][1]
     assert FakeServer.instances == []
 
 
@@ -249,6 +307,55 @@ def test_navigation_policy_rejects_remote_wrong_port_and_files():
     assert not allowed_primary_navigation("https://example.com", app_url)
     assert not allowed_primary_navigation("http://127.0.0.1:9999", app_url)
     assert not allowed_primary_navigation("file:///private/data", app_url)
+
+
+def test_primary_navigation_guard_keeps_local_and_opens_web_links_externally():
+    window = FakeWindow()
+    app_url = "http://127.0.0.1:4567/"
+    opened = []
+    window.current_url = f"{app_url}help"
+    assert enforce_primary_navigation(window, app_url, external_opener=opened.append)
+    assert opened == []
+
+    window.current_url = "https://support.example.test/help"
+    assert not enforce_primary_navigation(
+        window, app_url, external_opener=opened.append
+    )
+    assert opened == ["https://support.example.test/help"]
+    assert window.loaded_urls[-1] == app_url
+
+    window.current_url = "file:///private/data"
+    assert not enforce_primary_navigation(
+        window, app_url, external_opener=opened.append
+    )
+    assert opened == ["https://support.example.test/help"]
+    assert window.loaded_urls[-1] == app_url
+
+
+def test_desktop_startup_registers_blocking_navigation_guard(tmp_path):
+    webview = FakeWebview()
+    assert run_desktop(
+        tmp_path,
+        webview_module=webview,
+        server_factory=FakeServer,
+    ) == 0
+    assert len(webview.window.events.before_load.handlers) == 1
+
+
+def test_shell_temporary_cleanup_is_scoped_to_shell_directory(tmp_path):
+    paths = desktop_data_paths(tmp_path)
+    keep = paths.root / "keep.txt"
+    keep.write_text("customer")
+    temporary_file = paths.shell_temporary / "pending.tmp"
+    temporary_file.write_text("temporary")
+    nested = paths.shell_temporary / "nested"
+    nested.mkdir()
+    (nested / "item.tmp").write_text("temporary")
+
+    clean_shell_temporary(paths, __import__("logging").getLogger())
+
+    assert keep.read_text() == "customer"
+    assert list(paths.shell_temporary.iterdir()) == []
 
 
 def test_shell_paths_and_mutable_directories_stay_under_data_root(tmp_path):
@@ -272,6 +379,32 @@ def test_loading_and_customer_templates_are_offline_only(client):
         page = client.get(path).data.decode()
         assert "https://" not in page
         assert "//cdn." not in page
+
+
+def test_representative_loopback_workflow_works_with_external_network_blocked(
+    tmp_path, monkeypatch
+):
+    import socket
+
+    original_connect = socket.create_connection
+
+    def loopback_only(address, *args, **kwargs):
+        if address[0] != LOOPBACK_HOST:
+            raise OSError("external network blocked by test")
+        return original_connect(address, *args, **kwargs)
+
+    monkeypatch.setattr(socket, "create_connection", loopback_only)
+    server = LocalServer(isolated_app(tmp_path))
+    try:
+        server.start()
+        server.wait_until_ready(timeout=3)
+        with urlopen(f"{server.url}help", timeout=2) as response:
+            page = response.read().decode()
+        assert response.status == 200
+        assert "Help Center" in page
+        assert "https://" not in page
+    finally:
+        server.shutdown()
 
 
 def test_import_has_no_server_or_window_side_effects():

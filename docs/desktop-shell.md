@@ -18,16 +18,23 @@ shuts down and joins the server thread before releasing the lock. Repeated
 shutdown calls are harmless, and stale unlocked lock files do not prevent a
 later launch.
 
-Startup failures use a local, nontechnical error page and the existing logs;
-partial servers and locks are cleaned up without deleting the database. A
-second launch displays an already-open message and starts no server. Primary
-window navigation is restricted to the generated loopback origin. No remote
+Startup failures use a local, nontechnical error page or native message and
+the existing logs; partial servers and locks are cleaned up without deleting
+the database. A second launch displays a native already-open message, creates
+no second application webview, and starts no server. A blocking pre-load guard
+restricts the primary window to the generated loopback origin. Deliberate
+HTTP(S) links are handed to the operating-system browser, file navigation is
+rejected, and the application window returns to its local origin. No remote
 assets, telemetry, authentication, or internet service is required.
 
 Mutable database, log, recovery, staging, shell-temporary, and lock files all
 resolve beneath `DATA_ROOT`. Development defaults remain in `data/`; packaging
 milestones must pass the final platform-specific root when invoking
 `app.desktop.run_desktop`.
+
+Closing the window also removes children of the shell-owned `shell-temp`
+directory. Cleanup never targets the data root, database, recovery snapshots,
+staging directory, or customer exports.
 
 ## Manual verification
 
