@@ -288,10 +288,36 @@ APPROVED UI IMPLEMENTATION
   locally and test navigation, section discovery, accessibility, copied diagnostics,
   links, responsive behavior, and unavailable-link states.
 
+☑ Prepare the stable external-QA candidate
+
+  Audit the complete application, remove tracked runtime artifacts, strengthen
+  ignore rules, update setup and QA handoff documentation, correct Help Center
+  test drift, recreate the Python environment, and verify the complete automated
+  suite with 595 passing tests.
+
+
+CHRISTOPHER QA TEST
+
+□ Prepare Christopher’s complete QA package
+  Create the full manual test plan, fictional test data, expected calculation
+  results, every-control checklist, and QA results template.
+
+□ Christopher completes the full independent QA pass
+  Test every screen, workflow, control, calculation, message, persistence
+  behavior, responsive state, and usability concern without modifying the app.
+
+□ Review and resolve confirmed QA findings
+  Classify reported findings, correct approved defects, rerun automated tests,
+  and return corrected behavior to Christopher for verification.
+
+□ Christopher completes regression testing and signs off
+  Confirm corrected defects, rerun core workflows, and return the calculator
+  as finished and ready for shipping.
+
 
 DESKTOP APPLICATION AND PACKAGING
 
-□ *Build the desktop application shell
+☑ *Build the desktop application shell
   Add the dedicated window, automatic local-server startup, safe shutdown,
   single-instance protection, product identity, loading and error screens,
   and verified offline use.
@@ -317,7 +343,7 @@ DESKTOP APPLICATION AND PACKAGING
 
 QUALITY ASSURANCE
 
-□ *Add complete automated end-to-end workflow tests
+☑ *Add complete automated end-to-end workflow tests
   Cover onboarding, defaults and overrides, event analysis, saved scenarios,
   comparison, backup and restore, and application closure.
 

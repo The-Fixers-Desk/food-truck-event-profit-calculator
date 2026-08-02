@@ -1,0 +1,10 @@
+To-Do to Packaging
+
+□ Have Codex create Christopher’s complete QA package.
+□ Commit and push that documentation-only work.
+□ Freeze the application code while Christopher performs his first pass.
+□ Build the public support-center content.
+□ Draft the usage, calculation, backup, and troubleshooting documentation.
+□ Decide pricing, licensing, refunds, and product positioning.
+□ Write the sales page and marketplace listing.
+□ Prepare packaging names, icons, metadata, and the START HERE framework.
